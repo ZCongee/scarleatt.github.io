@@ -1,0 +1,1 @@
+"use strict";console.log("test");var app=new Vue({el:"#vueText",data:{message:"  ../"}});console.log(document.getElementById("vueText").innerHTML),document.getElementById("VueImg").setAttribute("src",document.getElementById("vueText").value);
