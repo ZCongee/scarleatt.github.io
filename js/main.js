@@ -1,1 +1,1432 @@
-"use strict";function _classCallCheck(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function game(e){var t=$("#canvas-container")[0],i=$(".time-score cite")[0],a=($(".time-to-stop")[0],$(".no-dissloved")[0]),n=window.location.href,s=$(".time-record cite")[0],r=0;if($(".higest-score p"))var o=$(".higest-score p")[0];screen.height<500&&($(".canvas-container")[0].style.height="9.4rem"),$(document).ready(function(){var c=Number($("html").attr("data-dpr")),l={width:Number(window.getComputedStyle(t,null).getPropertyValue("width").slice(0,-2))-13*c,height:Number(window.getComputedStyle(t,null).getPropertyValue("height").slice(0,-2))-11*c},m={canvas:document.getElementById("canvas"),ctx:document.getElementById("canvas").getContext("2d"),xNum:6,yNum:8,imgWidth:l.width/6,imgHeight:l.height/8,timeCount:10,passOneNeedScore:2500,passTwoNeedScore:5e3,passThreeNeedScore:7e3,extraScore:10,halfWidth:20,clickedImgIndex:0,setWH:function(e){e.style.width=screen.width+"px",e.style.height=screen.height+"px"}};m.canvas.width=l.width,m.canvas.height=l.height;var d={allImgs:$(".time-imgs .allimg").children(),clickedImg:$(".time-imgs .img-clicked").children(),disslovedImg:$(".time-imgs .img-dissloved").children(),moveFlag:!1,clickedFlag:!1,score:0,imgPlaceStay:function(){f={x:g.x,y:g.y}}},u={},g={},f={},h=[],y=0,v=void 0,k=0,p=!0;e?v=!0:(v=!1,k=1,d.allImgs=$(".pass-one-imgs .allimg").children(),d.clickedImg=$(".pass-one-imgs .img-clicked").children(),d.disslovedImg=$(".pass-one-imgs .img-dissloved").children());var x=function(){function e(){_classCallCheck(this,e),this.ctx=m.ctx}return _createClass(e,[{key:"refresh",value:function(){this.ctx.clearRect(0,0,this.width,this.height)}},{key:"drawPictures",value:function(){for(var e=0;e<=m.xNum-1;e++){h[e]=new Array;for(var t=0;t<=m.yNum-1;t++){var i=d.allImgs.length,a=Math.round(Math.random()*(i-1)+0),n=new S(m.ctx,e*m.imgWidth,t*m.imgHeight,d.allImgs[a],!1,!0);h[e][t]=n,n.paint()}}}},{key:"drawTimeStage",value:function(){var e=0;h[e][e].toClick=!1,h[e+1][e].toClick=!1,h[e][e+1].toClick=!1;var t=m.xNum-1;h[t][e].toClick=!1,h[t-1][e].toClick=!1,h[t][e+1].toClick=!1;var i=m.yNum-1;h[e][i].toClick=!1,h[e][i-1].toClick=!1,h[e+1][i].toClick=!1,h[t][i].toClick=!1,h[t-1][i].toClick=!1,h[t][i-1].toClick=!1,h.forEach(function(e,t){e.forEach(function(e,t){e.toClick||e.refresh()})})}},{key:"drawPassTwo",value:function(){var e=m.xNum-1,t=m.yNum-1;h[0][0].toClick=!1,h[e][0].toClick=!1,h[0][t].toClick=!1,h[e][t].toClick=!1,h.forEach(function(e,t){e.forEach(function(e,t){e.toClick||e.refresh()})})}},{key:"drawAllStage",value:function(){v||1==k?(I.drawTimeStage(),$(".canvas-container").attr("style","background-image: url(../images/game-time-border.png)")):2==k?($(".canvas-container").attr("style","background-image: url(../images/pass2-bg.png)"),I.drawPassTwo()):3==k&&$(".canvas-container").attr("style","background-image: url(../images/pass3-bg.png)")}},{key:"drawStage",value:function(){for(var e=0;e<=m.xNum-1;e++)for(var t=0;t<=m.yNum-1;t++)h[e][t].toClick&&h[e][t].paint()}},{key:"drawNewImg",value:function(e,t,i){var a=d.allImgs.length,n=Math.round(Math.random()*(a-1)+0);return e[t][i].img=d.allImgs[n],n}},{key:"findYSameImg",value:function(e,t,i){if(h[t][i+e]&&h[t][i+e].toClick){for(var a=0;a<e&&(!h[t][i+a+1]||h[t][i+a].img===h[t][i+a+1].img);a++);if(a===e){for(var n=0;n<=e;n++)h[t][i+n].toRemove=!0;return e}}}},{key:"findXSameImg",value:function(e,t,i){if(t<m.xNum-e&&h[t+e][i]&&h[t+e][i].toClick){for(var a=0;a<e&&(!h[t+a+1][i]||h[t+a][i].img===h[t+a+1][i].img);a++);if(a===e){for(var n=0;n<=e;n++)h[t+n][i].toRemove=!0;return e}}}},{key:"isDissloved",value:function(){for(var e=0;e<m.xNum;e++)for(var t=0;t<m.yNum;t++)if(h[e][t].toClick)for(var i=2;i<=4;i++)I.findXSameImg(i,e,t),I.findYSameImg(i,e,t);for(var a=0;a<m.xNum;a++)for(var n=0;n<m.yNum;n++)if(h[a][n].toClick&&h[a][n].toRemove)return!0;return!1}},{key:"Dissloved",value:function(){var e=0;h.forEach(function(e,t){e.forEach(function(e,i){if(e.toClick)for(var a=4;a>=2;a--)I.findXSameImg(a,t,i),I.findYSameImg(a,t,i)})});for(var t=0,i=0;i<m.xNum;i++)for(var a=0;a<m.yNum;a++)h[i][a].toClick&&h[i][a].toRemove&&(h[i][a].dissloved(),t++);e+=t>3?2*t*10:10*t;for(var n=function(e){for(var t=function(t){if(h[e][t].toClick&&h[e][t].toRemove){if(setTimeout(function(){h[e][t].refresh()},80),0!==t){for(var i=t-1;i>=0;i--)h[e][i+1].img=h[e][i].img;I.drawNewImg(h,e,0)}else I.drawNewImg(h,e,0);h[e][t].toRemove=!1}},i=0;i<m.yNum;i++)t(i)},s=0;s<m.xNum;s++)n(s);return setTimeout(function(){I.drawStage()},240),I.isDissloved()?{bool:!0,score:e}:{bool:!1,score:e}}},{key:"rewriteClickedImg",value:function(){var e=Array.prototype.slice.call(d.clickedImg);h.forEach(function(t,i){t.forEach(function(i,a){i.toClick&&e.forEach(function(e,i){t[a].img===e&&(t[a].img=d.allImgs[i])})})})}},{key:"currentAllImgsIndex",value:function(e){var t=Array.prototype.slice.call(d.allImgs),i=0,a=e;return t.forEach(function(e,t){a.img===e&&(i=t)}),i}},{key:"continueToDissloved",value:function(){var e=600,t=setInterval(function(){if(d.score<99999){var a=0,n=I.Dissloved();a+=e>=1200?2*n.score:n.score,n.bool||clearInterval(t),d.score+=a,r<d.score&&(r=d.score),s.innerHTML=r,i.innerHTML=d.score,e+=600}},e)}},{key:"nextTouchToDisslove",value:function(){return!0}},{key:"exchangeImg",value:function(e,t){if(e&&t&&e.toClick&&t.toClick){var i=e.img;e.img=t.img,t.img=i}}},{key:"setInitMarginLeft",value:function(){$("#process-current")[0].style.marginLeft="-"+window.getComputedStyle($("#process-current")[0],null).getPropertyValue("width")}},{key:"gameBegin",value:function(){if($(".time-over")){var e,t;!function(){var c=function(e){y+=1,$("#process-current")[0].style.marginLeft=T-x+"px",T+=S,v||(1==k?d.score>=m.passOneNeedScore&&(console.log("pass 1"),t.style.display="block",clearInterval(e),d.score+=m.extraScore*(m.timeCount-parseInt(30*y/1e3)),localStorage.setItem("passOneScore",d.score),h.style.marginLeft=0,r<d.score&&(s.innerHTML=d.score),i.innerHTML=d.score,setTimeout(function(){t.style.display="block"},1e3),setTimeout(function(){t.style.display="none"},3e3),$(".pass-num")[0].innerHTML="二",setTimeout(function(){k=2,d.allImgs=$(".pass-two-imgs .allimg").children(),d.clickedImg=$(".pass-two-imgs .img-clicked").children(),d.disslovedImg=$(".pass-two-imgs .img-dissloved").children(),I.setInitMarginLeft(),I.drawPictures(),I.drawAllStage(),I.gameBegin(),I.continueToDissloved()},3e3)):2==k?d.score>=m.passTwoNeedScore&&(console.log("pass 2"),t.style.display="block",clearInterval(e),d.score+=m.extraScore*(m.timeCount-parseInt(30*y/1e3)),localStorage.setItem("passTwoScore",d.score),h.style.marginLeft=0,r<d.score&&(s.innerHTML=d.score),i.innerHTML=d.score,$(".pass-num")[0].innerHTML="三",setTimeout(function(){t.style.display="block"},1e3),setTimeout(function(){t.style.display="none"},3e3),setTimeout(function(){k=3,d.allImgs=$(".pass-three-imgs .allimg").children(),d.clickedImg=$(".pass-three-imgs .img-clicked").children(),d.disslovedImg=$(".pass-three-imgs .img-dissloved").children(),I.setInitMarginLeft(),I.drawPictures(),I.drawAllStage(),I.gameBegin(),I.continueToDissloved()},3e3)):3==k&&d.score>=m.passThreeNeedScore&&(t.style.display="block",clearInterval(e),d.score+=m.extraScore*(m.timeCount-parseInt(30*y/1e3)),localStorage.setItem("passThreeScore",d.score),h.style.marginLeft=0,r<d.score&&(s.innerHTML=d.score),i.innerHTML=d.score,setTimeout(function(){t.style.display="block"},1e3),setTimeout(function(){t.style.display="none"},3e3),setTimeout(function(){w.style.display="block"},3e3),Ajax({method:"POST",url:$("meta")[0].getAttribute("update-url"),content:"style=cg&score="+d.score+"&time="+m.timeCount+"&stage=3",success:function(e){$(".time-rank")[0].innerHTML=e.data.rank,$(".time-higest-score")[0].innerHTML=e.data.HighScore,d.score<e.data.HighScore&&$(".higest-score")[0].setAttribute("data-class","")}}))),y>=1e3*m.timeCount/30&&(console.log("time out"),clearInterval(e),w.style.display="block",1==k?d.score<m.passOneNeedScore&&(localStorage.setItem("passOneScore",d.score),w.style.display="block",Ajax({method:"POST",url:$("meta")[0].getAttribute("update-url"),content:"style=cg&score="+d.score+"&time="+m.timeCount+"&stage=1",success:function(e){$(".time-rank")[0].innerHTML=e.data.rank,$(".time-higest-score")[0].innerHTML=e.data.HighScore,d.score<e.data.HighScore&&$(".higest-score")[0].setAttribute("data-class","")}})):2==k?d.score<m.passTwoNeedScore&&(localStorage.setItem("passTwoScore",d.score),w.style.display="block",Ajax({method:"POST",url:$("meta")[0].getAttribute("update-url"),content:"style=cg&score="+d.score+"&time="+m.timeCount+"&stage=2",success:function(e){$(".time-rank")[0].innerHTML=e.data.rank,$(".time-higest-score")[0].innerHTML=e.data.HighScore,d.score<e.data.HighScore&&$(".higest-score")[0].setAttribute("data-class","")}})):3==k?d.score<m.passThreeNeedScore&&(localStorage.setItem("passThreeScore",d.score),w.style.display="block",Ajax({method:"POST",url:$("meta")[0].getAttribute("update-url"),content:"style=cg&score="+d.score+"&time="+m.timeCount+"&stage=3",success:function(e){$(".time-rank")[0].innerHTML=e.data.rank,$(".time-higest-score")[0].innerHTML=e.data.HighScore,d.score<e.data.HighScore&&$(".higest-score")[0].setAttribute("data-class","")}})):v&&(localStorage.setItem("timeScore",d.score),w.style.display="block",Ajax({method:"POST",url:$("meta")[0].getAttribute("update-url"),content:"style=js&score="+d.score+"&time="+m.timeCount,success:function(e){$(".time-rank")[0].innerHTML=e.data.rank,$(".time-higest-score")[0].innerHTML=e.data.HighScore,d.score<e.data.HighScore&&$(".higest-score")[0].setAttribute("data-class","")}})),o.innerHTML=d.score)},l=$(".time-over")[0],u=$(".game-stop")[0],g=$(".time-to-stop")[0],f=$(".btn-to-continue")[0],h=$("#process-current")[0],x=($(".rank-detail")[0],Number(getComputedStyle(h).width.slice(0,-3))),S=x/(1e3*m.timeCount/30),T=2*S,w=$(".time-over")[0],b=($(".time-again")[0],!0);$(".score-to-end")&&(e=$(".score-to-end")[0]),m.setWH(l),m.setWH(u),m.setWH(a),$(".next-checkpoint")&&(t=$(".next-checkpoint")[0],m.setWH(t)),n.indexOf("two")>-1?d.score=Number(localStorage.getItem("passOneScore")):n.indexOf("three")>-1&&(d.score=Number(localStorage.getItem("passTwoScore"))),o.innerHTML=d.score,g.addEventListener("click",function(){var t=0;b=!1,u.style.display="block",g.classList.add("time-to-continue"),n.indexOf("one")>-1?t=m.passOneNeedScore-d.score:n.indexOf("two")>-1?t=m.passTwoNeedScore-d.score:n.indexOf("three")>-1&&(t=m.passThreeNeedScore-d.score),t<0&&(t=0),e&&(e.innerHTML=t)},!1),f.addEventListener("click",function(){$(".time-to-continue")[0].classList.remove("time-to-continue"),u.style.display="none";var e=setInterval(function(){p||clearInterval(C),b?c(e):clearInterval(e)},30);b=!0},!1);var C=setInterval(function(){p||clearInterval(C),b?c(C):clearInterval(C)},30)}()}}}]),e}(),S=function(){function e(t,i,a,n,s,r){_classCallCheck(this,e),this.ctx=t,this.x=i,this.y=a,this.img=n,this.toRemove=s,this.toClick=r}return _createClass(e,[{key:"paint",value:function(){this.ctx.drawImage(this.img,this.x,this.y,m.imgWidth,m.imgHeight)}},{key:"refresh",value:function(){this.ctx.clearRect(this.x,this.y,m.imgWidth,m.imgHeight)}},{key:"dissloved",value:function(){var e=I.currentAllImgsIndex(this);this.img=d.disslovedImg[e],I.drawStage()}},{key:"clicked",value:function(){var e=I.currentAllImgsIndex(this);return this.img=d.clickedImg[e],I.drawStage(),e}}]),e}(),I=new x;I.gameBegin(),I.drawPictures(),I.drawAllStage(),(v||1==k)&&Ajax({method:"GET",url:$("meta")[0].getAttribute("show-url"),success:function(e){n.indexOf("time")>-1?e.data.js.myScore>0&&(r=e.data.js.myScore):n.indexOf("pass")>-1&&e.data.js.myScore>0&&(r=e.data.cg.myScore)}}),s.innerHTML=r,I.continueToDissloved(),m.canvas.addEventListener("touchstart",function(e){d.clickedFlag=!1;var e=e||window.event;u={x:e.touches[0].clientX,y:e.touches[0].clientY},g={x:parseInt((u.x-this.offsetLeft)/m.imgWidth)*m.imgWidth,y:parseInt((u.y-this.offsetTop)/m.imgHeight)*m.imgHeight},d.clickedImgIndex=h[g.x/m.imgWidth][g.y/m.imgHeight].clicked(),I.rewriteClickedImg(),d.clickedFlag=!1}),m.canvas.addEventListener("touchmove",function(e){d.moveFlag=!0;var e=e||window.event,t={x:e.touches[0].clientX,y:e.touches[0].clientY};Math.abs(t.y-u.y)<=Math.abs(t.x-u.x)?t.x-u.x>=0?t.x-u.x>=m.halfWidth?f={x:g.x+m.imgWidth,y:g.y}:d.imgPlaceStay():t.x-u.x<=-m.halfWidth?f={x:g.x-m.imgWidth,y:g.y}:d.imgPlaceStay():t.y-u.y>=0?t.y-u.y>=m.halfWidth?f={x:g.x,y:g.y+m.imgHeight}:d.imgPlaceStay():u.y-t.y>=m.halfWidth?f={x:g.x,y:g.y-m.imgHeight}:d.imgPlaceStay()}),m.canvas.addEventListener("touchend",function(e){d.clickedFlag=!1;var t={x:g.x/m.imgWidth,y:g.y/m.imgHeight},i={x:f.x/m.imgWidth,y:f.y/m.imgHeight};if(h[t.x][t.y].img=d.allImgs[d.clickedImgIndex],d.moveFlag)if(h[t.x][t.y].img!==h[i.x][i.y].img&&I.exchangeImg(h[t.x][t.y],h[i.x][i.y]),I.drawStage(),g={x:f.x,y:f.y},I.isDissloved())I.continueToDissloved();else{I.exchangeImg(h[t.x][t.y],h[i.x][i.y]);for(var a=0;a<m.xNum;a++)for(var n=0;n<m.yNum;n++)h[a][n].toClick=!1;setTimeout(function(){for(var e=0;e<m.xNum;e++)for(var t=0;t<m.yNum;t++)h[e][t].toClick=!0;I.drawAllStage(),I.drawStage()},300)}d.moveFlag=!1}),$(".to-homepage").on("click",function(){p=!1,d.score=0,y=0,$(".rank-container").attr("style","display: none"),$(".first-container").attr("style","display: block")}),$(".time-lbtn").on("click",function(){p=!1,y=0,d.score=0,I.setInitMarginLeft();var e=$("body").children("div");e.forEach(function(e,t){e.setAttribute("style","display: none"),console.log(e)}),$(".first-container").attr("style","display: block"),$(".time-title-content .time-to-stop")[0].classList.remove("time-to-continue")}),$(".time-again")[0].addEventListener("click",function(e){y=0,d.score=0,I.setInitMarginLeft(),$(".time-over").attr("style","display: none"),$(".game-stop").attr("style","display: none"),$(".time-title-content .time-to-stop")[0].classList.remove("time-to-continue"),h.forEach(function(e,t){e.forEach(function(e,t){e.refresh(),console.log("test")})}),setTimeout(function(){I.drawPictures(),I.drawAllStage(),I.gameBegin(),I.continueToDissloved()},400)},!1)})}function rankToView(){screen.height<500&&($(".rank-time-list")[0].style.height="4.8rem",$(".rank-pass-list")[0].style.height="4.8rem",$(".rank-cup")[0].style.display="none"),Ajax({method:"GET",url:$("meta")[0].getAttribute("show-url"),success:function(e){e=e.data;var t=$(".rank-time-list")[0],i=$(".rank-time-list .clearfix")[0],a=$(".rank-pass-list")[0],n=$(".rank-pass-list .clearfix")[0],s=$(".me-time")[0],r=$(".me-pass")[0];if(s.firstElementChild.innerHTML=e.js.rank,s.lastElementChild.innerHTML=e.js.myScore,r.firstElementChild.innerHTML=e.cg.rank,r.lastElementChild.innerHTML=e.cg.myScore,e.js.data)for(var o=e.js.data.length,c=0;c<o;c++){var l=document.createElement("li");c<3?l.setAttribute("class","single-detail rank-list-top"):l.setAttribute("class","single-detail"),t.insertBefore(l,i);var m=c+1;l.innerHTML='<span class="rank-num">'+m+'</span><span class="rank-name">'+e.js.data[c].nickname+'</span><span class="rank-score">'+e.js.data[c].score+"</span>"}if(e.cg.data)for(var d=e.cg.data.length,u=0;u<d;u++){var g=document.createElement("li");u<3?g.setAttribute("class","single-detail rank-list-top"):g.setAttribute("class","single-detail"),a.insertBefore(g,n);var f=u+1;g.innerHTML='<span class="rank-num">'+f+'</span><span class="rank-name">'+e.cg.data[u].nickname+'</span><span class="rank-score">'+e.cg.data[u].score+"</span>"}}});var e=$(".rank-btn-time")[0],t=$(".rank-btn-pass")[0],i=$(".rank-time-list")[0],a=$(".rank-pass-list")[0],n=$(".to-nextpage")[0],s="time",r=0,o=0,c=0;e.addEventListener("click",function(){i.style.display="block",a.style.display="none";var t=$(".rank-clicked")[0];t.classList.remove("rank-clicked"),e.classList.add("rank-clicked");var n=i.children;n=Array.prototype.slice.call(n),n.forEach(function(e,t){e.style.display="block"}),s="time",r=0},!1),t.addEventListener("click",function(){i.style.display="none",a.style.display="block";var e=$(".rank-clicked")[0];e.classList.remove("rank-clicked"),t.classList.add("rank-clicked");var n=a.children;n=Array.prototype.slice.call(n),n.forEach(function(e,t){e.style.display="block"}),s="pass",r=0},!1),n.addEventListener("click",function(){var e=void 0;if(r++,"pass"==s?(e=a.children,c=e.length):"time"==s&&(e=i.children,c=e.length),o=parseInt((c-1)/5),(c-1)%5>0&&(o+=1),o>r)for(var t=1;t<c;t++)t<=5*r&&(e[t].style.display="none")},!1)}function Ajax(e){var t=new XMLHttpRequest,i={method:"GET",url:"",async:!0,success:function(){},errer:function(){},content:null};for(var a in e)i[a]=e[a];t.onreadystatechange=function(){if(4===t.readyState&&200===t.status){var e=JSON.parse(t.responseText);i.success.call(t,e)}else i.errer()},t.open(i.method,i.url,i.async),t.setRequestHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF-8"),t.send(i.content)}var _createClass=function(){function e(e,t){for(var i=0;i<t.length;i++){var a=t[i];a.enumerable=a.enumerable||!1,a.configurable=!0,"value"in a&&(a.writable=!0),Object.defineProperty(e,a.key,a)}}return function(t,i,a){return i&&e(t.prototype,i),a&&e(t,a),t}}();$(window).on("scroll.elasticity",function(e){e.preventDefault()}).on("touchmove.elasticity",function(e){e.preventDefault()}),$(".mode-time").on("click",function(e){$(".first-container").attr("style","display: none"),$(".game-container").attr("style","display: block"),game(!0)}),$(".mode-pass-through").on("click",function(e){$(".first-container").attr("style","display: none"),$(".game-container").attr("style","display: block"),game(!1)}),$(".ranking-list").on("click",function(e){$(".first-container").attr("style","display: none"),$(".rank-container").attr("style","display: block"),rankToView()});
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+$(window).on('scroll.elasticity', function (e) {
+    e.preventDefault();
+}).on('touchmove.elasticity', function (e) {
+    e.preventDefault();
+});
+
+//游戏页面
+if (document.querySelector('#canvas-container') && document.querySelector('.time-score cite')) {
+    var container = document.querySelector('#canvas-container');
+    var timeScore = document.querySelector('.time-score cite');
+    var btnStop = document.querySelector('.time-to-stop');
+    //如果没有可以消去的小建筑
+    var noDissloved = document.querySelector('.no-dissloved');
+    var currentUrl = window.location.href;
+    //游戏进行时的页面上的 记录
+    var record = document.querySelector('.time-record cite');
+    var historyScore = 0;
+
+    if (document.querySelector('.higest-score p')) {
+        var gameOverScore = document.querySelector('.higest-score p');
+    }
+
+    if (screen.height < 500) {
+        document.querySelector('.canvas-container').style.height = '9.4rem';
+    }
+
+    $(document).ready(function () {
+
+        //根据不同的dataDpr，图片的宽度不同
+        var dataDpr = Number(document.querySelector('html').getAttribute('data-dpr'));
+
+        var conNum = {
+            width: Number(window.getComputedStyle(container, null).getPropertyValue('width').slice(0, -2)) - dataDpr * 13,
+            height: Number(window.getComputedStyle(container, null).getPropertyValue('height').slice(0, -2)) - dataDpr * 11
+        };
+
+        var pub = {
+            canvas: document.getElementById('canvas'),
+            ctx: document.getElementById('canvas').getContext('2d'),
+            //第一行图片的数量
+            xNum: 6,
+            //第一列图片的数量
+            yNum: 8,
+            imgWidth: conNum.width / 6,
+            imgHeight: conNum.height / 8,
+            //每个模式需要的时间
+            timeCount: 60,
+            //闯关模式各关 通关 需要达到的分数
+            passOneNeddScore: 2500,
+            passTwoNeedScore: 5000,
+            passThreeNeedScore: 7000,
+            //达到目标分数后，如果还有剩余时间，每s加成的分数
+            extraScore: 10,
+            //当图片的移动位移超过 halfwidth 时, 会进行上下左右的移动
+            halfWidth: 20,
+            allImgs: document.querySelector('.allimg').children,
+            clickedImg: document.querySelector('.img-clicked').children,
+            disslovedImg: document.querySelector('.img-dissloved').children,
+            clickedImgIndex: 0,
+            //动态设置宽度和高度
+            setWH: function setWH(ele) {
+                ele.style.width = screen.width + 'px';
+                ele.style.height = screen.height + 'px';
+            }
+        };
+
+        pub.canvas.width = conNum.width;
+        pub.canvas.height = conNum.height;
+
+        var pubdata = {
+            moveFlag: false,
+            clickedFlag: false,
+            score: 0,
+            //移动位置不合理时
+            imgPlaceStay: function imgPlaceStay() {
+                imgPlace = {
+                    x: startInt.x,
+                    y: startInt.y
+                };
+            }
+        };
+
+        //记录触发touchstart事件的位置
+        var start = {};
+        //将 触发touchstart事件的位置 设置为imgWidth的整数倍
+        var startInt = {};
+        //点击的图片 下一刻要去的地方
+        var imgPlace = {};
+        //存放页面上所有的图片信息
+        var matrix = [];
+        //记录分数
+        var ct = 0;
+        //记录当前时间
+        var currentTime = 0;
+        //设置一个标志量，防止将同一张图片连续移动
+        var continueMove = void 0;
+
+        var Stage = function () {
+            function Stage() {
+                _classCallCheck(this, Stage);
+
+                this.ctx = pub.ctx;
+            }
+
+            //每次消除小动物之后 刷新页面
+
+
+            _createClass(Stage, [{
+                key: 'refresh',
+                value: function refresh() {
+                    this.ctx.clearRect(0, 0, this.width, this.height);
+                }
+
+                //游戏开始时 填充图片
+
+            }, {
+                key: 'drawBeginStage',
+                value: function drawBeginStage() {
+                    for (var i = 0; i <= pub.xNum - 1; i++) {
+                        matrix[i] = new Array();
+                        for (var j = 0; j <= pub.yNum - 1; j++) {
+                            var len = pub.allImgs.length;
+                            var index = Math.round(Math.random() * (len - 1) + 0);
+                            var animal = new Animal(pub.ctx, i * pub.imgWidth, j * pub.imgHeight, pub.allImgs[index], false, true);
+
+                            matrix[i][j] = animal;
+                            animal.paint();
+                        }
+                    }
+                }
+
+                //计时模式图案填充
+
+            }, {
+                key: 'drawTimeStage',
+                value: function drawTimeStage() {
+                    //left-top
+                    var k = 0;
+                    matrix[k][k].toClick = false;
+                    matrix[k + 1][k].toClick = false;
+                    matrix[k][k + 1].toClick = false;
+
+                    //right-top
+                    var m = pub.xNum - 1;
+                    matrix[m][k].toClick = false;
+                    matrix[m - 1][k].toClick = false;
+                    matrix[m][k + 1].toClick = false;
+
+                    //left-bottom
+                    var n = pub.yNum - 1;
+                    matrix[k][n].toClick = false;
+                    matrix[k][n - 1].toClick = false;
+                    matrix[k + 1][n].toClick = false;
+
+                    //right-bottom
+                    matrix[m][n].toClick = false;
+                    matrix[m - 1][n].toClick = false;
+                    matrix[m][n - 1].toClick = false;
+
+                    matrix.forEach(function (element, index) {
+                        element.forEach(function (ele, ind) {
+                            if (!ele.toClick) {
+                                ele.refresh();
+                            }
+                        });
+                    });
+                }
+
+                //闯关模式第一关
+
+            }, {
+                key: 'drawPassTwo',
+                value: function drawPassTwo() {
+                    var m = pub.xNum - 1;
+                    var n = pub.yNum - 1;
+
+                    matrix[0][0].toClick = false;
+                    matrix[m][0].toClick = false;
+                    matrix[0][n].toClick = false;
+                    matrix[m][n].toClick = false;
+
+                    matrix.forEach(function (element, index) {
+                        element.forEach(function (ele, ind) {
+                            if (!ele.toClick) {
+                                ele.refresh();
+                            }
+                        });
+                    });
+                }
+
+                //为所有模式添加事件
+
+            }, {
+                key: 'drawAllStage',
+                value: function drawAllStage() {
+                    //根据不同的模式填充不同的图片
+                    if (currentUrl.indexOf('time') > -1 || currentUrl.indexOf('one') > -1) {
+                        stage.drawTimeStage();
+                    } else if (currentUrl.indexOf('two') > -1) {
+                        stage.drawPassTwo();
+                    }
+                }
+
+                //对 存入matrix 的图片进行重绘
+
+            }, {
+                key: 'drawStage',
+                value: function drawStage() {
+                    for (var i = 0; i <= pub.xNum - 1; i++) {
+                        for (var j = 0; j <= pub.yNum - 1; j++) {
+                            if (matrix[i][j].toClick) {
+                                matrix[i][j].paint();
+                            }
+                        }
+                    }
+                }
+
+                //随机重绘 matrix[i][k]区域 图片
+
+            }, {
+                key: 'drawNewImg',
+                value: function drawNewImg(matrix, i, k) {
+                    var len = pub.allImgs.length;
+                    var index = Math.round(Math.random() * (len - 1) + 0);
+                    matrix[i][k].img = pub.allImgs[index];
+
+                    return index;
+                }
+
+                //判断 y方向 是否有 count+1 个可消去的小动物
+
+            }, {
+                key: 'findYSameImg',
+                value: function findYSameImg(count, i, j) {
+                    if (matrix[i][j + count]) {
+                        if (matrix[i][j + count].toClick) {
+                            for (var z = 0; z < count; z++) {
+                                //如果下一张图片不为空
+                                if (matrix[i][j + z + 1]) {
+                                    if (matrix[i][j + z].img !== matrix[i][j + z + 1].img) {
+                                        break;
+                                    }
+                                }
+                            }
+                            if (z === count) {
+                                //为可以消去的图片把toRemove改成true
+                                for (var k = 0; k <= count; k++) {
+                                    matrix[i][j + k].toRemove = true;
+                                }
+                                return count;
+                            }
+                        }
+                    }
+                }
+
+                //判断 x方向 是否有 count+1 个可消去的小动物
+
+            }, {
+                key: 'findXSameImg',
+                value: function findXSameImg(count, i, j) {
+                    if (i < pub.xNum - count) {
+                        if (matrix[i + count][j]) {
+                            if (matrix[i + count][j].toClick) {
+                                for (var z = 0; z < count; z++) {
+                                    if (matrix[i + z + 1][j]) {
+                                        if (matrix[i + z][j].img !== matrix[i + z + 1][j].img) break;
+                                    }
+                                }
+                                if (z === count) {
+                                    //为可以消去的图片把toRemove改成true
+                                    for (var k = 0; k <= count; k++) {
+                                        matrix[i + k][j].toRemove = true;
+                                    }
+                                    return count;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //检测当前矩阵中是否还有可以消去的小动物
+
+            }, {
+                key: 'isDissloved',
+                value: function isDissloved() {
+                    //如果重新生成的图片中有可以消去的图片, 改变它们的toRemove值
+                    for (var i = 0; i < pub.xNum; i++) {
+                        for (var j = 0; j < pub.yNum; j++) {
+                            if (matrix[i][j].toClick) {
+                                for (var k = 2; k <= 4; k++) {
+                                    stage.findXSameImg(k, i, j);
+                                    stage.findYSameImg(k, i, j);
+                                }
+                            }
+                        }
+                    }
+
+                    for (var _i = 0; _i < pub.xNum; _i++) {
+                        for (var _j = 0; _j < pub.yNum; _j++) {
+                            if (matrix[_i][_j].toClick) {
+                                if (matrix[_i][_j].toRemove) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+
+                    return false;
+                }
+
+                //遍历所有图片, 为toRemove值为true的图片进行操作
+
+            }, {
+                key: 'Dissloved',
+                value: function Dissloved() {
+                    //移动一次应该增加的分数
+                    var countOnceScore = 0;
+
+                    matrix.forEach(function (element, index) {
+                        element.forEach(function (e, i) {
+                            if (e.toClick) {
+                                for (var k = 4; k >= 2; k--) {
+                                    stage.findXSameImg(k, index, i);
+                                    stage.findYSameImg(k, index, i);
+                                }
+                            }
+                        });
+                    });
+                    //查看当前一共有多少个可以消去的元素
+                    var a = 0;
+
+                    //可以消去的图片 消去之前会发生的变化 (边界出现亮圆点)
+                    for (var i = 0; i < pub.xNum; i++) {
+                        for (var j = 0; j < pub.yNum; j++) {
+                            if (matrix[i][j].toClick) {
+                                if (matrix[i][j].toRemove) {
+                                    matrix[i][j].dissloved();
+                                    a++;
+                                }
+                            }
+                        }
+                    }
+
+                    //如果大于3, 将分数 *2
+                    if (a > 3) {
+                        countOnceScore += a * 2 * 10;
+                    } else {
+                        countOnceScore += a * 10;
+                    }
+
+                    var _loop = function _loop(_i2) {
+                        var _loop2 = function _loop2(_j2) {
+                            if (matrix[_i2][_j2].toClick) {
+                                if (matrix[_i2][_j2].toRemove) {
+                                    //要等亮圆点出现之后, 再清除当前图片区域
+                                    setTimeout(function () {
+                                        matrix[_i2][_j2].refresh();
+                                    }, 30);
+
+                                    //模仿图片下落的操作
+                                    if (_j2 !== 0) {
+                                        //如果不是第一行的元素
+                                        for (var k = _j2 - 1; k >= 0; k--) {
+                                            matrix[_i2][k + 1].img = matrix[_i2][k].img;
+                                        }
+                                        stage.drawNewImg(matrix, _i2, 0);
+                                    } else {
+                                        stage.drawNewImg(matrix, _i2, 0);
+                                    }
+
+                                    matrix[_i2][_j2].toRemove = false;
+                                }
+                            }
+                        };
+
+                        for (var _j2 = 0; _j2 < pub.yNum; _j2++) {
+                            _loop2(_j2);
+                        }
+                    };
+
+                    for (var _i2 = 0; _i2 < pub.xNum; _i2++) {
+                        _loop(_i2);
+                    }
+
+                    setTimeout(function () {
+                        stage.drawStage();
+                    }, 200);
+
+                    if (stage.isDissloved()) {
+                        return {
+                            bool: true,
+                            score: countOnceScore
+                        };
+                    } else {
+                        return {
+                            bool: false,
+                            score: countOnceScore
+                        };
+                    }
+                }
+
+                //每次点击之前, 将所有图片重置为没有 clickedImg 的图片
+
+            }, {
+                key: 'rewriteClickedImg',
+                value: function rewriteClickedImg() {
+                    var clickedImg = Array.prototype.slice.call(pub.clickedImg);
+                    matrix.forEach(function (element, index) {
+                        element.forEach(function (ele, ind) {
+                            if (ele.toClick) {
+                                clickedImg.forEach(function (e, i) {
+                                    if (element[ind].img === e) {
+                                        element[ind].img = pub.allImgs[i];
+                                    }
+                                });
+                            }
+                        });
+                    });
+                }
+
+                //获取当前图片在 allImg 中的index
+
+            }, {
+                key: 'currentAllImgsIndex',
+                value: function currentAllImgsIndex(ele) {
+                    var allImgs = Array.prototype.slice.call(pub.allImgs);
+                    var imgIndex = 0;
+                    var that = ele;
+
+                    allImgs.forEach(function (element, index) {
+                        if (that.img === element) {
+                            imgIndex = index;
+                        }
+                    });
+
+                    return imgIndex;
+                }
+
+                //连续消去函数
+
+            }, {
+                key: 'continueToDissloved',
+                value: function continueToDissloved() {
+                    //当连续消去的时候
+
+                    var time = 600;
+
+                    //如果 新生成 的图片有可以消去的, 继续调用消去函数
+                    var timer = setInterval(function () {
+                        if (pubdata.score < 99999) {
+                            var scoreCount = 0;
+                            var result = stage.Dissloved();
+
+                            if (time >= 1200) {
+                                scoreCount += result.score * 2;
+                            } else {
+                                scoreCount += result.score;
+                            }
+
+                            if (!result.bool) {
+                                clearInterval(timer);
+                            }
+
+                            pubdata.score += scoreCount;
+
+                            if (historyScore < pubdata.score) {
+                                historyScore = pubdata.score;
+                            }
+
+                            record.innerHTML = historyScore;
+                            timeScore.innerHTML = pubdata.score;
+
+                            time += 600;
+                        }
+                    }, time);
+                }
+
+                //判断下一步是否有可以消去的元素
+
+            }, {
+                key: 'nextTouchToDisslove',
+                value: function nextTouchToDisslove() {
+                    var touchToDisslove = false;
+
+                    //将每一项都往四个方向移动一次,
+                    for (var i = 0; i < pub.xNum - 1; i++) {
+                        for (var j = 0; j < pub.yNum; j++) {
+                            if (matrix[i][j].toClick && matrix[i + 1][j].toClick) {
+                                stage.exchangeImg(matrix[i + 1][j], matrix[i][j]);
+
+                                //交换图片后, 查看当前是否有可消去的小动物
+                                matrix.forEach(function (element, index) {
+                                    element.forEach(function (e, i) {
+                                        if (e.toClick) {
+                                            for (var k = 4; k >= 2; k--) {
+                                                stage.findXSameImg(k, index, i);
+                                                stage.findYSameImg(k, index, i);
+                                            }
+                                        }
+                                    });
+                                });
+
+                                //为了不影响后续的操作, 需要将图片再次交换回来
+                                stage.exchangeImg(matrix[i + 1][j], matrix[i][j]);
+
+                                //findXSameImg 函数会将可以消去的图片的 toRemove 值设置为 true
+                                //这里只需要检测 toRemove 的值即可
+                                for (var _i3 = 0; _i3 < pub.xNum; _i3++) {
+                                    for (var _j3 = 0; _j3 < pub.yNum; _j3++) {
+                                        if (matrix[_i3][_j3].toClick) {
+                                            if (matrix[_i3][_j3].toRemove) {
+                                                touchToDisslove = true;
+                                                matrix[_i3][_j3].toRemove = false;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                    };
+
+                    if (touchToDisslove) {
+                        return touchToDisslove;
+                    }
+
+                    for (var _i4 = 1; _i4 < pub.xNum; _i4++) {
+                        for (var _j4 = 0; _j4 < pub.yNum; _j4++) {
+                            if (matrix[_i4][_j4].toClick && matrix[_i4 - 1][_j4].toClick) {
+                                stage.exchangeImg(matrix[_i4 - 1][_j4], matrix[_i4][_j4]);
+
+                                //交换图片后, 查看当前是否有可消去的小动物
+                                matrix.forEach(function (element, index) {
+                                    element.forEach(function (e, i) {
+                                        if (e.toClick) {
+                                            for (var k = 4; k >= 2; k--) {
+                                                stage.findXSameImg(k, index, i);
+                                                stage.findYSameImg(k, index, i);
+                                            }
+                                        }
+                                    });
+                                });
+
+                                //为了不影响后续的操作, 需要将图片再次交换回来
+                                stage.exchangeImg(matrix[_i4 - 1][_j4], matrix[_i4][_j4]);
+
+                                //findXSameImg 函数会将可以消去的图片的 toRemove 值设置为 true
+                                //这里只需要检测 toRemove 的值即可
+                                for (var _i5 = 0; _i5 < pub.xNum; _i5++) {
+                                    for (var _j5 = 0; _j5 < pub.yNum; _j5++) {
+                                        if (matrix[_i5][_j5].toClick) {
+                                            if (matrix[_i5][_j5].toRemove) {
+                                                touchToDisslove = true;
+                                                matrix[_i5][_j5].toRemove = false;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                    };
+
+                    if (touchToDisslove) {
+                        return touchToDisslove;
+                    }
+
+                    for (var _i6 = 0; _i6 < pub.xNum; _i6++) {
+                        for (var _j6 = 0; _j6 < pub.yNum - 1; _j6++) {
+                            if (matrix[_i6][_j6].toClick && matrix[_i6][_j6 + 1].toClick) {
+                                stage.exchangeImg(matrix[_i6][_j6 + 1], matrix[_i6][_j6]);
+
+                                //交换图片后, 查看当前是否有可消去的小动物
+                                matrix.forEach(function (element, index) {
+                                    element.forEach(function (e, i) {
+                                        if (e.toClick) {
+                                            for (var k = 4; k >= 2; k--) {
+                                                stage.findXSameImg(k, index, i);
+                                                stage.findYSameImg(k, index, i);
+                                            }
+                                        }
+                                    });
+                                });
+
+                                //为了不影响后续的操作, 需要将图片再次交换回来
+                                stage.exchangeImg(matrix[_i6][_j6 + 1], matrix[_i6][_j6]);
+
+                                //findXSameImg 函数会将可以消去的图片的 toRemove 值设置为 true
+                                //这里只需要检测 toRemove 的值即可
+                                for (var _i7 = 0; _i7 < pub.xNum; _i7++) {
+                                    for (var _j7 = 0; _j7 < pub.yNum; _j7++) {
+                                        if (matrix[_i7][_j7].toClick) {
+                                            if (matrix[_i7][_j7].toRemove) {
+                                                touchToDisslove = true;
+                                                matrix[_i7][_j7].toRemove = false;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                    };
+
+                    if (touchToDisslove) {
+                        return touchToDisslove;
+                    }
+
+                    for (var _i8 = 0; _i8 < pub.xNum; _i8++) {
+                        for (var _j8 = 1; _j8 < pub.yNum; _j8++) {
+                            if (matrix[_i8][_j8].toClick && matrix[_i8][_j8 - 1].toClick) {
+                                stage.exchangeImg(matrix[_i8][_j8 - 1], matrix[_i8][_j8]);
+
+                                //交换图片后, 查看当前是否有可消去的小动物
+                                matrix.forEach(function (element, index) {
+                                    element.forEach(function (e, i) {
+                                        if (e.toClick) {
+                                            for (var k = 4; k >= 2; k--) {
+                                                stage.findXSameImg(k, index, i);
+                                                stage.findYSameImg(k, index, i);
+                                            }
+                                        }
+                                    });
+                                });
+
+                                //为了不影响后续的操作, 需要将图片再次交换回来
+                                stage.exchangeImg(matrix[_i8][_j8 - 1], matrix[_i8][_j8]);
+
+                                //findXSameImg 函数会将可以消去的图片的 toRemove 值设置为 true
+                                //这里只需要检测 toRemove 的值即可
+                                for (var _i9 = 0; _i9 < pub.xNum; _i9++) {
+                                    for (var _j9 = 0; _j9 < pub.yNum; _j9++) {
+                                        if (matrix[_i9][_j9].toClick) {
+                                            if (matrix[_i9][_j9].toRemove) {
+                                                touchToDisslove = true;
+                                                matrix[_i9][_j9].toRemove = false;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                    };
+
+                    if (touchToDisslove) {
+                        console.log(touchToDisslove);
+                        return touchToDisslove;
+                    } else {
+                        console.log(false);
+                        return false;
+                    }
+                }
+
+                //交换两个 obj 的 img属性值
+
+            }, {
+                key: 'exchangeImg',
+                value: function exchangeImg(a, b) {
+                    if (a && b) {
+                        if (a.toClick && b.toClick) {
+                            var temp = a.img;
+                            a.img = b.img;
+                            b.img = temp;
+                        }
+                    }
+                }
+            }, {
+                key: 'gameBegin',
+                value: function gameBegin() {
+                    if (document.querySelector('.time-over')) {
+
+                        //游戏结束时的分数设置
+                        var _gameToEnd = function _gameToEnd(timer1) {
+                            currentTime += 1;
+                            document.querySelector('#process-current').style.marginLeft = currentSmallWidth - processWidth + 'px';
+                            currentSmallWidth += smallWidth;
+
+                            //如果闯关模式已经达到目标分数，将剩余的时间加成分数
+                            if (currentUrl.indexOf('pass') > -1) {
+                                if (currentUrl.indexOf('one') > -1) {
+                                    if (pubdata.score >= pub.passOneNeddScore) {
+                                        nextCheckpoint.style.display = 'block';
+
+                                        clearInterval(timer1);
+
+                                        //设置分数
+                                        pubdata.score += pub.extraScore * (pub.timeCount - currentTime);
+                                        //将分数存入缓存
+                                        localStorage.setItem('passOneScore', pubdata.score);
+
+                                        //设置计时条直接滚动到 时间截止位置
+                                        processCurrent.style.marginLeft = 0;
+
+                                        //设置分数的增加
+                                        if (historyScore < pubdata.score) {
+                                            record.innerHTML = pubdata.score;
+                                        }
+                                        timeScore.innerHTML = pubdata.score;
+
+                                        //恭喜通关
+                                        setTimeout(function () {
+                                            nextCheckpoint.style.display = 'block';
+                                        }, 1000);
+
+                                        setTimeout(function () {
+                                            nextCheckpoint.style.display = 'none';
+                                        }, 3000);
+
+                                        //直接进入下一关
+                                        setTimeout(function () {
+                                            window.location.href = currentUrl.replace('one', 'two');
+                                        }, 3000);
+                                    }
+                                } else if (currentUrl.indexOf('two') > -1) {
+                                    if (pubdata.score >= pub.passTwoNeedScore) {
+                                        nextCheckpoint.style.display = 'block';
+
+                                        clearInterval(timer1);
+
+                                        pubdata.score += pub.extraScore * (pub.timeCount - currentTime);
+                                        localStorage.setItem('passTwoScore', pubdata.score);
+
+                                        processCurrent.style.marginLeft = 0;
+
+                                        //设置分数的增加
+                                        if (historyScore < pubdata.score) {
+                                            record.innerHTML = pubdata.score;
+                                        }
+                                        timeScore.innerHTML = pubdata.score;
+
+                                        setTimeout(function () {
+                                            nextCheckpoint.style.display = 'block';
+                                        }, 1000);
+
+                                        setTimeout(function () {
+                                            nextCheckpoint.style.display = 'none';
+                                        }, 3000);
+
+                                        setTimeout(function () {
+                                            window.location.href = currentUrl.replace('two', 'three');
+                                        }, 3000);
+                                    }
+                                } else if (currentUrl.indexOf('three') > -1) {
+                                    if (pubdata.score >= pub.passThreeNeedScore) {
+                                        nextCheckpoint.style.display = 'block';
+
+                                        clearInterval(timer1);
+
+                                        pubdata.score += pub.extraScore * (pub.timeCount - currentTime);
+
+                                        localStorage.setItem('passThreeScore', pubdata.score);
+
+                                        processCurrent.style.marginLeft = 0;
+
+                                        //设置分数的增加
+                                        if (historyScore < pubdata.score) {
+                                            record.innerHTML = pubdata.score;
+                                        }
+                                        timeScore.innerHTML = pubdata.score;
+
+                                        setTimeout(function () {
+                                            nextCheckpoint.style.display = 'block';
+                                        }, 1000);
+
+                                        setTimeout(function () {
+                                            nextCheckpoint.style.display = 'none';
+                                        }, 3000);
+
+                                        setTimeout(function () {
+                                            timeOver.style.display = 'block';
+                                        }, 3000);
+
+                                        Ajax({
+                                            method: "POST",
+                                            url: document.querySelector('meta').getAttribute('update-url'),
+                                            content: 'style=cg' + '&score=' + pubdata.score + '&time=' + pub.timeCount + '&stage=' + 3,
+                                            success: function success(res) {
+                                                document.querySelector('.time-rank').innerHTML = res.data.rank;
+                                                document.querySelector('.time-higest-score').innerHTML = res.data.HighScore;
+                                                if (pubdata.score < res.data.HighScore) {
+                                                    document.querySelector('.higest-score').setAttribute('data-class', '');
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+
+                            //timeout
+                            if (Number(window.getComputedStyle(processCurrent, null).getPropertyValue('margin-left').slice(0, -2)) >= -smallWidth) {
+                                clearInterval(timer1);
+
+                                timeOver.style.display = 'block';
+
+                                //如果为闯关模式
+                                if (window.location.href.indexOf('pass') > -1) {
+                                    //第一关
+                                    if (currentUrl.indexOf('one') > -1) {
+                                        localStorage.setItem('passOneScore', pubdata.score);
+                                        //闯关失败
+                                        if (pubdata.score < pub.passOneNeddScore) {
+                                            timeOver.style.display = 'block';
+                                            Ajax({
+                                                method: "POST",
+                                                url: document.querySelector('meta').getAttribute('update-url'),
+                                                content: 'style=cg' + '&score=' + pubdata.score + '&time=' + pub.timeCount + '&stage=' + 1,
+                                                success: function success(res) {
+                                                    document.querySelector('.time-rank').innerHTML = res.data.rank;
+                                                    document.querySelector('.time-higest-score').innerHTML = res.data.HighScore;
+                                                    if (pubdata.score < res.data.HighScore) {
+                                                        document.querySelector('.higest-score').setAttribute('data-class', '');
+                                                    }
+                                                }
+                                            });
+                                        }
+                                        //第二关
+                                    } else if (currentUrl.indexOf('two') > -1) {
+                                        localStorage.setItem('passTwoScore', pubdata.score);
+                                        if (pubdata.score < pub.passTwoNeedScore) {
+                                            timeOver.style.display = 'block';
+                                            Ajax({
+                                                method: "POST",
+                                                url: document.querySelector('meta').getAttribute('update-url'),
+                                                content: 'style=cg' + '&score=' + pubdata.score + '&time=' + pub.timeCount + '&stage=' + 2,
+                                                success: function success(res) {
+                                                    document.querySelector('.time-rank').innerHTML = res.data.rank;
+                                                    document.querySelector('.time-higest-score').innerHTML = res.data.HighScore;
+                                                    if (pubdata.score < res.data.HighScore) {
+                                                        document.querySelector('.higest-score').setAttribute('data-class', '');
+                                                    }
+                                                }
+                                            });
+                                        }
+                                        //第三关
+                                    } else if (currentUrl.indexOf('three') > -1) {
+                                        localStorage.setItem('passThreeScore', pubdata.score);
+                                        if (pubdata.score < pub.passThreeNeedScore) {
+                                            timeOver.style.display = 'block';
+                                            Ajax({
+                                                method: "POST",
+                                                url: document.querySelector('meta').getAttribute('update-url'),
+                                                content: 'style=cg' + '&score=' + pubdata.score + '&time=' + pub.timeCount + '&stage=' + 3,
+                                                success: function success(res) {
+                                                    document.querySelector('.time-rank').innerHTML = res.data.rank;
+                                                    document.querySelector('.time-higest-score').innerHTML = res.data.HighScore;
+                                                    if (pubdata.score < res.data.HighScore) {
+                                                        document.querySelector('.higest-score').setAttribute('data-class', '');
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    }
+                                    //计时模式
+                                } else {
+                                    localStorage.setItem('timeScore', pubdata.score);
+                                    timeOver.style.display = 'block';
+
+                                    Ajax({
+                                        method: "POST",
+                                        url: document.querySelector('meta').getAttribute('update-url'),
+                                        content: 'style=js' + '&score=' + pubdata.score + '&time=' + pub.timeCount,
+                                        success: function success(res) {
+                                            document.querySelector('.time-rank').innerHTML = res.data.rank;
+                                            document.querySelector('.time-higest-score').innerHTML = res.data.HighScore;
+                                            if (pubdata.score < res.data.HighScore) {
+                                                document.querySelector('.higest-score').setAttribute('data-class', '');
+                                            }
+                                        }
+                                    });
+                                }
+                                gameOverScore.innerHTML = pubdata.score;
+                            }
+                        };
+
+                        var gameOver = document.querySelector('.time-over');
+                        var gameStop = document.querySelector('.game-stop');
+                        var _btnStop = document.querySelector('.time-to-stop');
+                        var btnContinue = document.querySelector('.btn-to-continue');
+                        var processCurrent = document.querySelector('#process-current');
+                        var rankDetail = document.querySelector('.rank-detail');
+                        //获取 processBar 需要移动的距离, 并转化为数值
+                        var processWidth = Number(getComputedStyle(processCurrent).width.slice(0, -3));
+                        //每过 1s 后的增量
+                        var smallWidth = processWidth / pub.timeCount;
+                        var currentSmallWidth = smallWidth * 2;
+                        var timeOver = document.querySelector('.time-over');
+                        var btnAgain = document.querySelector('.time-again');
+                        //是否继续游戏
+                        var toContinue = true;
+                        if (document.querySelector('.score-to-end')) {
+                            var scoreToEnd = document.querySelector('.score-to-end');
+                        }
+
+                        //动态设置宽度和高度游戏结束时 页面的 宽度和高度
+                        pub.setWH(gameOver);
+                        pub.setWH(gameStop);
+                        pub.setWH(noDissloved);
+
+                        if (document.querySelector('.next-checkpoint')) {
+                            var nextCheckpoint = document.querySelector('.next-checkpoint');
+                            pub.setWH(nextCheckpoint);
+                        }
+
+                        //设置 闯关模式 开始时 的分数
+                        if (currentUrl.indexOf('two') > -1) {
+                            pubdata.score = Number(localStorage.getItem('passOneScore'));
+                        } else if (currentUrl.indexOf('three') > -1) {
+                            pubdata.score = Number(localStorage.getItem('passTwoScore'));
+                        }
+                        gameOverScore.innerHTML = pubdata.score;
+
+                        //游戏暂停
+                        _btnStop.addEventListener('click', function () {
+                            var timeStopScore = 0;
+
+                            toContinue = false;
+
+                            gameStop.style.display = 'block';
+                            _btnStop.classList.add('time-to-continue');
+
+                            //设置距离目标还有多少分
+                            if (currentUrl.indexOf('one') > -1) {
+                                timeStopScore = pub.passOneNeddScore - pubdata.score;
+                            } else if (currentUrl.indexOf('two') > -1) {
+                                timeStopScore = pub.passTwoNeedScore - pubdata.score;
+                            } else if (currentUrl.indexOf('three') > -1) {
+                                timeStopScore = pub.passThreeNeedScore - pubdata.score;
+                            }
+
+                            if (timeStopScore < 0) {
+                                timeStopScore = 0;
+                            }
+
+                            if (scoreToEnd) {
+                                scoreToEnd.innerHTML = timeStopScore;
+                            }
+                        }, false);
+
+                        //游戏继续
+                        btnContinue.addEventListener('click', function () {
+                            document.querySelector('.time-to-continue').classList.remove('time-to-continue');
+                            gameStop.style.display = 'none';
+
+                            var timer0 = setInterval(function () {
+                                //如果点击了停止游戏按钮
+                                if (!toContinue) {
+                                    clearInterval(timer0);
+                                } else {
+                                    _gameToEnd(timer0);
+                                }
+                            }, 1000);
+
+                            toContinue = true;
+                        }, false);
+
+                        //重新游戏
+                        btnAgain.addEventListener('click', function (e) {
+                            timeOver.style.display = 'none';
+                        }, false);
+
+                        //设置计时滚动条的滑动 和 重新游戏
+                        var timer1 = setInterval(function () {
+
+                            //如果点击了停止游戏按钮
+                            if (!toContinue) {
+                                clearInterval(timer1);
+                            } else {
+                                _gameToEnd(timer1);
+                            }
+                        }, 1000);
+                    }
+                }
+            }]);
+
+            return Stage;
+        }();
+
+        var Animal = function () {
+            function Animal(ctx, x, y, img, toRemove, toClick) {
+                _classCallCheck(this, Animal);
+
+                this.ctx = ctx;
+                this.x = x;
+                this.y = y;
+                this.img = img;
+                this.toRemove = toRemove;
+                this.toClick = toClick;
+            }
+
+            _createClass(Animal, [{
+                key: 'paint',
+                value: function paint() {
+                    this.ctx.drawImage(this.img, this.x, this.y, pub.imgWidth, pub.imgHeight);
+                }
+            }, {
+                key: 'fall',
+                value: function fall() {
+                    this.y += .5;
+                    stage.refresh();
+                    this.paint();
+                }
+            }, {
+                key: 'refresh',
+                value: function refresh() {
+                    this.ctx.clearRect(this.x, this.y, pub.imgWidth, pub.imgHeight);
+                }
+
+                //消去的时候图片会发生的变化
+
+            }, {
+                key: 'dissloved',
+                value: function dissloved() {
+                    var imgIndex = stage.currentAllImgsIndex(this);
+
+                    this.img = pub.disslovedImg[imgIndex];
+                    stage.drawStage();
+                }
+
+                //点击的时候图片发生的变化
+
+            }, {
+                key: 'clicked',
+                value: function clicked() {
+                    var imgIndex = stage.currentAllImgsIndex(this);
+                    this.img = pub.clickedImg[imgIndex];
+
+                    stage.drawStage();
+                    return imgIndex;
+                }
+            }]);
+
+            return Animal;
+        }();
+
+        var stage = new Stage();
+
+        stage.gameBegin();
+
+        //游戏刚开始时填充图片
+        stage.drawBeginStage();
+        //填充不同的模式
+        stage.drawAllStage();
+
+        //如果没有可以消去的图片, 重绘当前页面
+        if (!stage.nextTouchToDisslove()) {
+            noDissloved.style.display = 'block';
+
+            setTimeout(function () {
+                noDissloved.style.display = 'none';
+                stage.drawBeginStage();
+                stage.drawAllStage();
+                stage.continueToDissloved();
+            }, 1000);
+        }
+
+        if (currentUrl.indexOf('time') > -1 || currentUrl.indexOf('one') > -1) {
+            Ajax({
+                method: "GET",
+                url: document.querySelector('meta').getAttribute('show-url'),
+                success: function success(res) {
+                    if (currentUrl.indexOf('time') > -1) {
+                        if (res.data.js.myScore > 0) {
+                            historyScore = res.data.js.myScore;
+                        }
+                    } else if (currentUrl.indexOf('pass') > -1) {
+                        if (res.data.js.myScore > 0) {
+                            historyScore = res.data.cg.myScore;
+                        }
+                    }
+                }
+            });
+        }
+
+        record.innerHTML = historyScore;
+
+        stage.continueToDissloved();
+
+        pub.canvas.addEventListener('touchstart', function (e) {
+            pubdata.clickedFlag = false;
+            var e = e || window.event;
+
+            //保存点击图片时的位置
+            start = {
+                x: e.touches[0].clientX,
+                y: e.touches[0].clientY
+            };
+            //转化为 图片宽度和高度 的整数倍
+            startInt = {
+                x: parseInt((start.x - this.offsetLeft) / pub.imgWidth) * pub.imgWidth,
+                y: parseInt((start.y - this.offsetTop) / pub.imgHeight) * pub.imgHeight
+            };
+
+            pub.clickedImgIndex = matrix[startInt.x / pub.imgWidth][startInt.y / pub.imgHeight].clicked();
+
+            //点击图片时 图片背景 会发生的变化
+            stage.rewriteClickedImg();
+
+            pubdata.clickedFlag = false;
+        });
+
+        pub.canvas.addEventListener('touchmove', function (e) {
+            pubdata.moveFlag = true;
+            var e = e || window.event;
+
+            var mouse = {
+                x: e.touches[0].clientX,
+                y: e.touches[0].clientY
+            };
+
+            //手指拖动图片向 水平 方向运动
+            if (Math.abs(mouse.y - start.y) <= Math.abs(mouse.x - start.x)) {
+                //鼠标向右移动
+                if (mouse.x - start.x >= 0) {
+                    //如果鼠标 向右 拖动图片移动的距离 超过 图片的halfwidth
+                    if (mouse.x - start.x >= pub.halfWidth) {
+                        imgPlace = {
+                            x: startInt.x + pub.imgWidth,
+                            y: startInt.y
+                        };
+                    } else {
+                        pubdata.imgPlaceStay();
+                    }
+                    //鼠标向左移动
+                } else {
+                    if (mouse.x - start.x <= -pub.halfWidth) {
+                        imgPlace = {
+                            x: startInt.x - pub.imgWidth,
+                            y: startInt.y
+                        };
+                    } else {
+                        pubdata.imgPlaceStay();
+                    }
+                }
+                //拖动图片向竖直方向运动
+            } else {
+                //鼠标向下移动
+                if (mouse.y - start.y >= 0) {
+                    //如果鼠标 向下 拖动图片移动的距离 超过 图片的halfwidth
+                    if (mouse.y - start.y >= pub.halfWidth) {
+                        imgPlace = {
+                            x: startInt.x,
+                            y: startInt.y + pub.imgHeight
+                        };
+                    } else {
+                        pubdata.imgPlaceStay();
+                    }
+                } else {
+                    if (start.y - mouse.y >= pub.halfWidth) {
+                        imgPlace = {
+                            x: startInt.x,
+                            y: startInt.y - pub.imgHeight
+                        };
+                    } else {
+                        pubdata.imgPlaceStay();
+                    }
+                }
+            }
+        });
+
+        pub.canvas.addEventListener('touchend', function (e) {
+            pubdata.clickedFlag = false;
+
+            var s = {
+                x: startInt.x / pub.imgWidth,
+                y: startInt.y / pub.imgHeight
+            };
+            var i = {
+                x: imgPlace.x / pub.imgWidth,
+                y: imgPlace.y / pub.imgHeight
+            };
+
+            //点击完成后 需要将 clickedImg 换回原图片
+            matrix[s.x][s.y].img = pub.allImgs[pub.clickedImgIndex];
+
+            if (pubdata.moveFlag) {
+                //如果两张图片不相同
+                if (matrix[s.x][s.y].img !== matrix[i.x][i.y].img) {
+                    stage.exchangeImg(matrix[s.x][s.y], matrix[i.x][i.y]);
+                }
+
+                //将 matrix 里面的图片重绘
+                stage.drawStage();
+
+                startInt = {
+                    x: imgPlace.x,
+                    y: imgPlace.y
+                };
+
+                if (stage.isDissloved()) {
+                    //调用消去函数
+                    stage.continueToDissloved();
+                } else {
+                    //如果交换图片后没有可以消去的小动物，再把图片换回去
+                    stage.exchangeImg(matrix[s.x][s.y], matrix[i.x][i.y]);
+
+                    //防止连续拖动图片
+                    for (var _i10 = 0; _i10 < pub.xNum; _i10++) {
+                        for (var j = 0; j < pub.yNum; j++) {
+                            matrix[_i10][j].toClick = false;
+                        }
+                    }
+                    setTimeout(function () {
+                        for (var _i11 = 0; _i11 < pub.xNum; _i11++) {
+                            for (var _j10 = 0; _j10 < pub.yNum; _j10++) {
+                                matrix[_i11][_j10].toClick = true;
+                            }
+                        }
+                        stage.drawAllStage();
+
+                        stage.drawStage();
+                    }, 300);
+                }
+
+                //如果没有可以消去的图片, 重绘当前页面
+                setTimeout(function () {
+                    for (var _i12 = 0; _i12 < pub.xNum; _i12++) {
+                        for (var _j11 = 0; _j11 < pub.yNum; _j11++) {
+                            if (matrix[_i12][_j11].toClick) {
+                                if (matrix[_i12][_j11].toRemove) {
+                                    matrix[_i12][_j11].toRemove = false;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!stage.nextTouchToDisslove()) {
+                        noDissloved.style.display = 'block';
+
+                        setTimeout(function () {
+                            noDissloved.style.display = 'none';
+                            //重新生成所有图片
+                            stage.drawBeginStage();
+                            stage.drawAllStage();
+                            stage.continueToDissloved();
+                        }, 1000);
+                    }
+                }, 2000);
+            }
+
+            pubdata.moveFlag = false;
+        });
+    });
+}
+
+//排行榜页面的渲染
+if (window.location.href.indexOf('rank') > -1) {
+    if (screen.height < 500) {
+        document.querySelector('.rank-time-list').style.height = '4.8rem';
+        document.querySelector('.rank-pass-list').style.height = '4.8rem';
+        document.querySelector('.rank-cup').style.display = 'none';
+    }
+
+    // Ajax({
+    //     method: "GET",
+    //     url: document.querySelector('meta').getAttribute('show-url'),
+    //     success: function (res) {
+    //         res = res.data;
+    //         //time
+    //         let timeParent = document.querySelector('.rank-time-list');
+    //         let timeLast = document.querySelector('.rank-time-list .clearfix');
+    //         let passParent = document.querySelector('.rank-pass-list');
+    //         let passLast = document.querySelector('.rank-pass-list .clearfix');
+    //         let meTime = document.querySelector('.me-time');
+    //         let mePass = document.querySelector('.me-pass');
+    //
+    //         // //我的分数
+    //         meTime.firstElementChild.innerHTML = res.js.rank;
+    //         meTime.lastElementChild.innerHTML = res.js.myScore;
+    //         mePass.firstElementChild.innerHTML = res.cg.rank;
+    //         mePass.lastElementChild.innerHTML = res.cg.myScore;
+    //
+    //         if (res.js.data) {
+    //             let jslistsCount = res.js.data.length;
+    //             for (let i = 0; i < jslistsCount; i++) {
+    //                 let newLiChild = document.createElement('li');
+    //
+    //                 if (i < 3) {
+    //                     newLiChild.setAttribute('class', 'single-detail rank-list-top');
+    //                 } else {
+    //                     newLiChild.setAttribute('class', 'single-detail');
+    //                 }
+    //
+    //                 timeParent.insertBefore(newLiChild, timeLast);
+    //                 let rank = i+1;
+    //
+    //                 newLiChild.innerHTML = '<span class="rank-num">' + rank
+    //                                         + '</span><span class="rank-name">' + res.js.data[i].nickname
+    //                                         + '</span><span class="rank-score">' + res.js.data[i].score + '</span>';
+    //             }
+    //         }
+    //
+    //         if (res.cg.data) {
+    //             //返回的数据条数
+    //             let cglistsCount = res.cg.data.length;
+    //
+    //             for (let i = 0; i < cglistsCount; i++) {
+    //                 let newLiChild = document.createElement('li');
+    //
+    //                 if (i < 3) {
+    //                     newLiChild.setAttribute('class', 'single-detail rank-list-top');
+    //                 } else {
+    //                     newLiChild.setAttribute('class', 'single-detail');
+    //                 }
+    //
+    //                 passParent.insertBefore(newLiChild, passLast);
+    //
+    //                 let rank = i+1;
+    //
+    //                 newLiChild.innerHTML = '<span class="rank-num">' + rank
+    //                                         + '</span><span class="rank-name">' + res.cg.data[i].nickname
+    //                                         + '</span><span class="rank-score">' + res.cg.data[i].score + '</span>';
+    //
+    //             }
+    //         }
+    //     }
+    // });
+}
+
+//排行榜 点击进入下一页
+if (document.querySelector('.rank-btn-time')) {
+    var btnTime = document.querySelector('.rank-btn-time');
+    var btnPass = document.querySelector('.rank-btn-pass');
+    var timeLists = document.querySelector('.rank-time-list');
+    var passLists = document.querySelector('.rank-pass-list');
+    var toNextPage = document.querySelector('.to-nextpage');
+    //判断当前显示的是 哪个模式
+    var nowLists = 'time';
+    //判断 下一次被点击次数
+    var clickCount = 0;
+    //下一页总共能 被点击 的次数
+    var toClickNext = 0;
+    var len = 0;
+
+    btnTime.addEventListener('click', function () {
+        timeLists.style.display = 'block';
+        passLists.style.display = 'none';
+
+        var clicked = document.querySelector('.rank-clicked');
+        clicked.classList.remove('rank-clicked');
+        btnTime.classList.add('rank-clicked');
+
+        var lists = timeLists.children;
+        lists = Array.prototype.slice.call(lists);
+
+        lists.forEach(function (element, index) {
+            element.style.display = 'block';
+        });
+
+        nowLists = 'time';
+        clickCount = 0;
+    }, false);
+
+    btnPass.addEventListener('click', function () {
+        timeLists.style.display = 'none';
+        passLists.style.display = 'block';
+
+        var clicked = document.querySelector('.rank-clicked');
+        clicked.classList.remove('rank-clicked');
+        btnPass.classList.add('rank-clicked');
+
+        var lists = passLists.children;
+        lists = Array.prototype.slice.call(lists);
+
+        lists.forEach(function (element, index) {
+            element.style.display = 'block';
+        });
+
+        nowLists = 'pass';
+        clickCount = 0;
+    }, false);
+
+    toNextPage.addEventListener('click', function () {
+        var lists = void 0;
+
+        clickCount++;
+
+        if (nowLists == 'pass') {
+            lists = passLists.children;
+            len = lists.length;
+        } else if (nowLists == 'time') {
+            lists = timeLists.children;
+            len = lists.length;
+        }
+
+        toClickNext = parseInt((len - 1) / 5);
+
+        if ((len - 1) % 5 > 0) {
+            toClickNext += 1;
+        }
+
+        //消去 6 ＊ clickCount 个list，实现分页效果
+        if (toClickNext > clickCount) {
+            for (var i = 1; i < len; i++) {
+                if (i <= 5 * clickCount) {
+                    lists[i].style.display = 'none';
+                }
+            }
+        }
+    }, false);
+}
+
+function Ajax(obj) {
+    var request = new XMLHttpRequest(),
+        defaults = {
+        method: "GET",
+        url: "",
+        async: true,
+        success: function success() {},
+        errer: function errer() {},
+        content: null
+    };
+
+    for (var key in obj) {
+        defaults[key] = obj[key];
+    }
+
+    request.onreadystatechange = function () {
+        if (request.readyState === 4 && request.status === 200) {
+            var responseText = JSON.parse(request.responseText);
+            defaults.success.call(request, responseText);
+        } else {
+            defaults.errer();
+        }
+    };
+
+    request.open(defaults.method, defaults.url, defaults.async);
+    request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
+    request.send(defaults.content);
+}
