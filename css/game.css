@@ -10,7 +10,7 @@
 .homepage-content {
     width: 100%;
     height: 2.746667rem;
-    background-image: url('../images/game-time-title.png');
+    /*background-image: url('../images/game-time-title.png');*/
     background-position: 0 0;
     background-size: 100% 100%;
 }
