@@ -3,19 +3,15 @@
 <head>
   <meta charset="utf-8">
   
-  <title>插入排序递归与非递归版 | Scarleatt</title>
+  <title>软件工程学概述 | Scarleatt</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="递归版插入排序：123456789101112131415161718192021222324252627#include &amp;lt;iostream&amp;gt;using namespace std;void insert(int a[], int j) &amp;#123;    int i = j-1;    int key = a[j];    while (i&amp;gt;=0 &amp;amp;&amp;amp; a[i">
-<meta name="keywords" content="算法 插入排序">
-<meta property="og:type" content="article">
-<meta property="og:title" content="插入排序递归与非递归版">
-<meta property="og:url" content="http://yoursite.com/2017/11/05/插入排序递归与非递归版/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="软件工程学概述">
+<meta property="og:url" content="http://yoursite.com/软件工程学概述/index.html">
 <meta property="og:site_name" content="Scarleatt">
-<meta property="og:description" content="递归版插入排序：123456789101112131415161718192021222324252627#include &amp;lt;iostream&amp;gt;using namespace std;void insert(int a[], int j) &amp;#123;    int i = j-1;    int key = a[j];    while (i&amp;gt;=0 &amp;amp;&amp;amp; a[i">
-<meta property="og:updated_time" content="2017-11-06T08:53:29.000Z">
+<meta property="og:updated_time" content="2020-03-08T08:24:47.893Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="插入排序递归与非递归版">
-<meta name="twitter:description" content="递归版插入排序：123456789101112131415161718192021222324252627#include &amp;lt;iostream&amp;gt;using namespace std;void insert(int a[], int j) &amp;#123;    int i = j-1;    int key = a[j];    while (i&amp;gt;=0 &amp;amp;&amp;amp; a[i">
+<meta name="twitter:title" content="软件工程学概述">
   
     <link rel="alternate" href="/atom.xml" title="Scarleatt" type="application/atom+xml">
   
@@ -70,10 +66,10 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-插入排序递归与非递归版" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="page-" class="article article-type-page" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2017/11/05/插入排序递归与非递归版/" class="article-date">
-  <time datetime="2017-11-05T11:53:09.000Z" itemprop="datePublished">2017-11-05</time>
+    <a href="/软件工程学概述/index.html" class="article-date">
+  <time datetime="2020-03-08T08:24:47.000Z" itemprop="datePublished">2020-03-08</time>
 </a>
     
   </div>
@@ -84,7 +80,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      插入排序递归与非递归版
+      软件工程学概述
     </h1>
   
 
@@ -92,40 +88,17 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>递归版插入排序：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">insert</span><span class="params">(<span class="keyword">int</span> a[], <span class="keyword">int</span> j)</span> </span>&#123;</div><div class="line">    <span class="keyword">int</span> i = j<span class="number">-1</span>;</div><div class="line">    <span class="keyword">int</span> key = a[j];</div><div class="line">    <span class="keyword">while</span> (i&gt;=<span class="number">0</span> &amp;&amp; a[i]&gt;key) &#123;</div><div class="line">        a[i+<span class="number">1</span>] = a[i];</div><div class="line">        i--;</div><div class="line">    &#125;</div><div class="line">    a[i+<span class="number">1</span>] = key;</div><div class="line">    <span class="keyword">return</span>;</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">insert_sort</span><span class="params">(<span class="keyword">int</span> a[], <span class="keyword">int</span> j)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (j &gt; <span class="number">0</span>) &#123;</div><div class="line">        insert_sort(a, j<span class="number">-1</span>);</div><div class="line">        insert(a, j);</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">return</span>;</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="keyword">int</span> n = <span class="number">8</span>;</div><div class="line">    <span class="keyword">int</span> a[<span class="number">8</span>] = &#123;<span class="number">5</span>,<span class="number">2</span>,<span class="number">4</span>,<span class="number">6</span>,<span class="number">1</span>,<span class="number">3</span>,<span class="number">9</span>,<span class="number">8</span>&#125;;</div><div class="line">    insert_sort(a, <span class="number">8</span>);</div><div class="line"></div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">8</span>; i++)</div><div class="line">        <span class="built_in">cout</span>&lt;&lt;a[i]&lt;&lt;<span class="string">" "</span>;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>非递归版插入排序：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="keyword">int</span> arr[<span class="number">6</span>] = &#123;<span class="number">5</span>,<span class="number">2</span>,<span class="number">4</span>,<span class="number">6</span>,<span class="number">1</span>,<span class="number">3</span>&#125;;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">1</span>; j &lt; <span class="number">6</span>; j++) &#123;</div><div class="line">        <span class="keyword">int</span> key = arr[j];</div><div class="line">        <span class="keyword">int</span> i = j<span class="number">-1</span>;</div><div class="line">        <span class="keyword">while</span> (i &gt;= <span class="number">0</span> &amp;&amp; arr[i] &gt; key) &#123;</div><div class="line">            arr[i+<span class="number">1</span>] = arr[i];</div><div class="line">            i--;</div><div class="line">        &#125;</div><div class="line">        arr[i+<span class="number">1</span>] = key;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">6</span>; i++)</div><div class="line">        <span class="built_in">cout</span>&lt;&lt;arr[i]&lt;&lt;<span class="string">" "</span>;</div><div class="line">    <span class="built_in">cout</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-
+        
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/11/05/插入排序递归与非递归版/" data-id="ck7iry3w3000fp5s0ufp6obop" class="article-share-link">Partager</a>
+      <a data-url="http://yoursite.com/软件工程学概述/index.html" data-id="ck7iry3w9000kp5s0kzy2wij3" class="article-share-link">Partager</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/算法-插入排序/">算法 插入排序</a></li></ul>
-
     </footer>
   </div>
   
     
-<nav id="article-nav">
-  
-    <a href="/2017/11/05/Chapter-2-Foundation-of-Algorithms/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Récent</strong>
-      <div class="article-nav-title">
-        
-          Chapter 2 Foundation of Algorithms
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2017/11/01/Machine-Learning/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Ancien</strong>
-      <div class="article-nav-title">Machine Learning</div>
-    </a>
-  
-</nav>
-
   
 </article>
 
