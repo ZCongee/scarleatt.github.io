@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+
+
+
+
+  <meta name="keywords" content="计算机体系结构,同时多线程,RAID," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="Scarleatt" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="同时多线程线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。 线程级并行：指并行执行两个或两个以上的线程。 同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种">
+<meta name="keywords" content="计算机体系结构,同时多线程,RAID">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机体系结构重要考点">
+<meta property="og:url" content="http://yoursite.com/2020/03/10/计算机体系结构重要考点/index.html">
+<meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="同时多线程线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。 线程级并行：指并行执行两个或两个以上的线程。 同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-03-10T07:59:51.310Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="计算机体系结构重要考点">
+<meta name="twitter:description" content="同时多线程线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。 线程级并行：指并行执行两个或两个以上的线程。 同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/03/10/计算机体系结构重要考点/"/>
+
+
+
+
+
+  <title>计算机体系结构重要考点 | Scarleatt</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Scarleatt</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/10/计算机体系结构重要考点/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">计算机体系结构重要考点</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-10T15:13:34+08:00">
+                2020-03-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="同时多线程"><a href="#同时多线程" class="headerlink" title="同时多线程"></a>同时多线程</h4><p>线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。</p>
+<p>线程级并行：指并行执行两个或两个以上的线程。</p>
+<p>同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种改进。通过寄存器命名和动态调度机制，来自各个独立线程的多条指令可以同时流出，而不用考虑它们之间的相互依赖关系。</p>
+<h5 id="实现多线程的主要方法"><a href="#实现多线程的主要方法" class="headerlink" title="实现多线程的主要方法"></a>实现多线程的主要方法</h5><p>细粒度多线程：在每条指令之间都可以进行线程的切换，从而使得多个线程可以交替执行。</p>
+<ul>
+<li>优点：能够隐藏由长时间停顿带来的吞吐率的损失，也能够隐藏由段时间停顿带来的损失。</li>
+<li>缺点：减慢了单个线程的执行。即使没有任何停顿的线程也不能连续执行，而且会因为其他线程的指令的插入执行而被延迟。</li>
+</ul>
+<p>粗粒度多线程：线程之间的切换只发生在时间较长的停顿出现的时候。</p>
+<ul>
+<li>优点：减少了切换次数，很大程度上也不会降低单个线程的执行速度。</li>
+<li>缺点：减少吞吐率损失的能力有限。由于实现粗粒度多线程的CPU只能执行单个线程的指令，不能交叉执行多个线程，因此当发生停顿时，流水线必须排空或暂停。</li>
+</ul>
+<h4 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h4><h5 id="写策略"><a href="#写策略" class="headerlink" title="写策略"></a>写策略</h5><p>写直达法：在执行写操作时，不仅把数据写入Cathe中相应的块，而且也写入下一级存储器。减少CPU写停顿的常用方法是，采用写缓冲器。</p>
+<p>写回法：只把数据写入Cathe中相应的块，不写入下一级存储器。这些最新数据只有在相应的块被替换出时，才被写回下一级存储器。速度快，要设置“修改位”。</p>
+<p>写不命中</p>
+<p>按写分配法：写不命中时，把所写单元的块从主存中调入Cathe，然后再进行写入。与<u>写回法</u>配合。</p>
+<p>不按写分配法：写不命中时，直接写入下一级存储器而不将相应的块调入Cathe。</p>
+<h5 id="三种类型的Cathe不命中"><a href="#三种类型的Cathe不命中" class="headerlink" title="三种类型的Cathe不命中"></a>三种类型的Cathe不命中</h5><p>强制性不命中：当第一次访问一个快时，该块不在Cathe中，需从下一级存储器中调入Cathe。（冷启动访问不命中，首次访问不命中）</p>
+<p>容量不命中：如果<u>程序执行时所需的块</u>不能全部调入Cathe中，当某些块被调出后，若又重新被访问，就会发生不命中。</p>
+<p>冲突不命中：在组相联或者直接映像Cathe中，若太多的块映像到同一组（块）中，则会出现该组中某个块被别的块替换掉，然后又重新被访问的情况。（碰撞不命中，冲突不命中）</p>
+<p>关系：</p>
+<ul>
+<li><strong>相联度</strong>越高，冲突不命中就越少；</li>
+<li>强制性不命中和容量不命中不受相联度的影响；</li>
+<li>强制性不命中不受<strong>Cathe容量</strong>的影响，但容量不命中却随着容量的增加而减少。</li>
+</ul>
+<h4 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h4><h5 id="I-O系统的可靠性、可用性和可信性"><a href="#I-O系统的可靠性、可用性和可信性" class="headerlink" title="I/O系统的可靠性、可用性和可信性"></a>I/O系统的可靠性、可用性和可信性</h5><p>可靠性：系统从某个初始参考点开始<u>一直连续提供服务的能力</u>，用平均无故障时间（<strong>MTTF</strong>）来衡量。MTTF的导数是失效率。系统总体的失效率是各部件的失效率之和。系统<u>中断服务的时间</u>用平均修复时间（<strong>MTTR</strong>）来衡量。</p>
+<p>可用性：系统正常工作的时间在连续两次服务间隔时间中所占的比例。<br>$$<br>可用性=\frac{MTTF}{MTTF+MTTR}<br>$$<br>   平均失效间隔时间，MTBF<br>$$<br>MTBF=MTTF+MTTR<br>$$<br>可信性：是服务的质量，是<u>不可度量</u>的。</p>
+<h5 id="廉价磁盘冗余阵列-RAID"><a href="#廉价磁盘冗余阵列-RAID" class="headerlink" title="廉价磁盘冗余阵列 (RAID)"></a>廉价磁盘冗余阵列 (RAID)</h5><p>RAID0：<u>无冗余和无校验</u>的磁盘阵列，成本最低。</p>
+<p>RAID1：<u>镜像</u>磁盘阵列。</p>
+<p>RAID2：采用纠错的<u>海明码</u>的磁盘阵列，冗余盘数量为$log_2m$，m为数据盘的个数。</p>
+<p>RAID3：<u>位</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID4：<u>块</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
+<p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
+<p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
+<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。</p>
+<p>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/计算机体系结构/" rel="tag"># 计算机体系结构</a>
+          
+            <a href="/tags/同时多线程/" rel="tag"># 同时多线程</a>
+          
+            <a href="/tags/RAID/" rel="tag"># RAID</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/03/08/软件工程学概述/" rel="next" title="软件工程学概述">
+                <i class="fa fa-chevron-left"></i> 软件工程学概述
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="Scarleatt" />
+            
+              <p class="site-author-name" itemprop="name">Scarleatt</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/scarleatt" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:fawnliu2333@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#同时多线程"><span class="nav-number">1.</span> <span class="nav-text">同时多线程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#实现多线程的主要方法"><span class="nav-number">1.1.</span> <span class="nav-text">实现多线程的主要方法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#存储系统"><span class="nav-number">2.</span> <span class="nav-text">存储系统</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#写策略"><span class="nav-number">2.1.</span> <span class="nav-text">写策略</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#三种类型的Cathe不命中"><span class="nav-number">2.2.</span> <span class="nav-text">三种类型的Cathe不命中</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IO系统"><span class="nav-number">3.</span> <span class="nav-text">IO系统</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#I-O系统的可靠性、可用性和可信性"><span class="nav-number">3.1.</span> <span class="nav-text">I/O系统的可靠性、可用性和可信性</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#廉价磁盘冗余阵列-RAID"><span class="nav-number">3.2.</span> <span class="nav-text">廉价磁盘冗余阵列 (RAID)</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Scarleatt</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
