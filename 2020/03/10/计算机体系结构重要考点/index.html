@@ -66,7 +66,7 @@
 
 
 
-  <meta name="keywords" content="计算机体系结构,同时多线程,RAID," />
+  <meta name="keywords" content="计算机体系结构,机群,MPP,SMP,消息传递,共享存储器,同时多线程,RAID," />
 
 
 
@@ -78,14 +78,14 @@
 
 
 <meta name="description" content="同时多线程线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。 线程级并行：指并行执行两个或两个以上的线程。 同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种">
-<meta name="keywords" content="计算机体系结构,同时多线程,RAID">
+<meta name="keywords" content="计算机体系结构,机群,MPP,SMP,消息传递,共享存储器,同时多线程,RAID">
 <meta property="og:type" content="article">
 <meta property="og:title" content="计算机体系结构重要考点">
 <meta property="og:url" content="http://yoursite.com/2020/03/10/计算机体系结构重要考点/index.html">
 <meta property="og:site_name" content="Scarleatt">
 <meta property="og:description" content="同时多线程线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。 线程级并行：指并行执行两个或两个以上的线程。 同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-03-10T10:08:38.709Z">
+<meta property="og:updated_time" content="2020-03-11T06:43:03.437Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="计算机体系结构重要考点">
 <meta name="twitter:description" content="同时多线程线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。 线程级并行：指并行执行两个或两个以上的线程。 同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种">
@@ -387,8 +387,7 @@
 <p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
 <p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
 <p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
-<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。</p>
-<p>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
+<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。<br>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
 
       
     </div>
@@ -407,6 +406,16 @@
         <div class="post-tags">
           
             <a href="/tags/计算机体系结构/" rel="tag"># 计算机体系结构</a>
+          
+            <a href="/tags/机群/" rel="tag"># 机群</a>
+          
+            <a href="/tags/MPP/" rel="tag"># MPP</a>
+          
+            <a href="/tags/SMP/" rel="tag"># SMP</a>
+          
+            <a href="/tags/消息传递/" rel="tag"># 消息传递</a>
+          
+            <a href="/tags/共享存储器/" rel="tag"># 共享存储器</a>
           
             <a href="/tags/同时多线程/" rel="tag"># 同时多线程</a>
           
@@ -432,6 +441,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/03/11/指令级并行/" rel="prev" title="指令级并行">
+                指令级并行 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -512,7 +525,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -534,7 +547,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-count">30</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

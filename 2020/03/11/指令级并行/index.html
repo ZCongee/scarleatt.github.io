@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+
+
+
+
+  <meta name="keywords" content="计算机体系结构,指令级并行,指令相关,指令冲突,动态调度,记分牌,Tomasulo,BHT,BTB,ROB,前瞻执行,超标量,VLIW,超长指令字," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="指令级并行指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：  资源重复，重复设置多个处理部件； 采用流水线技术，使指令重叠并行执行。  指令的静态调度：依靠编译器进行静态调度，以减少相关和冲突。它不是在程序执行的过程中，而是在编译期间进行调度和优化。 指令的动态调度：能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水">
+<meta name="keywords" content="计算机体系结构,指令级并行,指令相关,指令冲突,动态调度,记分牌,Tomasulo,BHT,BTB,ROB,前瞻执行,超标量,VLIW,超长指令字">
+<meta property="og:type" content="article">
+<meta property="og:title" content="指令级并行">
+<meta property="og:url" content="http://yoursite.com/2020/03/11/指令级并行/index.html">
+<meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="指令级并行指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：  资源重复，重复设置多个处理部件； 采用流水线技术，使指令重叠并行执行。  指令的静态调度：依靠编译器进行静态调度，以减少相关和冲突。它不是在程序执行的过程中，而是在编译期间进行调度和优化。 指令的动态调度：能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-03-11T06:43:06.704Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="指令级并行">
+<meta name="twitter:description" content="指令级并行指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：  资源重复，重复设置多个处理部件； 采用流水线技术，使指令重叠并行执行。  指令的静态调度：依靠编译器进行静态调度，以减少相关和冲突。它不是在程序执行的过程中，而是在编译期间进行调度和优化。 指令的动态调度：能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/03/11/指令级并行/"/>
+
+
+
+
+
+  <title>指令级并行 | Scarleatt</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Scarleatt</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/03/11/指令级并行/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">指令级并行</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-03-11T14:38:03+08:00">
+                2020-03-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/计算机体系结构/" itemprop="url" rel="index">
+                    <span itemprop="name">计算机体系结构</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="指令级并行"><a href="#指令级并行" class="headerlink" title="指令级并行"></a>指令级并行</h4><p>指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：</p>
+<ul>
+<li>资源重复，重复设置多个处理部件；</li>
+<li>采用流水线技术，使指令重叠并行执行。</li>
+</ul>
+<p>指令的<strong>静态调度</strong>：依靠编译器进行静态调度，以减少相关和冲突。它不是在程序执行的过程中，而是在编译期间进行调度和优化。</p>
+<p>指令的<strong>动态调度</strong>：能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。是由硬件在程序执行时进行优化的。</p>
+<p>基本程序块：一串连续的代码除了入口和出口以外，没有其他的分支指令和转入点。</p>
+<p>不精确异常：当执行指令i导致发生异常时，处理机的现场与严格按照程序顺序执行时指令i的现场不同。</p>
+<p>精确异常：发生异常时，处理机的现场与严格按照程序顺序执行指令i的现场相同。</p>
+<h5 id="相关与冲突"><a href="#相关与冲突" class="headerlink" title="相关与冲突"></a>相关与冲突</h5><ul>
+<li>数据相关</li>
+<li>名相关，名指指令所访问的寄存器或存储器单元的名称。<ul>
+<li>反相关</li>
+<li>输出相关</li>
+</ul>
+</li>
+<li>控制相关</li>
+</ul>
+<p>流水线冲突 指由于相关的存在，使得指令流中的下一条指令不能在指定的时钟周期执行。<u>结构冲突</u>是硬件资源冲突引起的，<u>数据冲突</u>是数据相关和名相关引起的，<u>控制冲突</u>是控制相关引起的。</p>
+<p>为了保证程序执行的正确性，必须保证的最关键的两个特性是：</p>
+<ul>
+<li><u>数据流</u></li>
+<li>保持<u>异常行为</u>：无论怎么改变指令的执行顺序，都不能改变程序中异常的发生情况。</li>
+</ul>
+<h4 id="指令的动态调度"><a href="#指令的动态调度" class="headerlink" title="指令的动态调度"></a>指令的动态调度</h4><p>能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。优点：</p>
+<ul>
+<li>能够处理一些<u>编译时情况不明的相关</u>（比如涉及存储器访问的相关），并简化了编译器；</li>
+<li>能够使本来是面向某一流水线优化编译的代码在<u>其他动态调度的流水线上</u>也能执行。</li>
+</ul>
+<h5 id="记分牌"><a href="#记分牌" class="headerlink" title="记分牌"></a>记分牌</h5><p>把流水线中的译码段ID分解成了两个段：流出和读操作数。记录的信息由三部分组成：</p>
+<ul>
+<li>指令状态表</li>
+<li>功能部件状态表</li>
+<li>结果寄存器状态表</li>
+</ul>
+<h5 id="Tomasulo"><a href="#Tomasulo" class="headerlink" title="Tomasulo"></a>Tomasulo</h5><p>核心思想：（1）记录和检测指令相关，操作数一旦就绪就立即执行，把发生RAW冲突的可能性较小到最低；（2）通过寄存器换名来消除WAR冲突和WAW冲突。寄存器换名是通过保留站来实现，它保存正在流出和等待流出指令所需要的操作数。</p>
+<p>基本思想：只要操作数有效，就取其放到保留站中，避免指令流出时才到寄存器取数据，这就使得即将执行的指令从相应的保留站中读取数据，而不用到寄存器中。指令的执行结果也是直接放到等待数据的其它保留站中去。一条指令流出时，存放操作数的寄存器被换名为该寄存器对应的保留站的名称。</p>
+<h4 id="动态分支预测"><a href="#动态分支预测" class="headerlink" title="动态分支预测"></a>动态分支预测</h4><p>用硬件动态地进行分支处理的方法。在程序运行的过程中，根据分支指令过去的表现预测将来的行为。如果分支行为发生了变化，预测结果也跟着变化。</p>
+<h5 id="分支历史表（BHT）"><a href="#分支历史表（BHT）" class="headerlink" title="分支历史表（BHT）"></a>分支历史表（BHT）</h5><p>用来记录相关指令最近一次或几次的执行情况是成功还是失败，并根据此进行预测。</p>
+<h5 id="分支目标缓冲器（BTB）"><a href="#分支目标缓冲器（BTB）" class="headerlink" title="分支目标缓冲器（BTB）"></a>分支目标缓冲器（BTB）</h5><p>是一种动态分支预测技术。将（1）<u>执行过的成功分支指令的目标地址</u>（2）<u>预测的分支目标地址</u> 记录在一张硬件表格中。在每次取指令时，用该指令的地址与BTB表中所有项目的第一个字段进行比较，以便尽早知道指令是否分支成功，尽早知道目标地址，达到减少分支开销的目的。</p>
+<p>BHT方法是在<u>译码ID</u>段，就能获得分支目标地址、顺序下一条指令以及预测的结果。BTB方法在<u>取址IF</u>段就能知道这些信息。</p>
+<h5 id="基于硬件的前瞻执行"><a href="#基于硬件的前瞻执行" class="headerlink" title="基于硬件的前瞻执行"></a>基于硬件的前瞻执行</h5><p>是解决控制相关的方法，它对分支指令的结果进行猜测，然后按照这个猜测继续取址、流出和执行后续的指令。但指令执行的结果不写回寄存器或存储器，而是放到一个称为ROB（再定序列缓冲器）中。等到相应的指令得到“确认”（即确实是应该执行）后，才将结果写入寄存器或存储器中。</p>
+<p>把三种思想结合在了一起：</p>
+<ul>
+<li><u>动态分支预测</u>。用来选择后续执行的指令。</li>
+<li>在控制相关的结果尚未出来之前，<u>前瞻</u>地执行后续指令。</li>
+<li>用<u>动态调度</u>对基本块的各种组合进行<u>跨基本块的组合</u>。</li>
+</ul>
+<h4 id="超标量流水线"><a href="#超标量流水线" class="headerlink" title="超标量流水线"></a>超标量流水线</h4><p>是一种多指令流出技术。它在每个时钟周期流出的指令条数不固定，依代码的具体情况而定，但有个上限。</p>
+<h4 id="超长指令字"><a href="#超长指令字" class="headerlink" title="超长指令字"></a>超长指令字</h4><p>是一种多指令流出技术。在每个时钟周期内流出的指令数都是固定的，这些指令构成一条长指令或者一个指令包，在这个指令包中，指令之间的并行性是通过指令显式地表现出来的。这种处理机的指令调度由编译器静态完成。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/计算机体系结构/" rel="tag"># 计算机体系结构</a>
+          
+            <a href="/tags/指令级并行/" rel="tag"># 指令级并行</a>
+          
+            <a href="/tags/指令相关/" rel="tag"># 指令相关</a>
+          
+            <a href="/tags/指令冲突/" rel="tag"># 指令冲突</a>
+          
+            <a href="/tags/动态调度/" rel="tag"># 动态调度</a>
+          
+            <a href="/tags/记分牌/" rel="tag"># 记分牌</a>
+          
+            <a href="/tags/Tomasulo/" rel="tag"># Tomasulo</a>
+          
+            <a href="/tags/BHT/" rel="tag"># BHT</a>
+          
+            <a href="/tags/BTB/" rel="tag"># BTB</a>
+          
+            <a href="/tags/ROB/" rel="tag"># ROB</a>
+          
+            <a href="/tags/前瞻执行/" rel="tag"># 前瞻执行</a>
+          
+            <a href="/tags/超标量/" rel="tag"># 超标量</a>
+          
+            <a href="/tags/VLIW/" rel="tag"># VLIW</a>
+          
+            <a href="/tags/超长指令字/" rel="tag"># 超长指令字</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/03/10/计算机体系结构重要考点/" rel="next" title="计算机体系结构重要考点">
+                <i class="fa fa-chevron-left"></i> 计算机体系结构重要考点
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/03/11/多处理机/" rel="prev" title="多处理机">
+                多处理机 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="Scarleatt" />
+            
+              <p class="site-author-name" itemprop="name">Scarleatt</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">11</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/scarleatt" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:fawnliu2333@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#指令级并行"><span class="nav-number">1.</span> <span class="nav-text">指令级并行</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#相关与冲突"><span class="nav-number">1.1.</span> <span class="nav-text">相关与冲突</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#指令的动态调度"><span class="nav-number">2.</span> <span class="nav-text">指令的动态调度</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#记分牌"><span class="nav-number">2.1.</span> <span class="nav-text">记分牌</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Tomasulo"><span class="nav-number">2.2.</span> <span class="nav-text">Tomasulo</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#动态分支预测"><span class="nav-number">3.</span> <span class="nav-text">动态分支预测</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#分支历史表（BHT）"><span class="nav-number">3.1.</span> <span class="nav-text">分支历史表（BHT）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#分支目标缓冲器（BTB）"><span class="nav-number">3.2.</span> <span class="nav-text">分支目标缓冲器（BTB）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#基于硬件的前瞻执行"><span class="nav-number">3.3.</span> <span class="nav-text">基于硬件的前瞻执行</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#超标量流水线"><span class="nav-number">4.</span> <span class="nav-text">超标量流水线</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#超长指令字"><span class="nav-number">5.</span> <span class="nav-text">超长指令字</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Scarleatt</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
