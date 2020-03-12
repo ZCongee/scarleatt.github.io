@@ -85,7 +85,7 @@
 <meta property="og:site_name" content="Scarleatt">
 <meta property="og:description" content="指令级并行指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：  资源重复，重复设置多个处理部件； 采用流水线技术，使指令重叠并行执行。  指令的静态调度：依靠编译器进行静态调度，以减少相关和冲突。它不是在程序执行的过程中，而是在编译期间进行调度和优化。 指令的动态调度：能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-03-11T06:43:06.704Z">
+<meta property="og:updated_time" content="2020-03-12T03:10:26.577Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="指令级并行">
 <meta name="twitter:description" content="指令级并行指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：  资源重复，重复设置多个处理部件； 采用流水线技术，使指令重叠并行执行。  指令的静态调度：依靠编译器进行静态调度，以减少相关和冲突。它不是在程序执行的过程中，而是在编译期间进行调度和优化。 指令的动态调度：能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水">
@@ -350,7 +350,7 @@
       
 
       
-        <h4 id="指令级并行"><a href="#指令级并行" class="headerlink" title="指令级并行"></a>指令级并行</h4><p>指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：</p>
+        <h5 id="指令级并行"><a href="#指令级并行" class="headerlink" title="指令级并行"></a>指令级并行</h5><p>指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：</p>
 <ul>
 <li>资源重复，重复设置多个处理部件；</li>
 <li>采用流水线技术，使指令重叠并行执行。</li>
@@ -621,7 +621,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#指令级并行"><span class="nav-number">1.</span> <span class="nav-text">指令级并行</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#相关与冲突"><span class="nav-number">1.1.</span> <span class="nav-text">相关与冲突</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#指令的动态调度"><span class="nav-number">2.</span> <span class="nav-text">指令的动态调度</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#记分牌"><span class="nav-number">2.1.</span> <span class="nav-text">记分牌</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Tomasulo"><span class="nav-number">2.2.</span> <span class="nav-text">Tomasulo</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#动态分支预测"><span class="nav-number">3.</span> <span class="nav-text">动态分支预测</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#分支历史表（BHT）"><span class="nav-number">3.1.</span> <span class="nav-text">分支历史表（BHT）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#分支目标缓冲器（BTB）"><span class="nav-number">3.2.</span> <span class="nav-text">分支目标缓冲器（BTB）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#基于硬件的前瞻执行"><span class="nav-number">3.3.</span> <span class="nav-text">基于硬件的前瞻执行</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#超标量流水线"><span class="nav-number">4.</span> <span class="nav-text">超标量流水线</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#超长指令字"><span class="nav-number">5.</span> <span class="nav-text">超长指令字</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#指令级并行"><span class="nav-number">1.</span> <span class="nav-text">指令级并行</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#相关与冲突"><span class="nav-number">2.</span> <span class="nav-text">相关与冲突</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#指令的动态调度"><span class="nav-number"></span> <span class="nav-text">指令的动态调度</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#记分牌"><span class="nav-number">1.</span> <span class="nav-text">记分牌</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Tomasulo"><span class="nav-number">2.</span> <span class="nav-text">Tomasulo</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#动态分支预测"><span class="nav-number"></span> <span class="nav-text">动态分支预测</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#分支历史表（BHT）"><span class="nav-number">1.</span> <span class="nav-text">分支历史表（BHT）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#分支目标缓冲器（BTB）"><span class="nav-number">2.</span> <span class="nav-text">分支目标缓冲器（BTB）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#基于硬件的前瞻执行"><span class="nav-number">3.</span> <span class="nav-text">基于硬件的前瞻执行</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#超标量流水线"><span class="nav-number"></span> <span class="nav-text">超标量流水线</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#超长指令字"><span class="nav-number"></span> <span class="nav-text">超长指令字</span></a></div>
             
 
           </div>
