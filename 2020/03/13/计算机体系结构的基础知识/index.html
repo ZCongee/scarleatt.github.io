@@ -66,7 +66,7 @@
 
 
 
-  <meta name="keywords" content="计算机体系结构,Flynn分类法,冯氏分类法,Handler分类法,模拟,仿真,系列机," />
+  <meta name="keywords" content="计算机体系结构,Flynn分类法,冯氏分类法,Handler分类法,模拟,仿真,系列机,分段开采,链接," />
 
 
 
@@ -77,18 +77,18 @@
 
 
 
-<meta name="description" content="计算机系统结构、组成和实现在设计主存系统的时候，确定主存容量、寻址方式等属于计算机体系结构；确定时钟周期、逻辑设计等属于计算机组成；而主存存储芯片的类型、线路设计、微组装技术属于计算机实现。 计算机组成是计算机体系结构的逻辑实现，计算机实现是计算机体系结构的物理实现。一种体系结构可以有多种组成，一种组成可以有多种实现。 计算机系统结构的分类Flynn分类法按照指令流和数据流的多倍性进行分类的。">
-<meta name="keywords" content="计算机体系结构,Flynn分类法,冯氏分类法,Handler分类法,模拟,仿真,系列机">
+<meta name="description" content="计算机系统结构、组成和实现计算机系统结构是指传统机器程序员所看到的计算机属性，即概念结构与功能特性。 在设计主存系统的时候，确定主存容量、寻址方式等属于计算机体系结构；确定时钟周期、逻辑设计等属于计算机组成；而主存存储芯片的类型、线路设计、微组装技术属于计算机实现。 计算机组成是计算机体系结构的逻辑实现，计算机实现是计算机体系结构的物理实现。一种体系结构可以有多种组成，一种组成可以有多种实现。 计">
+<meta name="keywords" content="计算机体系结构,Flynn分类法,冯氏分类法,Handler分类法,模拟,仿真,系列机,分段开采,链接">
 <meta property="og:type" content="article">
 <meta property="og:title" content="计算机体系结构的基础知识">
 <meta property="og:url" content="http://yoursite.com/2020/03/13/计算机体系结构的基础知识/index.html">
 <meta property="og:site_name" content="Scarleatt">
-<meta property="og:description" content="计算机系统结构、组成和实现在设计主存系统的时候，确定主存容量、寻址方式等属于计算机体系结构；确定时钟周期、逻辑设计等属于计算机组成；而主存存储芯片的类型、线路设计、微组装技术属于计算机实现。 计算机组成是计算机体系结构的逻辑实现，计算机实现是计算机体系结构的物理实现。一种体系结构可以有多种组成，一种组成可以有多种实现。 计算机系统结构的分类Flynn分类法按照指令流和数据流的多倍性进行分类的。">
+<meta property="og:description" content="计算机系统结构、组成和实现计算机系统结构是指传统机器程序员所看到的计算机属性，即概念结构与功能特性。 在设计主存系统的时候，确定主存容量、寻址方式等属于计算机体系结构；确定时钟周期、逻辑设计等属于计算机组成；而主存存储芯片的类型、线路设计、微组装技术属于计算机实现。 计算机组成是计算机体系结构的逻辑实现，计算机实现是计算机体系结构的物理实现。一种体系结构可以有多种组成，一种组成可以有多种实现。 计">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-03-13T08:14:04.435Z">
+<meta property="og:updated_time" content="2020-03-25T08:50:27.826Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="计算机体系结构的基础知识">
-<meta name="twitter:description" content="计算机系统结构、组成和实现在设计主存系统的时候，确定主存容量、寻址方式等属于计算机体系结构；确定时钟周期、逻辑设计等属于计算机组成；而主存存储芯片的类型、线路设计、微组装技术属于计算机实现。 计算机组成是计算机体系结构的逻辑实现，计算机实现是计算机体系结构的物理实现。一种体系结构可以有多种组成，一种组成可以有多种实现。 计算机系统结构的分类Flynn分类法按照指令流和数据流的多倍性进行分类的。">
+<meta name="twitter:description" content="计算机系统结构、组成和实现计算机系统结构是指传统机器程序员所看到的计算机属性，即概念结构与功能特性。 在设计主存系统的时候，确定主存容量、寻址方式等属于计算机体系结构；确定时钟周期、逻辑设计等属于计算机组成；而主存存储芯片的类型、线路设计、微组装技术属于计算机实现。 计算机组成是计算机体系结构的逻辑实现，计算机实现是计算机体系结构的物理实现。一种体系结构可以有多种组成，一种组成可以有多种实现。 计">
 
 
 
@@ -350,14 +350,22 @@
       
 
       
-        <h4 id="计算机系统结构、组成和实现"><a href="#计算机系统结构、组成和实现" class="headerlink" title="计算机系统结构、组成和实现"></a>计算机系统结构、组成和实现</h4><p>在设计主存系统的时候，确定主存容量、寻址方式等属于计算机体系结构；确定时钟周期、逻辑设计等属于计算机组成；而主存存储芯片的类型、线路设计、微组装技术属于计算机实现。</p>
+        <h4 id="计算机系统结构、组成和实现"><a href="#计算机系统结构、组成和实现" class="headerlink" title="计算机系统结构、组成和实现"></a>计算机系统结构、组成和实现</h4><p>计算机系统结构是指传统机器程序员所看到的计算机属性，即概念结构与功能特性。</p>
+<p>在设计主存系统的时候，确定主存容量、寻址方式等属于计算机体系结构；确定时钟周期、逻辑设计等属于计算机组成；而主存存储芯片的类型、线路设计、微组装技术属于计算机实现。</p>
 <p>计算机组成是计算机体系结构的逻辑实现，计算机实现是计算机体系结构的物理实现。一种体系结构可以有多种组成，一种组成可以有多种实现。</p>
 <h4 id="计算机系统结构的分类"><a href="#计算机系统结构的分类" class="headerlink" title="计算机系统结构的分类"></a>计算机系统结构的分类</h4><h5 id="Flynn分类法"><a href="#Flynn分类法" class="headerlink" title="Flynn分类法"></a>Flynn分类法</h5><p>按照指令流和数据流的多倍性进行分类的。</p>
 <ul>
 <li>SISD，标量流水线</li>
 <li>SIMD，向量流水线</li>
-<li>MISD，只是一种认为的划分，目前并没有实际的机器</li>
-<li>MIMD，多处理机，机群，PVP，SMP，MPP</li>
+<li>MISD，只是一种人为的划分，目前并没有实际的机器</li>
+<li>MIMD，多处理机，<ul>
+<li>机群，</li>
+<li>PVP（并行向量处理机），</li>
+<li>SMP（对称式共享存储器多处理机），</li>
+<li>MPP（大规模并行处理机），</li>
+<li>DSM（分布式共享存储器多处理机）。</li>
+</ul>
+</li>
 </ul>
 <h5 id="冯氏分类法"><a href="#冯氏分类法" class="headerlink" title="冯氏分类法"></a>冯氏分类法</h5><p>用系统的最大并行度对计算机进行分类。最大并行度$P_m$为：单位时间内能够处理的最大二进制位数。</p>
 <ul>
@@ -369,7 +377,7 @@
 <h5 id="Handler分类法"><a href="#Handler分类法" class="headerlink" title="Handler分类法"></a>Handler分类法</h5><p>根据并行度和流水线来分类。</p>
 <h4 id="计算机体系结构设计的主要方法"><a href="#计算机体系结构设计的主要方法" class="headerlink" title="计算机体系结构设计的主要方法"></a>计算机体系结构设计的主要方法</h4><h5 id="由上往下"><a href="#由上往下" class="headerlink" title="由上往下"></a>由上往下</h5><p>从层次结构中的最上面一级开始，逐层往下设计各层机器。先设计软件，再设计硬件。</p>
 <h5 id="由下往上"><a href="#由下往上" class="headerlink" title="由下往上"></a>由下往上</h5><p>从层次结构的最下面一级开始，逐层往上设计各层的机器。先设计硬件，再设计软件。</p>
-<h5 id="从中间开始"><a href="#从中间开始" class="headerlink" title="从中间开始"></a>从中间开始</h5><p>这里的“中间”是指层次结构中软硬件的交界面，一般指的是传统机器语言级和操作系统级之间。优点：</p>
+<h5 id="从中间开始"><a href="#从中间开始" class="headerlink" title="从中间开始"></a>从中间开始</h5><p>这里的“中间”是指层次结构中软硬件的交界面，一般指的是传统机器语言级和操作系统级之间。先进行软硬件的分工，确定好这个界面，从这个界面开始，软件设计者开始往上设计操作系统、编译系统等，硬件设计者开始往下设计传统机器级、微程序机器级等。优点：</p>
 <ul>
 <li>软件和硬件并行设计可以缩短设计周期，设计过程中可以交流协调，是一种交互式的、很好的设计方案。</li>
 </ul>
@@ -378,7 +386,7 @@
 <p>采用系列机可以解决<u>同一系列的计算机</u>之间的软件移植。</p>
 <ul>
 <li>向上兼容，程序不修改就可以运行于比它<u>高档</u>的计算机</li>
-<li>向后兼容，程序不佳修改就可以运行于在它<u>之后投入市场</u>的计算机</li>
+<li>向后兼容，程序不修改就可以运行于在它<u>之后投入市场</u>的计算机</li>
 </ul>
 <h5 id="模拟和仿真"><a href="#模拟和仿真" class="headerlink" title="模拟和仿真"></a>模拟和仿真</h5><p>可以在不同体系结构的计算机之间相互移植，在一种计算机上实现另一种计算机的指令系统。</p>
 <p><strong>模拟</strong>是用<u>软件</u>的方法在一台计算机（宿主机）上实现另一台计算机（虚拟机）的指令系统。运行速度慢，性能较差。</p>
@@ -408,6 +416,27 @@
 <li>任务级或过程级并行</li>
 <li>作业或程序级并行</li>
 </ul>
+<h4 id="指令集结构"><a href="#指令集结构" class="headerlink" title="指令集结构"></a>指令集结构</h4><p>根据CPU内部状态，可以将指令系统的机构分为：</p>
+<ul>
+<li><u>堆栈</u>型结构</li>
+<li><u>累加器</u>型结构</li>
+<li><u>通用寄存器</u>结构</li>
+</ul>
+<p>将通用存储器型结构进一步细分为：<u>RR型、RM型、MM型</u>。</p>
+<h4 id="向量的处理方式"><a href="#向量的处理方式" class="headerlink" title="向量的处理方式"></a>向量的处理方式</h4><ul>
+<li>横向处理方式，按行的方式从左到右进行计算的，相当于进行了N次循环；</li>
+<li>纵向处理方式，按列的方式从上到下进行计算的，将整个向量按相同的运算处理完之后，再去进行别的运算；</li>
+<li>纵横处理方式，又称为分组处理方式，把向量分成若干组，组内按照纵向方式处理，一次处理各组。</li>
+</ul>
+<p>后面两种方式都适用于向量处理机。</p>
+<h4 id="提高向量处理机性能的常用技术"><a href="#提高向量处理机性能的常用技术" class="headerlink" title="提高向量处理机性能的常用技术"></a>提高向量处理机性能的常用技术</h4><ul>
+<li>设置多个处理部件，使它们并行工作；</li>
+<li>采用链接技术，加快一串向量指令的执行；</li>
+<li>采用循环开采技术，加快循环的处理；</li>
+<li>采用多处理机系统，进一步提高系统性能。</li>
+</ul>
+<p><strong>链接</strong>：具有<u>先写后读相关（RAW）</u>的两条指令，在不出现<u>功能部件</u>冲突和其他<u>$V_i$（寄存器）</u>冲突的情况下，可以把功能部件链接起来进行流水处理。</p>
+<p><strong>分段开采技术</strong>：当向量的长度大于向量处理器的长度时，必须把长向量分为长度固定的段，然后循环分段处理，每一次循环只处理一个向量段。</p>
 
       
     </div>
@@ -439,6 +468,10 @@
           
             <a href="/tags/系列机/" rel="tag"># 系列机</a>
           
+            <a href="/tags/分段开采/" rel="tag"># 分段开采</a>
+          
+            <a href="/tags/链接/" rel="tag"># 链接</a>
+          
         </div>
       
 
@@ -459,6 +492,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/03/25/流水线/" rel="prev" title="流水线">
+                流水线 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -539,7 +576,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-count">13</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -561,7 +598,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">42</span>
+                  <span class="site-state-item-count">48</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -610,7 +647,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#计算机系统结构、组成和实现"><span class="nav-number">1.</span> <span class="nav-text">计算机系统结构、组成和实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#计算机系统结构的分类"><span class="nav-number">2.</span> <span class="nav-text">计算机系统结构的分类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Flynn分类法"><span class="nav-number">2.1.</span> <span class="nav-text">Flynn分类法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#冯氏分类法"><span class="nav-number">2.2.</span> <span class="nav-text">冯氏分类法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Handler分类法"><span class="nav-number">2.3.</span> <span class="nav-text">Handler分类法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#计算机体系结构设计的主要方法"><span class="nav-number">3.</span> <span class="nav-text">计算机体系结构设计的主要方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#由上往下"><span class="nav-number">3.1.</span> <span class="nav-text">由上往下</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#由下往上"><span class="nav-number">3.2.</span> <span class="nav-text">由下往上</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#从中间开始"><span class="nav-number">3.3.</span> <span class="nav-text">从中间开始</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实现软件的可移植性"><span class="nav-number">4.</span> <span class="nav-text">实现软件的可移植性</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#统一高级语言"><span class="nav-number">4.1.</span> <span class="nav-text">统一高级语言</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#采用系列机"><span class="nav-number">4.2.</span> <span class="nav-text">采用系列机</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#模拟和仿真"><span class="nav-number">4.3.</span> <span class="nav-text">模拟和仿真</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#摩尔定律"><span class="nav-number">5.</span> <span class="nav-text">摩尔定律</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#并行性"><span class="nav-number">6.</span> <span class="nav-text">并行性</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#计算机系统结构、组成和实现"><span class="nav-number">1.</span> <span class="nav-text">计算机系统结构、组成和实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#计算机系统结构的分类"><span class="nav-number">2.</span> <span class="nav-text">计算机系统结构的分类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Flynn分类法"><span class="nav-number">2.1.</span> <span class="nav-text">Flynn分类法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#冯氏分类法"><span class="nav-number">2.2.</span> <span class="nav-text">冯氏分类法</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Handler分类法"><span class="nav-number">2.3.</span> <span class="nav-text">Handler分类法</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#计算机体系结构设计的主要方法"><span class="nav-number">3.</span> <span class="nav-text">计算机体系结构设计的主要方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#由上往下"><span class="nav-number">3.1.</span> <span class="nav-text">由上往下</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#由下往上"><span class="nav-number">3.2.</span> <span class="nav-text">由下往上</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#从中间开始"><span class="nav-number">3.3.</span> <span class="nav-text">从中间开始</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实现软件的可移植性"><span class="nav-number">4.</span> <span class="nav-text">实现软件的可移植性</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#统一高级语言"><span class="nav-number">4.1.</span> <span class="nav-text">统一高级语言</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#采用系列机"><span class="nav-number">4.2.</span> <span class="nav-text">采用系列机</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#模拟和仿真"><span class="nav-number">4.3.</span> <span class="nav-text">模拟和仿真</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#摩尔定律"><span class="nav-number">5.</span> <span class="nav-text">摩尔定律</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#并行性"><span class="nav-number">6.</span> <span class="nav-text">并行性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#指令集结构"><span class="nav-number">7.</span> <span class="nav-text">指令集结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#向量的处理方式"><span class="nav-number">8.</span> <span class="nav-text">向量的处理方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#提高向量处理机性能的常用技术"><span class="nav-number">9.</span> <span class="nav-text">提高向量处理机性能的常用技术</span></a></li></ol></div>
             
 
           </div>
