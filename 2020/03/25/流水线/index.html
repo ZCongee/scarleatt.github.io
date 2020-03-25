@@ -86,7 +86,7 @@
 <meta property="og:description" content="流水线的特点 把一个处理过程分解为若干个子过程，每个过程由一个专门的功能部件来实现 各功能段的时间应尽可能相等，否则将引起流水线堵塞和断流 每一个段的后面都要有一个缓冲寄存器，称为流水寄存器 适合于大量重复的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率 需要有通过时间与排空时间  在指令流水线中，解决控制相关的方法主要有：冻结或排空流水线、预测分支失败、预测分支成功、延迟分支。 减">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2020/03/25/流水线/image-20200314165639374.png">
-<meta property="og:updated_time" content="2020-03-25T09:06:03.390Z">
+<meta property="og:updated_time" content="2020-03-25T09:35:44.777Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="流水线">
 <meta name="twitter:description" content="流水线的特点 把一个处理过程分解为若干个子过程，每个过程由一个专门的功能部件来实现 各功能段的时间应尽可能相等，否则将引起流水线堵塞和断流 每一个段的后面都要有一个缓冲寄存器，称为流水寄存器 适合于大量重复的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率 需要有通过时间与排空时间  在指令流水线中，解决控制相关的方法主要有：冻结或排空流水线、预测分支失败、预测分支成功、延迟分支。 减">
@@ -378,12 +378,6 @@
 <li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
 <li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
 </ul>
-<h4 id="计算"><a href="#计算" class="headerlink" title="计算"></a>计算</h4><p>吞吐率</p>
-<p>$$<br>TP=\frac{n}{T<em>k}=\frac{n}{\sum\limits</em>{i=1}^k\Delta t_i+(n-1)max(\Delta t_1,\Delta t_2,…\Delta t_k)}<br>$$</p>
-<p>加速比</p>
-<p>$$<br>S=\frac{nk}{n+k-1}=\frac{n\sum\limits_{i=1}^k\Delta t<em>i}{\sum\limits</em>{i=1}^k\Delta t_i+(n-1)max(\Delta t_1,\Delta t_2,…\Delta t_k)}<br>$$</p>
-<p>效率</p>
-<p>$$<br>E=\frac{n}{n+k-1}=\frac{n\sum\limits_{i=1}^k\Delta t<em>i}{k\left(\sum\limits</em>{i=1}^k\Delta t_i+(n-1)max(\Delta t_1,\Delta t_2,…\Delta t<em>k)\right)}E=\frac{n}{n+k-1}=\frac{n\sum\limits</em>{i=1}^k\Delta t<em>i}{k\left(\sum\limits</em>{i=1}^k\Delta t_i+(n-1)max(\Delta t_1,\Delta t_2,…\Delta t_k)\right)}<br>$$</p>
 
       
     </div>
@@ -580,7 +574,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#流水线的特点"><span class="nav-number">1.</span> <span class="nav-text">流水线的特点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#减少分支延迟"><span class="nav-number">2.</span> <span class="nav-text">减少分支延迟</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#预测分支失败"><span class="nav-number">2.1.</span> <span class="nav-text">预测分支失败</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#预测分支成功"><span class="nav-number">2.2.</span> <span class="nav-text">预测分支成功</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#延迟分支"><span class="nav-number">2.3.</span> <span class="nav-text">延迟分支</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#流水线的额外开销"><span class="nav-number">3.</span> <span class="nav-text">流水线的额外开销</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#计算"><span class="nav-number">4.</span> <span class="nav-text">计算</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#流水线的特点"><span class="nav-number">1.</span> <span class="nav-text">流水线的特点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#减少分支延迟"><span class="nav-number">2.</span> <span class="nav-text">减少分支延迟</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#预测分支失败"><span class="nav-number">2.1.</span> <span class="nav-text">预测分支失败</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#预测分支成功"><span class="nav-number">2.2.</span> <span class="nav-text">预测分支成功</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#延迟分支"><span class="nav-number">2.3.</span> <span class="nav-text">延迟分支</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#流水线的额外开销"><span class="nav-number">3.</span> <span class="nav-text">流水线的额外开销</span></a></li></ol></div>
             
 
           </div>
