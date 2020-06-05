@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+
+
+
+
+  <meta name="keywords" content="Classification,Sigmoid Function," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="考虑到宝可梦的两个属性（Defense、SP Defense），将输入的宝可梦进行属性分类（Water、Normal）  Gaussian Distribution假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，   Maximum Likelihood第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\">
+<meta name="keywords" content="Classification,Sigmoid Function">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Classification">
+<meta property="og:url" content="http://yoursite.com/2020/06/05/Classification/index.html">
+<meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="考虑到宝可梦的两个属性（Defense、SP Defense），将输入的宝可梦进行属性分类（Water、Normal）  Gaussian Distribution假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，   Maximum Likelihood第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605204445258.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605202837571.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605204129951.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605203041766.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605210600803.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605212347236.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605214028329.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605214245755.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605214446675.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605215021833.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605220705405.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605221617855.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605221733838.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605221911457.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605222200879.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605223207505.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605223410530.png">
+<meta property="og:updated_time" content="2020-06-05T14:44:51.117Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Classification">
+<meta name="twitter:description" content="考虑到宝可梦的两个属性（Defense、SP Defense），将输入的宝可梦进行属性分类（Water、Normal）  Gaussian Distribution假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，   Maximum Likelihood第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\">
+<meta name="twitter:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605204445258.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/06/05/Classification/"/>
+
+
+
+
+
+  <title>Classification | Scarleatt</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Scarleatt</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/05/Classification/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Classification</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-05T22:40:56+08:00">
+                2020-06-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ML-notes/" itemprop="url" rel="index">
+                    <span itemprop="name">ML-notes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>考虑到宝可梦的两个属性（<strong>Defense</strong>、<strong>SP Defense</strong>），将输入的宝可梦进行属性分类（Water、Normal）</p>
+<p><img src="/2020/06/05/Classification/image-20200605204445258.png" alt="image-20200605204445258" style="zoom:50%;"></p>
+<h4 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a>Gaussian Distribution</h4><p>假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，</p>
+<p><img src="/2020/06/05/Classification/image-20200605202837571.png" alt="image-20200605202837571" style="zoom:50%;"></p>
+<p><img src="/2020/06/05/Classification/image-20200605204129951.png" alt="image-20200605204129951" style="zoom:50%;"></p>
+<h4 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a>Maximum Likelihood</h4><p>第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\mu,\sum)$的表达式，其中$\mu=\mu^<em>,\sum=\sum^</em>$时，函数L得到最大值</p>
+<p><img src="/2020/06/05/Classification/image-20200605203041766.png" alt="image-20200605203041766" style="zoom:50%;"></p>
+<p>这里我们假设有两个类别，其参数和分布如下，</p>
+<p><img src="/2020/06/05/Classification/image-20200605210600803.png" alt="image-20200605210600803" style="zoom:50%;"></p>
+<p>输入样例x是Class 1:Water的概率为，</p>
+<script type="math/tex; mode=display">
+P(C_1|x)=\frac{P(x|C_1)P(C_1)}{P(x)}=\frac{P(x|C_1)P(C_1)}
+{P(x|C_1)P(C_1)+P(x|C_2)P(C_2)}</script><p>再代入相应的表达式，其中$P(x|C<em>1)=f</em>{\mu^1,\sum^1},P(x|C<em>2)=f</em>{\mu^2,\sum^2}$，即可算出x为C1的概率，如果算出这个概率大于0.5，我们就可以认为x的属性为C1</p>
+<p><img src="/2020/06/05/Classification/image-20200605212347236.png" alt="image-20200605212347236" style="zoom:50%;"></p>
+<p>但这样子算出来的分类精确度很低，只有47%，就算加入其他的属性，精确度也只提高到了54%</p>
+<p><img src="/2020/06/05/Classification/image-20200605214028329.png" alt="image-20200605214028329" style="zoom:50%;"></p>
+<h4 id="Modifying-Model"><a href="#Modifying-Model" class="headerlink" title="Modifying Model"></a>Modifying Model</h4><p>由于上面模型的精确度都不高，所以在此我们对模型进行了修改，模型的参数就只有三个，$\mu^1,\mu^2,\sum=\sum^1=\sum^2$</p>
+<p><img src="/2020/06/05/Classification/image-20200605214245755.png" alt="image-20200605214245755" style="zoom:50%;"></p>
+<p>对于Water属性的宝可梦对应参数为$\mu^1$，Normal属性的宝可梦为$\mu^2$，共同属性为$\sum$，这时对应的最大似然函数为$L(\mu^1,\mu^2,\sum)$，</p>
+<p><img src="/2020/06/05/Classification/image-20200605214446675.png" alt="image-20200605214446675" style="zoom:50%;"></p>
+<p>修改后的模型准确率可以达到54%，如果加入更多的属性，准确率可以提高到73%</p>
+<p><img src="/2020/06/05/Classification/image-20200605215021833.png" alt="image-20200605215021833" style="zoom:50%;"></p>
+<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><p>这里再回忆一下三个步骤：<br>（1）Function Set，计算分类为该类的概率$P(C_1|x)$，如果大于0.5，则认为类别为1，否则为类别2<br>（2）找出相对应的$\mu,\sum$，使得似然函数L取得最大值；<br>（3）得出使似然函数最大化的参数，$\mu^<em>,\sum^</em>$</p>
+<script type="math/tex; mode=display">
+u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\mu^*)(x^n-\mu^*)^T</script><p><img src="/2020/06/05/Classification/image-20200605220705405.png" alt="image-20200605220705405" style="zoom:50%;"></p>
+<h4 id="Probability-Distribution"><a href="#Probability-Distribution" class="headerlink" title="Probability Distribution"></a>Probability Distribution</h4><p>这里我们所使用的概率分布是</p>
+<p><img src="/2020/06/05/Classification/image-20200605221617855.png" alt="image-20200605221617855" style="zoom:50%;"></p>
+<p>下面开始公式推导，</p>
+<p><img src="/2020/06/05/Classification/image-20200605221733838.png" alt="image-20200605221733838" style="zoom:50%;"></p>
+<p>得出了我们的Sigmoid函数，$\sigma(z)$的函数图像为s型，值域范围为[0,1]，将z化简，并代入$P(C_i)=\frac{N_i}{N_1+N_2}$ (i=1,2)，</p>
+<p><img src="/2020/06/05/Classification/image-20200605221911457.png" alt="image-20200605221911457" style="zoom:50%;"></p>
+<p>将$P(x|C_1),P(x|C_2)$的表达式代入$ln\frac{P(x|C_1)}{P(x|C_2)}$，</p>
+<p><img src="/2020/06/05/Classification/image-20200605222200879.png" alt="image-20200605222200879" style="zoom:50%;"></p>
+<p><img src="/2020/06/05/Classification/image-20200605223207505.png" alt="image-20200605223207505" style="zoom:50%;"></p>
+<p>再进行进一步化简，带入$\sum^1=\sum^2=\sum$，我们可以得出z的简易表达式$z=w\cdot x + b$，可得出$P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)$。当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
+<p><img src="/2020/06/05/Classification/image-20200605223410530.png" alt="image-20200605223410530" style="zoom:50%;"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Classification/" rel="tag"># Classification</a>
+          
+            <a href="/tags/Sigmoid-Function/" rel="tag"># Sigmoid Function</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/04/梯度下降/" rel="next" title="Gradient Descent">
+                <i class="fa fa-chevron-left"></i> Gradient Descent
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="Scarleatt" />
+            
+              <p class="site-author-name" itemprop="name">Scarleatt</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">54</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/scarleatt" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:fawnliu2333@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Gaussian-Distribution"><span class="nav-number">1.</span> <span class="nav-text">Gaussian Distribution</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Maximum-Likelihood"><span class="nav-number">2.</span> <span class="nav-text">Maximum Likelihood</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Modifying-Model"><span class="nav-number">3.</span> <span class="nav-text">Modifying Model</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Three-Steps"><span class="nav-number">4.</span> <span class="nav-text">Three Steps</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Probability-Distribution"><span class="nav-number">5.</span> <span class="nav-text">Probability Distribution</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Scarleatt</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
