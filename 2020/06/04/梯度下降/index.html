@@ -77,13 +77,13 @@
 
 
 
-<meta name="description" content="Gradient Descent梯度下降的目标是使损失函数L最小化，$\theta^* = arg\ min\ L(\theta)$  Learning Rate从$\theta_0$开始，先计算出$\theta_0$的梯度，其中红色箭头表示梯度的方向，蓝色箭头表示移动的方向。 梯度的方向是函数值在这个点增长最快的方向，想要使损失函数L的值达到最小值，就必须要往相反的方向运动。  学习率会出现以下">
+<meta name="description" content="Gradient Descent梯度下降的目标是使损失函数L最小化，$\theta^* = arg\ min\ L(\theta)$  Learning Rate从$\theta_0$开始，先计算出$\theta_0$的梯度，其中红色箭头表示梯度的方向，蓝色箭头表示移动的方向。梯度的方向是函数值在这个点增长最快的方向，想要使损失函数L的值达到最小值，就必须要往相反的方向运动。  学习率会出现以下四">
 <meta name="keywords" content="Gradient Descent,Adagrad,SGD">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Gradient Descent">
 <meta property="og:url" content="http://yoursite.com/2020/06/04/梯度下降/index.html">
 <meta property="og:site_name" content="Scarleatt">
-<meta property="og:description" content="Gradient Descent梯度下降的目标是使损失函数L最小化，$\theta^* = arg\ min\ L(\theta)$  Learning Rate从$\theta_0$开始，先计算出$\theta_0$的梯度，其中红色箭头表示梯度的方向，蓝色箭头表示移动的方向。 梯度的方向是函数值在这个点增长最快的方向，想要使损失函数L的值达到最小值，就必须要往相反的方向运动。  学习率会出现以下">
+<meta property="og:description" content="Gradient Descent梯度下降的目标是使损失函数L最小化，$\theta^* = arg\ min\ L(\theta)$  Learning Rate从$\theta_0$开始，先计算出$\theta_0$的梯度，其中红色箭头表示梯度的方向，蓝色箭头表示移动的方向。梯度的方向是函数值在这个点增长最快的方向，想要使损失函数L的值达到最小值，就必须要往相反的方向运动。  学习率会出现以下四">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="http://yoursite.com/2020/06/04/梯度下降/image-20200603152209444.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/04/梯度下降/image-20200603152117920.png">
@@ -103,10 +103,10 @@
 <meta property="og:image" content="http://yoursite.com/2020/06/04/梯度下降/image-20200604114112061.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/04/梯度下降/image-20200604114656448.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/04/梯度下降/image-20200604123420086.png">
-<meta property="og:updated_time" content="2020-06-04T05:17:03.516Z">
+<meta property="og:updated_time" content="2020-06-05T01:43:00.894Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Gradient Descent">
-<meta name="twitter:description" content="Gradient Descent梯度下降的目标是使损失函数L最小化，$\theta^* = arg\ min\ L(\theta)$  Learning Rate从$\theta_0$开始，先计算出$\theta_0$的梯度，其中红色箭头表示梯度的方向，蓝色箭头表示移动的方向。 梯度的方向是函数值在这个点增长最快的方向，想要使损失函数L的值达到最小值，就必须要往相反的方向运动。  学习率会出现以下">
+<meta name="twitter:description" content="Gradient Descent梯度下降的目标是使损失函数L最小化，$\theta^* = arg\ min\ L(\theta)$  Learning Rate从$\theta_0$开始，先计算出$\theta_0$的梯度，其中红色箭头表示梯度的方向，蓝色箭头表示移动的方向。梯度的方向是函数值在这个点增长最快的方向，想要使损失函数L的值达到最小值，就必须要往相反的方向运动。  学习率会出现以下四">
 <meta name="twitter:image" content="http://yoursite.com/2020/06/04/梯度下降/image-20200603152209444.png">
 
 
@@ -371,8 +371,7 @@
       
         <h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>梯度下降的目标是使损失函数L最小化，$\theta^* = arg\ min\ L(\theta)$</p>
 <p><img src="/2020/06/04/梯度下降/image-20200603152209444.png" alt="image-20200603152209444" style="zoom:50%; "></p>
-<h4 id="Learning-Rate"><a href="#Learning-Rate" class="headerlink" title="Learning Rate"></a>Learning Rate</h4><p>从$\theta_0$开始，先计算出$\theta_0$的梯度，其中红色箭头表示梯度的方向，蓝色箭头表示移动的方向。</p>
-<p><u>梯度的方向是函数值在这个点增长最快的方向，想要使损失函数L的值达到最小值，就必须要往相反的方向运动。</u></p>
+<h4 id="Learning-Rate"><a href="#Learning-Rate" class="headerlink" title="Learning Rate"></a>Learning Rate</h4><p>从$\theta_0$开始，先计算出$\theta_0$的梯度，其中红色箭头表示梯度的方向，蓝色箭头表示移动的方向。<br><u>梯度的方向是函数值在这个点增长最快的方向，想要使损失函数L的值达到最小值，就必须要往相反的方向运动。</u></p>
 <p><img src="/2020/06/04/梯度下降/image-20200603152117920.png" alt="image-20200603152117920" style="zoom: 50%;"></p>
 <p>学习率会出现以下四种不同的情况：</p>
 <ul>
@@ -384,20 +383,14 @@
 <p><img src="/2020/06/04/梯度下降/image-20200603161210664.png" alt="image-20200603161210664" style="zoom:50%;"></p>
 <p>由于手动设置learning rate会导致很多问题，就出现了一些自适应的梯度调整方法。</p>
 <ul>
-<li><p>刚开始训练时，我们离local minimum的距离还很远，因此可以使用稍大的learning rate；</p>
-</li>
-<li><p>在经过多次的训练后，离local minimum的距离已经很近了，所以这时可以使用小的learning rate；</p>
-</li>
-<li><p>在经过t次的训练后，learning rate可以衰减为</p>
-<p>$\eta^t=\frac{\eta}{\sqrt{t+1}}$</p>
-</li>
+<li>刚开始训练时，我们离local minimum的距离还很远，因此可以使用稍大的learning rate；</li>
+<li>在经过多次的训练后，离local minimum的距离已经很近了，所以这时可以使用小的learning rate；</li>
+<li>在经过t次的训练后，learning rate可以衰减为$\eta^t=\frac{\eta}{\sqrt{t+1}}$</li>
 </ul>
 <h4 id="Adagrad"><a href="#Adagrad" class="headerlink" title="Adagrad"></a>Adagrad</h4><blockquote>
 <p>Divide the learning rate of each parameter by the <strong>root mean square of its previous derivatives</strong></p>
 </blockquote>
-<h5 id="理论推导"><a href="#理论推导" class="headerlink" title="理论推导"></a>理论推导</h5><p>使用这个公式来更新参数w，</p>
-<p>$w^{t+1} \leftarrow  w^t - \frac{\eta^t}{\sigma^t}g^t$</p>
-<p>其中，t表示第t次的update，$g^t = \frac{\partial L(\theta ^t)}{\partial w}$，是损失函数L对参数w的导数，$\sigma^t$表示其先前导数的均方根（root mean square）</p>
+<h5 id="理论推导"><a href="#理论推导" class="headerlink" title="理论推导"></a>理论推导</h5><p>使用这个公式来更新参数w，$w^{t+1} \leftarrow  w^t - \frac{\eta^t}{\sigma^t}g^t$<br>其中，t表示第t次的update，$g^t = \frac{\partial L(\theta ^t)}{\partial w}$，是损失函数L对参数w的导数，$\sigma^t$表示其先前导数的均方根（root mean square）</p>
 <p>计算w的具体例子如下所示，</p>
 <p><img src="/2020/06/04/梯度下降/image-20200603165047318.png" alt="image-20200603165047318" style="zoom: 50%; "></p>
 <p>得出了$\sigma^t$和$\eta^t$的表达式后，再带入原式，消除分母上的$\sqrt{t+1}$即可得出下面的公式，</p>
@@ -414,8 +407,7 @@
 <p>再来回顾下Adagrad中每次更新w的表达式，$w^{t+1}\leftarrow w^t - \frac{\eta}{\sqrt{\sum_{t=0}^t(g^i)^2}}g^t$</p>
 <p>一阶导数用$g^t$表示，二阶导数的值则用分母中的$\sum_{i=0}^t(g^i)^2$来进行评估，即使用一阶导数的值来表示二阶导数的值。</p>
 <p><img src="/2020/06/04/梯度下降/image-20200603180425226.png" alt="image-20200603180425226" style="zoom:50%;"></p>
-<h4 id="Stochastic-Gradient-Descent"><a href="#Stochastic-Gradient-Descent" class="headerlink" title="Stochastic Gradient Descent"></a>Stochastic Gradient Descent</h4><p>对于传统的梯度下降算法，损失函数L的计算包含了所有的样本;</p>
-<p>随机梯度下降算法，损失函数$L^n$则只使用其中一个样本，计算效率可以提高很多</p>
+<h4 id="Stochastic-Gradient-Descent"><a href="#Stochastic-Gradient-Descent" class="headerlink" title="Stochastic Gradient Descent"></a>Stochastic Gradient Descent</h4><p>对于传统的梯度下降算法，损失函数L的计算包含了所有的样本;<br>随机梯度下降算法，损失函数$L^n$则只使用其中一个样本，计算效率可以提高很多</p>
 <p><img src="/2020/06/04/梯度下降/image-20200603215238564.png" alt="image-20200603215238564" style="zoom:50%;"></p>
 <p>对比示意图如下，</p>
 <p><img src="/2020/06/04/梯度下降/image-20200603215557501.png" alt="image-20200603215557501" style="zoom:50%;"></p>
@@ -434,7 +426,7 @@
 \frac{X-\bar {X}}{\sqrt{D(x)}} \sim N(0,1)</script><h4 id="Gradient-Descent-Theory"><a href="#Gradient-Descent-Theory" class="headerlink" title="Gradient Descent Theory"></a>Gradient Descent Theory</h4><h5 id="Question"><a href="#Question" class="headerlink" title="Question"></a>Question</h5><p>在求解最小化问题时，$\theta^* = arg\ min\ L(\theta)$，每次更新$\theta$的值，并不一定能使$𝐿(\theta^0) &gt;𝐿(\theta^1)&gt;𝐿(\theta^2) &gt;⋯$成立</p>
 <p>对于给出的$\theta^1,\theta^2$，我们要如何根据这些值来找出最小的loss？这也是我们接下来会研究的问题</p>
 <p><img src="/2020/06/04/梯度下降/image-20200604110917247.png" alt="image-20200604110917247" style="zoom:50%;"></p>
-<h5 id="Talor-Series"><a href="#Talor-Series" class="headerlink" title="Talor Series"></a>Talor Series</h5><p>泰勒公式定义如下，将函数h(x)在x=x0处展开</p>
+<h5 id="Taylor-Series"><a href="#Taylor-Series" class="headerlink" title="Taylor Series"></a>Taylor Series</h5><p>泰勒公式定义如下，将函数h(x)在x=x0处展开</p>
 <script type="math/tex; mode=display">
 h(x) = \sum_{k=0}^{\infty}\frac{h^{(k)}(x_0)}{k!}(x-x_0)^k</script><p>当$x\rightarrow x_0$时，表达式可写为$h(x)\approx h(x_0)+h’(x_0)(x-x_0)$</p>
 <p>对于二元函数，当$x\rightarrow x_0,y\rightarrow y_0$时，相应的表达式可以简化为</p>
@@ -660,7 +652,7 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Gradient-Descent"><span class="nav-number">1.</span> <span class="nav-text">Gradient Descent</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Learning-Rate"><span class="nav-number">2.</span> <span class="nav-text">Learning Rate</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Adagrad"><span class="nav-number">3.</span> <span class="nav-text">Adagrad</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#理论推导"><span class="nav-number">3.1.</span> <span class="nav-text">理论推导</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Contradiction"><span class="nav-number">3.2.</span> <span class="nav-text">Contradiction</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Stochastic-Gradient-Descent"><span class="nav-number">4.</span> <span class="nav-text">Stochastic Gradient Descent</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Feature-scaling"><span class="nav-number">5.</span> <span class="nav-text">Feature scaling</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#原理介绍"><span class="nav-number">5.1.</span> <span class="nav-text">原理介绍</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#计算"><span class="nav-number">5.2.</span> <span class="nav-text">计算</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Gradient-Descent-Theory"><span class="nav-number">6.</span> <span class="nav-text">Gradient Descent Theory</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Question"><span class="nav-number">6.1.</span> <span class="nav-text">Question</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Talor-Series"><span class="nav-number">6.2.</span> <span class="nav-text">Talor Series</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Back-to-Formal-Derivation"><span class="nav-number">6.3.</span> <span class="nav-text">Back to Formal Derivation</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Limitation"><span class="nav-number">6.4.</span> <span class="nav-text">Limitation</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Gradient-Descent"><span class="nav-number">1.</span> <span class="nav-text">Gradient Descent</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Learning-Rate"><span class="nav-number">2.</span> <span class="nav-text">Learning Rate</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Adagrad"><span class="nav-number">3.</span> <span class="nav-text">Adagrad</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#理论推导"><span class="nav-number">3.1.</span> <span class="nav-text">理论推导</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Contradiction"><span class="nav-number">3.2.</span> <span class="nav-text">Contradiction</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Stochastic-Gradient-Descent"><span class="nav-number">4.</span> <span class="nav-text">Stochastic Gradient Descent</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Feature-scaling"><span class="nav-number">5.</span> <span class="nav-text">Feature scaling</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#原理介绍"><span class="nav-number">5.1.</span> <span class="nav-text">原理介绍</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#计算"><span class="nav-number">5.2.</span> <span class="nav-text">计算</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Gradient-Descent-Theory"><span class="nav-number">6.</span> <span class="nav-text">Gradient Descent Theory</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Question"><span class="nav-number">6.1.</span> <span class="nav-text">Question</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Taylor-Series"><span class="nav-number">6.2.</span> <span class="nav-text">Taylor Series</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Back-to-Formal-Derivation"><span class="nav-number">6.3.</span> <span class="nav-text">Back to Formal Derivation</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Limitation"><span class="nav-number">6.4.</span> <span class="nav-text">Limitation</span></a></li></ol></li></ol></div>
             
 
           </div>
