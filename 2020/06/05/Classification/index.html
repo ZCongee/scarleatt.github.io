@@ -102,7 +102,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605222200879.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605223207505.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605223410530.png">
-<meta property="og:updated_time" content="2020-06-05T14:44:51.117Z">
+<meta property="og:updated_time" content="2020-06-05T15:52:36.906Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Classification">
 <meta name="twitter:description" content="考虑到宝可梦的两个属性（Defense、SP Defense），将输入的宝可梦进行属性分类（Water、Normal）  Gaussian Distribution假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，   Maximum Likelihood第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\">
@@ -390,7 +390,7 @@ P(C_1|x)=\frac{P(x|C_1)P(C_1)}{P(x)}=\frac{P(x|C_1)P(C_1)}
 <p><img src="/2020/06/05/Classification/image-20200605214446675.png" alt="image-20200605214446675" style="zoom:50%;"></p>
 <p>修改后的模型准确率可以达到54%，如果加入更多的属性，准确率可以提高到73%</p>
 <p><img src="/2020/06/05/Classification/image-20200605215021833.png" alt="image-20200605215021833" style="zoom:50%;"></p>
-<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><p>这里再回忆一下三个步骤：<br>（1）Function Set，计算分类为该类的概率$P(C_1|x)$，如果大于0.5，则认为类别为1，否则为类别2<br>（2）找出相对应的$\mu,\sum$，使得似然函数L取得最大值；<br>（3）得出使似然函数最大化的参数，$\mu^<em>,\sum^</em>$</p>
+<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><p>这里再回忆一下三个步骤：<br>（1）Function Set，计算分类为该类的概率$P(C_1|x)$，如果大于0.5，则认为类别为1，否则为类别2<br>（2）找出相对应的$\mu,\sum$，使得似然函数L取得最大值；<br>（3）得出使似然函数最大化的参数，$\mu^<em>,\sum^</em>$，</p>
 <script type="math/tex; mode=display">
 u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\mu^*)(x^n-\mu^*)^T</script><p><img src="/2020/06/05/Classification/image-20200605220705405.png" alt="image-20200605220705405" style="zoom:50%;"></p>
 <h4 id="Probability-Distribution"><a href="#Probability-Distribution" class="headerlink" title="Probability Distribution"></a>Probability Distribution</h4><p>这里我们所使用的概率分布是</p>
