@@ -66,7 +66,7 @@
 
 
 
-  <meta name="keywords" content="Classification,Sigmoid Function,Deep Learning," />
+  <meta name="keywords" content="deep learning,classification,sigmoid function," />
 
 
 
@@ -78,7 +78,7 @@
 
 
 <meta name="description" content="考虑到宝可梦的两个属性（Defense、SP Defense），将输入的宝可梦进行属性分类（Water、Normal）  Gaussian Distribution假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，   Maximum Likelihood第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\">
-<meta name="keywords" content="Classification,Sigmoid Function,Deep Learning">
+<meta name="keywords" content="deep learning,classification,sigmoid function">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Classification">
 <meta property="og:url" content="http://yoursite.com/2020/06/05/Classification/index.html">
@@ -102,7 +102,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605222200879.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605223207505.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/05/Classification/image-20200605223410530.png">
-<meta property="og:updated_time" content="2020-06-06T03:04:26.985Z">
+<meta property="og:updated_time" content="2020-06-06T14:47:56.476Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Classification">
 <meta name="twitter:description" content="考虑到宝可梦的两个属性（Defense、SP Defense），将输入的宝可梦进行属性分类（Water、Normal）  Gaussian Distribution假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，   Maximum Likelihood第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\">
@@ -380,7 +380,7 @@
 <p>输入样例x是Class 1:Water的概率为，</p>
 <script type="math/tex; mode=display">
 P(C_1|x)=\frac{P(x|C_1)P(C_1)}{P(x)}=\frac{P(x|C_1)P(C_1)}
-{P(x|C_1)P(C_1)+P(x|C_2)P(C_2)}</script><p>再代入相应的表达式，其中$P(x|C<em>1)=f</em>{\mu^1,\sum^1},P(x|C<em>2)=f</em>{\mu^2,\sum^2}$，即可算出x为C1的概率，如果算出这个概率大于0.5，我们就可以认为x的属性为C1</p>
+{P(x|C_1)P(C_1)+P(x|C_2)P(C_2)}</script><p>再代入相应的表达式，其中$P(x|C_1)=f_{\mu^1,\sum^1},P(x|C_2)=f_{\mu^2,\sum^2}$，即可算出x为C1的概率，如果算出这个概率大于0.5，我们就可以认为x的属性为C1</p>
 <p><img src="/2020/06/05/Classification/image-20200605212347236.png" alt="image-20200605212347236" style="zoom:50%;"></p>
 <p>但这样子算出来的分类精确度很低，只有47%，就算加入其他的属性，精确度也只提高到了54%</p>
 <p><img src="/2020/06/05/Classification/image-20200605214028329.png" alt="image-20200605214028329" style="zoom:50%;"></p>
@@ -421,11 +421,11 @@ u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\
       
         <div class="post-tags">
           
-            <a href="/tags/Classification/" rel="tag"># Classification</a>
+            <a href="/tags/deep-learning/" rel="tag"># deep learning</a>
           
-            <a href="/tags/Sigmoid-Function/" rel="tag"># Sigmoid Function</a>
+            <a href="/tags/classification/" rel="tag"># classification</a>
           
-            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+            <a href="/tags/sigmoid-function/" rel="tag"># sigmoid function</a>
           
         </div>
       
@@ -438,8 +438,8 @@ u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/03/29/Mac安装Pytorch/" rel="next" title="Mac安装Pytorch">
-                <i class="fa fa-chevron-left"></i> Mac安装Pytorch
+              <a href="/2020/06/04/梯度下降/" rel="next" title="Gradient Descent">
+                <i class="fa fa-chevron-left"></i> Gradient Descent
               </a>
             
           </div>
@@ -531,7 +531,7 @@ u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-count">18</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -553,7 +553,7 @@ u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">53</span>
+                  <span class="site-state-item-count">57</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
