@@ -1822,7 +1822,7 @@ pre .javascript .function {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #494512;
+  background: #ffff96;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -2594,7 +2594,7 @@ h6 {
   margin: 20px 0 10px;
 }
 p {
-  margin: 0 0 25px 0;
+  margin: 0 0 10px 0;
 }
 a {
   border-bottom-color: #ccc;
@@ -2602,6 +2602,18 @@ a {
 hr {
   margin: 20px 0;
   height: 2px;
+}
+body {
+  line-height: 1.5;
+}
+.highlight .gutter {
+  display: None;
+}
+.posts-expand .post {
+  margin-top: 90px !important;
+}
+.post-button {
+  margin-top: 14px;
 }
 .main-inner {
   margin-top: 80px;
