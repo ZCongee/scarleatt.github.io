@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+
+
+
+
+  <meta name="keywords" content="deep learning,semi-supervised,smoothness," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Introduction 对于猫狗分类问题，如果只有一部分data有label，还有其他很大一部分data是unlabeled，那么我们可以认为unlabeled data对我们网络的训练是无用的吗？  Q：Why semi-supervised learning helps ?  A：如图所示，图中灰色圆点表示unlabeled data，其他圆点表示labeled data。如果没有unlab">
+<meta name="keywords" content="deep learning,semi-supervised,smoothness">
+<meta property="og:type" content="article">
+<meta property="og:title" content="semi-supervised">
+<meta property="og:url" content="http://yoursite.com/2020/06/10/semi-supervised/index.html">
+<meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="Introduction 对于猫狗分类问题，如果只有一部分data有label，还有其他很大一部分data是unlabeled，那么我们可以认为unlabeled data对我们网络的训练是无用的吗？  Q：Why semi-supervised learning helps ?  A：如图所示，图中灰色圆点表示unlabeled data，其他圆点表示labeled data。如果没有unlab">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610195909860.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610200040869.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610200322008.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610201326618.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610201826012.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610204004390.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610204526467.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610214224919.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610205046125.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610210239919.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610211113227.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610213305033.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610214254778.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610214546977.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610215523269.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610221020376.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610221342226.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610221803745.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610224513039.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610224714665.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610225336692.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610225851786.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610230634932.png">
+<meta property="og:updated_time" content="2020-06-10T15:15:22.519Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="semi-supervised">
+<meta name="twitter:description" content="Introduction 对于猫狗分类问题，如果只有一部分data有label，还有其他很大一部分data是unlabeled，那么我们可以认为unlabeled data对我们网络的训练是无用的吗？  Q：Why semi-supervised learning helps ?  A：如图所示，图中灰色圆点表示unlabeled data，其他圆点表示labeled data。如果没有unlab">
+<meta name="twitter:image" content="http://yoursite.com/2020/06/10/semi-supervised/image-20200610195909860.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/06/10/semi-supervised/"/>
+
+
+
+
+
+  <title>semi-supervised | Scarleatt</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Scarleatt</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/10/semi-supervised/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">semi-supervised</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-10T23:07:28+08:00">
+                2020-06-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ML-notes/" itemprop="url" rel="index">
+                    <span itemprop="name">ML-notes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p><img src="/2020/06/10/semi-supervised/image-20200610195909860.png" alt="image-20200610195909860" style="zoom:50%;"></p>
+<p>对于猫狗分类问题，如果只有一部分data有label，还有其他很大一部分data是unlabeled，那么我们可以认为unlabeled data对我们网络的训练是无用的吗？</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610200040869.png" alt="image-20200610200040869" style="zoom:50%;"></p>
+<p>Q：Why semi-supervised learning helps ?</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610200322008.png" alt="image-20200610200322008" style="zoom:50%;"></p>
+<p>A：如图所示，图中灰色圆点表示unlabeled data，其他圆点表示labeled data。如果没有unlabeled data，此时可以用一条竖直的线将猫狗进行分类，boundary为竖直的那条线；但unlabeled data的分布也可以告诉我们一些信息，对我们的训练也是有帮助的，有了unlabeled data，此时的boundary为斜直线</p>
+<h4 id="Semi-supervised-Learning-for-Generative-Model"><a href="#Semi-supervised-Learning-for-Generative-Model" class="headerlink" title="Semi-supervised Learning for Generative Model"></a>Semi-supervised Learning for Generative Model</h4><h5 id="Intuitive"><a href="#Intuitive" class="headerlink" title="Intuitive"></a>Intuitive</h5><p>不考虑unlabeled data，只有labeled data</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610201326618.png" alt="image-20200610201326618" style="zoom:50%;"></p>
+<p>如果把unlabeled data也考虑进来，此时的boundary 也发生了变化</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610201826012.png" alt="image-20200610201826012" style="zoom:50%;"></p>
+<h5 id="Formulation"><a href="#Formulation" class="headerlink" title="Formulation"></a>Formulation</h5><p><img src="/2020/06/10/semi-supervised/image-20200610204004390.png" alt="image-20200610204004390" style="zoom:50%;"></p>
+<p>不同的maximum likelihood对比</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610204526467.png" alt="image-20200610204526467" style="zoom:50%;"></p>
+<h4 id="Low-density-Separation-Assumption"><a href="#Low-density-Separation-Assumption" class="headerlink" title="Low-density Separation Assumption"></a>Low-density Separation Assumption</h4><p><img src="/2020/06/10/semi-supervised/image-20200610214224919.png" alt="image-20200610214224919" style="zoom:50%;"></p>
+<h5 id="Self-training"><a href="#Self-training" class="headerlink" title="Self-training"></a>Self-training</h5><p>有labeled data和unlabeled data，重复以下过程：</p>
+<ul>
+<li>从labeled data中tarin了模型$f^*$；</li>
+<li>将$f^*$应用到unlabeled data，得到带label的数据，称为Pseudo-label</li>
+<li>从unlabeled data中移出这部分data，并加入labeled data；要移除哪部分data，要根据具体的限制条件而定</li>
+<li>有了更多的label data，就可以继续训练我们的模型，返回第一步</li>
+</ul>
+<p><img src="/2020/06/10/semi-supervised/image-20200610205046125.png" alt="image-20200610205046125" style="zoom:50%;"></p>
+<p>Q：这种训练方式对regression 有用吗 ？</p>
+<p>W：不能，regression输出的是一个真实的值</p>
+<p><strong>hard label vs soft label</strong></p>
+<p>self-training用的是hard label；generative model用的是soft label</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610210239919.png" alt="image-20200610210239919" style="zoom:50%;"></p>
+<h5 id="Entropy-based-Regularization"><a href="#Entropy-based-Regularization" class="headerlink" title="Entropy-based Regularization"></a>Entropy-based Regularization</h5><p>如果输出的每个类别的概率是相近的，那么这个模型就比较bad；输出的类别差距很大，比如某个类别的概率为1，其他都是0；我们可以用$E(y^u)$来衡量</p>
+<script type="math/tex; mode=display">
+E(y^u)=-\sum_{m=1}^5y_m^uln(y_m^u)</script><p>对于第一个和第二个distribution，那么$E(y^u)=0$；</p>
+<p>对于第三个distribution，那么$E(y^u)=-ln(\frac{1}{5})=ln5$</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610211113227.png" alt="image-20200610211113227" style="zoom:50%;"></p>
+<p>那么我们现在就可以重新设计loss function，用cross entropy来估计$y^r,\hat y ^r$之间的差距，即$C(y^r,\hat y^r)$，使用labeled data，还加上了一个regularization term</p>
+<script type="math/tex; mode=display">
+L=\sum_{x^T}C(y^r,\hat y^r)+\lambda \sum_{x^u} E(y^u)</script><h5 id="Outlook-Semi-supervised-SVM"><a href="#Outlook-Semi-supervised-SVM" class="headerlink" title="Outlook: Semi-supervised SVM"></a>Outlook: Semi-supervised SVM</h5><p>对于unlabeled data，如果是SVM 二分类问题，可以把所有的unlabeled data都穷举为Class1或Class2，列举出所有可能的方案，再找出对应的boundary，计算loss，可以发现下图中黑色方框图具有最小的loss</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610213305033.png" alt="image-20200610213305033" style="zoom:50%;"></p>
+<h4 id="Smoothness-Assumption"><a href="#Smoothness-Assumption" class="headerlink" title="Smoothness Assumption"></a>Smoothness Assumption</h4><h5 id="Introduction-1"><a href="#Introduction-1" class="headerlink" title="Introduction"></a>Introduction</h5><p><img src="/2020/06/10/semi-supervised/image-20200610214254778.png" alt="image-20200610214254778" style="zoom:50%;"></p>
+<p>假设：如果x是similar的，那么他们的y也是一样的</p>
+<p>这样的假设是非常不精确的，下面我们做出一个更加精确的假设：</p>
+<ul>
+<li>x是分布不均匀的，有的地方很密集，有的地方很稀疏</li>
+<li>$x^1,x^2$中间有个high density region，那么label $y^1,y^2$就很可能是一样的；但$x^2,x^3$中间没有high density region，其label相同的概率就非常小</li>
+</ul>
+<p><img src="/2020/06/10/semi-supervised/image-20200610214546977.png" alt="image-20200610214546977" style="zoom:50%;"></p>
+<p>对于下图中的数字，2之间是有过渡形态的，所以这两个图片是similar的；而2与3之间没有过渡形态，因此是不similar的</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610215523269.png" alt="image-20200610215523269"></p>
+<p>比较直观的做法是先进行cluster，再进行label</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610221020376.png" alt="image-20200610221020376" style="zoom:50%;"></p>
+<h5 id="Graph-based-Approach"><a href="#Graph-based-Approach" class="headerlink" title="Graph-based Approach"></a>Graph-based Approach</h5><p>那么我们到底要怎么才能知道$x^1,x^2$到底在high density region是不是close呢 ？</p>
+<p>我们可以把data point用图来表示，图的表示有时是比较nature，有时需要我们自己找出来point之间的联系</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610221342226.png" alt="image-20200610221342226" style="zoom:50%;"></p>
+<p> <strong>Graph Construction</strong></p>
+<p>首先定义不同point之间的相似度$s(x^i,x^j)$，可以通过以下两个算法来添加edge：</p>
+<ul>
+<li>KNN，对于图中红色的圆点，与其最相近的三个（k=3）neighbor相连接</li>
+<li>e-Neighborhood，对于周围的neighbor，只有和他相似度大于1的才会被连接起来</li>
+</ul>
+<p><img src="/2020/06/10/semi-supervised/image-20200610221803745.png" alt="image-20200610221803745" style="zoom:50%;"></p>
+<p>edge并不是只有相连和不相连两种选择而已，也可以给edge一些weight，让这个weight和这两个point之间的相似度成正比</p>
+<p>labeled data会影响他的邻居，如果这个point是class1，那么他周围的某些point也可能是class1</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610224513039.png" alt="image-20200610224513039" style="zoom:50%;"></p>
+<p><strong>Definition</strong></p>
+<p>对于下图中的两幅图，如果从直观上看，我们可以认为左边的图更smooth</p>
+<p>现在我们用数字来定量描述，S的定义如下</p>
+<script type="math/tex; mode=display">
+S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算出左图的S=0.5，右图的S=3，值越小越smooth，越小越好</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610224714665.png" alt="image-20200610224714665" style="zoom:50%;"></p>
+<p>对原来的S进行改造一下，$S=y^TLy$</p>
+<p>其中$L=D-W$，W为权重矩阵，D表示将weight每行的和放到对角线的位置</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610225336692.png" alt="image-20200610225336692" style="zoom:50%;"></p>
+<p>loss function其中一项就包括cross entropy计算的loss；smoothness的量S，前面再乘上一个可以调整的参数$\lambda$ ，$\lambda S$就表示一个regularization term</p>
+<p>网络的整体目标是使loss function 取得最小值，即cross entropy项和smoothness都必须要达到最小值，和其他的网络一样，计算相应的gradient，做gradient descent即可</p>
+<p>如果要计算smoothness不一定非要在output的地方，也可以是其他位置，比如hidden layer拿出来进行一些transform，或者直接拿hidden layer，都可以计算smoothness</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610225851786.png" alt="image-20200610225851786" style="zoom:50%;"></p>
+<h4 id="Better-Representation"><a href="#Better-Representation" class="headerlink" title="Better Representation"></a>Better Representation</h4><p><img src="/2020/06/10/semi-supervised/image-20200610230634932.png" alt="image-20200610230634932" style="zoom:50%;"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/deep-learning/" rel="tag"># deep learning</a>
+          
+            <a href="/tags/semi-supervised/" rel="tag"># semi-supervised</a>
+          
+            <a href="/tags/smoothness/" rel="tag"># smoothness</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/10/RNN/" rel="next" title="Recurrent Neural Network">
+                <i class="fa fa-chevron-left"></i> Recurrent Neural Network
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="Scarleatt" />
+            
+              <p class="site-author-name" itemprop="name">Scarleatt</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/scarleatt" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:fawnliu2333@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Semi-supervised-Learning-for-Generative-Model"><span class="nav-number">2.</span> <span class="nav-text">Semi-supervised Learning for Generative Model</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Intuitive"><span class="nav-number">2.1.</span> <span class="nav-text">Intuitive</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Formulation"><span class="nav-number">2.2.</span> <span class="nav-text">Formulation</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Low-density-Separation-Assumption"><span class="nav-number">3.</span> <span class="nav-text">Low-density Separation Assumption</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Self-training"><span class="nav-number">3.1.</span> <span class="nav-text">Self-training</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Entropy-based-Regularization"><span class="nav-number">3.2.</span> <span class="nav-text">Entropy-based Regularization</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Outlook-Semi-supervised-SVM"><span class="nav-number">3.3.</span> <span class="nav-text">Outlook: Semi-supervised SVM</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Smoothness-Assumption"><span class="nav-number">4.</span> <span class="nav-text">Smoothness Assumption</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Introduction-1"><span class="nav-number">4.1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Graph-based-Approach"><span class="nav-number">4.2.</span> <span class="nav-text">Graph-based Approach</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Better-Representation"><span class="nav-number">5.</span> <span class="nav-text">Better Representation</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Scarleatt</span>
+
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
