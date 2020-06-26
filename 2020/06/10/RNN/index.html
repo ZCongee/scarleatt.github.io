@@ -128,7 +128,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/06/10/RNN/image-20200610163053020.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/10/RNN/image-20200610163303283.png">
 <meta property="og:image" content="http://yoursite.com/2020/06/10/RNN/image-20200610164950240.png">
-<meta property="og:updated_time" content="2020-06-10T15:08:03.495Z">
+<meta property="og:updated_time" content="2020-06-26T03:30:07.530Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Recurrent Neural Network">
 <meta name="twitter:description" content="Example Application将Taipei作为向量的输入，由于RNN网络是有记忆的，因此可以根据输入来预测目的地dest，以及离开的时间  RNN ExampleRNN是一个有记忆的网络。对于输入的向量$(x_1,x_2)$，hidden neural的输入就包含store和input的neural，本次hidden neural的输出又作为下一次hidden neural的部分输入">
@@ -378,6 +378,37 @@
           
 
           
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.5k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  14
+                </span>
+              
+            </div>
+          
 
           
 
@@ -401,7 +432,7 @@
 <p>在下图中，对于给定的input sequence为(1,1),(1,1),(2,2)，所有的weights都出实话为1，没有bias项，所有的activation function都是linear的</p>
 <p>如果input sequence的第一个输入为(1,1)，store neural的初始值为0，则hidden neural的输出为2，把hidden neural的再放到store neural里（红色箭头），output neural的输出为$y_1=4,y_2=4$</p>
 <p><img src="/2020/06/10/RNN/image-20200609170004564.png" alt="image-20200609170004564" style="zoom:50%;"></p>
-<p>第二个input为(1,1)，store neural的值为(2,2)，那么hidden layer的输出为$2+2+1+1=6$，再把hidden neural 的输出作为store neural的值，对应的$y_12,y_2=12$</p>
+<p>第二个input为(1,1)，store neural的值为(2,2)，那么hidden layer的输出为$2+2+1+1=6$，再把hidden neural 的输出作为store neural的值，对应的$y_1=2,y_2=12$</p>
 <p><img src="/2020/06/10/RNN/image-20200609170504030.png" alt="image-20200609170504030" style="zoom:50%;"></p>
 <p>第三个input为(2,2)，store neural的值为(6,6)，那么hidden neural的输出为$6+6+2+2=16$，对应的$y_1=32,y_2=32$</p>
 <p><img src="/2020/06/10/RNN/image-20200609170819485.png" alt="image-20200609170819485" style="zoom:50%;"></p>
@@ -671,7 +702,7 @@ a=h(c')f(z_0)=7</script><p><img src="/2020/06/10/RNN/image-20200609225546396.png
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">19</span>
+                  <span class="site-state-item-count">20</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -693,7 +724,7 @@ a=h(c')f(z_0)=7</script><p><img src="/2020/06/10/RNN/image-20200609225546396.png
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">64</span>
+                  <span class="site-state-item-count">65</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -768,6 +799,15 @@ a=h(c')f(z_0)=7</script><p><img src="/2020/06/10/RNN/image-20200609225546396.png
   </span>
   <span class="author" itemprop="copyrightHolder">Scarleatt</span>
 
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">27k</span>
   
 </div>
 

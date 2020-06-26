@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+
+
+
+
+  <meta name="keywords" content="deep learning,Attack and Defense," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Motivation What do we want to do?attack要做的事就是把找到原图片$x^0$对应的$x’$  Loss Function for AttackTraining：network训练得出的结果$y^0$必须和$y^{true}$越接近越好，此时的loss function为$L_{train}(\theta)=C(y^0,y^{true})$，输入的$x$是固定的，">
+<meta name="keywords" content="deep learning,Attack and Defense">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Attack and Defense">
+<meta property="og:url" content="http://yoursite.com/2020/06/26/Attack/index.html">
+<meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="Motivation What do we want to do?attack要做的事就是把找到原图片$x^0$对应的$x’$  Loss Function for AttackTraining：network训练得出的结果$y^0$必须和$y^{true}$越接近越好，此时的loss function为$L_{train}(\theta)=C(y^0,y^{true})$，输入的$x$是固定的，">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626095005396.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626095352498.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626095914128.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626102113579.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626103758330.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626123032000.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626123713569.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626161331898.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626161942541.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626162037439.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626162150972.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626163736373.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626170309446.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626171523647.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626174020656.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626174930630.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626175459885.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626183115909.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626183139180.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626183341651.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626183453090.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626183523115.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626184313560.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626184847976.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626185155952.png">
+<meta property="og:updated_time" content="2020-06-26T10:59:58.293Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Attack and Defense">
+<meta name="twitter:description" content="Motivation What do we want to do?attack要做的事就是把找到原图片$x^0$对应的$x’$  Loss Function for AttackTraining：network训练得出的结果$y^0$必须和$y^{true}$越接近越好，此时的loss function为$L_{train}(\theta)=C(y^0,y^{true})$，输入的$x$是固定的，">
+<meta name="twitter:image" content="http://yoursite.com/2020/06/26/Attack/image-20200626095005396.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/06/26/Attack/"/>
+
+
+
+
+
+  <title>Attack and Defense | Scarleatt</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Scarleatt</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/26/Attack/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Attack and Defense</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-26T18:57:46+08:00">
+                2020-06-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ML-notes/" itemprop="url" rel="index">
+                    <span itemprop="name">ML-notes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  7
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h4><p><img src="/2020/06/26/Attack/image-20200626095005396.png" alt="image-20200626095005396" style="zoom:50%;"></p>
+<h4 id="What-do-we-want-to-do"><a href="#What-do-we-want-to-do" class="headerlink" title="What do we want to do?"></a>What do we want to do?</h4><p>attack要做的事就是把找到原图片$x^0$对应的$x’$</p>
+<p><img src="/2020/06/26/Attack/image-20200626095352498.png" alt="image-20200626095352498" style="zoom:50%;"></p>
+<h4 id="Loss-Function-for-Attack"><a href="#Loss-Function-for-Attack" class="headerlink" title="Loss Function for Attack"></a>Loss Function for Attack</h4><p><strong>Training</strong>：network训练得出的结果$y^0$必须和$y^{true}$越接近越好，此时的loss function为$L_{train}(\theta)=C(y^0,y^{true})$，<u>输入的$x$是固定的</u>，需要不断调整$\theta$的值，使得$L_{train}(\theta)$取得最小值；</p>
+<p><strong>Non-targeted Attack</strong>：如果我们需要attack一个network，此时network的输出$y’$和$y^{true}$应该越大越好，此时的loss function为$L(x’)=-C(y’,y^{true})$，前面多了一个负号。此时的<u>network中的参数$\theta$是固定的</u>，需要不断调整输入$x’$，使network的输出$y’$和$y^{true}$的差距尽量远；</p>
+<p><strong>Targeted Attack</strong>：如果我们不仅想要$y’,y^{true}$之间的距离尽量远，还想使$y’,y^{false}$之间的距离尽量近，就需要使用targeted attack；此时的loss function为$L(x’)=-C(y’,y^{true})+C(y’,y^{false})$</p>
+<p><img src="/2020/06/26/Attack/image-20200626095914128.png" alt="image-20200626095914128" style="zoom:50%;"></p>
+<p>不仅需要限制输出之间的差异，还需要限制输入$x^0,x’$之间的差异，只有这输入之间的差异d小于$\epsilon$，我们才可以认为$x’$是与$x^0$相似的，才达到了attack 一个network的目的，即使输入尽可能具有迷惑性，从而使网络输出错误的结果</p>
+<h4 id="Constraint"><a href="#Constraint" class="headerlink" title="Constraint"></a>Constraint</h4><p>那么我们怎么计算d呢？</p>
+<p>有以下两种主要的方法：</p>
+<ul>
+<li>L2-norm，为$x^0,x’$之间每个像素差异的平方和；</li>
+<li>L-infinity，为$x^0,x’$之间每个像素差异的最大值</li>
+</ul>
+<p>如果我们改变图中的每个pixel，另外一幅图只改变其中一个pixel，使得这两者之间的L2-norm是一样的，但第二种方式得出的L-infinity更大</p>
+<p><img src="/2020/06/26/Attack/image-20200626102113579.png" alt="image-20200626102113579" style="zoom:50%;"></p>
+<h4 id="How-to-Attack"><a href="#How-to-Attack" class="headerlink" title="How to Attack"></a>How to Attack</h4><p>就像我们训练一个neural network一样，但需要训练的参数是$x’$，此时就需要找到一个参数$x^*$，来最小化$L(x’)$，限制条件是$d(x^0,x’)\leq\epsilon$</p>
+<script type="math/tex; mode=display">
+x^*=arg\mathop{min}_\limits {d(x^0,x')\leq\epsilon}L(x')</script><p>这里我们也使用了gradient descent算法，只是此时需要调整的参数变成了$x^t$</p>
+<p><img src="/2020/06/26/Attack/image-20200626103758330.png" alt="image-20200626103758330" style="zoom:50%;"></p>
+<p>当$d(x^0,x^t)&gt;\epsilon$时，就需要更新这个参数了，使用$fix(x^t)$来更新</p>
+<p><img src="/2020/06/26/Attack/image-20200626123032000.png" alt="image-20200626123032000" style="zoom:50%;"></p>
+<p>更新的参数需要满足一定的条件，</p>
+<ul>
+<li>如果使用L2-norm，必须选择在差值在半径以内的参数，超过了这个半径，就设为$\epsilon $；</li>
+<li>如果使用L-infinity，现在超过了这个方形的区域，就必须想办法把它拉回来，在y轴方向超过了$\epsilon$，就把值设为$\epsilon$；在x轴方向超过了$\epsilon$，就把值设为$\epsilon$</li>
+</ul>
+<p><img src="/2020/06/26/Attack/image-20200626123713569.png" alt="image-20200626123713569" style="zoom:50%;"></p>
+<h4 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h4><p>如果我们现在要attack一个network，其真实类别为Tiger cat，但attack之后的network认为这是star fish</p>
+<p><img src="/2020/06/26/Attack/image-20200626161331898.png" alt="image-20200626161331898" style="zoom:50%;"></p>
+<p>由于这两者之间的差异很小，很难识别，这里我们将差值x50来进行展示</p>
+<p><img src="/2020/06/26/Attack/image-20200626161942541.png" alt="image-20200626161942541" style="zoom:50%;"></p>
+<p>可能猫和猫之间是比较类似的，这里我们将attack的target设置为keyboard，该network认为这是keyboard的概率为0.98</p>
+<p><img src="/2020/06/26/Attack/image-20200626162037439.png" alt="image-20200626162037439" style="zoom:50%;"></p>
+<p>如果我们再对图片加入噪声，network认为这是Persian cat，再继续加入噪声，我们都快分辨不出这张图是一只猫了，network就认为这是fire screen</p>
+<p><img src="/2020/06/26/Attack/image-20200626162150972.png" alt="image-20200626162150972" style="zoom:50%;"></p>
+<p>我们假设$x_0$是在高维平面上的一个点，沿着任意方向随机移动，我们可以看到在接近$x^0$ 的时候，是 tiger cat（正确分类）的可能性是很高的，但如果再移动多一点，是Persian cat和Egyptian cat的可能性是很高的 </p>
+<p>上述说的是随机方向进行移动，如果图片是225*225pixel的，那么就是5万多个高维的方向，现在我们选取其中几个特定的方向。在这几个特定的方向中，$x^0$可变化的范围就变得非常狭窄，$x^0$稍微变化一下，network输出为另一个类别（key board）的可能性就很高</p>
+<p><img src="/2020/06/26/Attack/image-20200626163736373.png" alt="image-20200626163736373" style="zoom:50%;"></p>
+<h4 id="Attack-Approaches"><a href="#Attack-Approaches" class="headerlink" title="Attack Approaches"></a>Attack Approaches</h4><ul>
+<li><p>FGSM (<a href="https://arxiv.org/abs/1412.6572" target="_blank" rel="external">https://arxiv.org/abs/1412.6572</a>)</p>
+</li>
+<li><p>Basic iterative method (<a href="https://arxiv.org/abs/1607.02533" target="_blank" rel="external">https://arxiv.org/abs/1607.02533</a>) </p>
+</li>
+<li><p>L-BFGS (<a href="https://arxiv.org/abs/1312.6199" target="_blank" rel="external">https://arxiv.org/abs/1312.6199</a>)</p>
+</li>
+<li>Deepfool (<a href="https://arxiv.org/abs/1511.04599" target="_blank" rel="external">https://arxiv.org/abs/1511.04599</a>)</li>
+<li>JSMA (<a href="https://arxiv.org/abs/1511.07528" target="_blank" rel="external">https://arxiv.org/abs/1511.07528</a>)</li>
+<li>C&amp;W (<a href="https://arxiv.org/abs/1608.04644" target="_blank" rel="external">https://arxiv.org/abs/1608.04644</a>)</li>
+<li>Elastic net attack (<a href="https://arxiv.org/abs/1709.04114" target="_blank" rel="external">https://arxiv.org/abs/1709.04114</a>)</li>
+<li>Spatially Transformed (<a href="https://arxiv.org/abs/1801.02612" target="_blank" rel="external">https://arxiv.org/abs/1801.02612</a>) </li>
+<li>One Pixel Attack (<a href="https://arxiv.org/abs/1710.08864" target="_blank" rel="external">https://arxiv.org/abs/1710.08864</a>)</li>
+<li>…… only list a few</li>
+</ul>
+<p>虽然有很多方法都可以用来attack network，但这些方法的主要区别在于使用了不同的constrains，或者使用了不同的optimization methods</p>
+<p><img src="/2020/06/26/Attack/image-20200626170309446.png" alt="image-20200626170309446" style="zoom:50%;"></p>
+<p>我们先介绍一下<strong>FGSM</strong>，对于第一维，如果$\frac{\partial L}{\partial x_1}$是大于0的值，那么$\Delta x_1=sign(\frac{\partial L}{\partial x_1})=+1$；如果对于第二维，如果$\frac{\partial L}{\partial x_2}$是小于0的值，不管值多大，都得出$\Delta x_2=sign(\frac{\partial L}{\partial x_2})=-1$；即对于$x^0$的所有维，要么$+\epsilon$，要么$-\epsilon$，即可得到最好的结果$x^*$</p>
+<p><img src="/2020/06/26/Attack/image-20200626171523647.png" alt="image-20200626171523647" style="zoom:50%;"></p>
+<p>FGSM使用L-infinity作为distance constrain，如果gradient指向左下角，那么$x^<em>$就在方框的右上角；如果gradient指向左上角，那么$x^</em>$就在方框的右下角；因此，在FGSM里面，我们只在意gradient的方向，不在意其具体的大小 </p>
+<p>那么FGSM到底是怎么运作的呢？</p>
+<p>我们可以看作FGSM是使用了非常大的一个learning rate，使x飞出了方形区域，由于L-infinity的限制，输出会被限制到方形区域内部，即$x^*$在方形区域的右上角</p>
+<p><img src="/2020/06/26/Attack/image-20200626174020656.png" alt="image-20200626174020656" style="zoom:60%;"></p>
+<h4 id="White-Box-v-s-Black-Box"><a href="#White-Box-v-s-Black-Box" class="headerlink" title="White Box v.s. Black Box"></a>White Box v.s. Black Box</h4><p>在之前的attack中，我们假设已经知道了network的参数$\theta$，目标是找到最优化的$x’$，这种attack就称为<strong>White Box</strong></p>
+<p>但在大多数的情况中，我们都不知道network的参数，但也需要去attack这个network，这就是<strong>Black Box</strong></p>
+<h4 id="Black-Box-Attack"><a href="#Black-Box-Attack" class="headerlink" title="Black Box Attack"></a>Black Box Attack</h4><p>如果我们现在已经知道了black network的training data，那么我们就可以用同样的training data来训练一个proxy network，再生成attacked object，如果能过成功attack新的proxy network，那么我们就可以把这个object也作为black network的输入，也可以attack成功</p>
+<p>如果不能得到相应的training data，network如果是一个在线版本，我们可以输入大量的图片，得出相对应的分类结果，从而可以组合成相对应的训练资料，来得出proxy network</p>
+<p><img src="/2020/06/26/Attack/image-20200626174930630.png" alt="image-20200626174930630" style="zoom:50%;"></p>
+<p>也有一些实验数据证明黑箱攻击是有可能成功的，现在假设Black Box有五种，现在我们来训练proxy network，我们用ResNet-152生成的图片，如果black box的network也是ResNet-152，那么attack成功的几率就会非常高，表格中的4%表示系统辨识的准确率</p>
+<p><img src="/2020/06/26/Attack/image-20200626175459885.png" alt="image-20200626175459885" style="zoom:50%;"></p>
+<h4 id="Attack-in-the-Real-World"><a href="#Attack-in-the-Real-World" class="headerlink" title="Attack in the Real World"></a>Attack in the Real World</h4><p><img src="/2020/06/26/Attack/image-20200626183115909.png" alt="image-20200626183115909" style="zoom:50%;"></p>
+<p><img src="/2020/06/26/Attack/image-20200626183139180.png" alt="image-20200626183139180" style="zoom:50%;"></p>
+<h4 id="Defense"><a href="#Defense" class="headerlink" title="Defense"></a>Defense</h4><p><img src="/2020/06/26/Attack/image-20200626183341651.png" alt="image-20200626183341651" style="zoom:50%;"></p>
+<h5 id="Passive-defense"><a href="#Passive-defense" class="headerlink" title="Passive defense"></a>Passive defense</h5><p><img src="/2020/06/26/Attack/image-20200626183453090.png" alt="image-20200626183453090" style="zoom:50%;"></p>
+<p>这个filter可以是smoothing，对于原来输入的attack图片network认为其是keyboard，经过smoothing之后，network就认为是tiger cat了，是正确的分类结果</p>
+<p>Q：那么为什么smoothing可以达到这种效果呢？</p>
+<p>A：只有某几种方向上的的信号可以使attack成功。如果使用了smoothing这种filter，就把这几种信号改变了，那么attack就失效了 ；加上smoothing并不会伤害原来的图片，所以network仍然可以得出正确的结果</p>
+<p><img src="/2020/06/26/Attack/image-20200626183523115.png" alt="image-20200626183523115" style="zoom:50%;"></p>
+<p>根据这种思想，有学者就提出了feature squeeze</p>
+<p>对于同一个input，我们先得出model的输出结果$Prediction_0$，再根据$Squeeze_1，Squeeze_2$得出结果$Prediction_1,Prediction_2$，如果$Prediction_0$和$Prediction_1,Prediction_2$之间的差值d很大，那么我们就可以认为input是来attack的</p>
+<p><img src="/2020/06/26/Attack/image-20200626184313560.png" alt="image-20200626184313560" style="zoom:50%;"></p>
+<p>还有另外一种方法</p>
+<p><img src="/2020/06/26/Attack/image-20200626184847976.png" alt="image-20200626184847976" style="zoom:50%;"></p>
+<h5 id="Proactive-defense"><a href="#Proactive-defense" class="headerlink" title="Proactive defense"></a>Proactive defense</h5><p>首先我们通过某种算法找出漏洞，找到相应的adversarial input，再把这些input和之前的training data一起作为新的input data，输入network，相当于进行了data augmentation，这个过程进行T次，每次的input data都是不一样的</p>
+<p><img src="/2020/06/26/Attack/image-20200626185155952.png" alt="image-20200626185155952" style="zoom:50%;"></p>
+<p>如果attacker知道了我们是使用算法A来进行模拟，那么attacker可以使用算法B来进行attack，那么我们的network并不能抵御这种attack</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/deep-learning/" rel="tag"># deep learning</a>
+          
+            <a href="/tags/Attack-and-Defense/" rel="tag"># Attack and Defense</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/12/Explainable-AI/" rel="next" title="Explainable Machine Learning">
+                <i class="fa fa-chevron-left"></i> Explainable Machine Learning
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="Scarleatt" />
+            
+              <p class="site-author-name" itemprop="name">Scarleatt</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">20</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">65</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/scarleatt" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:fawnliu2333@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Motivation"><span class="nav-number">1.</span> <span class="nav-text">Motivation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#What-do-we-want-to-do"><span class="nav-number">2.</span> <span class="nav-text">What do we want to do?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Loss-Function-for-Attack"><span class="nav-number">3.</span> <span class="nav-text">Loss Function for Attack</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Constraint"><span class="nav-number">4.</span> <span class="nav-text">Constraint</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#How-to-Attack"><span class="nav-number">5.</span> <span class="nav-text">How to Attack</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Example"><span class="nav-number">6.</span> <span class="nav-text">Example</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Attack-Approaches"><span class="nav-number">7.</span> <span class="nav-text">Attack Approaches</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#White-Box-v-s-Black-Box"><span class="nav-number">8.</span> <span class="nav-text">White Box v.s. Black Box</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Black-Box-Attack"><span class="nav-number">9.</span> <span class="nav-text">Black Box Attack</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Attack-in-the-Real-World"><span class="nav-number">10.</span> <span class="nav-text">Attack in the Real World</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Defense"><span class="nav-number">11.</span> <span class="nav-text">Defense</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Passive-defense"><span class="nav-number">11.1.</span> <span class="nav-text">Passive defense</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Proactive-defense"><span class="nav-number">11.2.</span> <span class="nav-text">Proactive defense</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Scarleatt</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">27k</span>
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
