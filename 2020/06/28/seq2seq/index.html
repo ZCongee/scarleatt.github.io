@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+
+
+
+
+  <meta name="keywords" content="deep learning,Sequence to Sequence," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Generation可以generation文字，也可以generation图片  如果想生成一张图片，我们可以把图片的每个pixel看成一个character，从而组成一个sentence，比如下图中蓝色pixel就表示blue，红色的pixel表示red,…… 接下来就可以用language model来生成图片，最初时间步的输入是特殊字符BOS  对于一般的generation，如下图的右上">
+<meta name="keywords" content="deep learning,Sequence to Sequence">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sequence to Sequence">
+<meta property="og:url" content="http://yoursite.com/2020/06/28/seq2seq/index.html">
+<meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="Generation可以generation文字，也可以generation图片  如果想生成一张图片，我们可以把图片的每个pixel看成一个character，从而组成一个sentence，比如下图中蓝色pixel就表示blue，红色的pixel表示red,…… 接下来就可以用language model来生成图片，最初时间步的输入是特殊字符BOS  对于一般的generation，如下图的右上">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627143309760.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627143546864.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627144748287.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627150215465.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627150953989.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627152018372.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627152512575.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627153002771.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627154111622.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627154318421.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627154905302.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627155414554.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627155937349.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627160046413.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627160411647.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627193908934.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627195250525.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627195503429.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627195511422.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627195914955.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627200010931.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627200439344.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627201014065.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627201933880.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627202652334.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627203211682.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627204251989.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627204747750.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627205536622.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627213016984.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627213436202.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627214936987.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627215358053.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627221402859.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627221933432.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627221956837.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627222144464.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627222358014.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627222713634.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627223140253.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627223424266.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627223531560.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200628095239086.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200628095644699.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200628100108506.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200628101004928.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200628102849708.png">
+<meta property="og:updated_time" content="2020-06-28T02:35:07.839Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sequence to Sequence">
+<meta name="twitter:description" content="Generation可以generation文字，也可以generation图片  如果想生成一张图片，我们可以把图片的每个pixel看成一个character，从而组成一个sentence，比如下图中蓝色pixel就表示blue，红色的pixel表示red,…… 接下来就可以用language model来生成图片，最初时间步的输入是特殊字符BOS  对于一般的generation，如下图的右上">
+<meta name="twitter:image" content="http://yoursite.com/2020/06/28/seq2seq/image-20200627143309760.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/06/28/seq2seq/"/>
+
+
+
+
+
+  <title>Sequence to Sequence | Scarleatt</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Scarleatt</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/28/seq2seq/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Sequence to Sequence</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-28T10:31:47+08:00">
+                2020-06-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ML-notes/" itemprop="url" rel="index">
+                    <span itemprop="name">ML-notes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.8k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  10
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="Generation"><a href="#Generation" class="headerlink" title="Generation"></a>Generation</h4><p>可以generation文字，也可以generation图片</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627143309760.png" alt="image-20200627143309760" style="zoom:50%;"></p>
+<p>如果想生成一张图片，我们可以把图片的每个pixel看成一个character，从而组成一个sentence，比如下图中蓝色pixel就表示blue，红色的pixel表示red,……</p>
+<p>接下来就可以用language model来生成图片，最初时间步的输入是特殊字符BOS</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627143546864.png" alt="image-20200627143546864" style="zoom:50%;"></p>
+<p>对于一般的generation，如下图的右上部分所示，先根据蓝色pixel生成红色pixel，再根据红色pixel生成黄色pixel，再根据黄色pixel生成灰色pixel，….，并没有考虑pixel之间的位置关系</p>
+<p>还有另外一个比较理想的生成图像方法，如果考虑了pixel之间的位置关系，如下图的右下部分所示，黑色pixel由附近的红色和灰色pixel生成</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627144748287.png" alt="image-20200627144748287" style="zoom:50%;"></p>
+<p>在上图的左上角部分，该lstm块输入了三组参数，也输出了三组参数，把这些方块叠起来就可以达到中部位置图像的效果</p>
+<p>对于一个$3\times 3$的画布，就是我们想要生成的图像的大小，一开始画布上还没有任何内容；现在在画布的左下角放入一个convolution的filter， 把其输出在放到3D的lstm的左下角（input），由于lstm也是有memory的，经过不断的process，可以到左上角，从而产生蓝色的pixel；再把蓝色的pixel放到画布的左下角</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627150215465.png" alt="image-20200627150215465" style="zoom:50%;"></p>
+<p>把filter向右移，结合上次蓝色pixel的输出，根据上文的步骤，就可以生成红色的pixel，再把红色pixel放到画布对应的位置</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627150953989.png" alt="image-20200627150953989" style="zoom:50%;"></p>
+<h4 id="Conditional-Generation"><a href="#Conditional-Generation" class="headerlink" title="Conditional Generation"></a>Conditional Generation</h4><p>必须是有条件的generation，要联系上下文</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627152018372.png" alt="image-20200627152018372" style="zoom:50%;"></p>
+<p>如果要对一张图片进行解释，我们先使用一个CNN model将image转化为一个vector（红色方框），先生成了第一个单词”A”，在生成第二个单词时，还需要将整个image的vector作为输入，不然RNN可能会忘记image的一些信息</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627152512575.png" alt="image-20200627152512575" style="zoom:50%;"></p>
+<p>RNN也可以用来做机器翻译，比如我们想要翻译“机器学习”，就先把这四个字分别输入绿色的RNN里面，最后一个时间节点的输出（红色方框）就包含了整个sentence的information，这个过程称之为<strong>Encoder</strong></p>
+<p>把encoder的information再作为另外一个rnn的input，再进行output，这个过程称之为<strong>Decoder</strong></p>
+<p>encoder和decoder是jointly train的，这两者的参数可以是一样的，也可以是不一样的</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627153002771.png" alt="image-20200627153002771" style="zoom:50%;"></p>
+<p> encoder将之前所有说过的话都进行整合了，再作为decoder的input</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627154111622.png" alt="image-20200627154111622" style="zoom:50%;"></p>
+<h4 id="Attention"><a href="#Attention" class="headerlink" title="Attention"></a>Attention</h4><h5 id="Dynamic-Conditional-Generation"><a href="#Dynamic-Conditional-Generation" class="headerlink" title="Dynamic Conditional Generation"></a>Dynamic Conditional Generation</h5><p>如果需要翻译的文字非常复杂，无法用一个vector来表示，就算可以表示也没办法表示全部的关键信息，这时候如果decoder每次input的都还是同一个vector，就不会得到很好的结果</p>
+<p>因此我们现在先把“机器”作为decoder的第一个输入$c^1$，这样就可以得到更好的结果</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627154318421.png" alt="image-20200627154318421" style="zoom:50%;"></p>
+<h5 id="Machine-Translation"><a href="#Machine-Translation" class="headerlink" title="Machine Translation"></a>Machine Translation</h5><p>绿色方块为RNN中hidden layer的output，分别是$h^1,h^2,h^3,h^4$；还有一个vector $z^0$，是可以通过network学出来的；把这两者输入一个match函数，可以得到$h^1,z^0$之间的match分数 $\alpha _0^1$</p>
+<p>这个match函数可以自己设计，可以有参数，也可以没有参数</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627154905302.png" alt="image-20200627154905302" style="zoom:50%;"></p>
+<p>得出的$\alpha _0^1,\alpha _0^2,\alpha _0^3,\alpha _0^4$再输入softmax函数，得到$\hat\alpha _0^1,\hat\alpha _0^2,\hat\alpha _0^3,\hat\alpha _0^4$，乘上$h^i$再加起来，就可以得到$c^0$，来作为decoder input，根据decoder，可得出第一个翻译的单词“machine”；$z^1$为decoder RNN其中hidden layer的输出，用$z^1$再来得出相应的decoder input</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627155414554.png" alt="image-20200627155414554" style="zoom:50%;"></p>
+<p>再来计算$z^1,h^1$之间的match分数$\alpha_1^1$，</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627155937349.png" alt="image-20200627155937349" style="zoom:50%;"></p>
+<p>再继续算出$c^1$作为decoder的input，从而得出第二个单词“learning”</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627160046413.png" alt="image-20200627160046413" style="zoom:50%;"></p>
+<p>一直重复这个过程，只到全部翻译完成</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627160411647.png" alt="image-20200627160411647" style="zoom:50%;"></p>
+<h5 id="Speech-Recognition"><a href="#Speech-Recognition" class="headerlink" title="Speech Recognition"></a>Speech Recognition</h5><p>语音信号也可以看成一系列的vector sequence，第一个红色方框所在的帧match分数很高，就把对应的vector放到decoder，machine就会得出“h”</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627193908934.png" alt="image-20200627193908934" style="zoom:50%;"></p>
+<h5 id="Image-Caption-Generation"><a href="#Image-Caption-Generation" class="headerlink" title="Image Caption Generation"></a>Image Caption Generation</h5><p>image可以分成多个region，每个region可以用一个vector来表示，计算这些vector和$z^0$之间match的分数，为0.7、0.1….，再进行weighted sum，得到红色方框的结果，再输入RNN，得到Word1，此时hidden layer的输出为$z^1$</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627195250525.png" alt="image-20200627195250525" style="zoom:50%;"><img src="/2020/06/28/seq2seq/image-20200627195503429.png" alt="image-20200627195503429"></p>
+<p>再计算$z^1$和vector之间的match分数，把分数作为RNN的input，从而得出Word 2</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627195511422.png" alt="image-20200627195511422" style="zoom:50%;"></p>
+<p>这里是一些具体的例子</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627195914955.png" alt="image-20200627195914955" style="zoom:50%;"></p>
+<p>但也会产生一些不好的结果</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627200010931.png" alt="image-20200627200010931" style="zoom:50%;"></p>
+<h5 id="Memory-Network"><a href="#Memory-Network" class="headerlink" title="Memory Network"></a>Memory Network</h5><p>memory network是有一篇文章，问machine一个问题，machine能够给出对应的答案</p>
+<p>先将document分成多个vector，再给出这些vector与问题q之间match的分数$\alpha^1,..,\alpha^N$，与$x^i$分别相乘，得到extracted information，作为DNN的input，再进行不断的训练，从而得出对应的answer</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627200439344.png" alt="image-20200627200439344" style="zoom:50%;"></p>
+<p>还有一个更加复杂的版本</p>
+<p>match的部分和extracted的部分不一定是一样的，相当于输入了两组不同的参数，比如可以把$x^i$乘上一个matrix，就可以变成另外一组参数$h^i$，这个matrix是可以自动学出来的</p>
+<p>这时计算extracted information的方式就发生了一些变化；sum之后的值不仅输入DNN，还会与问题q进行结合，再重新计算match分数，不断进行一个反复思考的过程</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627201014065.png" alt="image-20200627201014065" style="zoom:50%;"></p>
+<p>q可以用来计算attention，计算出extracted information之后，与q加起来；上一次sum的结果会再继续参与计算attention，再extract，再进行sum，作为DNN的input，得到最后的答案</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627201933880.png" alt="image-20200627201933880" style="zoom:50%;"></p>
+<p>可以把这个模型看作是两层layer的network，也有back propagation来更新network的参数</p>
+<h5 id="Neural-Turing-Machine"><a href="#Neural-Turing-Machine" class="headerlink" title="Neural Turing Machine"></a>Neural Turing Machine</h5><p>Neural Turing Machine不仅可以读取memory的内容，也可以根据match分数来修改memory的内容；即你不仅可以通过memory读取information，也可以把information写到memory里面去</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627202652334.png" alt="image-20200627202652334" style="zoom:50%;"></p>
+<p>对于初始值的memory $m_0^i$，计算出对应的match分数$\hat\alpha_0^i$，在进行weighted sum，得出$r^0$，来作为另外一个network f的input，这个network相当于是一个controller，f可以是DNN、SVM、GRU等；</p>
+<p>$r^0,x^1$作为该network的输入，可以得出三个output，这些output可以控memory，比如新的attention是什么，新的memory里面的值如何进行修改</p>
+<p>新的attention计算加入了$k^1$，即$\alpha_1^i=cos(m_0^i,k^1)$，再输入softmax，得到新的$\hat\alpha_1^i$的distribution</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627203211682.png" alt="image-20200627203211682" style="zoom:50%;"></p>
+<p>$e^1$里面的值表示把原来memory里面的值清空，$a^1$表示把新的值写入memory，通过下面的公式再计算新的memory $m_1^i$</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627204251989.png" alt="image-20200627204251989" style="zoom:50%;"></p>
+<p>得到新的memory $m_1^i$之后，再计算出新的attention $\hat\alpha_1^i$，再进行weighted sum得到$r^1$，加上新的$x^2$作为network的input，得出新的output，再来对整个network进行操控</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627204747750.png" alt="image-20200627204747750" style="zoom:50%;"></p>
+<h4 id="Tips-for-Generation"><a href="#Tips-for-Generation" class="headerlink" title="Tips for Generation"></a>Tips for Generation</h4><h5 id="Attention-1"><a href="#Attention-1" class="headerlink" title="Attention"></a>Attention</h5><p>$\alpha_t^i$下标表示time，上标表示component，该视频包括4个component，有4个时间节点；在第一个时间节点产生attention $\alpha_1^1,\alpha_1^2,\alpha_1^3,\alpha_1^4$，生成了第一个word $w_1$</p>
+<p>attention也是可以调节的，有时会出现一些<strong>bad attention</strong>，在产生第二个word（$w_2$,<span style="color: red">women</span>）时，focus到第二个component，在产生第四个word $w_4$时，也focus到第二个component上，也是<span style="color: green">women</span>，多次attent在同一个frame上，就会产生一些很奇怪的结果</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627205536622.png" alt="image-20200627205536622" style="zoom:50%;"></p>
+<p><strong>Good Attention</strong>：至少要包含input的每一个frame，每个frame都应该attent一下，每个frame进行attent的量也不能太多，这个量最好是同等级的</p>
+<p>Q：那么如何保证这个标准呢？</p>
+<p>A：有学者提出了一个regularization term，有一个新的可学习的参数$\tau$，$\sum_t\alpha_t^i$表示所有attention的sum，再计算$\sum_i(\tau-\sum_t\alpha_t^i)^2$的值，这个值越小越好；对于上文所说的bad attention的情况，这个值算出来是很大的，因此network就会再进行不断地学习，只到term的值不断减小</p>
+<h5 id="Mismatch-between-Train-and-Test"><a href="#Mismatch-between-Train-and-Test" class="headerlink" title="Mismatch between Train and Test"></a>Mismatch between Train and Test</h5><p><img src="/2020/06/28/seq2seq/image-20200627213016984.png" alt="image-20200627213016984" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/seq2seq/image-20200627213436202.png" alt="image-20200627213436202" style="zoom:50%;"></p>
+<p><strong>Exposure Bias</strong>：在training的时候，input为真正的答案；但在testing的时候，input为上一个时间节点的output</p>
+<p>在下图中，由于RNN从来没有到右子树B训练过，但如果在testing时一开始就遇到了B，network就会出现错误</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627214936987.png" alt="image-20200627214936987" style="zoom:50%;"></p>
+<h5 id="Modifying-Training-Process"><a href="#Modifying-Training-Process" class="headerlink" title="Modifying Training Process?"></a>Modifying Training Process?</h5><p>那么我们如何解决这种mismatch问题呢？可以尝试modify训练process</p>
+<p>如果machine现在output B，即使是错误的output（和reference A不一样），我们也应该让这个错误的output作为下一次的input，那么training和testing就是match的</p>
+<p>但在实际操作中，training是非常麻烦的；现在我们使用gradient descent来进行training，第一个gradient的方向告诉我们要把A的几率增大，output B，在第二个时间点，input为B，看到reference为B，把B的几率增大，就可以和reference相对应起来；</p>
+<p>但实际上，第一个output为A的几率上升，那么output发生了变化，第二个时间点的input就发生了变化，是A；那么我们之前学习到的让B上升就没有意义了</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627215358053.png" alt="image-20200627215358053" style="zoom:50%;"></p>
+<h5 id="Scheduled-Sampling"><a href="#Scheduled-Sampling" class="headerlink" title="Scheduled Sampling"></a><strong>Scheduled Sampling</strong></h5><p>由于使用Modifying Training Process很难train，现在我们就使用Scheduled Sampling</p>
+<p>对于到底是model里的ouput，还是reference来作为input，我们可以给一个几率；铜板是正面，就使用model的output，如果是反面，就用reference</p>
+<p>右上角的图，纵轴表示from reference的几率，一开始只看reference，reference的几率不断变小，model的几率不断增加</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627221402859.png" alt="image-20200627221402859" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/seq2seq/image-20200627221933432.png" alt="image-20200627221933432" style="zoom:50%;"></p>
+<h5 id="Beam-Search"><a href="#Beam-Search" class="headerlink" title="Beam Search"></a>Beam Search</h5><p><img src="/2020/06/28/seq2seq/image-20200627221956837.png" alt="image-20200627221956837" style="zoom:50%;"></p>
+<p>同时走两条path</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627222144464.png" alt="image-20200627222144464" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/seq2seq/image-20200627222358014.png" alt="image-20200627222358014" style="zoom:50%;"></p>
+<h5 id="Better-idea？"><a href="#Better-idea？" class="headerlink" title="Better idea？"></a>Better idea？</h5><p>为什么不直接把distribution作为下一个input呢？即下图中的右图</p>
+<p>但右边的结果会比较差，对于几率接近的输入，左图会sample一个几率最高的（高兴），但右图会保留这个distribution</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627222713634.png" alt="image-20200627222713634" style="zoom:50%;"></p>
+<h5 id="Object-level-v-s-Component-level"><a href="#Object-level-v-s-Component-level" class="headerlink" title="Object level v.s. Component level"></a>Object level v.s. Component level</h5><p><img src="/2020/06/28/seq2seq/image-20200627223140253.png" alt="image-20200627223140253" style="zoom:50%;"></p>
+<p>应该是考虑整个sentence的准确率如何，而不应该只考虑单个的word</p>
+<h5 id="Reinforcement-learning"><a href="#Reinforcement-learning" class="headerlink" title="Reinforcement learning?"></a>Reinforcement learning?</h5><p><img src="/2020/06/28/seq2seq/image-20200627223424266.png" alt="image-20200627223424266" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/seq2seq/image-20200627223531560.png" alt="image-20200627223531560" style="zoom:50%;"></p>
+<h4 id="Pointer-Network"><a href="#Pointer-Network" class="headerlink" title="Pointer Network"></a>Pointer Network</h4><p>定义如下，找到其中的几个point，将剩下的point包围起来</p>
+<p><img src="/2020/06/28/seq2seq/image-20200628095239086.png" alt="image-20200628095239086" style="zoom:50%;"></p>
+<h5 id="Seq2seq"><a href="#Seq2seq" class="headerlink" title="Seq2seq"></a>Seq2seq</h5><p>input为4个point，但output只有三个point ($P_1,P_2,P_4$)，那这个问题还是sequence to sequence吗？</p>
+<p><img src="/2020/06/28/seq2seq/image-20200628095644699.png" alt="image-20200628095644699" style="zoom:50%;"></p>
+<p>由于output的个数是提前设定好的，并不能动态改变；<span style="color: red">在training的时候，output很只有50个point，但在testing的时候，output有100个point，由于之前只学习了50个point，因此现在并不能生成51-100之间的点</span>；因此这种做法是不可取的</p>
+<p>这里我们对network进行了改进</p>
+<p>对于输入的5个point（加入了END），先得到RNN中hidden layer的输出（$h^0,h^1,h^2,h^3,h^4,h^5$），计算attention weight（match score），再把这个distribution输入argmax函数，输出概率最大的point，即 1</p>
+<p><img src="/2020/06/28/seq2seq/image-20200628100108506.png" alt="image-20200628100108506" style="zoom:50%;"></p>
+<p>把这个output 1再输入另外一个RNN network，其hidden layer的输出为$z^1$，再根据$z^1,h^i$来计算相应的attention weight，输入argmax函数，得到output为 4</p>
+<p>再把point 4作为另外一个RNN network的input，其hidden layer的输出为$z^2$，….</p>
+<p>这个process会一直持续，知道END出现</p>
+<p><img src="/2020/06/28/seq2seq/image-20200628101004928.png" alt="image-20200628101004928" style="zoom:50%;"></p>
+<p><span style="color: red">对于改进后的network，如果现在的input是100个，那么其output就会有100个不同的选择，没有了之前的限制</span></p>
+<h5 id="Applications"><a href="#Applications" class="headerlink" title="Applications"></a>Applications</h5><p>对于机器翻译，如果input包含一些地名、人名，并不需要进行翻译，这是我们就可以用pointer network，将这些名词直接copy</p>
+<p><img src="/2020/06/28/seq2seq/image-20200628102849708.png" alt="image-20200628102849708" style="zoom:50%;"></p>
+<p>对于chat-bot，也有一些名词并不需要学习，可以直接copy</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/deep-learning/" rel="tag"># deep learning</a>
+          
+            <a href="/tags/Sequence-to-Sequence/" rel="tag"># Sequence to Sequence</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/27/network-conpression/" rel="next" title="Network Compression">
+                <i class="fa fa-chevron-left"></i> Network Compression
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="Scarleatt" />
+            
+              <p class="site-author-name" itemprop="name">Scarleatt</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">67</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/scarleatt" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:fawnliu2333@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Generation"><span class="nav-number">1.</span> <span class="nav-text">Generation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Conditional-Generation"><span class="nav-number">2.</span> <span class="nav-text">Conditional Generation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Attention"><span class="nav-number">3.</span> <span class="nav-text">Attention</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Dynamic-Conditional-Generation"><span class="nav-number">3.1.</span> <span class="nav-text">Dynamic Conditional Generation</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Machine-Translation"><span class="nav-number">3.2.</span> <span class="nav-text">Machine Translation</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Speech-Recognition"><span class="nav-number">3.3.</span> <span class="nav-text">Speech Recognition</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Image-Caption-Generation"><span class="nav-number">3.4.</span> <span class="nav-text">Image Caption Generation</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Memory-Network"><span class="nav-number">3.5.</span> <span class="nav-text">Memory Network</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Neural-Turing-Machine"><span class="nav-number">3.6.</span> <span class="nav-text">Neural Turing Machine</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Tips-for-Generation"><span class="nav-number">4.</span> <span class="nav-text">Tips for Generation</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Attention-1"><span class="nav-number">4.1.</span> <span class="nav-text">Attention</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Mismatch-between-Train-and-Test"><span class="nav-number">4.2.</span> <span class="nav-text">Mismatch between Train and Test</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Modifying-Training-Process"><span class="nav-number">4.3.</span> <span class="nav-text">Modifying Training Process?</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Scheduled-Sampling"><span class="nav-number">4.4.</span> <span class="nav-text">Scheduled Sampling</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Beam-Search"><span class="nav-number">4.5.</span> <span class="nav-text">Beam Search</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Better-idea？"><span class="nav-number">4.6.</span> <span class="nav-text">Better idea？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Object-level-v-s-Component-level"><span class="nav-number">4.7.</span> <span class="nav-text">Object level v.s. Component level</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Reinforcement-learning"><span class="nav-number">4.8.</span> <span class="nav-text">Reinforcement learning?</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Pointer-Network"><span class="nav-number">5.</span> <span class="nav-text">Pointer Network</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Seq2seq"><span class="nav-number">5.1.</span> <span class="nav-text">Seq2seq</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Applications"><span class="nav-number">5.2.</span> <span class="nav-text">Applications</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Scarleatt</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">30.8k</span>
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
