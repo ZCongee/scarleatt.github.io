@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+
+
+
+
+  <meta name="keywords" content="Deep Learning,LLE,t-SNE,Unsupervised Learning,Dimension Reduction," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；  Manifold Learning在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learn">
+<meta name="keywords" content="Deep Learning,LLE,t-SNE,Unsupervised Learning,Dimension Reduction">
+<meta property="og:type" content="article">
+<meta property="og:title" content="T-distributed Stochastic Neighbor Embedding (t-SNE)">
+<meta property="og:url" content="http://yoursite.com/2020/06/28/t-SNE/index.html">
+<meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；  Manifold Learning在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learn">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/t-SNE/image-20200628202133893.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/t-SNE/image-20200628202738023.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/t-SNE/image-20200628203501209.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/t-SNE/image-20200628204015777.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/t-SNE/image-20200628205136836.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/t-SNE/image-20200628210651621.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/t-SNE/image-20200628211215304.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/t-SNE/image-20200628211326492.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/t-SNE/image-20200628213646582.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/t-SNE/image-20200628214657615.png">
+<meta property="og:image" content="http://yoursite.com/2020/06/28/t-SNE/image-20200628214721028.png">
+<meta property="og:updated_time" content="2020-06-28T13:55:25.207Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="T-distributed Stochastic Neighbor Embedding (t-SNE)">
+<meta name="twitter:description" content="本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；  Manifold Learning在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learn">
+<meta name="twitter:image" content="http://yoursite.com/2020/06/28/t-SNE/image-20200628202133893.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/06/28/t-SNE/"/>
+
+
+
+
+
+  <title>T-distributed Stochastic Neighbor Embedding (t-SNE) | Scarleatt</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Scarleatt</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/28/t-SNE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">T-distributed Stochastic Neighbor Embedding (t-SNE)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-28T21:50:49+08:00">
+                2020-06-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ML-notes/" itemprop="url" rel="index">
+                    <span itemprop="name">ML-notes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  934
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  3
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；</p>
+</blockquote>
+<h4 id="Manifold-Learning"><a href="#Manifold-Learning" class="headerlink" title="Manifold Learning"></a>Manifold Learning</h4><p>在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learning 任务</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628202133893.png" alt="image-20200628202133893" style="zoom:50%;"></p>
+<h4 id="Locally-Linear-Embedding-LLE"><a href="#Locally-Linear-Embedding-LLE" class="headerlink" title="Locally Linear Embedding (LLE)"></a>Locally Linear Embedding (LLE)</h4><p>用$w_{ij}$表示$x_i,x_j$之间的联系，先找到使得$\sum_i ||x^i-\sum_jw_{ij}x^j||_2$最小化的$w_{ij}$，再根据这个$w_{ij}$来找到降维的结果$z_i,z_j$</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628202738023.png" alt="image-20200628202738023" style="zoom:50%;"></p>
+<p>如果并不知道之前的$x_i,x_j$，那么就可以用LLE这种方法，也可以得出$z_i,z_j$</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628203501209.png" alt="image-20200628203501209" style="zoom:50%;"></p>
+<h4 id="Laplacian-Eigenmaps"><a href="#Laplacian-Eigenmaps" class="headerlink" title="Laplacian Eigenmaps"></a>Laplacian Eigenmaps</h4><p>Review: 在之前的semi-supervised learning中，如果$x^1,x^2$在一个high density region内是相近的，那么我们就可以认为$\hat y^1,\hat y^2$也有类似的表现</p>
+<p>如果$y^i,y^j$是connected的，那么其$w_{ij}$就是对应的相似度；如果没有connect，其$w_{ij}$就是0</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628204015777.png" alt="image-20200628204015777" style="zoom:50%;"></p>
+<p>我们也可以得出类似smoothness的式子，计算$z^i,z^j$之间的smoothness</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628205136836.png" alt="image-20200628205136836" style="zoom:50%;"></p>
+<p>那么我们现在的目标就是找到$z^i,z^j$，来使S达到最小值，还需要有一些额外的constrains</p>
+<p>现在我们对z加入一些constrains，如果降维后z的维数是M，那么我们就不希望取出来的这些点还生活在比M还低维的空间里面；我们现在希望把塞进高维空间的低维空间展开，我们就不希望展开之后的点在一个更低维的空间里面</p>
+<h4 id="T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><a href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE" class="headerlink" title="T-distributed Stochastic Neighbor Embedding (t-SNE)"></a>T-distributed Stochastic Neighbor Embedding (t-SNE)</h4><p>对于之前的LLE方法，类似的data之间是很close的，<u>但不同类别之间的data却没有分开，是叠成一团的</u></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628210651621.png" alt="image-20200628210651621" style="zoom:50%;"></p>
+<p><strong>为了找到对应的$z^i,z^j$</strong>，先计算$x^i,x^j$之间的相似度$S(x^i,x^j)$，再得出一个分布 $P(x^j|x^i)$；还要计算$z^i,z^j$之间的相似度$S’(z^i,z^j)$，得出分布$Q(z^j|z^i)$；</p>
+<p>这两个分布应该越接近越好，使用L来表示</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628211215304.png" alt="image-20200628211215304" style="zoom:50%;"></p>
+<p>可以使用gradient descent，有了L函数，再分别对$z^i,z^j$求偏微分即可</p>
+<p>但t-SNE要对所有的point之间都求similarity，因此计算量比较大，在数据量很大的情况下电脑的计算速度会非常慢</p>
+<p>因此，对于很高的dimensions，通常先做降维（PCA），比如可以降维到50维，再使用t-SNE降到2维</p>
+<p><span style="color: red">通常我们使用t-SNE来对高维的数据进行可视化</span></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628211326492.png" alt="image-20200628211326492" style="zoom:50%;"></p>
+<p>在上图中，红色曲线表示SNE，蓝色曲线表示t-SNE，纵轴表示distribution；如果我们想要维持相同的distribution，即在同一个水平线上，就达到了如图所示的效果；相同的几率，t-SNE的$||z^i-z^j||_2$之间的距离越大</p>
+<p>如果本来就离得很近，那么经过t-SNE之间的距离还是很小；如果本来就离得很远，那么从原来的distribution拉到t-SNE之后，距离会更远；</p>
+<p>到实际的例子中，<span style="color: red">如果本来是同一个类别的data，由于这些data之间的距离很近，不会收到t-SNE很大的影响；但如果是属于不同类别的data，距离是比较远的，t-SNE会放大这种距离</span></p>
+<p>对于下图中的MNIST，先使用PCA进行降维，再进行可视化，就可以得到下图中的good visualization</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628213646582.png" alt="image-20200628213646582" style="zoom:50%;"></p>
+<p>下图中有一个更加直观的例子，使用t-SNE算法，运用gradient descent的思想，不同类别的data之间的距离会越来越大</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628214657615.png" alt="image-20200628214657615" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628214721028.png" alt="image-20200628214721028" style="zoom:50%;"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/LLE/" rel="tag"># LLE</a>
+          
+            <a href="/tags/t-SNE/" rel="tag"># t-SNE</a>
+          
+            <a href="/tags/Unsupervised-Learning/" rel="tag"># Unsupervised Learning</a>
+          
+            <a href="/tags/Dimension-Reduction/" rel="tag"># Dimension Reduction</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/28/dimension-reduction/" rel="next" title="Dimension Reduction">
+                <i class="fa fa-chevron-left"></i> Dimension Reduction
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="Scarleatt" />
+            
+              <p class="site-author-name" itemprop="name">Scarleatt</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">24</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">73</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/scarleatt" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:fawnliu2333@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Manifold-Learning"><span class="nav-number">1.</span> <span class="nav-text">Manifold Learning</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Locally-Linear-Embedding-LLE"><span class="nav-number">2.</span> <span class="nav-text">Locally Linear Embedding (LLE)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Laplacian-Eigenmaps"><span class="nav-number">3.</span> <span class="nav-text">Laplacian Eigenmaps</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><span class="nav-number">4.</span> <span class="nav-text">T-distributed Stochastic Neighbor Embedding (t-SNE)</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Scarleatt</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">33k</span>
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
