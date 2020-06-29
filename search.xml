@@ -1,85 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>CCF-JSON查询</title>
-    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
-    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
-<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>CCF Answer</category>
-      </categories>
-      <tags>
-        <tag>CCF</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Backpropagation</title>
-    <url>/2020/06/06/Backpropagation/</url>
-    <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>这里我们再回顾一下gradient descent，对于网络中的参数$w_1,w_2,…,b_1,b_2,…$，通过求出相对应的梯度$\Delta L(\theta)$，再根据梯度更新网络结构中的参数</p>
-<script type="math/tex; mode=display">
-\theta ^i=\theta^{i-1}-\eta\Delta L(\theta^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606200029374.png" alt="image-20200606200029374" style="zoom:50%;"></p>
-<h4 id="Chain-Rule"><a href="#Chain-Rule" class="headerlink" title="Chain Rule"></a>Chain Rule</h4><p>backpropagation的核心思想就是链式法则</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606200855314.png" alt="image-20200606200855314" style="zoom:50%;"></p>
-<h4 id="Backpropagation"><a href="#Backpropagation" class="headerlink" title="Backpropagation"></a>Backpropagation</h4><p>这里我们先定义了一个loss函数，$l^n(\theta)$表示training data中$y^n$和$\hat y ^n$之间的loss，这个loss可以通过cross entropy或者MSE计算，再将所有的loss进行求和，得到$L(\theta)$</p>
-<script type="math/tex; mode=display">
-L(\theta)=\sum_{n=1}^Nl^n(\theta)</script><p><img src="/2020/06/06/Backpropagation/image-20200606200827557.png" alt="image-20200606200827557" style="zoom:50%;"></p>
-<p>对w求导，可得$\frac{\partial l^n}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}$，这里我们截取了网络中的部分结构，神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606201320644.png" alt="image-20200606201320644" style="zoom:50%;"></p>
-<h4 id="Forward-pass"><a href="#Forward-pass" class="headerlink" title="Forward pass"></a>Forward pass</h4><p>forward过程计算$\frac{\partial z}{\partial w}$，即为权重所对应的上一层神经元的值(x1,x2)</p>
-<script type="math/tex; mode=display">
-z=x_1w_1+x_2+w_2+b \\
-\frac{\partial z}{\partial w_1}=x_1,\quad\frac{\partial z}{\partial w_2}=x_2</script><p><img src="/2020/06/06/Backpropagation/image-20200606201854092.png" alt="image-20200606201854092" style="zoom:50%;"></p>
-<p>对于forward过程，计算出上层神经元的值后，才可以继续计算下一层神经元的梯度$\frac{\partial z}{\partial w}$，</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606202207055.png" alt="image-20200606202207055" style="zoom:50%;"></p>
-<h4 id="Backward-pass"><a href="#Backward-pass" class="headerlink" title="Backward pass"></a>Backward pass</h4><h5 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h5><p>backward过程计算$\frac{\partial l}{\partial z}$，z为激活函数$\sigma (z)$的输入值。这里我们令$a=\sigma(z)$，简化表达式的形式，根据chain rule</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a}</script><p>其中$\frac{\partial a}{\partial z}=\sigma’(z)$，对激活函数求一阶导数，可以很轻松地表示出来</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606203500895.png" alt="image-20200606203500895" style="zoom:50%;"></p>
-<p>接下来我们开始$\frac{\partial l}{\partial a}$的计算，a会影响$z’,z’’$，因此可以再次使用链式法则</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial a}=\frac{\partial z'}{\partial a}\frac{\partial l}{\partial z'}
-+ \frac{\partial z''}{\partial a}\frac{\partial l}{\partial z''}</script><p>由于$z’=aw_3+…,\quad z’’=aw_4+…$，那么我们可以得出</p>
-<script type="math/tex; mode=display">
-\frac{\partial z'}{\partial a}=w_3,\quad\frac{\partial z''}{\partial a}=w_4</script><p>代入原式，可得</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a} =\sigma'(z)\left[w_3\frac{\partial l}{\partial z'}+ w_4\frac{\partial l}{\partial z''}\right]</script><p>对于$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，我们假设可以通过某种方式求得他们的值</p>
-<h5 id="另一个观点"><a href="#另一个观点" class="headerlink" title="另一个观点"></a>另一个观点</h5><p>我们可以从这个图中更加直观地了解backpropagation的过程，这里我们假设有一个神经元（图中的三角形），它不在原来的网络结构中，可以通过$w_3\frac{\partial l}{\partial z’}+ w_4\frac{\partial l}{\partial z’’}$来计算，<u>前面再乘上一个放大系数$\sigma’(z)$，这个放大系数的值是根据forward过程计算的，是一个常数</u>，就可以得出$\frac{\partial l}{\partial z}$的值</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606204707606.png" alt="image-20200606204707606" style="zoom:50%;"></p>
-<h5 id="两种情况"><a href="#两种情况" class="headerlink" title="两种情况"></a>两种情况</h5><p>公式内的其他项都已经计算出来，还有$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$没有得出具体的表达式，此步骤是为了求解$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$的表达式</p>
-<p><strong>Case1：Output Layer</strong></p>
-<p>为了求出$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，这里再次使用了chain rule</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z'}=\frac{\partial y_1}{\partial z'}\frac{\partial l}{\partial y_1}</script><p>其中$\frac{\partial y_1}{\partial z’}$就是激活函数的输出值再对$z’$求导；</p>
-<p>$\frac{\partial l}{\partial y_1}$为相对应的loss函数对y1求导，这个loss函数可以是cross entropy，也可以是MSE，对于不同的loss函数，计算出来的导数也不同</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606213905635.png" alt="image-20200606213905635" style="zoom:50%;"></p>
-<p><strong>Case2: Not output layer</strong></p>
-<p>如果现在假设后层不是output layer，而是hidden layer中的其中一层，计算方式就发生了一些小小的变化</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606215916597.png" alt="image-20200606215916597" style="zoom:50%;"></p>
-<p>根据Case1的推导，知道了$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$之后，就可以对$\frac{\partial l}{\partial z’}$进行求解</p>
-<p>同理可得，知道了$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$，就可以对$\frac{\partial l}{\partial z’}$求解，如下图所示，$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$分别乘上对应的权重$w_5,w_6$，前面再乘一个放大系数，就可得出$\frac{\partial l}{\partial z’}$的表达式</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z'}=\sigma'(z')\left[w_5\frac{\partial l}{\partial z_a}+ w_6\frac{\partial l}{\partial z_b}\right]</script><p><img src="/2020/06/06/Backpropagation/image-20200606221608597.png" alt="image-20200606221608597" style="zoom:50%;"></p>
-<p>知道了$z’,z’’$的值后，就可以根据公式计算z的值；知道了$z_a,z_b$之后，就可以计算$z’$ 的值；……一直循环这个步骤，直到到达output layer为止</p>
-<p>下图中有6个neural，分别是$z_1,z_2,z_3,z_4,z_5,z_6$，为激活函数的输入值，现在要分别求得$l$对这些函数的偏微分$\frac{\partial l}{\partial z_i}$。按照我们之前的做法，要求$\frac{\partial l}{\partial z_1}$，就必须要求$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$，而要求$\frac{\partial l}{\partial z_3}，\frac{\partial l}{\partial z_4}$的值，就必须要分别求两次$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$的值，计算效率很低</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606222718315.png" alt="image-20200606222718315" style="zoom:50%;"></p>
-<p>如果我们先计算$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$，就可以接着计算出$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$的值，再计算出$\frac{\partial l}{\partial z_1},\frac{\partial l}{\partial z_2}$的值，计算效率可以提高很多</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606222732356.png" alt="image-20200606222732356" style="zoom:50%;"></p>
-<h4 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h4><p>神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$，再相乘，就可以得出loss函数对每个hidden layer神经元的梯度，</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}</script><p>代入每次参数更新的公式，就可以得出每次的参数更新结果</p>
-<script type="math/tex; mode=display">
-w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606224217277.png" alt="image-20200606224217277" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>backpropagation</tag>
-        <tag>Deep Learning</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Attack and Defense</title>
     <url>/2020/06/26/Attack/</url>
     <content><![CDATA[<h4 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h4><p><img src="/2020/06/26/Attack/image-20200626095005396.png" alt="image-20200626095005396" style="zoom:50%;"></p>
@@ -174,6 +95,85 @@ x^*=arg\mathop{min}_\limits {d(x^0,x')\leq\epsilon}L(x')</script><p>这里我们
       <tags>
         <tag>Deep Learning</tag>
         <tag>Attack and Defense</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CCF-JSON查询</title>
+    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
+    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
+<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>CCF Answer</category>
+      </categories>
+      <tags>
+        <tag>CCF</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Backpropagation</title>
+    <url>/2020/06/06/Backpropagation/</url>
+    <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>这里我们再回顾一下gradient descent，对于网络中的参数$w_1,w_2,…,b_1,b_2,…$，通过求出相对应的梯度$\Delta L(\theta)$，再根据梯度更新网络结构中的参数</p>
+<script type="math/tex; mode=display">
+\theta ^i=\theta^{i-1}-\eta\Delta L(\theta^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606200029374.png" alt="image-20200606200029374" style="zoom:50%;"></p>
+<h4 id="Chain-Rule"><a href="#Chain-Rule" class="headerlink" title="Chain Rule"></a>Chain Rule</h4><p>backpropagation的核心思想就是链式法则</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606200855314.png" alt="image-20200606200855314" style="zoom:50%;"></p>
+<h4 id="Backpropagation"><a href="#Backpropagation" class="headerlink" title="Backpropagation"></a>Backpropagation</h4><p>这里我们先定义了一个loss函数，$l^n(\theta)$表示training data中$y^n$和$\hat y ^n$之间的loss，这个loss可以通过cross entropy或者MSE计算，再将所有的loss进行求和，得到$L(\theta)$</p>
+<script type="math/tex; mode=display">
+L(\theta)=\sum_{n=1}^Nl^n(\theta)</script><p><img src="/2020/06/06/Backpropagation/image-20200606200827557.png" alt="image-20200606200827557" style="zoom:50%;"></p>
+<p>对w求导，可得$\frac{\partial l^n}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}$，这里我们截取了网络中的部分结构，神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606201320644.png" alt="image-20200606201320644" style="zoom:50%;"></p>
+<h4 id="Forward-pass"><a href="#Forward-pass" class="headerlink" title="Forward pass"></a>Forward pass</h4><p>forward过程计算$\frac{\partial z}{\partial w}$，即为权重所对应的上一层神经元的值(x1,x2)</p>
+<script type="math/tex; mode=display">
+z=x_1w_1+x_2+w_2+b \\
+\frac{\partial z}{\partial w_1}=x_1,\quad\frac{\partial z}{\partial w_2}=x_2</script><p><img src="/2020/06/06/Backpropagation/image-20200606201854092.png" alt="image-20200606201854092" style="zoom:50%;"></p>
+<p>对于forward过程，计算出上层神经元的值后，才可以继续计算下一层神经元的梯度$\frac{\partial z}{\partial w}$，</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606202207055.png" alt="image-20200606202207055" style="zoom:50%;"></p>
+<h4 id="Backward-pass"><a href="#Backward-pass" class="headerlink" title="Backward pass"></a>Backward pass</h4><h5 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h5><p>backward过程计算$\frac{\partial l}{\partial z}$，z为激活函数$\sigma (z)$的输入值。这里我们令$a=\sigma(z)$，简化表达式的形式，根据chain rule</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a}</script><p>其中$\frac{\partial a}{\partial z}=\sigma’(z)$，对激活函数求一阶导数，可以很轻松地表示出来</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606203500895.png" alt="image-20200606203500895" style="zoom:50%;"></p>
+<p>接下来我们开始$\frac{\partial l}{\partial a}$的计算，a会影响$z’,z’’$，因此可以再次使用链式法则</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial a}=\frac{\partial z'}{\partial a}\frac{\partial l}{\partial z'}
++ \frac{\partial z''}{\partial a}\frac{\partial l}{\partial z''}</script><p>由于$z’=aw_3+…,\quad z’’=aw_4+…$，那么我们可以得出</p>
+<script type="math/tex; mode=display">
+\frac{\partial z'}{\partial a}=w_3,\quad\frac{\partial z''}{\partial a}=w_4</script><p>代入原式，可得</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a} =\sigma'(z)\left[w_3\frac{\partial l}{\partial z'}+ w_4\frac{\partial l}{\partial z''}\right]</script><p>对于$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，我们假设可以通过某种方式求得他们的值</p>
+<h5 id="另一个观点"><a href="#另一个观点" class="headerlink" title="另一个观点"></a>另一个观点</h5><p>我们可以从这个图中更加直观地了解backpropagation的过程，这里我们假设有一个神经元（图中的三角形），它不在原来的网络结构中，可以通过$w_3\frac{\partial l}{\partial z’}+ w_4\frac{\partial l}{\partial z’’}$来计算，<u>前面再乘上一个放大系数$\sigma’(z)$，这个放大系数的值是根据forward过程计算的，是一个常数</u>，就可以得出$\frac{\partial l}{\partial z}$的值</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606204707606.png" alt="image-20200606204707606" style="zoom:50%;"></p>
+<h5 id="两种情况"><a href="#两种情况" class="headerlink" title="两种情况"></a>两种情况</h5><p>公式内的其他项都已经计算出来，还有$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$没有得出具体的表达式，此步骤是为了求解$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$的表达式</p>
+<p><strong>Case1：Output Layer</strong></p>
+<p>为了求出$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，这里再次使用了chain rule</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z'}=\frac{\partial y_1}{\partial z'}\frac{\partial l}{\partial y_1}</script><p>其中$\frac{\partial y_1}{\partial z’}$就是激活函数的输出值再对$z’$求导；</p>
+<p>$\frac{\partial l}{\partial y_1}$为相对应的loss函数对y1求导，这个loss函数可以是cross entropy，也可以是MSE，对于不同的loss函数，计算出来的导数也不同</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606213905635.png" alt="image-20200606213905635" style="zoom:50%;"></p>
+<p><strong>Case2: Not output layer</strong></p>
+<p>如果现在假设后层不是output layer，而是hidden layer中的其中一层，计算方式就发生了一些小小的变化</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606215916597.png" alt="image-20200606215916597" style="zoom:50%;"></p>
+<p>根据Case1的推导，知道了$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$之后，就可以对$\frac{\partial l}{\partial z’}$进行求解</p>
+<p>同理可得，知道了$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$，就可以对$\frac{\partial l}{\partial z’}$求解，如下图所示，$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$分别乘上对应的权重$w_5,w_6$，前面再乘一个放大系数，就可得出$\frac{\partial l}{\partial z’}$的表达式</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z'}=\sigma'(z')\left[w_5\frac{\partial l}{\partial z_a}+ w_6\frac{\partial l}{\partial z_b}\right]</script><p><img src="/2020/06/06/Backpropagation/image-20200606221608597.png" alt="image-20200606221608597" style="zoom:50%;"></p>
+<p>知道了$z’,z’’$的值后，就可以根据公式计算z的值；知道了$z_a,z_b$之后，就可以计算$z’$ 的值；……一直循环这个步骤，直到到达output layer为止</p>
+<p>下图中有6个neural，分别是$z_1,z_2,z_3,z_4,z_5,z_6$，为激活函数的输入值，现在要分别求得$l$对这些函数的偏微分$\frac{\partial l}{\partial z_i}$。按照我们之前的做法，要求$\frac{\partial l}{\partial z_1}$，就必须要求$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$，而要求$\frac{\partial l}{\partial z_3}，\frac{\partial l}{\partial z_4}$的值，就必须要分别求两次$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$的值，计算效率很低</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606222718315.png" alt="image-20200606222718315" style="zoom:50%;"></p>
+<p>如果我们先计算$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$，就可以接着计算出$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$的值，再计算出$\frac{\partial l}{\partial z_1},\frac{\partial l}{\partial z_2}$的值，计算效率可以提高很多</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606222732356.png" alt="image-20200606222732356" style="zoom:50%;"></p>
+<h4 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h4><p>神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$，再相乘，就可以得出loss函数对每个hidden layer神经元的梯度，</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}</script><p>代入每次参数更新的公式，就可以得出每次的参数更新结果</p>
+<script type="math/tex; mode=display">
+w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606224217277.png" alt="image-20200606224217277" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>backpropagation</tag>
       </tags>
   </entry>
   <entry>
@@ -687,164 +687,6 @@ P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p>
       </tags>
   </entry>
   <entry>
-    <title>Word Embedding</title>
-    <url>/2020/06/11/Word-Embedding/</url>
-    <content><![CDATA[<h4 id="Word-Embedding"><a href="#Word-Embedding" class="headerlink" title="Word Embedding"></a>Word Embedding</h4><p>如果使用1-of-N encoding，每个单词用一个vector表示，那么5个单词就需要5个vector；如果我们把同一个类别的单词都放到那个类里，即属于class1的单词有dog、cat、bird，属于动物类的单词，同理可以得出class2，class3；</p>
-<p>但只做classify是不够的，这些class之间也有一些其他的联系；比如class1属于动物，class3属于植物，他们都是生物，只做classify并不能体现这种联系</p>
-<p>现在我们把每个word都project到一个两个dimension上， 水平的dimension可以是表示生物（class1，class3）和其他类别class2之间的差距，竖直的dimension可以是会动（class2，class3）的和不会动class1之间的差距</p>
-<p>如果现在有10w个单词，1-of-N encoding就需要10w个vector，但word embedding可能只需要50维左右，就可以表示这些所有的word</p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611094055907.png" alt="image-20200611094055907" style="zoom:50%;"></p>
-<p>word2vec是一个无监督学习问题，如果network的input为“Apple”，要输出其对应的vector </p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611095916810.png" alt="image-20200611095916810" style="zoom:50%;"></p>
-<h4 id="How-to-exploit-the-context"><a href="#How-to-exploit-the-context" class="headerlink" title="How to exploit the context?"></a>How to exploit the context?</h4><h5 id="Count-based"><a href="#Count-based" class="headerlink" title="Count based"></a>Count based</h5><p><img src="/2020/06/11/Word-Embedding/image-20200611102225747.png" alt="image-20200611102225747" style="zoom:50%;"></p>
-<h5 id="Prediction-based"><a href="#Prediction-based" class="headerlink" title="Prediction-based"></a>Prediction-based</h5><p>根据词义的上下文来了解词义</p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611102755128.png" alt="image-20200611102755128" style="zoom:50%;"></p>
-<p><strong>Sharing weight</strong></p>
-<p>$w_{i-1},w_{i-2}$的第一维对应$z_1$，其对应的weight是一样的；同理$w_{i-1},w_{i-2}$的第二维对应$z_1$，其对应的weight是一样的,……，如果每一维对应的weight都不一样，那么实际上就输入了两个vector，</p>
-<p>网络输出每个word为下一个生成word的probability</p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611103812991.png" alt="image-20200611103812991" style="zoom:50%;"></p>
-<p>如果我们设置$x_{i-1},x_{i-2}$的长度都是$|V|$，$z$的长度是$|Z|$，那么</p>
-<script type="math/tex; mode=display">
-z=W_1x_{i-2}+W_2x_{i-1}</script><p>其中$W_1=W_2=W$，那么$z=W(x_{i-2}+x_{i-1})$,</p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611104833054.png" alt="image-20200611104833054" style="zoom:50%;"></p>
-<p>那么在实际的网络训练中，我们如何保证$W_1=W_2$呢？</p>
-<p>首先需要将$w_1,w_2$初始化为相同的值，那么</p>
-<script type="math/tex; mode=display">
-w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}\\
-w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}</script><p>由于gradient的值不同，$w_1,w_2$在更新一次参数之后就不相等了，必须保证每次更新之后的值还是一样的，因此</p>
-<script type="math/tex; mode=display">
-w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}-\eta \frac{\partial C}{\partial w_j}\\
-w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}-\eta \frac{\partial C}{\partial w_i}</script><p>这样每次更新的值都一样的，也就保证了$w_1=w_2$</p>
-<p><strong>Training</strong></p>
-<p>对于输入“潮水、退了”，我们希望network的输出和“就”越接近越好，即最小化cross entropy</p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611103701528.png" alt="image-20200611103701528" style="zoom:50%;"></p>
-<p> <strong>Various Architectures</strong></p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611110004840.png" alt="image-20200611110004840" style="zoom:50%;"></p>
-<p><strong>Result</strong></p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611110430525.png" alt="image-20200611110430525" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>word embedding</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>PCA</title>
-    <url>/2020/06/28/dimension-reduction/</url>
-    <content><![CDATA[<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>unsupervised learning可以分为两大类，dimension reduction和generation</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628104819015.png" alt="image-20200628104819015" style="zoom:50%;"></p>
-<h4 id="Clustering"><a href="#Clustering" class="headerlink" title="Clustering"></a>Clustering</h4><p><img src="/2020/06/28/dimension-reduction/image-20200628105521936.png" alt="image-20200628105521936" style="zoom:50%;"></p>
-<p>先根据input之间的相似度建立一颗树，再用一条线切一刀，如果使用红色的线切，那么可以分为2个大类</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628110013187.png" alt="image-20200628110013187" style="zoom:50%;"></p>
-<h4 id="Distributed-Representation"><a href="#Distributed-Representation" class="headerlink" title="Distributed Representation"></a>Distributed Representation</h4><p><img src="/2020/06/28/dimension-reduction/image-20200628110332232.png" alt="image-20200628110332232" style="zoom:50%;"></p>
-<h4 id="Dimension-Reduction"><a href="#Dimension-Reduction" class="headerlink" title="Dimension Reduction"></a>Dimension Reduction</h4><p>用2维就可以表示这些特征，并不需要用到3D</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628110540545.png" alt="image-20200628110540545" style="zoom:50%;"></p>
-<p>这些3只有倾斜的角度不一样，用1D即可表示</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628110631658.png" alt="image-20200628110631658" style="zoom:50%;"></p>
-<p>主要有两种方法，feature selection和PCA</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628110752052.png" alt="image-20200628110752052" style="zoom:50%;"></p>
-<h4 id="PCA"><a href="#PCA" class="headerlink" title="PCA"></a>PCA</h4><p>如果reduce to 1D，我们使用$z_1=w^1 \cdot  x$，使得$x$投影到$w_1$上，即达到了降维的目的，那么我们如何来评价降维的好坏呢？</p>
-<p>我们可以使用降维之后数据的variance来评价，variance越大越好</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628112108807.png" alt="image-20200628112108807" style="zoom:50%;"></p>
-<p>如果reduce to 2D，那么现在就需要投影到两个不同的方向$(w^1,w^2)$上，再来与$x$做inner product，得到$z_1,z_2$，再分别计算这两者的variance；其中$w^1,w^2$要满足一定的条件，即$w^1\cdot w^2=0$，两者是垂直的，可以保证是不同的方向</p>
-<p>那么W就是一个正交矩阵，向量之间相互正交，且向量模长都是1</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628112628933.png" alt="image-20200628112628933" style="zoom:50%;"></p>
-<h5 id="Formula"><a href="#Formula" class="headerlink" title="Formula"></a>Formula</h5><p><img src="/2020/06/28/dimension-reduction/image-20200628114149626.png" alt="image-20200628114149626" style="zoom:50%;"></p>
-<p>由于$a^Tb$是一个scalar，所以可以直接加上转置符号</p>
-<script type="math/tex; mode=display">
-\begin{aligned}
-(a\cdot b)^2&=a^Tba^Tb\\
-&=a^Tb(a^Tb)^T
-\end{aligned}</script><p>其中$Ex=\bar x$，协方差$Cov(x)$为</p>
-<script type="math/tex; mode=display">
-\begin{aligned}
-Cov(x)&=\frac{1}{N}\sum(x-Ex)(x-Ex)^T \\
-&=\frac{1}{N}\sum(x-\bar x)(x-\bar x)^T
-\end{aligned}</script><p>令协方差为S，那么我们现在的问题是 maximizing $(w^1)^TSw^1$，限制条件是</p>
-<script type="math/tex; mode=display">
-||w^1||_2=(w^1)^Tw^1=1</script><p>先找到$w^1$，可以maximizing $(w^1)^TSw^1$，这里使用了拉格朗日乘数法，再对$w^1$求偏微分，得</p>
-<script type="math/tex; mode=display">
-Sw^1=\alpha w^1</script><p>即$w^1$为特征向量 eigenvector</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628115707351.png" alt="image-20200628115707351" style="zoom:50%;"></p>
-<p>$w^1$为矩阵S的特征向量，对应的特征值$\lambda_1$是最大的</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628115903683.png" alt="image-20200628115903683" style="zoom:50%;"></p>
-<p>再找到$w^2$，对$w^2$求偏微分，得</p>
-<script type="math/tex; mode=display">
-Sw^2-\alpha w^2-\beta w^1=0</script><p>两边同时乘上$(w^1)^T$，得</p>
-<script type="math/tex; mode=display">
-(w^1)^TSw^2-\alpha (w^1)^Tw^2-\beta(w^1)^T w^1=0</script><p>代入$(w^1)^Tw^1=1,(w^2)^Tw^1=0$，</p>
-<script type="math/tex; mode=display">
-\begin{aligned}
-&(w^1)^TSw^2-\alpha (w^1)^Tw^2-\beta(w^1)^T w^1\\
-&=(w^1)^TSw^2-\beta
-\end{aligned}</script><p>代入$Sw^1=\lambda w^1$,</p>
-<script type="math/tex; mode=display">
-\begin{aligned}
-&(w^1)^TSw^2\\
-&=((w^1)^TSw^2)^T=(w^2)^TS^Tw^1\\
-&=(w^2)^TSw^1=\lambda (w^2)^Tw^1=0
-\end{aligned}</script><p>那么</p>
-<script type="math/tex; mode=display">
-0-\alpha\ 0-\beta\ 1=0\quad\rightarrow \beta=0</script><p>代入$Sw^2-\alpha w^2-\beta w^1=0$，可得</p>
-<script type="math/tex; mode=display">
-Sw^2-\alpha w^2=0\quad \rightarrow Sw^2=\alpha w^2</script><p>可得出$w^2$为矩阵S的特征向量，对应的特征值$\lambda_2$是第二大的</p>
-<h5 id="Decorrelation"><a href="#Decorrelation" class="headerlink" title="Decorrelation"></a><strong>Decorrelation</strong></h5><script type="math/tex; mode=display">
-W=\begin{pmatrix} 
-(w_1)^T\\
-(w_2)^T \\
-\vdots
-\\
-(w_K)^T
-\end{pmatrix}</script><p>$(w^1)^T$表示W的第一行，且$(w^1)^Tw^1=1,(w^2)^Tw^1=0$，因此$Ww^1=e_1,…,Ww^K=e_K$，</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628123018232.png" alt="image-20200628123018232" style="zoom:50%;"></p>
-<p>可得出$Cov(z)$是一个对角矩阵，只有正对角线上有元素</p>
-<h5 id="Another-Point-of-View"><a href="#Another-Point-of-View" class="headerlink" title="Another Point of View"></a>Another Point of View</h5><p>下图中的7可以由三个部分组成，即$u^1,u^3,u^5$</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628123840304.png" alt="image-20200628123840304" style="zoom:50%;"></p>
-<p>那么我们目标就是找到这K个component，使得$||(x-\bar x)-\hat x||_2$达到最小值</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628124332233.png" alt="image-20200628124332233" style="zoom:50%;"></p>
-<p>x可以分为$x^1,x^2,…$，对应的$c_1$也可以分为$c_1^1,c_1^2,…$，这样就形成了三个矩阵</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628125033081.png" alt="image-20200628125033081" style="zoom:50%;"></p>
-<p>那么我们怎么来最小化矩阵之间的最小差值呢？</p>
-<p>下图中的U对应PCA中的权重矩阵W，为前文求出来的K个特征向量，为K个component，$\sum,V$表示C矩阵</p>
-<p>对于矩阵$XX^T$的K个最大的特征值，矩阵U的每一列表示就表示这些特征值所对应的K个特征向量</p>
-<p>做SVD求解出来的U矩阵，就是协方差矩阵$Cov(z)$所对应的特征向量，也就是PCA得出来的解</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628125515261.png" alt="image-20200628125515261" style="zoom:50%;"></p>
-<p>其中$c_k$可以用另外一种形式表达出来，$c_k=(x-\bar x)\cdot w^k$，$\cdot$表示做inner product</p>
-<p>如果此时K=2，那么$c_1=\sum_{i=1}^3(x-\bar x)\cdot w^k_i$，可以用neural network的形式表达出来，</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628155642780.png" alt="image-20200628155642780" style="zoom:50%;"></p>
-<p>那么$c_1$乘上$w_i^1$，就可以得到output为$\hat x_i$，</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628160122130.png" alt="image-20200628160122130" style="zoom:50%;"></p>
-<p>对于$c_2$也有类似的结果</p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628160212513.png" alt="image-20200628160212513" style="zoom:50%;"></p>
-<p>对于network的output为$\hat x_i$，应与$x-\bar x$之间的error最小化</p>
-<p>那么我们就可以把这个结构看成是具有一个hidden layer的network，其output和input应该越接近越好，这就可以叫做<strong>Autoencoder</strong></p>
-<p>Q：既然是neural network，那么我们可以用gradient descent来得到和PCA一样的最优解吗？</p>
-<p>A：用PCA求解出来的w是相互正交的，可以让reconstruction error最小化，但gradient descent求解出来的w并不能保证这一点，而且并不能使这个reconstruction error比PCA方法更小</p>
-<p><span style="color: red">如果是在linear的情况下，使用PCA比较好，用network就会很麻烦；但network可以是deep的，可以中间有很多个hidden layer，这被称为<strong>Deep Autoencoder</strong></span></p>
-<h5 id="Weakness-of-PCA"><a href="#Weakness-of-PCA" class="headerlink" title="Weakness of PCA"></a>Weakness of PCA</h5><ul>
-<li>unsupervised，输入的data是没有label的，PCA会找一种方式使得降维之后data的variance最大，就可能出现左上的结果，这时两者的class是不一样的，如果还是继续投影到红线上，就会出现两个class的data相互交错的局面；</li>
-<li>Linear，对于立体的data，如果还是继续pca，得到的结果也会非常不理想</li>
-</ul>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628161709298.png" alt="image-20200628161709298" style="zoom:50%;"></p>
-<h5 id="Pokemon"><a href="#Pokemon" class="headerlink" title="Pokémon"></a>Pokémon</h5><p><img src="/2020/06/28/dimension-reduction/image-20200628162244781.png" alt="image-20200628162244781" style="zoom:50%;"></p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628162630167.png" alt="image-20200628162630167" style="zoom:50%;"></p>
-<p><img src="/2020/06/28/dimension-reduction/image-20200628162636915.png" alt="image-20200628162636915" style="zoom:50%;"></p>
-<h5 id="MNIST"><a href="#MNIST" class="headerlink" title="MNIST"></a>MNIST</h5><p><img src="/2020/06/28/dimension-reduction/image-20200628162743780.png" alt="image-20200628162743780" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>PCA</tag>
-        <tag>Dimension Reduction</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Recurrent Neural Network</title>
     <url>/2020/06/10/RNN/</url>
     <content><![CDATA[<h4 id="Example-Application"><a href="#Example-Application" class="headerlink" title="Example Application"></a>Example Application</h4><p>将Taipei作为向量的输入，由于RNN网络是有记忆的，因此可以根据输入来预测目的地dest，以及离开的时间</p>
@@ -1005,6 +847,164 @@ a=h(c')f(z_0)=7</script><p><img src="/2020/06/10/RNN/image-20200609225546396.png
         <tag>Deep Learning</tag>
         <tag>RNN</tag>
         <tag>LSTM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Word Embedding</title>
+    <url>/2020/06/11/Word-Embedding/</url>
+    <content><![CDATA[<h4 id="Word-Embedding"><a href="#Word-Embedding" class="headerlink" title="Word Embedding"></a>Word Embedding</h4><p>如果使用1-of-N encoding，每个单词用一个vector表示，那么5个单词就需要5个vector；如果我们把同一个类别的单词都放到那个类里，即属于class1的单词有dog、cat、bird，属于动物类的单词，同理可以得出class2，class3；</p>
+<p>但只做classify是不够的，这些class之间也有一些其他的联系；比如class1属于动物，class3属于植物，他们都是生物，只做classify并不能体现这种联系</p>
+<p>现在我们把每个word都project到一个两个dimension上， 水平的dimension可以是表示生物（class1，class3）和其他类别class2之间的差距，竖直的dimension可以是会动（class2，class3）的和不会动class1之间的差距</p>
+<p>如果现在有10w个单词，1-of-N encoding就需要10w个vector，但word embedding可能只需要50维左右，就可以表示这些所有的word</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611094055907.png" alt="image-20200611094055907" style="zoom:50%;"></p>
+<p>word2vec是一个无监督学习问题，如果network的input为“Apple”，要输出其对应的vector </p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611095916810.png" alt="image-20200611095916810" style="zoom:50%;"></p>
+<h4 id="How-to-exploit-the-context"><a href="#How-to-exploit-the-context" class="headerlink" title="How to exploit the context?"></a>How to exploit the context?</h4><h5 id="Count-based"><a href="#Count-based" class="headerlink" title="Count based"></a>Count based</h5><p><img src="/2020/06/11/Word-Embedding/image-20200611102225747.png" alt="image-20200611102225747" style="zoom:50%;"></p>
+<h5 id="Prediction-based"><a href="#Prediction-based" class="headerlink" title="Prediction-based"></a>Prediction-based</h5><p>根据词义的上下文来了解词义</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611102755128.png" alt="image-20200611102755128" style="zoom:50%;"></p>
+<p><strong>Sharing weight</strong></p>
+<p>$w_{i-1},w_{i-2}$的第一维对应$z_1$，其对应的weight是一样的；同理$w_{i-1},w_{i-2}$的第二维对应$z_1$，其对应的weight是一样的,……，如果每一维对应的weight都不一样，那么实际上就输入了两个vector，</p>
+<p>网络输出每个word为下一个生成word的probability</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611103812991.png" alt="image-20200611103812991" style="zoom:50%;"></p>
+<p>如果我们设置$x_{i-1},x_{i-2}$的长度都是$|V|$，$z$的长度是$|Z|$，那么</p>
+<script type="math/tex; mode=display">
+z=W_1x_{i-2}+W_2x_{i-1}</script><p>其中$W_1=W_2=W$，那么$z=W(x_{i-2}+x_{i-1})$,</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611104833054.png" alt="image-20200611104833054" style="zoom:50%;"></p>
+<p>那么在实际的网络训练中，我们如何保证$W_1=W_2$呢？</p>
+<p>首先需要将$w_1,w_2$初始化为相同的值，那么</p>
+<script type="math/tex; mode=display">
+w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}\\
+w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}</script><p>由于gradient的值不同，$w_1,w_2$在更新一次参数之后就不相等了，必须保证每次更新之后的值还是一样的，因此</p>
+<script type="math/tex; mode=display">
+w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}-\eta \frac{\partial C}{\partial w_j}\\
+w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}-\eta \frac{\partial C}{\partial w_i}</script><p>这样每次更新的值都一样的，也就保证了$w_1=w_2$</p>
+<p><strong>Training</strong></p>
+<p>对于输入“潮水、退了”，我们希望network的输出和“就”越接近越好，即最小化cross entropy</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611103701528.png" alt="image-20200611103701528" style="zoom:50%;"></p>
+<p> <strong>Various Architectures</strong></p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611110004840.png" alt="image-20200611110004840" style="zoom:50%;"></p>
+<p><strong>Result</strong></p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611110430525.png" alt="image-20200611110430525" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>word embedding</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>PCA</title>
+    <url>/2020/06/28/dimension-reduction/</url>
+    <content><![CDATA[<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>unsupervised learning可以分为两大类，dimension reduction和generation</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628104819015.png" alt="image-20200628104819015" style="zoom:50%;"></p>
+<h4 id="Clustering"><a href="#Clustering" class="headerlink" title="Clustering"></a>Clustering</h4><p><img src="/2020/06/28/dimension-reduction/image-20200628105521936.png" alt="image-20200628105521936" style="zoom:50%;"></p>
+<p>先根据input之间的相似度建立一颗树，再用一条线切一刀，如果使用红色的线切，那么可以分为2个大类</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628110013187.png" alt="image-20200628110013187" style="zoom:50%;"></p>
+<h4 id="Distributed-Representation"><a href="#Distributed-Representation" class="headerlink" title="Distributed Representation"></a>Distributed Representation</h4><p><img src="/2020/06/28/dimension-reduction/image-20200628110332232.png" alt="image-20200628110332232" style="zoom:50%;"></p>
+<h4 id="Dimension-Reduction"><a href="#Dimension-Reduction" class="headerlink" title="Dimension Reduction"></a>Dimension Reduction</h4><p>用2维就可以表示这些特征，并不需要用到3D</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628110540545.png" alt="image-20200628110540545" style="zoom:50%;"></p>
+<p>这些3只有倾斜的角度不一样，用1D即可表示</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628110631658.png" alt="image-20200628110631658" style="zoom:50%;"></p>
+<p>主要有两种方法，feature selection和PCA</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628110752052.png" alt="image-20200628110752052" style="zoom:50%;"></p>
+<h4 id="PCA"><a href="#PCA" class="headerlink" title="PCA"></a>PCA</h4><p>如果reduce to 1D，我们使用$z_1=w^1 \cdot  x$，使得$x$投影到$w_1$上，即达到了降维的目的，那么我们如何来评价降维的好坏呢？</p>
+<p>我们可以使用降维之后数据的variance来评价，variance越大越好</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628112108807.png" alt="image-20200628112108807" style="zoom:50%;"></p>
+<p>如果reduce to 2D，那么现在就需要投影到两个不同的方向$(w^1,w^2)$上，再来与$x$做inner product，得到$z_1,z_2$，再分别计算这两者的variance；其中$w^1,w^2$要满足一定的条件，即$w^1\cdot w^2=0$，两者是垂直的，可以保证是不同的方向</p>
+<p>那么W就是一个正交矩阵，向量之间相互正交，且向量模长都是1</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628112628933.png" alt="image-20200628112628933" style="zoom:50%;"></p>
+<h5 id="Formula"><a href="#Formula" class="headerlink" title="Formula"></a>Formula</h5><p><img src="/2020/06/28/dimension-reduction/image-20200628114149626.png" alt="image-20200628114149626" style="zoom:50%;"></p>
+<p>由于$a^Tb$是一个scalar，所以可以直接加上转置符号</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+(a\cdot b)^2&=a^Tba^Tb\\
+&=a^Tb(a^Tb)^T
+\end{aligned}</script><p>其中$Ex=\bar x$，协方差$Cov(x)$为</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+Cov(x)&=\frac{1}{N}\sum(x-Ex)(x-Ex)^T \\
+&=\frac{1}{N}\sum(x-\bar x)(x-\bar x)^T
+\end{aligned}</script><p>令协方差为S，那么我们现在的问题是 maximizing $(w^1)^TSw^1$，限制条件是</p>
+<script type="math/tex; mode=display">
+||w^1||_2=(w^1)^Tw^1=1</script><p>先找到$w^1$，可以maximizing $(w^1)^TSw^1$，这里使用了拉格朗日乘数法，再对$w^1$求偏微分，得</p>
+<script type="math/tex; mode=display">
+Sw^1=\alpha w^1</script><p>即$w^1$为特征向量 eigenvector</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628115707351.png" alt="image-20200628115707351" style="zoom:50%;"></p>
+<p>$w^1$为矩阵S的特征向量，对应的特征值$\lambda_1$是最大的</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628115903683.png" alt="image-20200628115903683" style="zoom:50%;"></p>
+<p>再找到$w^2$，对$w^2$求偏微分，得</p>
+<script type="math/tex; mode=display">
+Sw^2-\alpha w^2-\beta w^1=0</script><p>两边同时乘上$(w^1)^T$，得</p>
+<script type="math/tex; mode=display">
+(w^1)^TSw^2-\alpha (w^1)^Tw^2-\beta(w^1)^T w^1=0</script><p>代入$(w^1)^Tw^1=1,(w^2)^Tw^1=0$，</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&(w^1)^TSw^2-\alpha (w^1)^Tw^2-\beta(w^1)^T w^1\\
+&=(w^1)^TSw^2-\beta
+\end{aligned}</script><p>代入$Sw^1=\lambda w^1$,</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&(w^1)^TSw^2\\
+&=((w^1)^TSw^2)^T=(w^2)^TS^Tw^1\\
+&=(w^2)^TSw^1=\lambda (w^2)^Tw^1=0
+\end{aligned}</script><p>那么</p>
+<script type="math/tex; mode=display">
+0-\alpha\ 0-\beta\ 1=0\quad\rightarrow \beta=0</script><p>代入$Sw^2-\alpha w^2-\beta w^1=0$，可得</p>
+<script type="math/tex; mode=display">
+Sw^2-\alpha w^2=0\quad \rightarrow Sw^2=\alpha w^2</script><p>可得出$w^2$为矩阵S的特征向量，对应的特征值$\lambda_2$是第二大的</p>
+<h5 id="Decorrelation"><a href="#Decorrelation" class="headerlink" title="Decorrelation"></a><strong>Decorrelation</strong></h5><script type="math/tex; mode=display">
+W=\begin{pmatrix} 
+(w_1)^T\\
+(w_2)^T \\
+\vdots
+\\
+(w_K)^T
+\end{pmatrix}</script><p>$(w^1)^T$表示W的第一行，且$(w^1)^Tw^1=1,(w^2)^Tw^1=0$，因此$Ww^1=e_1,…,Ww^K=e_K$，</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628123018232.png" alt="image-20200628123018232" style="zoom:50%;"></p>
+<p>可得出$Cov(z)$是一个对角矩阵，只有正对角线上有元素</p>
+<h5 id="Another-Point-of-View"><a href="#Another-Point-of-View" class="headerlink" title="Another Point of View"></a>Another Point of View</h5><p>下图中的7可以由三个部分组成，即$u^1,u^3,u^5$</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628123840304.png" alt="image-20200628123840304" style="zoom:50%;"></p>
+<p>那么我们目标就是找到这K个component，使得$||(x-\bar x)-\hat x||_2$达到最小值</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628124332233.png" alt="image-20200628124332233" style="zoom:50%;"></p>
+<p>x可以分为$x^1,x^2,…$，对应的$c_1$也可以分为$c_1^1,c_1^2,…$，这样就形成了三个矩阵</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628125033081.png" alt="image-20200628125033081" style="zoom:50%;"></p>
+<p>那么我们怎么来最小化矩阵之间的最小差值呢？</p>
+<p>下图中的U对应PCA中的权重矩阵W，为前文求出来的K个特征向量，为K个component，$\sum,V$表示C矩阵</p>
+<p>对于矩阵$XX^T$的K个最大的特征值，矩阵U的每一列表示就表示这些特征值所对应的K个特征向量</p>
+<p>做SVD求解出来的U矩阵，就是协方差矩阵$Cov(z)$所对应的特征向量，也就是PCA得出来的解</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628125515261.png" alt="image-20200628125515261" style="zoom:50%;"></p>
+<p>其中$c_k$可以用另外一种形式表达出来，$c_k=(x-\bar x)\cdot w^k$，$\cdot$表示做inner product</p>
+<p>如果此时K=2，那么$c_1=\sum_{i=1}^3(x-\bar x)\cdot w^k_i$，可以用neural network的形式表达出来，</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628155642780.png" alt="image-20200628155642780" style="zoom:50%;"></p>
+<p>那么$c_1$乘上$w_i^1$，就可以得到output为$\hat x_i$，</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628160122130.png" alt="image-20200628160122130" style="zoom:50%;"></p>
+<p>对于$c_2$也有类似的结果</p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628160212513.png" alt="image-20200628160212513" style="zoom:50%;"></p>
+<p>对于network的output为$\hat x_i$，应与$x-\bar x$之间的error最小化</p>
+<p>那么我们就可以把这个结构看成是具有一个hidden layer的network，其output和input应该越接近越好，这就可以叫做<strong>Autoencoder</strong></p>
+<p>Q：既然是neural network，那么我们可以用gradient descent来得到和PCA一样的最优解吗？</p>
+<p>A：用PCA求解出来的w是相互正交的，可以让reconstruction error最小化，但gradient descent求解出来的w并不能保证这一点，而且并不能使这个reconstruction error比PCA方法更小</p>
+<p><span style="color: red">如果是在linear的情况下，使用PCA比较好，用network就会很麻烦；但network可以是deep的，可以中间有很多个hidden layer，这被称为<strong>Deep Autoencoder</strong></span></p>
+<h5 id="Weakness-of-PCA"><a href="#Weakness-of-PCA" class="headerlink" title="Weakness of PCA"></a>Weakness of PCA</h5><ul>
+<li>unsupervised，输入的data是没有label的，PCA会找一种方式使得降维之后data的variance最大，就可能出现左上的结果，这时两者的class是不一样的，如果还是继续投影到红线上，就会出现两个class的data相互交错的局面；</li>
+<li>Linear，对于立体的data，如果还是继续pca，得到的结果也会非常不理想</li>
+</ul>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628161709298.png" alt="image-20200628161709298" style="zoom:50%;"></p>
+<h5 id="Pokemon"><a href="#Pokemon" class="headerlink" title="Pokémon"></a>Pokémon</h5><p><img src="/2020/06/28/dimension-reduction/image-20200628162244781.png" alt="image-20200628162244781" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628162630167.png" alt="image-20200628162630167" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/dimension-reduction/image-20200628162636915.png" alt="image-20200628162636915" style="zoom:50%;"></p>
+<h5 id="MNIST"><a href="#MNIST" class="headerlink" title="MNIST"></a>MNIST</h5><p><img src="/2020/06/28/dimension-reduction/image-20200628162743780.png" alt="image-20200628162743780" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Dimension Reduction</tag>
+        <tag>PCA</tag>
       </tags>
   </entry>
   <entry>
@@ -1451,81 +1451,6 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
       </tags>
   </entry>
   <entry>
-    <title>指令级并行</title>
-    <url>/2020/03/11/%E6%8C%87%E4%BB%A4%E7%BA%A7%E5%B9%B6%E8%A1%8C/</url>
-    <content><![CDATA[<h5 id="指令级并行"><a href="#指令级并行" class="headerlink" title="指令级并行"></a>指令级并行</h5><p>指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：</p>
-<ul>
-<li>资源重复，重复设置多个处理部件；</li>
-<li>采用流水线技术，使指令重叠并行执行。</li>
-</ul>
-<p>指令的<strong>静态调度</strong>：依靠编译器进行静态调度，以减少相关和冲突。它不是在程序执行的过程中，而是在编译期间进行调度和优化。</p>
-<p>指令的<strong>动态调度</strong>：能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。是由硬件在程序执行时进行优化的。</p>
-<p>基本程序块：一串连续的代码除了入口和出口以外，没有其他的分支指令和转入点。</p>
-<p>不精确异常：当执行指令i导致发生异常时，处理机的现场与严格按照程序顺序执行时指令i的现场不同。</p>
-<p>精确异常：发生异常时，处理机的现场与严格按照程序顺序执行指令i的现场相同。</p>
-<h5 id="相关与冲突"><a href="#相关与冲突" class="headerlink" title="相关与冲突"></a>相关与冲突</h5><ul>
-<li>数据相关</li>
-<li>名相关，名指指令所访问的寄存器或存储器单元的名称。<ul>
-<li>反相关</li>
-<li>输出相关</li>
-</ul>
-</li>
-<li>控制相关</li>
-</ul>
-<p>流水线冲突 指由于相关的存在，使得指令流中的下一条指令不能在指定的时钟周期执行。<u>结构冲突</u>是硬件资源冲突引起的，<u>数据冲突</u>是数据相关和名相关引起的，<u>控制冲突</u>是控制相关引起的。</p>
-<p>为了保证程序执行的正确性，必须保证的最关键的两个特性是：</p>
-<ul>
-<li><u>数据流</u></li>
-<li>保持<u>异常行为</u>：无论怎么改变指令的执行顺序，都不能改变程序中异常的发生情况。</li>
-</ul>
-<h4 id="指令的动态调度"><a href="#指令的动态调度" class="headerlink" title="指令的动态调度"></a>指令的动态调度</h4><p>能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。优点：</p>
-<ul>
-<li>能够处理一些<u>编译时情况不明的相关</u>（比如涉及存储器访问的相关），并简化了编译器；</li>
-<li>能够使本来是面向某一流水线优化编译的代码在<u>其他动态调度的流水线上</u>也能执行。</li>
-</ul>
-<h5 id="记分牌"><a href="#记分牌" class="headerlink" title="记分牌"></a>记分牌</h5><p>把流水线中的译码段ID分解成了两个段：流出和读操作数。记录的信息由三部分组成：</p>
-<ul>
-<li>指令状态表</li>
-<li>功能部件状态表</li>
-<li>结果寄存器状态表</li>
-</ul>
-<h5 id="Tomasulo"><a href="#Tomasulo" class="headerlink" title="Tomasulo"></a>Tomasulo</h5><p>核心思想：（1）记录和检测指令相关，操作数一旦就绪就立即执行，把发生RAW冲突的可能性较小到最低；（2）通过寄存器换名来消除WAR冲突和WAW冲突。寄存器换名是通过保留站来实现，它保存正在流出和等待流出指令所需要的操作数。</p>
-<p>基本思想：只要操作数有效，就取其放到保留站中，避免指令流出时才到寄存器取数据，这就使得即将执行的指令从相应的保留站中读取数据，而不用到寄存器中。指令的执行结果也是直接放到等待数据的其它保留站中去。一条指令流出时，存放操作数的寄存器被换名为该寄存器对应的保留站的名称。</p>
-<h4 id="动态分支预测"><a href="#动态分支预测" class="headerlink" title="动态分支预测"></a>动态分支预测</h4><p>用硬件动态地进行分支处理的方法。在程序运行的过程中，根据分支指令过去的表现预测将来的行为。如果分支行为发生了变化，预测结果也跟着变化。</p>
-<h5 id="分支历史表（BHT）"><a href="#分支历史表（BHT）" class="headerlink" title="分支历史表（BHT）"></a>分支历史表（BHT）</h5><p>用来记录相关指令最近一次或几次的执行情况是成功还是失败，并根据此进行预测。</p>
-<h5 id="分支目标缓冲器（BTB）"><a href="#分支目标缓冲器（BTB）" class="headerlink" title="分支目标缓冲器（BTB）"></a>分支目标缓冲器（BTB）</h5><p>是一种动态分支预测技术。将（1）<u>执行过的成功分支指令的目标地址</u>（2）<u>预测的分支目标地址</u> 记录在一张硬件表格中。在每次取指令时，用该指令的地址与BTB表中所有项目的第一个字段进行比较，以便尽早知道指令是否分支成功，尽早知道目标地址，达到减少分支开销的目的。</p>
-<p>BHT方法是在<u>译码ID</u>段，就能获得分支目标地址、顺序下一条指令以及预测的结果。BTB方法在<u>取址IF</u>段就能知道这些信息。</p>
-<h5 id="基于硬件的前瞻执行"><a href="#基于硬件的前瞻执行" class="headerlink" title="基于硬件的前瞻执行"></a>基于硬件的前瞻执行</h5><p>是解决控制相关的方法，它对分支指令的结果进行猜测，然后按照这个猜测继续取址、流出和执行后续的指令。但指令执行的结果不写回寄存器或存储器，而是放到一个称为ROB（再定序列缓冲器）中。等到相应的指令得到“确认”（即确实是应该执行）后，才将结果写入寄存器或存储器中。</p>
-<p>把三种思想结合在了一起：</p>
-<ul>
-<li><u>动态分支预测</u>。用来选择后续执行的指令。</li>
-<li>在控制相关的结果尚未出来之前，<u>前瞻</u>地执行后续指令。</li>
-<li>用<u>动态调度</u>对基本块的各种组合进行<u>跨基本块的组合</u>。</li>
-</ul>
-<h4 id="超标量流水线"><a href="#超标量流水线" class="headerlink" title="超标量流水线"></a>超标量流水线</h4><p>是一种多指令流出技术。它在每个时钟周期流出的指令条数不固定，依代码的具体情况而定，但有个上限。</p>
-<h4 id="超长指令字"><a href="#超长指令字" class="headerlink" title="超长指令字"></a>超长指令字</h4><p>是一种多指令流出技术。在每个时钟周期内流出的指令数都是固定的，这些指令构成一条长指令或者一个指令包，在这个指令包中，指令之间的并行性是通过指令显式地表现出来的。这种处理机的指令调度由编译器静态完成。</p>
-]]></content>
-      <categories>
-        <category>计算机体系结构</category>
-      </categories>
-      <tags>
-        <tag>计算机体系结构</tag>
-        <tag>指令级并行</tag>
-        <tag>指令相关</tag>
-        <tag>指令冲突</tag>
-        <tag>动态调度</tag>
-        <tag>记分牌</tag>
-        <tag>Tomasulo</tag>
-        <tag>BHT</tag>
-        <tag>BTB</tag>
-        <tag>ROB</tag>
-        <tag>前瞻执行</tag>
-        <tag>超标量</tag>
-        <tag>VLIW</tag>
-        <tag>超长指令字</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>多处理机</title>
     <url>/2020/03/11/%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA/</url>
     <content><![CDATA[<h5 id="计算机分类"><a href="#计算机分类" class="headerlink" title="计算机分类"></a>计算机分类</h5><ul>
@@ -1608,6 +1533,81 @@ S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（M
         <tag>SMP</tag>
         <tag>消息传递</tag>
         <tag>共享存储器</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>指令级并行</title>
+    <url>/2020/03/11/%E6%8C%87%E4%BB%A4%E7%BA%A7%E5%B9%B6%E8%A1%8C/</url>
+    <content><![CDATA[<h5 id="指令级并行"><a href="#指令级并行" class="headerlink" title="指令级并行"></a>指令级并行</h5><p>指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：</p>
+<ul>
+<li>资源重复，重复设置多个处理部件；</li>
+<li>采用流水线技术，使指令重叠并行执行。</li>
+</ul>
+<p>指令的<strong>静态调度</strong>：依靠编译器进行静态调度，以减少相关和冲突。它不是在程序执行的过程中，而是在编译期间进行调度和优化。</p>
+<p>指令的<strong>动态调度</strong>：能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。是由硬件在程序执行时进行优化的。</p>
+<p>基本程序块：一串连续的代码除了入口和出口以外，没有其他的分支指令和转入点。</p>
+<p>不精确异常：当执行指令i导致发生异常时，处理机的现场与严格按照程序顺序执行时指令i的现场不同。</p>
+<p>精确异常：发生异常时，处理机的现场与严格按照程序顺序执行指令i的现场相同。</p>
+<h5 id="相关与冲突"><a href="#相关与冲突" class="headerlink" title="相关与冲突"></a>相关与冲突</h5><ul>
+<li>数据相关</li>
+<li>名相关，名指指令所访问的寄存器或存储器单元的名称。<ul>
+<li>反相关</li>
+<li>输出相关</li>
+</ul>
+</li>
+<li>控制相关</li>
+</ul>
+<p>流水线冲突 指由于相关的存在，使得指令流中的下一条指令不能在指定的时钟周期执行。<u>结构冲突</u>是硬件资源冲突引起的，<u>数据冲突</u>是数据相关和名相关引起的，<u>控制冲突</u>是控制相关引起的。</p>
+<p>为了保证程序执行的正确性，必须保证的最关键的两个特性是：</p>
+<ul>
+<li><u>数据流</u></li>
+<li>保持<u>异常行为</u>：无论怎么改变指令的执行顺序，都不能改变程序中异常的发生情况。</li>
+</ul>
+<h4 id="指令的动态调度"><a href="#指令的动态调度" class="headerlink" title="指令的动态调度"></a>指令的动态调度</h4><p>能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。优点：</p>
+<ul>
+<li>能够处理一些<u>编译时情况不明的相关</u>（比如涉及存储器访问的相关），并简化了编译器；</li>
+<li>能够使本来是面向某一流水线优化编译的代码在<u>其他动态调度的流水线上</u>也能执行。</li>
+</ul>
+<h5 id="记分牌"><a href="#记分牌" class="headerlink" title="记分牌"></a>记分牌</h5><p>把流水线中的译码段ID分解成了两个段：流出和读操作数。记录的信息由三部分组成：</p>
+<ul>
+<li>指令状态表</li>
+<li>功能部件状态表</li>
+<li>结果寄存器状态表</li>
+</ul>
+<h5 id="Tomasulo"><a href="#Tomasulo" class="headerlink" title="Tomasulo"></a>Tomasulo</h5><p>核心思想：（1）记录和检测指令相关，操作数一旦就绪就立即执行，把发生RAW冲突的可能性较小到最低；（2）通过寄存器换名来消除WAR冲突和WAW冲突。寄存器换名是通过保留站来实现，它保存正在流出和等待流出指令所需要的操作数。</p>
+<p>基本思想：只要操作数有效，就取其放到保留站中，避免指令流出时才到寄存器取数据，这就使得即将执行的指令从相应的保留站中读取数据，而不用到寄存器中。指令的执行结果也是直接放到等待数据的其它保留站中去。一条指令流出时，存放操作数的寄存器被换名为该寄存器对应的保留站的名称。</p>
+<h4 id="动态分支预测"><a href="#动态分支预测" class="headerlink" title="动态分支预测"></a>动态分支预测</h4><p>用硬件动态地进行分支处理的方法。在程序运行的过程中，根据分支指令过去的表现预测将来的行为。如果分支行为发生了变化，预测结果也跟着变化。</p>
+<h5 id="分支历史表（BHT）"><a href="#分支历史表（BHT）" class="headerlink" title="分支历史表（BHT）"></a>分支历史表（BHT）</h5><p>用来记录相关指令最近一次或几次的执行情况是成功还是失败，并根据此进行预测。</p>
+<h5 id="分支目标缓冲器（BTB）"><a href="#分支目标缓冲器（BTB）" class="headerlink" title="分支目标缓冲器（BTB）"></a>分支目标缓冲器（BTB）</h5><p>是一种动态分支预测技术。将（1）<u>执行过的成功分支指令的目标地址</u>（2）<u>预测的分支目标地址</u> 记录在一张硬件表格中。在每次取指令时，用该指令的地址与BTB表中所有项目的第一个字段进行比较，以便尽早知道指令是否分支成功，尽早知道目标地址，达到减少分支开销的目的。</p>
+<p>BHT方法是在<u>译码ID</u>段，就能获得分支目标地址、顺序下一条指令以及预测的结果。BTB方法在<u>取址IF</u>段就能知道这些信息。</p>
+<h5 id="基于硬件的前瞻执行"><a href="#基于硬件的前瞻执行" class="headerlink" title="基于硬件的前瞻执行"></a>基于硬件的前瞻执行</h5><p>是解决控制相关的方法，它对分支指令的结果进行猜测，然后按照这个猜测继续取址、流出和执行后续的指令。但指令执行的结果不写回寄存器或存储器，而是放到一个称为ROB（再定序列缓冲器）中。等到相应的指令得到“确认”（即确实是应该执行）后，才将结果写入寄存器或存储器中。</p>
+<p>把三种思想结合在了一起：</p>
+<ul>
+<li><u>动态分支预测</u>。用来选择后续执行的指令。</li>
+<li>在控制相关的结果尚未出来之前，<u>前瞻</u>地执行后续指令。</li>
+<li>用<u>动态调度</u>对基本块的各种组合进行<u>跨基本块的组合</u>。</li>
+</ul>
+<h4 id="超标量流水线"><a href="#超标量流水线" class="headerlink" title="超标量流水线"></a>超标量流水线</h4><p>是一种多指令流出技术。它在每个时钟周期流出的指令条数不固定，依代码的具体情况而定，但有个上限。</p>
+<h4 id="超长指令字"><a href="#超长指令字" class="headerlink" title="超长指令字"></a>超长指令字</h4><p>是一种多指令流出技术。在每个时钟周期内流出的指令数都是固定的，这些指令构成一条长指令或者一个指令包，在这个指令包中，指令之间的并行性是通过指令显式地表现出来的。这种处理机的指令调度由编译器静态完成。</p>
+]]></content>
+      <categories>
+        <category>计算机体系结构</category>
+      </categories>
+      <tags>
+        <tag>计算机体系结构</tag>
+        <tag>指令级并行</tag>
+        <tag>指令相关</tag>
+        <tag>指令冲突</tag>
+        <tag>动态调度</tag>
+        <tag>记分牌</tag>
+        <tag>Tomasulo</tag>
+        <tag>BHT</tag>
+        <tag>BTB</tag>
+        <tag>ROB</tag>
+        <tag>前瞻执行</tag>
+        <tag>超标量</tag>
+        <tag>VLIW</tag>
+        <tag>超长指令字</tag>
       </tags>
   </entry>
   <entry>
