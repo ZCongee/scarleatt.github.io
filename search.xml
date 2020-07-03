@@ -104,6 +104,19 @@ L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^
       </tags>
   </entry>
   <entry>
+    <title>CCF-JSON查询</title>
+    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
+    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
+<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>CCF Answer</category>
+      </categories>
+      <tags>
+        <tag>CCF</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Attack and Defense</title>
     <url>/2020/06/26/Attack/</url>
     <content><![CDATA[<h4 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h4><p><img src="/2020/06/26/Attack/image-20200626095005396.png" alt="image-20200626095005396" style="zoom:50%;"></p>
@@ -267,19 +280,6 @@ w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="/2020/06/06/Backpropagat
       </tags>
   </entry>
   <entry>
-    <title>CCF-JSON查询</title>
-    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
-    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
-<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>CCF Answer</category>
-      </categories>
-      <tags>
-        <tag>CCF</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Convolutional Neural Network</title>
     <url>/2020/06/08/CNN/</url>
     <content><![CDATA[<h4 id="Why-CNN-for-Image"><a href="#Why-CNN-for-Image" class="headerlink" title="Why CNN for Image"></a>Why CNN for Image</h4><p>可以使用相同的参数来提取不同图像中的同一种特征，这样就可以降低网络需要学习的参数</p>
@@ -329,178 +329,6 @@ H/W=\frac{(h/w - F+2P)}{S}+1</script><p>这里引入了keras，先介绍几个�
       <tags>
         <tag>Deep Learning</tag>
         <tag>CNN</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Tips for Training DNN</title>
-    <url>/2020/06/07/DNN-tip/</url>
-    <content><![CDATA[<blockquote>
-<p>本文的主要思路：针对training set和testing set上的performance分别提出针对性的解决方法 1、在training set上准确率不高：   new activation function：ReLU、Maxout   adaptive learning rate：Adagrad、RMSProp、Momentum、Adam<br>2、在testing set上准确率不高：Early Stopping、Regularization or Dropout</p>
-</blockquote>
-<h3 id="Recipe"><a href="#Recipe" class="headerlink" title="Recipe"></a>Recipe</h3><h4 id="three-steps-of-deep-learning"><a href="#three-steps-of-deep-learning" class="headerlink" title="three steps of deep learning"></a>three steps of deep learning</h4><p>做深度学习也遵循这三个步骤：</p>
-<ul>
-<li>define a set of function，</li>
-<li>goodness of function，找到loss function</li>
-<li>pick the best function，找到使loss最小化的参数</li>
-</ul>
-<p>overfitting是指模型在训练集上表现良好，但在测试集上表现却很差的现象。</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607122016217.png" alt="image-20200607122016217" style="zoom:50%;"></p>
-<h4 id="Do-not-always-blame-Overfitting"><a href="#Do-not-always-blame-Overfitting" class="headerlink" title="Do not always blame Overfitting"></a>Do not always blame Overfitting</h4><p>在下图中，我们展示了一个20层和56层的network，在训练集和测试集上的error。黄色表示20层network，红色表示56层network。</p>
-<p>由于模型在训练集上的表现，20层的network表现得比较好，有同学就认为这是overfitting，但其实这并不是overfitting问题，因为这个模型在训练集上的表现，也是20层的network表现好</p>
-<p>之所以出现这个20层和56层network表现（都是20层network表现好），是由于模型的训练没有训练好</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607123330505.png" alt="image-20200607123330505" style="zoom:50%;"></p>
-<h4 id="Different-approaches-for-different-problems"><a href="#Different-approaches-for-different-problems" class="headerlink" title="Different approaches for different problems."></a>Different approaches for different problems.</h4><p>在网络的训练过程中，我们要针对网络的不同问题提供不同的解决方法，主要有两个问题</p>
-<ul>
-<li>在training data上表现不好</li>
-<li>在testing data上表现不好</li>
-</ul>
-<p><img src="/2020/06/07/DNN-tip/image-20200607123926844.png" alt="image-20200607123926844" style="zoom:50%;"></p>
-<h3 id="Good-Results-on-Training-Data"><a href="#Good-Results-on-Training-Data" class="headerlink" title="Good Results on Training Data?"></a>Good Results on Training Data?</h3><p>要在training data上获得好的结果，可以使用new activation function和adaptive learning rate</p>
-<h4 id="New-Activation-Function"><a href="#New-Activation-Function" class="headerlink" title="New Activation Function"></a>New Activation Function</h4><h5 id="deeper-is-better-？"><a href="#deeper-is-better-？" class="headerlink" title="deeper is better ？"></a>deeper is better ？</h5><p>在1980年代，network中主要使用sigmoid funcion作为激活函数，从下图中我们可以看出，使用sigmoid function并不能保证网络结构越深，训练结果越好</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607124417000.png" alt="image-20200607124417000" style="zoom:50%;"></p>
-<h5 id="Vanishing-Gradient-Problem"><a href="#Vanishing-Gradient-Problem" class="headerlink" title="Vanishing Gradient Problem"></a>Vanishing Gradient Problem</h5><p>出现上面这个问题的原因并不是overfitting，而是vanishing gradient（梯度消失）</p>
-<p>当网络层数很深的时候，在靠近input layer的位置，常常会有很小的 gradient，学习速度也很慢；而在靠近output layer的地方，常常会有更大的gradient，学习速度也会很快，很快就到了converge（收敛）了</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607125209255.png" alt="image-20200607125209255" style="zoom:50%;"></p>
-<p>下面将叙述出现这个问题的原因。对于下图的中sigmoid function，输出范围为[0,1]，对于很大的输入，输出往往会被压缩成一个较小的值</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607125550128.png" alt="image-20200607125550128" style="zoom: 50%;"></p>
-<p>对于loss function对其中一个参数w的微分$\frac{\partial l}{\partial w}$，这里我们将其表达式写为$\Delta w$，可以表示当前参数w对结果loss的影响，当把这个参数w进行变化时，对loss的影响会有多大</p>
-<p>如下图所示，如果我们输入一个很大的$\Delta w$，在经过sigmoid function运算之后，其值就缩小一次；当经过后面多层的压缩之后，$\Delta w$的值就变得越来越小;……；因此gradient在input layer附近的值会很大，但在output layer附近的值经过多次的压缩就变得很小了。</p>
-<p>当缩小的gradient达到我们设置的那个临界值，即gradient接近于0，就发生了梯度消失问题</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607125910525.png" alt="image-20200607125910525" style="zoom:50%;"></p>
-<p>要解决这个问题，可以修改一下network中用到的激活函数</p>
-<h5 id="ReLU"><a href="#ReLU" class="headerlink" title="ReLU"></a>ReLU</h5><p>我们选取ReLU函数的原因有以下几个：</p>
-<ul>
-<li>可以快速计算，不管是函数值还是对应的梯度</li>
-<li>结合了生物上的一些观察</li>
-<li>无穷多个不同bias的sigmoid function叠加的结果可以变成ReLU</li>
-<li><u>可以解决梯度消失问题</u>；</li>
-</ul>
-<p><img src="/2020/06/07/DNN-tip/image-20200607131402741.png" alt="image-20200607131402741" style="zoom:50%;"></p>
-<p>使用ReLU函数之后，代入具体的网络结构</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607131816149.png" alt="image-20200607131816149" style="zoom:50%;"></p>
-<p>对于input为0的值，network将不再计算其相对应的weight，而对于input不为0的值，就相当于一个线性函数$y=x$。这样做可以简化网络结构，网络结构中也就不存在gradient很小的neural</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607131920750.png" alt="image-20200607131920750" style="zoom:50%;"></p>
-<p>Q：但这时出现了一个新问题，ReLU函数在z=0这一点是不可导的，那么我们在根据loss function如何来计算gradient呢？</p>
-<p>A：这里我们将输入z<0的数的gradient看作0，相当于从network中抹去了这部分神经元；对于z>=0的数，gradient=1</0的数的gradient看作0，相当于从network中抹去了这部分神经元；对于z></p>
-<h5 id="ReLU-variant"><a href="#ReLU-variant" class="headerlink" title="ReLU - variant"></a>ReLU - variant</h5><p>对于ReLU，当x&lt;=0时，函数的输出值就为0了，网络中的参数也没办法更新。因此，就有学者提出了Leaky ReLU，当x&lt;=0时，函数的输出值不是0，而是乘以一个系数0.01，这时的函数就称作<strong>Leaky ReLU</strong></p>
-<p>还有另外一种ReLU函数的变体，<strong>Parametric ReLU</strong>，前面乘上的系数也可以进行训练</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607143129117.png" alt="image-20200607143129117" style="zoom:50%;"></p>
-<h5 id="Maxout"><a href="#Maxout" class="headerlink" title="Maxout"></a>Maxout</h5><blockquote>
-<p>ReLU is a special cases of Maxout</p>
-</blockquote>
-<p>Maxout的主要思想是：让network自己去学习对应的activation function，可以学习出ReLU，也可以是其他的activation function</p>
-<p>Maxout激活函数是对前几个神经元取最大值，再输出相应的最大值</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607144717796.png" alt="image-20200607144717796" style="zoom:50%;"></p>
-<p><strong>Maxout-&gt;ReLU</strong></p>
-<p>在下图中，对于左图中的ReLU function</p>
-<ul>
-<li>input为蓝色直线，表示$z=wx+b$，</li>
-<li><p>output：当z<0时，relu也输出为0；当z>0时，ReLU的图像和z是一致的</0时，relu也输出为0；当z></p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607144943655.png" alt="image-20200607144943655" style="zoom:50%;"></p>
-</li>
-</ul>
-<p>对于右图中的Maxout function，$z_1$对应的权重是$w,b$，而$z_2$对应的权重则是0，</p>
-<ul>
-<li>input为$z_1,z_2$，<ul>
-<li>蓝色直线表示$z_1=wx+b$，</li>
-<li>红色表示$z_2=0$</li>
-</ul>
-</li>
-<li>这时neural的output为$max\{z_1,z_2\}$，输出则是和ReLU一致的（图中绿色直线）</li>
-</ul>
-<p><strong>Maxout-&gt;more than ReLU</strong></p>
-<p>maxout不仅可以学习ReLU，也可以学习其他的activation function</p>
-<p>对于右图中的新的输入，$z_2$对应的权重则变成了$w’,b’$，那么相应的input和output为</p>
-<ul>
-<li>input，$z_1=wx+b,z_2=w’x+b’$，分别对应图中蓝色和绿色直线；</li>
-<li>output为$max\{z_1,z_2\}$，表现为图中绿色直线</li>
-</ul>
-<p><img src="/2020/06/07/DNN-tip/image-20200607150829520.png" alt="image-20200607150829520" style="zoom:50%;"></p>
-<p>这时我们得到的activation function就是图中的绿色直线，是通过网络training出来的，训练的参数为$w,w’,b,b’$，训练结束即可得出我们的activation function</p>
-<p><strong>Summary</strong></p>
-<p>这里我们先对maxout做一个总结，maxout是一个可学习的activation function，可以学习出任何分段线性凸函数（piecewise linear convex function），具体的分段数取决于在group中的元素个数</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607151653515.png" alt="image-20200607151653515" style="zoom:50%;"></p>
-<p>对于maxout函数的训练，如果是下图中的网络结构，我们假设已经知道$z_1^1,z_4^1,z_2^2,z_3^2$为对应的最大值，</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607152054887.png" alt="image-20200607152054887" style="zoom:50%;"></p>
-<p>那么network可以再次被化简，neural也可以变少</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607152242384.png" alt="image-20200607152242384" style="zoom:50%;"></p>
-<h4 id="Adaptive-Learning-Rate"><a href="#Adaptive-Learning-Rate" class="headerlink" title="Adaptive Learning Rate"></a>Adaptive Learning Rate</h4><h5 id="Review"><a href="#Review" class="headerlink" title="Review"></a>Review</h5><p><strong>Adagrad</strong></p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607152520774.png" alt="image-20200607152520774" style="zoom:50%;"></p>
-<p><strong>RMSprop</strong></p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607153455066.png" alt="image-20200607153455066" style="zoom:50%;"></p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607153507651.png" alt="image-20200607153507651" style="zoom:50%;"></p>
-<p>gradient为0的点可以是local minimum，也可以是saddle point，还可以是在很平缓的plateau中的某些点</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607153541752.png" alt="image-20200607153541752" style="zoom:50%;"></p>
-<p>而在物理世界，物体本身是带有momentum的，再加上gradient的作用，就很可能可以跳出saddle point，继续训练</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607153719322.png" alt="image-20200607153719322" style="zoom:50%;"></p>
-<h5 id="Momentum"><a href="#Momentum" class="headerlink" title="Momentum"></a>Momentum</h5><p>图中蓝色箭头表示Movement（前进方向），红色箭头表示gradient的方向，绿色虚线表示上一次movement对本次的影响（惯性）</p>
-<p>再$\theta^0$处，movement为$v^0=0$；对于在$\theta^1$处的前进方向，先计算出在$\theta^0$处的梯度$\Delta L(\theta^0)$，我们要移动的方向是由上一个时间点的gradient为$\Delta L(\theta^0)$和前进方向$v_0$决定的，即</p>
-<script type="math/tex; mode=display">
-v^1=\lambda v^0-\eta \Delta L(\theta^0)=-\eta \Delta L(\theta^0)</script><p>其中$\lambda$也是一个可以手动调整的参数</p>
-<p>对于下一个时间点的移动方向$v^2$，是和当前时间节点的移动方向和梯度$v^1,\Delta L(\theta^1)$决定的，即</p>
-<script type="math/tex; mode=display">
-\begin{aligned}
-v^2&=\lambda v^1-\eta \Delta L(\theta^1)\\
-&=-\lambda\eta \Delta L(\theta^0)-\eta \Delta L(\theta^1)
-\end{aligned}</script><p><img src="/2020/06/07/DNN-tip/image-20200607154125395.png" alt="image-20200607154125395" style="zoom:50%;"></p>
-<p>再回到之前的例子，红色箭头表示gradient的反方向，绿色表示momentum的方向，蓝色箭头表示受到gradient和momentum影响后的真实运动方向</p>
-<p>初始点的momentum值为0；在下一个plateau上的点，虽然gradient的值很小很小，但由于受到上一个很大的momentum的影响，真实的movement还是向前的，步长也没有因为gradient的变小而变得很小；</p>
-<p>如果我们现在走到了local minimum，此时gradient=0，此时由于momentum的影响，如果momentum的值足够大，还会继续向前运动</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607161327324.png" alt="image-20200607161327324" style="zoom:50%;"></p>
-<h5 id="Adam"><a href="#Adam" class="headerlink" title="Adam"></a>Adam</h5><blockquote>
-<p>RMSProp + Momentum</p>
-<p>Adam其实就是结合了RMSProp和Momentum思想的方法</p>
-</blockquote>
-<p><img src="/2020/06/07/DNN-tip/image-20200607162646245.png" alt="image-20200607162646245" style="zoom: 67%;"></p>
-<p>先将动量momentum和初始移动方向初始化为0，即$m_0=0,v_0=0$，$v_0$表示RMSProp中分母上的参数$\sigma$</p>
-<p>计算在t时的梯度$g_t$，</p>
-<script type="math/tex; mode=display">
-g_t=\Delta_\theta f_t(\theta_{\theta-1})</script><p>根据上一个时间点的要走的方向$m_t$和gradient，因此t时的移动方向为$m_t$———Momentum</p>
-<script type="math/tex; mode=display">
-m_t=\beta_1\cdot m_{t-1}+(1-\beta_1)\cdot g_t</script><p>根据上一个时间点的移动方向$v_{t-1}$和gradient，则此时的真实移动方向$v_t$为———-RMSprop</p>
-<script type="math/tex; mode=display">
-v_t=\beta_1\cdot v_{t-1}+(1-\beta_2)\cdot g_t</script><p>该算法还进行了bias corrected，</p>
-<script type="math/tex; mode=display">
-\hat m_t=\frac{m_t }{(1-\beta_1^t)},\quad
-\hat v_t=\frac{v_t}{(1-\beta_2^t)}</script><p>将进行了bias corrected的参数再输入公式，更新参数</p>
-<script type="math/tex; mode=display">
-\theta_t=\theta_{t-1} -\alpha \cdot \hat m _t/\sqrt{\hat v _t}+\epsilon</script><h3 id="Good-Results-on-Testing-Data"><a href="#Good-Results-on-Testing-Data" class="headerlink" title="Good Results on Testing Data?"></a>Good Results on Testing Data?</h3><h4 id="Early-Stopping"><a href="#Early-Stopping" class="headerlink" title="Early Stopping"></a>Early Stopping</h4><p><img src="/2020/06/07/DNN-tip/image-20200607163018382.png" alt="image-20200607163018382" style="zoom:50%;"></p>
-<h4 id="Regularization"><a href="#Regularization" class="headerlink" title="Regularization"></a>Regularization</h4><h5 id="L2-Regularization"><a href="#L2-Regularization" class="headerlink" title="L2 Regularization"></a>L2 Regularization</h5><p>正则化就引入了一个新的loss function，加上了一个新的正则项，这个正则项将所有需要training的参数都包括进来了，通常不包括bias</p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607163135769.png" alt="image-20200607163135769" style="zoom:50%;"></p>
-<p>这个新的loss function再对w求偏微分，对参数进行更新</p>
-<script type="math/tex; mode=display">
-w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><p><img src="/2020/06/07/DNN-tip/image-20200607163452933.png" alt="image-20200607163452933" style="zoom:50%;"></p>
-<p>与原来的参数更新公式相比，可以发现$w^t$前面多了一项$(1-\eta\lambda)$，通常这个$\eta,\lambda$都是很小的值，这里我们假设$(1-\eta\lambda)$是很接近于1的值，约等于0.99; regularization所做的事就是，在每次更新参数时，全都在前面乘上了一个小于1的数，在经过若干次的训练之后，$(1-\eta\lambda)w^t$的值就很接近0了</p>
-<p>虽然$(1-\eta\lambda)w^t$的值每次都会变得越来越小，但参数更新的公式中，后面还有另外一项$\eta \frac{\partial L}{\partial w}$，会使得梯度的值不会变成0，达到平衡</p>
-<h5 id="L1-Regularization"><a href="#L1-Regularization" class="headerlink" title="L1 Regularization"></a>L1 Regularization</h5><p>既然L2可以作为正则项，L1也可以作为正则项，正则项为参数的绝对值相加。对这些参数求导，当$w_i$大于0时，gradient=1，当$w_i$小雨0时，gradient=-1，即为$sgn(w)$函数</p>
-<p>L1的参数更新公式为</p>
-<script type="math/tex; mode=display">
-w^{t+1}=w^t-\eta \frac{\partial L}{\partial w} - \eta\lambda\ \rm{sgn}(w^t)</script><p><img src="/2020/06/07/DNN-tip/image-20200607171442670.png" alt="image-20200607171442670" style="zoom:50%;"></p>
-<p>与原来的参数更新公式相比较，可以发现后面多了一项$- \eta\lambda\ \rm{sgn}(w^t)$，表示参数在原来的基础上都要减去一个小于1的数</p>
-<h5 id="L1-vs-L2"><a href="#L1-vs-L2" class="headerlink" title="L1 vs L2"></a>L1 vs L2</h5><p>参数更新公式分别如下，</p>
-<script type="math/tex; mode=display">
-L1:\ w^{t+1}=w^t-\eta \frac{\partial L}{\partial w} - \eta\lambda\ \rm{sgn}(w^t)\\
-L2:\ w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><ul>
-<li>L1参数更新公式每次都多<strong>减去了一个小于1的固定值（constant）</strong></li>
-<li>L2参数更新公式中每次都将<strong>前一次的参数乘上一个小于1的值</strong></li>
-</ul>
-<h4 id="Dropout"><a href="#Dropout" class="headerlink" title="Dropout"></a>Dropout</h4><p><img src="/2020/06/07/DNN-tip/image-20200607173403475.png" alt="image-20200607173403475" style="zoom:50%;"></p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607173419426.png" alt="image-20200607173419426" style="zoom:50%;"></p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607173455150.png" alt="image-20200607173455150" style="zoom:50%;"></p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607173629804.png" alt="image-20200607173629804" style="zoom:50%;"></p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607173828093.png" alt="image-20200607173828093" style="zoom:50%;"></p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607173729715.png" alt="image-20200607173729715" style="zoom:50%;"></p>
-<p><img src="/2020/06/07/DNN-tip/image-20200607173943611.png" alt="image-20200607173943611" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>DNN</tag>
-        <tag>Momentum</tag>
-        <tag>Adam</tag>
-        <tag>Regularization</tag>
       </tags>
   </entry>
   <entry>
@@ -763,6 +591,178 @@ P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p>
       </tags>
   </entry>
   <entry>
+    <title>Tips for Training DNN</title>
+    <url>/2020/06/07/DNN-tip/</url>
+    <content><![CDATA[<blockquote>
+<p>本文的主要思路：针对training set和testing set上的performance分别提出针对性的解决方法 1、在training set上准确率不高：   new activation function：ReLU、Maxout   adaptive learning rate：Adagrad、RMSProp、Momentum、Adam<br>2、在testing set上准确率不高：Early Stopping、Regularization or Dropout</p>
+</blockquote>
+<h3 id="Recipe"><a href="#Recipe" class="headerlink" title="Recipe"></a>Recipe</h3><h4 id="three-steps-of-deep-learning"><a href="#three-steps-of-deep-learning" class="headerlink" title="three steps of deep learning"></a>three steps of deep learning</h4><p>做深度学习也遵循这三个步骤：</p>
+<ul>
+<li>define a set of function，</li>
+<li>goodness of function，找到loss function</li>
+<li>pick the best function，找到使loss最小化的参数</li>
+</ul>
+<p>overfitting是指模型在训练集上表现良好，但在测试集上表现却很差的现象。</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607122016217.png" alt="image-20200607122016217" style="zoom:50%;"></p>
+<h4 id="Do-not-always-blame-Overfitting"><a href="#Do-not-always-blame-Overfitting" class="headerlink" title="Do not always blame Overfitting"></a>Do not always blame Overfitting</h4><p>在下图中，我们展示了一个20层和56层的network，在训练集和测试集上的error。黄色表示20层network，红色表示56层network。</p>
+<p>由于模型在训练集上的表现，20层的network表现得比较好，有同学就认为这是overfitting，但其实这并不是overfitting问题，因为这个模型在训练集上的表现，也是20层的network表现好</p>
+<p>之所以出现这个20层和56层network表现（都是20层network表现好），是由于模型的训练没有训练好</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607123330505.png" alt="image-20200607123330505" style="zoom:50%;"></p>
+<h4 id="Different-approaches-for-different-problems"><a href="#Different-approaches-for-different-problems" class="headerlink" title="Different approaches for different problems."></a>Different approaches for different problems.</h4><p>在网络的训练过程中，我们要针对网络的不同问题提供不同的解决方法，主要有两个问题</p>
+<ul>
+<li>在training data上表现不好</li>
+<li>在testing data上表现不好</li>
+</ul>
+<p><img src="/2020/06/07/DNN-tip/image-20200607123926844.png" alt="image-20200607123926844" style="zoom:50%;"></p>
+<h3 id="Good-Results-on-Training-Data"><a href="#Good-Results-on-Training-Data" class="headerlink" title="Good Results on Training Data?"></a>Good Results on Training Data?</h3><p>要在training data上获得好的结果，可以使用new activation function和adaptive learning rate</p>
+<h4 id="New-Activation-Function"><a href="#New-Activation-Function" class="headerlink" title="New Activation Function"></a>New Activation Function</h4><h5 id="deeper-is-better-？"><a href="#deeper-is-better-？" class="headerlink" title="deeper is better ？"></a>deeper is better ？</h5><p>在1980年代，network中主要使用sigmoid funcion作为激活函数，从下图中我们可以看出，使用sigmoid function并不能保证网络结构越深，训练结果越好</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607124417000.png" alt="image-20200607124417000" style="zoom:50%;"></p>
+<h5 id="Vanishing-Gradient-Problem"><a href="#Vanishing-Gradient-Problem" class="headerlink" title="Vanishing Gradient Problem"></a>Vanishing Gradient Problem</h5><p>出现上面这个问题的原因并不是overfitting，而是vanishing gradient（梯度消失）</p>
+<p>当网络层数很深的时候，在靠近input layer的位置，常常会有很小的 gradient，学习速度也很慢；而在靠近output layer的地方，常常会有更大的gradient，学习速度也会很快，很快就到了converge（收敛）了</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607125209255.png" alt="image-20200607125209255" style="zoom:50%;"></p>
+<p>下面将叙述出现这个问题的原因。对于下图的中sigmoid function，输出范围为[0,1]，对于很大的输入，输出往往会被压缩成一个较小的值</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607125550128.png" alt="image-20200607125550128" style="zoom: 50%;"></p>
+<p>对于loss function对其中一个参数w的微分$\frac{\partial l}{\partial w}$，这里我们将其表达式写为$\Delta w$，可以表示当前参数w对结果loss的影响，当把这个参数w进行变化时，对loss的影响会有多大</p>
+<p>如下图所示，如果我们输入一个很大的$\Delta w$，在经过sigmoid function运算之后，其值就缩小一次；当经过后面多层的压缩之后，$\Delta w$的值就变得越来越小;……；因此gradient在input layer附近的值会很大，但在output layer附近的值经过多次的压缩就变得很小了。</p>
+<p>当缩小的gradient达到我们设置的那个临界值，即gradient接近于0，就发生了梯度消失问题</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607125910525.png" alt="image-20200607125910525" style="zoom:50%;"></p>
+<p>要解决这个问题，可以修改一下network中用到的激活函数</p>
+<h5 id="ReLU"><a href="#ReLU" class="headerlink" title="ReLU"></a>ReLU</h5><p>我们选取ReLU函数的原因有以下几个：</p>
+<ul>
+<li>可以快速计算，不管是函数值还是对应的梯度</li>
+<li>结合了生物上的一些观察</li>
+<li>无穷多个不同bias的sigmoid function叠加的结果可以变成ReLU</li>
+<li><u>可以解决梯度消失问题</u>；</li>
+</ul>
+<p><img src="/2020/06/07/DNN-tip/image-20200607131402741.png" alt="image-20200607131402741" style="zoom:50%;"></p>
+<p>使用ReLU函数之后，代入具体的网络结构</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607131816149.png" alt="image-20200607131816149" style="zoom:50%;"></p>
+<p>对于input为0的值，network将不再计算其相对应的weight，而对于input不为0的值，就相当于一个线性函数$y=x$。这样做可以简化网络结构，网络结构中也就不存在gradient很小的neural</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607131920750.png" alt="image-20200607131920750" style="zoom:50%;"></p>
+<p>Q：但这时出现了一个新问题，ReLU函数在z=0这一点是不可导的，那么我们在根据loss function如何来计算gradient呢？</p>
+<p>A：这里我们将输入z<0的数的gradient看作0，相当于从network中抹去了这部分神经元；对于z>=0的数，gradient=1</0的数的gradient看作0，相当于从network中抹去了这部分神经元；对于z></p>
+<h5 id="ReLU-variant"><a href="#ReLU-variant" class="headerlink" title="ReLU - variant"></a>ReLU - variant</h5><p>对于ReLU，当x&lt;=0时，函数的输出值就为0了，网络中的参数也没办法更新。因此，就有学者提出了Leaky ReLU，当x&lt;=0时，函数的输出值不是0，而是乘以一个系数0.01，这时的函数就称作<strong>Leaky ReLU</strong></p>
+<p>还有另外一种ReLU函数的变体，<strong>Parametric ReLU</strong>，前面乘上的系数也可以进行训练</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607143129117.png" alt="image-20200607143129117" style="zoom:50%;"></p>
+<h5 id="Maxout"><a href="#Maxout" class="headerlink" title="Maxout"></a>Maxout</h5><blockquote>
+<p>ReLU is a special cases of Maxout</p>
+</blockquote>
+<p>Maxout的主要思想是：让network自己去学习对应的activation function，可以学习出ReLU，也可以是其他的activation function</p>
+<p>Maxout激活函数是对前几个神经元取最大值，再输出相应的最大值</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607144717796.png" alt="image-20200607144717796" style="zoom:50%;"></p>
+<p><strong>Maxout-&gt;ReLU</strong></p>
+<p>在下图中，对于左图中的ReLU function</p>
+<ul>
+<li>input为蓝色直线，表示$z=wx+b$，</li>
+<li><p>output：当z<0时，relu也输出为0；当z>0时，ReLU的图像和z是一致的</0时，relu也输出为0；当z></p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607144943655.png" alt="image-20200607144943655" style="zoom:50%;"></p>
+</li>
+</ul>
+<p>对于右图中的Maxout function，$z_1$对应的权重是$w,b$，而$z_2$对应的权重则是0，</p>
+<ul>
+<li>input为$z_1,z_2$，<ul>
+<li>蓝色直线表示$z_1=wx+b$，</li>
+<li>红色表示$z_2=0$</li>
+</ul>
+</li>
+<li>这时neural的output为$max\{z_1,z_2\}$，输出则是和ReLU一致的（图中绿色直线）</li>
+</ul>
+<p><strong>Maxout-&gt;more than ReLU</strong></p>
+<p>maxout不仅可以学习ReLU，也可以学习其他的activation function</p>
+<p>对于右图中的新的输入，$z_2$对应的权重则变成了$w’,b’$，那么相应的input和output为</p>
+<ul>
+<li>input，$z_1=wx+b,z_2=w’x+b’$，分别对应图中蓝色和绿色直线；</li>
+<li>output为$max\{z_1,z_2\}$，表现为图中绿色直线</li>
+</ul>
+<p><img src="/2020/06/07/DNN-tip/image-20200607150829520.png" alt="image-20200607150829520" style="zoom:50%;"></p>
+<p>这时我们得到的activation function就是图中的绿色直线，是通过网络training出来的，训练的参数为$w,w’,b,b’$，训练结束即可得出我们的activation function</p>
+<p><strong>Summary</strong></p>
+<p>这里我们先对maxout做一个总结，maxout是一个可学习的activation function，可以学习出任何分段线性凸函数（piecewise linear convex function），具体的分段数取决于在group中的元素个数</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607151653515.png" alt="image-20200607151653515" style="zoom:50%;"></p>
+<p>对于maxout函数的训练，如果是下图中的网络结构，我们假设已经知道$z_1^1,z_4^1,z_2^2,z_3^2$为对应的最大值，</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607152054887.png" alt="image-20200607152054887" style="zoom:50%;"></p>
+<p>那么network可以再次被化简，neural也可以变少</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607152242384.png" alt="image-20200607152242384" style="zoom:50%;"></p>
+<h4 id="Adaptive-Learning-Rate"><a href="#Adaptive-Learning-Rate" class="headerlink" title="Adaptive Learning Rate"></a>Adaptive Learning Rate</h4><h5 id="Review"><a href="#Review" class="headerlink" title="Review"></a>Review</h5><p><strong>Adagrad</strong></p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607152520774.png" alt="image-20200607152520774" style="zoom:50%;"></p>
+<p><strong>RMSprop</strong></p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607153455066.png" alt="image-20200607153455066" style="zoom:50%;"></p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607153507651.png" alt="image-20200607153507651" style="zoom:50%;"></p>
+<p>gradient为0的点可以是local minimum，也可以是saddle point，还可以是在很平缓的plateau中的某些点</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607153541752.png" alt="image-20200607153541752" style="zoom:50%;"></p>
+<p>而在物理世界，物体本身是带有momentum的，再加上gradient的作用，就很可能可以跳出saddle point，继续训练</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607153719322.png" alt="image-20200607153719322" style="zoom:50%;"></p>
+<h5 id="Momentum"><a href="#Momentum" class="headerlink" title="Momentum"></a>Momentum</h5><p>图中蓝色箭头表示Movement（前进方向），红色箭头表示gradient的方向，绿色虚线表示上一次movement对本次的影响（惯性）</p>
+<p>再$\theta^0$处，movement为$v^0=0$；对于在$\theta^1$处的前进方向，先计算出在$\theta^0$处的梯度$\Delta L(\theta^0)$，我们要移动的方向是由上一个时间点的gradient为$\Delta L(\theta^0)$和前进方向$v_0$决定的，即</p>
+<script type="math/tex; mode=display">
+v^1=\lambda v^0-\eta \Delta L(\theta^0)=-\eta \Delta L(\theta^0)</script><p>其中$\lambda$也是一个可以手动调整的参数</p>
+<p>对于下一个时间点的移动方向$v^2$，是和当前时间节点的移动方向和梯度$v^1,\Delta L(\theta^1)$决定的，即</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+v^2&=\lambda v^1-\eta \Delta L(\theta^1)\\
+&=-\lambda\eta \Delta L(\theta^0)-\eta \Delta L(\theta^1)
+\end{aligned}</script><p><img src="/2020/06/07/DNN-tip/image-20200607154125395.png" alt="image-20200607154125395" style="zoom:50%;"></p>
+<p>再回到之前的例子，红色箭头表示gradient的反方向，绿色表示momentum的方向，蓝色箭头表示受到gradient和momentum影响后的真实运动方向</p>
+<p>初始点的momentum值为0；在下一个plateau上的点，虽然gradient的值很小很小，但由于受到上一个很大的momentum的影响，真实的movement还是向前的，步长也没有因为gradient的变小而变得很小；</p>
+<p>如果我们现在走到了local minimum，此时gradient=0，此时由于momentum的影响，如果momentum的值足够大，还会继续向前运动</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607161327324.png" alt="image-20200607161327324" style="zoom:50%;"></p>
+<h5 id="Adam"><a href="#Adam" class="headerlink" title="Adam"></a>Adam</h5><blockquote>
+<p>RMSProp + Momentum</p>
+<p>Adam其实就是结合了RMSProp和Momentum思想的方法</p>
+</blockquote>
+<p><img src="/2020/06/07/DNN-tip/image-20200607162646245.png" alt="image-20200607162646245" style="zoom: 67%;"></p>
+<p>先将动量momentum和初始移动方向初始化为0，即$m_0=0,v_0=0$，$v_0$表示RMSProp中分母上的参数$\sigma$</p>
+<p>计算在t时的梯度$g_t$，</p>
+<script type="math/tex; mode=display">
+g_t=\Delta_\theta f_t(\theta_{\theta-1})</script><p>根据上一个时间点的要走的方向$m_t$和gradient，因此t时的移动方向为$m_t$———Momentum</p>
+<script type="math/tex; mode=display">
+m_t=\beta_1\cdot m_{t-1}+(1-\beta_1)\cdot g_t</script><p>根据上一个时间点的移动方向$v_{t-1}$和gradient，则此时的真实移动方向$v_t$为———-RMSprop</p>
+<script type="math/tex; mode=display">
+v_t=\beta_1\cdot v_{t-1}+(1-\beta_2)\cdot g_t</script><p>该算法还进行了bias corrected，</p>
+<script type="math/tex; mode=display">
+\hat m_t=\frac{m_t }{(1-\beta_1^t)},\quad
+\hat v_t=\frac{v_t}{(1-\beta_2^t)}</script><p>将进行了bias corrected的参数再输入公式，更新参数</p>
+<script type="math/tex; mode=display">
+\theta_t=\theta_{t-1} -\alpha \cdot \hat m _t/\sqrt{\hat v _t}+\epsilon</script><h3 id="Good-Results-on-Testing-Data"><a href="#Good-Results-on-Testing-Data" class="headerlink" title="Good Results on Testing Data?"></a>Good Results on Testing Data?</h3><h4 id="Early-Stopping"><a href="#Early-Stopping" class="headerlink" title="Early Stopping"></a>Early Stopping</h4><p><img src="/2020/06/07/DNN-tip/image-20200607163018382.png" alt="image-20200607163018382" style="zoom:50%;"></p>
+<h4 id="Regularization"><a href="#Regularization" class="headerlink" title="Regularization"></a>Regularization</h4><h5 id="L2-Regularization"><a href="#L2-Regularization" class="headerlink" title="L2 Regularization"></a>L2 Regularization</h5><p>正则化就引入了一个新的loss function，加上了一个新的正则项，这个正则项将所有需要training的参数都包括进来了，通常不包括bias</p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607163135769.png" alt="image-20200607163135769" style="zoom:50%;"></p>
+<p>这个新的loss function再对w求偏微分，对参数进行更新</p>
+<script type="math/tex; mode=display">
+w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><p><img src="/2020/06/07/DNN-tip/image-20200607163452933.png" alt="image-20200607163452933" style="zoom:50%;"></p>
+<p>与原来的参数更新公式相比，可以发现$w^t$前面多了一项$(1-\eta\lambda)$，通常这个$\eta,\lambda$都是很小的值，这里我们假设$(1-\eta\lambda)$是很接近于1的值，约等于0.99; regularization所做的事就是，在每次更新参数时，全都在前面乘上了一个小于1的数，在经过若干次的训练之后，$(1-\eta\lambda)w^t$的值就很接近0了</p>
+<p>虽然$(1-\eta\lambda)w^t$的值每次都会变得越来越小，但参数更新的公式中，后面还有另外一项$\eta \frac{\partial L}{\partial w}$，会使得梯度的值不会变成0，达到平衡</p>
+<h5 id="L1-Regularization"><a href="#L1-Regularization" class="headerlink" title="L1 Regularization"></a>L1 Regularization</h5><p>既然L2可以作为正则项，L1也可以作为正则项，正则项为参数的绝对值相加。对这些参数求导，当$w_i$大于0时，gradient=1，当$w_i$小雨0时，gradient=-1，即为$sgn(w)$函数</p>
+<p>L1的参数更新公式为</p>
+<script type="math/tex; mode=display">
+w^{t+1}=w^t-\eta \frac{\partial L}{\partial w} - \eta\lambda\ \rm{sgn}(w^t)</script><p><img src="/2020/06/07/DNN-tip/image-20200607171442670.png" alt="image-20200607171442670" style="zoom:50%;"></p>
+<p>与原来的参数更新公式相比较，可以发现后面多了一项$- \eta\lambda\ \rm{sgn}(w^t)$，表示参数在原来的基础上都要减去一个小于1的数</p>
+<h5 id="L1-vs-L2"><a href="#L1-vs-L2" class="headerlink" title="L1 vs L2"></a>L1 vs L2</h5><p>参数更新公式分别如下，</p>
+<script type="math/tex; mode=display">
+L1:\ w^{t+1}=w^t-\eta \frac{\partial L}{\partial w} - \eta\lambda\ \rm{sgn}(w^t)\\
+L2:\ w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><ul>
+<li>L1参数更新公式每次都多<strong>减去了一个小于1的固定值（constant）</strong></li>
+<li>L2参数更新公式中每次都将<strong>前一次的参数乘上一个小于1的值</strong></li>
+</ul>
+<h4 id="Dropout"><a href="#Dropout" class="headerlink" title="Dropout"></a>Dropout</h4><p><img src="/2020/06/07/DNN-tip/image-20200607173403475.png" alt="image-20200607173403475" style="zoom:50%;"></p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607173419426.png" alt="image-20200607173419426" style="zoom:50%;"></p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607173455150.png" alt="image-20200607173455150" style="zoom:50%;"></p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607173629804.png" alt="image-20200607173629804" style="zoom:50%;"></p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607173828093.png" alt="image-20200607173828093" style="zoom:50%;"></p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607173729715.png" alt="image-20200607173729715" style="zoom:50%;"></p>
+<p><img src="/2020/06/07/DNN-tip/image-20200607173943611.png" alt="image-20200607173943611" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>DNN</tag>
+        <tag>Momentum</tag>
+        <tag>Adam</tag>
+        <tag>Regularization</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Mac安装Pytorch</title>
     <url>/2020/03/29/Mac%E5%AE%89%E8%A3%85Pytorch/</url>
     <content><![CDATA[<p>先创建一个名为<code>pytorch</code>的虚拟环境，</p>
@@ -998,6 +998,118 @@ w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}-\eta \frac{\partial C}{\p
       </tags>
   </entry>
   <entry>
+    <title>Generative Models</title>
+    <url>/2020/06/29/generative-models/</url>
+    <content><![CDATA[<blockquote>
+<p>本文主要叙述了集中generative models，包括PixelRNN、VAE，GAN（生成对抗网络）；还叙述了auto-encoder和VAE的区别，以及VAE进行改进的地方，通过高斯混合模型来对VAE的原理进行了详细介绍。</p>
+</blockquote>
+<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>Generative Models可以分为三大类：pixelRNN、autoencoder、GAN；</p>
+<p>现在machine可以对猫狗进行分类，在将来machine就可以通过自己的学习画出一只猫来。</p>
+<p><img src="/2020/06/29/generative-models/image-20200629141407487.png" alt="image-20200629141407487" style="zoom: 67%;"></p>
+<h4 id="PixelRNN"><a href="#PixelRNN" class="headerlink" title="PixelRNN"></a>PixelRNN</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>如果要生成一张图像，我们可以先生成这张图像的第一个红色pixel，再根据这个pixel生成下一个蓝色pixel，每个pixel可以用一个三维的vector来进行表示</p>
+<p><img src="/2020/06/29/generative-models/image-20200629141521860.png" alt="image-20200629141521860" style="zoom: 67%;"></p>
+<p>这是一个无监督学习的过程，并不需要对data进行标注</p>
+<p>如果我们现在把下图中的狗下半身遮住，可以让machine学习出下半身的图片</p>
+<p><img src="/2020/06/29/generative-models/image-20200629141945697.png" alt="image-20200629141945697" style="zoom: 67%;"></p>
+<p>也可以用到声讯号</p>
+<p><img src="/2020/06/29/generative-models/image-20200629142331286.png" alt="image-20200629142331286" style="zoom:50%;"></p>
+<p><img src="/2020/06/29/generative-models/image-20200629142353897.png" alt="image-20200629142353897" style="zoom:50%;"></p>
+<h5 id="Practicing-Generation-Models-Pokemon-Creation"><a href="#Practicing-Generation-Models-Pokemon-Creation" class="headerlink" title="Practicing Generation Models: Pokémon Creation"></a>Practicing Generation Models: Pokémon Creation</h5><p><img src="/2020/06/29/generative-models/image-20200629142516414.png" alt="image-20200629142516414" style="zoom: 67%;"></p>
+<p>做这个实验时，有一些tips；</p>
+<p>由于每个pixel都使用三维的vector来表示（RGB），只有三个channel的值相差特别大时，才会有颜色特别鲜明的图片，但学习结果并不能保证这一点，因此图片会会比较灰蒙蒙的，最后得出来的结果会不太好；</p>
+<p>因此，每个pixel最好使用1-of-N encoding来表示，输入一个绿色的方块，vector中只有绿色方块对应的dimensions为1，其他都是0；但有$256\times256$种颜色，颜色种类非常繁多，可以先对类似的颜色做一个<strong>clustering</strong>，类似的颜色都用同一种颜色来表示，可以把颜色数量缩小到167种</p>
+<p><img src="/2020/06/29/generative-models/image-20200629142535096.png" alt="image-20200629142535096" style="zoom: 67%;"></p>
+<p>下面开始正式做实验</p>
+<p><img src="/2020/06/29/generative-models/image-20200629143804656.png" alt="image-20200629143804656" style="zoom: 67%;"></p>
+<p><img src="/2020/06/29/generative-models/image-20200629143843226.png" alt="image-20200629143843226" style="zoom: 33%;"></p>
+<h4 id="VAE"><a href="#VAE" class="headerlink" title="VAE"></a>VAE</h4><h5 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h5><p><img src="/2020/06/29/generative-models/image-20200629144022672.png" alt="image-20200629144022672" style="zoom: 67%;"></p>
+<h5 id="VAE-1"><a href="#VAE-1" class="headerlink" title="VAE"></a>VAE</h5><p>VAE不像autoencoder那样，直接得出code，经过了一些变换，即$c_i=exp(\sigma_i)\times e_i+m_i$，也是来最小化reconstruction error</p>
+<p><img src="/2020/06/29/generative-models/image-20200629144250780.png" alt="image-20200629144250780" style="zoom: 67%;"></p>
+<p>minimize的目标还有</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><h5 id="Pokemon-Creation"><a href="#Pokemon-Creation" class="headerlink" title="Pokémon Creation"></a>Pokémon Creation</h5><p>input一个宝可梦图像，进行encoder、decoder，得到reconstruct之后的图像，其中code是10-dim的；</p>
+<p>现在我们只选择其中的2个纬度出来，其他纬度的值都固定不变，对这个二维的坐标轴，放入不同的点，再输入对应的Decoder，观察其合成出来的image；如果使用不同维度的点，就可以观察到不同维度生成的image；根据不同的维度，我们就可以根据自己的需要，调整这些维度的值，从而得出我们想要的结果</p>
+<p><img src="/2020/06/29/generative-models/image-20200629150656140.png" alt="image-20200629150656140" style="zoom: 50%;"></p>
+<p>部分结果展示</p>
+<p><img src="/2020/06/29/generative-models/image-20200629151406932.png" alt="image-20200629151406932" style="zoom:50%;"></p>
+<h5 id="Why-VAE"><a href="#Why-VAE" class="headerlink" title="Why VAE?"></a>Why VAE?</h5><p>对于一张满月的图像，先进行encode，再进行decode，使得input和output之间的差值最小化；对半月的图像输入也如此</p>
+<p><img src="/2020/06/29/generative-models/image-20200629152107223.png" alt="image-20200629152107223" style="zoom: 67%;"></p>
+<p>对于encoder的其中一个输出$\sigma_i$，表示noise的variance，需要再输入exp函数进行计算，保证其值是大于0的，是machine自己学习的</p>
+<p><img src="/2020/06/29/generative-models/image-20200629153400892.png" alt="image-20200629153400892" style="zoom: 67%;"></p>
+<p>但只有noise是不够的，还需要加一些限制</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>在下图中，蓝色的线表示$exp(\sigma_i)$，红色的线表示$(1+\sigma_i)$，绿色的线表示两者的差值，可以发现在原点处差值是最小的，$\sigma _i$的值接近1，variance的值接近1</p>
+<p><img src="/2020/06/29/generative-models/image-20200629153918937.png" alt="image-20200629153918937" style="zoom:50%;"></p>
+<p>$(m_i)^2$为正则项regularization term，让结果不那么overfiting</p>
+<p>在下图中，为一个高维的坐标（用一维进行了展示），曲线表示image是宝可梦的概率，可以在图中看到，对于一些很像宝可梦的image，$P(x)$值很高，但对于一些比较模棱两可的image，$P(x)$值就很低</p>
+<p><img src="/2020/06/29/generative-models/image-20200629154606838.png" alt="image-20200629154606838" style="zoom: 33%;"></p>
+<p>那么我们到底要怎么来评估这个probability distribution呢？答案是高斯混合模型</p>
+<h5 id="Gaussian-Mixture-Model"><a href="#Gaussian-Mixture-Model" class="headerlink" title="Gaussian Mixture Model"></a>Gaussian Mixture Model</h5><p>对于下图中的曲线图，蓝色表示多个高斯模型，黑色曲线表示这些模型通过一定的weight进行叠加之后的结果</p>
+<p>现在有很多个gaussian model（1，2，3，4，5…），且都对应了自己的weight $P(m)$（蓝色方块），<span style="color: red">要先根据weight选对应的gaussian，再决定到底要从gaussian中sample哪些data</span> ;我们使用$P(m)$表示每个gaussian的weight，$P(x|m)$表示从对应的gaussian中选出data x的概率</p>
+<p>x并不是代表着某个类别，而是用一个vector来进行表示，每个维度表示不同的特征，即 <u>Distributed representation is better than cluster</u></p>
+<p><img src="/2020/06/29/generative-models/image-20200629155005437.png" alt="image-20200629155005437" style="zoom: 67%;"></p>
+<p>我们现在从正态分布中sample一个data z，z的每个dimension就表示某种attribute；</p>
+<p>根据z我们就可以得出高斯分布mean和variance，即$\mu (z),\sigma(z)$，z有无穷多个可能，mean和variance也有无穷多个可能</p>
+<p><img src="/2020/06/29/generative-models/image-20200629160314318.png" alt="image-20200629160314318" style="zoom: 67%;"></p>
+<p>在最下方的图中，我们可以认为最中间的圆点被sample到的几率最大，其他圆点被sample到的几率就相对较小；<span style="color: red">每个z被sample到之后，根据某个function，计算出对应的mean和variance，都对应着不同的gaussian model</span></p>
+<p>这个function可以是一个neural network，input为z，output为$\mu(z),\sigma(z)$</p>
+<p>由于现在是连续的z，$P(z)$的形式也发生了变化，</p>
+<script type="math/tex; mode=display">
+P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><h5 id="Maximizing-Likelihood"><a href="#Maximizing-Likelihood" class="headerlink" title="Maximizing Likelihood"></a><strong>Maximizing Likelihood</strong></h5><p>现在我们需要找到z和$\mu(z),\sigma(z)$之间的关系，用network来进行计算的时候也需要一个评估手段，这里我们采用的是最大化$L=\sum_xlogP(x)$，即最大化我们已经看到的image x的likelihood；</p>
+<p>那么我们现在就有一个NN的参数需要调整，来最大化likelihood L；</p>
+<p><img src="/2020/06/29/generative-models/image-20200629162138964.png" alt="image-20200629162138964" style="zoom: 67%;"></p>
+<p>现在我们还有另外一个distribution $q(z|x)$，和前一个是相反的，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，其mean和variance，即$\mu’(x),\sigma’(x)$</p>
+<p>$P(x|z)$表示z决定了x的distribution，$q(z|x)$表示x决定了z的distribution</p>
+<p><img src="/2020/06/29/generative-models/image-20200629163947560.png" alt="image-20200629163947560" style="zoom:45%;"></p>
+<p>其中$P(z,x)=P(x)P(z|x)$</p>
+<p><img src="/2020/06/29/generative-models/image-20200629165559403.png" alt="image-20200629165559403" style="zoom:50%;"></p>
+<p>我们本来需要调整的参数是$P(x|z)$，使得$P(x)$取得最大值，从而使likelihood取得最大值；但现在的lower bound为$L_b$，是$log(P(x))$的最小值，其中$P(z)$是已知的，不知道的参数是$P(x|z),q(z|x)$，两项都需要调整</p>
+<p>Q：这里为什么突然多了一项需要调整的参数？</p>
+<p>A：这里并不知道lower bound和likelihood之间的关系到底是怎样的，有可能升高了lower bound，但likelihood反而下降了；引入q就可以解决这个问题</p>
+<p>根据原式子，即$P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z$，只和$P(x|z)$有关，与$q(z|x)$是无关的，即下图中<span style="color: purple">方框</span>部分是不变的，</p>
+<p><img src="/2020/06/29/generative-models/image-20200629170614939.png" alt="image-20200629170614939" style="zoom: 67%;"></p>
+<p><strong>如果我们现在固定$P(x|z)$，想通过$q(z|x)$来使$L_b$ 最大化，那么对应的KL divergence就会最小化，到一种很极端的情况，KL divergence会变为0；如果$L_b$继续上升，那么肯定会超出该区域，因此对应的$logP(x)$也会继续上升；KL divergence不断变小的过程，$q(z|x),P(z|x)$之间的差距也会不断缩小</strong></p>
+<p>因此，这个过程不仅让likelihood变得越来越大，也会找到和$P(x|z)$接近的$q(z|x)$</p>
+<p><img src="/2020/06/29/generative-models/image-20200629171631388.png" alt="image-20200629171631388" style="zoom:50%;"></p>
+<p>对于$q(z|x)$，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，就可以知道z是从什么样的gaussian distribution得出来的</p>
+<h5 id="Connection-with-Network"><a href="#Connection-with-Network" class="headerlink" title="Connection with Network"></a><strong>Connection with Network</strong></h5><p>现在我们的目标就是最小化$q(z|x),P(z)$之间的KL divergence，即使$q(z|x)$和normal distribution $P(z)$越接近越好，即minimize</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>还需要maximizing</p>
+<script type="math/tex; mode=display">
+P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><p><img src="/2020/06/29/generative-models/image-20200629172034668.png" alt="image-20200629172034668" style="zoom:50%;"></p>
+<p>对于input的x，我们先输入网络$NN’$，得到获取z的gaussian distribution；sample得到z之后，再输入网络$NN$，得到获取x的gaussian distribution，使得新分布的mean和x越接近越好</p>
+<h5 id="KL散度"><a href="#KL散度" class="headerlink" title="KL散度"></a>KL散度</h5><blockquote>
+<p>所谓KL散度，是指当某分布q(x)被用于近似p(x)时的信息损失。</p>
+</blockquote>
+<p>计算公式为</p>
+<script type="math/tex; mode=display">
+KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href="#Problems-of-VAE" class="headerlink" title="Problems of VAE"></a>Problems of VAE</h5><p><img src="/2020/06/29/generative-models/image-20200629174600157.png" alt="image-20200629174600157" style="zoom:50%;"></p>
+<h4 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h4><h5 id="The-evolution-of-generation"><a href="#The-evolution-of-generation" class="headerlink" title="The evolution of generation"></a>The evolution of generation</h5><p>v1：会generate一些奇怪的图片，然后会有一个第一代的discriminator，来辨别到底哪一个是real image；</p>
+<p>V2： generater会根据上一次discriminater的结果进行调整，第二代生成的image就和真实的image更像了，再把image输入第二代discriminator，再进行比较；</p>
+<p>…….</p>
+<p><img src="/2020/06/29/generative-models/image-20200629175524852.png" alt="image-20200629175524852" style="zoom:50%;"></p>
+<h5 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h5><p>对于generator，可以看作是VAE里面的decoder，我们通常选择从某个distributionsample出来的vector，输入到第一代的generator，再生成相对应的image，有多少个vector，就生成多少个image；</p>
+<p>把真实的image输入discriminator，与generator生成的image进行比较；并对这些data进行标注，real image标注为1，其余标注为0</p>
+<p><img src="/2020/06/29/generative-models/image-20200629201306815.png" alt="image-20200629201306815" style="zoom:50%;"></p>
+<h5 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h5><p>首先随机sample一个vector，作为Generator的输入，generator会生成对应的image，再把这个image输入discriminator，输出是real image的概率，对于第一代（v1），generator还不成熟，因此概率只有0.87；generator接下来会调整自己的参数，使discriminator认为其生成的image是real image；</p>
+<p>这generator+discriminator就相当于一个network，整体目标是使discriminator认为generator生成的image是real image，就可以根据这个指标来使用梯度下降算法，进行back propagation，来不断调整generator的参数；</p>
+<p><span style="color: red">注：在训练过程中应该固定discriminator的参数，来调整generator的参数</span></p>
+<p><img src="/2020/06/29/generative-models/image-20200629201707553.png" alt="image-20200629201707553" style="zoom:50%;"></p>
+<h5 id="Why-GAN-is-hard-to-train"><a href="#Why-GAN-is-hard-to-train" class="headerlink" title="Why GAN is hard to train?"></a>Why GAN is hard to train?</h5><p><img src="/2020/06/29/generative-models/image-20200629202903543.png" alt="image-20200629202903543" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Autoencoder</tag>
+        <tag>VAE</tag>
+        <tag>GAN</tag>
+        <tag>PixelRNN</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>PCA</title>
     <url>/2020/06/28/dimension-reduction/</url>
     <content><![CDATA[<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>unsupervised learning可以分为两大类，dimension reduction和generation</p>
@@ -1111,118 +1223,6 @@ W=\begin{pmatrix}
       </tags>
   </entry>
   <entry>
-    <title>Generative Models</title>
-    <url>/2020/06/29/generative-models/</url>
-    <content><![CDATA[<blockquote>
-<p>本文主要叙述了集中generative models，包括PixelRNN、VAE，GAN（生成对抗网络）；还叙述了auto-encoder和VAE的区别，以及VAE进行改进的地方，通过高斯混合模型来对VAE的原理进行了详细介绍。</p>
-</blockquote>
-<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>Generative Models可以分为三大类：pixelRNN、autoencoder、GAN；</p>
-<p>现在machine可以对猫狗进行分类，在将来machine就可以通过自己的学习画出一只猫来。</p>
-<p><img src="/2020/06/29/generative-models/image-20200629141407487.png" alt="image-20200629141407487" style="zoom: 67%;"></p>
-<h4 id="PixelRNN"><a href="#PixelRNN" class="headerlink" title="PixelRNN"></a>PixelRNN</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>如果要生成一张图像，我们可以先生成这张图像的第一个红色pixel，再根据这个pixel生成下一个蓝色pixel，每个pixel可以用一个三维的vector来进行表示</p>
-<p><img src="/2020/06/29/generative-models/image-20200629141521860.png" alt="image-20200629141521860" style="zoom: 67%;"></p>
-<p>这是一个无监督学习的过程，并不需要对data进行标注</p>
-<p>如果我们现在把下图中的狗下半身遮住，可以让machine学习出下半身的图片</p>
-<p><img src="/2020/06/29/generative-models/image-20200629141945697.png" alt="image-20200629141945697" style="zoom: 67%;"></p>
-<p>也可以用到声讯号</p>
-<p><img src="/2020/06/29/generative-models/image-20200629142331286.png" alt="image-20200629142331286" style="zoom:50%;"></p>
-<p><img src="/2020/06/29/generative-models/image-20200629142353897.png" alt="image-20200629142353897" style="zoom:50%;"></p>
-<h5 id="Practicing-Generation-Models-Pokemon-Creation"><a href="#Practicing-Generation-Models-Pokemon-Creation" class="headerlink" title="Practicing Generation Models: Pokémon Creation"></a>Practicing Generation Models: Pokémon Creation</h5><p><img src="/2020/06/29/generative-models/image-20200629142516414.png" alt="image-20200629142516414" style="zoom: 67%;"></p>
-<p>做这个实验时，有一些tips；</p>
-<p>由于每个pixel都使用三维的vector来表示（RGB），只有三个channel的值相差特别大时，才会有颜色特别鲜明的图片，但学习结果并不能保证这一点，因此图片会会比较灰蒙蒙的，最后得出来的结果会不太好；</p>
-<p>因此，每个pixel最好使用1-of-N encoding来表示，输入一个绿色的方块，vector中只有绿色方块对应的dimensions为1，其他都是0；但有$256\times256$种颜色，颜色种类非常繁多，可以先对类似的颜色做一个<strong>clustering</strong>，类似的颜色都用同一种颜色来表示，可以把颜色数量缩小到167种</p>
-<p><img src="/2020/06/29/generative-models/image-20200629142535096.png" alt="image-20200629142535096" style="zoom: 67%;"></p>
-<p>下面开始正式做实验</p>
-<p><img src="/2020/06/29/generative-models/image-20200629143804656.png" alt="image-20200629143804656" style="zoom: 67%;"></p>
-<p><img src="/2020/06/29/generative-models/image-20200629143843226.png" alt="image-20200629143843226" style="zoom: 33%;"></p>
-<h4 id="VAE"><a href="#VAE" class="headerlink" title="VAE"></a>VAE</h4><h5 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h5><p><img src="/2020/06/29/generative-models/image-20200629144022672.png" alt="image-20200629144022672" style="zoom: 67%;"></p>
-<h5 id="VAE-1"><a href="#VAE-1" class="headerlink" title="VAE"></a>VAE</h5><p>VAE不像autoencoder那样，直接得出code，经过了一些变换，即$c_i=exp(\sigma_i)\times e_i+m_i$，也是来最小化reconstruction error</p>
-<p><img src="/2020/06/29/generative-models/image-20200629144250780.png" alt="image-20200629144250780" style="zoom: 67%;"></p>
-<p>minimize的目标还有</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><h5 id="Pokemon-Creation"><a href="#Pokemon-Creation" class="headerlink" title="Pokémon Creation"></a>Pokémon Creation</h5><p>input一个宝可梦图像，进行encoder、decoder，得到reconstruct之后的图像，其中code是10-dim的；</p>
-<p>现在我们只选择其中的2个纬度出来，其他纬度的值都固定不变，对这个二维的坐标轴，放入不同的点，再输入对应的Decoder，观察其合成出来的image；如果使用不同维度的点，就可以观察到不同维度生成的image；根据不同的维度，我们就可以根据自己的需要，调整这些维度的值，从而得出我们想要的结果</p>
-<p><img src="/2020/06/29/generative-models/image-20200629150656140.png" alt="image-20200629150656140" style="zoom: 50%;"></p>
-<p>部分结果展示</p>
-<p><img src="/2020/06/29/generative-models/image-20200629151406932.png" alt="image-20200629151406932" style="zoom:50%;"></p>
-<h5 id="Why-VAE"><a href="#Why-VAE" class="headerlink" title="Why VAE?"></a>Why VAE?</h5><p>对于一张满月的图像，先进行encode，再进行decode，使得input和output之间的差值最小化；对半月的图像输入也如此</p>
-<p><img src="/2020/06/29/generative-models/image-20200629152107223.png" alt="image-20200629152107223" style="zoom: 67%;"></p>
-<p>对于encoder的其中一个输出$\sigma_i$，表示noise的variance，需要再输入exp函数进行计算，保证其值是大于0的，是machine自己学习的</p>
-<p><img src="/2020/06/29/generative-models/image-20200629153400892.png" alt="image-20200629153400892" style="zoom: 67%;"></p>
-<p>但只有noise是不够的，还需要加一些限制</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>在下图中，蓝色的线表示$exp(\sigma_i)$，红色的线表示$(1+\sigma_i)$，绿色的线表示两者的差值，可以发现在原点处差值是最小的，$\sigma _i$的值接近1，variance的值接近1</p>
-<p><img src="/2020/06/29/generative-models/image-20200629153918937.png" alt="image-20200629153918937" style="zoom:50%;"></p>
-<p>$(m_i)^2$为正则项regularization term，让结果不那么overfiting</p>
-<p>在下图中，为一个高维的坐标（用一维进行了展示），曲线表示image是宝可梦的概率，可以在图中看到，对于一些很像宝可梦的image，$P(x)$值很高，但对于一些比较模棱两可的image，$P(x)$值就很低</p>
-<p><img src="/2020/06/29/generative-models/image-20200629154606838.png" alt="image-20200629154606838" style="zoom: 33%;"></p>
-<p>那么我们到底要怎么来评估这个probability distribution呢？答案是高斯混合模型</p>
-<h5 id="Gaussian-Mixture-Model"><a href="#Gaussian-Mixture-Model" class="headerlink" title="Gaussian Mixture Model"></a>Gaussian Mixture Model</h5><p>对于下图中的曲线图，蓝色表示多个高斯模型，黑色曲线表示这些模型通过一定的weight进行叠加之后的结果</p>
-<p>现在有很多个gaussian model（1，2，3，4，5…），且都对应了自己的weight $P(m)$（蓝色方块），<span style="color: red">要先根据weight选对应的gaussian，再决定到底要从gaussian中sample哪些data</span> ;我们使用$P(m)$表示每个gaussian的weight，$P(x|m)$表示从对应的gaussian中选出data x的概率</p>
-<p>x并不是代表着某个类别，而是用一个vector来进行表示，每个维度表示不同的特征，即 <u>Distributed representation is better than cluster</u></p>
-<p><img src="/2020/06/29/generative-models/image-20200629155005437.png" alt="image-20200629155005437" style="zoom: 67%;"></p>
-<p>我们现在从正态分布中sample一个data z，z的每个dimension就表示某种attribute；</p>
-<p>根据z我们就可以得出高斯分布mean和variance，即$\mu (z),\sigma(z)$，z有无穷多个可能，mean和variance也有无穷多个可能</p>
-<p><img src="/2020/06/29/generative-models/image-20200629160314318.png" alt="image-20200629160314318" style="zoom: 67%;"></p>
-<p>在最下方的图中，我们可以认为最中间的圆点被sample到的几率最大，其他圆点被sample到的几率就相对较小；<span style="color: red">每个z被sample到之后，根据某个function，计算出对应的mean和variance，都对应着不同的gaussian model</span></p>
-<p>这个function可以是一个neural network，input为z，output为$\mu(z),\sigma(z)$</p>
-<p>由于现在是连续的z，$P(z)$的形式也发生了变化，</p>
-<script type="math/tex; mode=display">
-P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><h5 id="Maximizing-Likelihood"><a href="#Maximizing-Likelihood" class="headerlink" title="Maximizing Likelihood"></a><strong>Maximizing Likelihood</strong></h5><p>现在我们需要找到z和$\mu(z),\sigma(z)$之间的关系，用network来进行计算的时候也需要一个评估手段，这里我们采用的是最大化$L=\sum_xlogP(x)$，即最大化我们已经看到的image x的likelihood；</p>
-<p>那么我们现在就有一个NN的参数需要调整，来最大化likelihood L；</p>
-<p><img src="/2020/06/29/generative-models/image-20200629162138964.png" alt="image-20200629162138964" style="zoom: 67%;"></p>
-<p>现在我们还有另外一个distribution $q(z|x)$，和前一个是相反的，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，其mean和variance，即$\mu’(x),\sigma’(x)$</p>
-<p>$P(x|z)$表示z决定了x的distribution，$q(z|x)$表示x决定了z的distribution</p>
-<p><img src="/2020/06/29/generative-models/image-20200629163947560.png" alt="image-20200629163947560" style="zoom:45%;"></p>
-<p>其中$P(z,x)=P(x)P(z|x)$</p>
-<p><img src="/2020/06/29/generative-models/image-20200629165559403.png" alt="image-20200629165559403" style="zoom:50%;"></p>
-<p>我们本来需要调整的参数是$P(x|z)$，使得$P(x)$取得最大值，从而使likelihood取得最大值；但现在的lower bound为$L_b$，是$log(P(x))$的最小值，其中$P(z)$是已知的，不知道的参数是$P(x|z),q(z|x)$，两项都需要调整</p>
-<p>Q：这里为什么突然多了一项需要调整的参数？</p>
-<p>A：这里并不知道lower bound和likelihood之间的关系到底是怎样的，有可能升高了lower bound，但likelihood反而下降了；引入q就可以解决这个问题</p>
-<p>根据原式子，即$P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z$，只和$P(x|z)$有关，与$q(z|x)$是无关的，即下图中<span style="color: purple">方框</span>部分是不变的，</p>
-<p><img src="/2020/06/29/generative-models/image-20200629170614939.png" alt="image-20200629170614939" style="zoom: 67%;"></p>
-<p><strong>如果我们现在固定$P(x|z)$，想通过$q(z|x)$来使$L_b$ 最大化，那么对应的KL divergence就会最小化，到一种很极端的情况，KL divergence会变为0；如果$L_b$继续上升，那么肯定会超出该区域，因此对应的$logP(x)$也会继续上升；KL divergence不断变小的过程，$q(z|x),P(z|x)$之间的差距也会不断缩小</strong></p>
-<p>因此，这个过程不仅让likelihood变得越来越大，也会找到和$P(x|z)$接近的$q(z|x)$</p>
-<p><img src="/2020/06/29/generative-models/image-20200629171631388.png" alt="image-20200629171631388" style="zoom:50%;"></p>
-<p>对于$q(z|x)$，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，就可以知道z是从什么样的gaussian distribution得出来的</p>
-<h5 id="Connection-with-Network"><a href="#Connection-with-Network" class="headerlink" title="Connection with Network"></a><strong>Connection with Network</strong></h5><p>现在我们的目标就是最小化$q(z|x),P(z)$之间的KL divergence，即使$q(z|x)$和normal distribution $P(z)$越接近越好，即minimize</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>还需要maximizing</p>
-<script type="math/tex; mode=display">
-P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><p><img src="/2020/06/29/generative-models/image-20200629172034668.png" alt="image-20200629172034668" style="zoom:50%;"></p>
-<p>对于input的x，我们先输入网络$NN’$，得到获取z的gaussian distribution；sample得到z之后，再输入网络$NN$，得到获取x的gaussian distribution，使得新分布的mean和x越接近越好</p>
-<h5 id="KL散度"><a href="#KL散度" class="headerlink" title="KL散度"></a>KL散度</h5><blockquote>
-<p>所谓KL散度，是指当某分布q(x)被用于近似p(x)时的信息损失。</p>
-</blockquote>
-<p>计算公式为</p>
-<script type="math/tex; mode=display">
-KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href="#Problems-of-VAE" class="headerlink" title="Problems of VAE"></a>Problems of VAE</h5><p><img src="/2020/06/29/generative-models/image-20200629174600157.png" alt="image-20200629174600157" style="zoom:50%;"></p>
-<h4 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h4><h5 id="The-evolution-of-generation"><a href="#The-evolution-of-generation" class="headerlink" title="The evolution of generation"></a>The evolution of generation</h5><p>v1：会generate一些奇怪的图片，然后会有一个第一代的discriminator，来辨别到底哪一个是real image；</p>
-<p>V2： generater会根据上一次discriminater的结果进行调整，第二代生成的image就和真实的image更像了，再把image输入第二代discriminator，再进行比较；</p>
-<p>…….</p>
-<p><img src="/2020/06/29/generative-models/image-20200629175524852.png" alt="image-20200629175524852" style="zoom:50%;"></p>
-<h5 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h5><p>对于generator，可以看作是VAE里面的decoder，我们通常选择从某个distributionsample出来的vector，输入到第一代的generator，再生成相对应的image，有多少个vector，就生成多少个image；</p>
-<p>把真实的image输入discriminator，与generator生成的image进行比较；并对这些data进行标注，real image标注为1，其余标注为0</p>
-<p><img src="/2020/06/29/generative-models/image-20200629201306815.png" alt="image-20200629201306815" style="zoom:50%;"></p>
-<h5 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h5><p>首先随机sample一个vector，作为Generator的输入，generator会生成对应的image，再把这个image输入discriminator，输出是real image的概率，对于第一代（v1），generator还不成熟，因此概率只有0.87；generator接下来会调整自己的参数，使discriminator认为其生成的image是real image；</p>
-<p>这generator+discriminator就相当于一个network，整体目标是使discriminator认为generator生成的image是real image，就可以根据这个指标来使用梯度下降算法，进行back propagation，来不断调整generator的参数；</p>
-<p><span style="color: red">注：在训练过程中应该固定discriminator的参数，来调整generator的参数</span></p>
-<p><img src="/2020/06/29/generative-models/image-20200629201707553.png" alt="image-20200629201707553" style="zoom:50%;"></p>
-<h5 id="Why-GAN-is-hard-to-train"><a href="#Why-GAN-is-hard-to-train" class="headerlink" title="Why GAN is hard to train?"></a>Why GAN is hard to train?</h5><p><img src="/2020/06/29/generative-models/image-20200629202903543.png" alt="image-20200629202903543" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Autoencoder</tag>
-        <tag>VAE</tag>
-        <tag>GAN</tag>
-        <tag>PixelRNN</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Network Compression</title>
     <url>/2020/06/27/network-conpression/</url>
     <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
@@ -1287,55 +1287,6 @@ KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href=
       <tags>
         <tag>Deep Learning</tag>
         <tag>network compression</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
-    <url>/2020/06/28/t-SNE/</url>
-    <content><![CDATA[<blockquote>
-<p>本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；</p>
-</blockquote>
-<h4 id="Manifold-Learning"><a href="#Manifold-Learning" class="headerlink" title="Manifold Learning"></a>Manifold Learning</h4><p>在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learning 任务</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628202133893.png" alt="image-20200628202133893" style="zoom:50%;"></p>
-<h4 id="Locally-Linear-Embedding-LLE"><a href="#Locally-Linear-Embedding-LLE" class="headerlink" title="Locally Linear Embedding (LLE)"></a>Locally Linear Embedding (LLE)</h4><p>用$w_{ij}$表示$x_i,x_j$之间的联系，先找到使得$\sum_i ||x^i-\sum_jw_{ij}x^j||_2$最小化的$w_{ij}$，再根据这个$w_{ij}$来找到降维的结果$z_i,z_j$</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628202738023.png" alt="image-20200628202738023" style="zoom:50%;"></p>
-<p>如果并不知道之前的$x_i,x_j$，那么就可以用LLE这种方法，也可以得出$z_i,z_j$</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628203501209.png" alt="image-20200628203501209" style="zoom:50%;"></p>
-<h4 id="Laplacian-Eigenmaps"><a href="#Laplacian-Eigenmaps" class="headerlink" title="Laplacian Eigenmaps"></a>Laplacian Eigenmaps</h4><p>Review: 在之前的semi-supervised learning中，如果$x^1,x^2$在一个high density region内是相近的，那么我们就可以认为$\hat y^1,\hat y^2$也有类似的表现</p>
-<p>如果$y^i,y^j$是connected的，那么其$w_{ij}$就是对应的相似度；如果没有connect，其$w_{ij}$就是0</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628204015777.png" alt="image-20200628204015777" style="zoom:50%;"></p>
-<p>我们也可以得出类似smoothness的式子，计算$z^i,z^j$之间的smoothness</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628205136836.png" alt="image-20200628205136836" style="zoom:50%;"></p>
-<p>那么我们现在的目标就是找到$z^i,z^j$，来使S达到最小值，还需要有一些额外的constrains</p>
-<p>现在我们对z加入一些constrains，如果降维后z的维数是M，那么我们就不希望取出来的这些点还生活在比M还低维的空间里面；我们现在希望把塞进高维空间的低维空间展开，我们就不希望展开之后的点在一个更低维的空间里面</p>
-<h4 id="T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><a href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE" class="headerlink" title="T-distributed Stochastic Neighbor Embedding (t-SNE)"></a>T-distributed Stochastic Neighbor Embedding (t-SNE)</h4><p>对于之前的LLE方法，类似的data之间是很close的，<u>但不同类别之间的data却没有分开，是叠成一团的</u></p>
-<p><img src="/2020/06/28/t-SNE/image-20200628210651621.png" alt="image-20200628210651621" style="zoom:50%;"></p>
-<p><strong>为了找到对应的$z^i,z^j$</strong>，先计算$x^i,x^j$之间的相似度$S(x^i,x^j)$，再得出一个分布 $P(x^j|x^i)$；还要计算$z^i,z^j$之间的相似度$S’(z^i,z^j)$，得出分布$Q(z^j|z^i)$；</p>
-<p>这两个分布应该越接近越好，使用L来表示</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628211215304.png" alt="image-20200628211215304" style="zoom:50%;"></p>
-<p>可以使用gradient descent，有了L函数，再分别对$z^i,z^j$求偏微分即可</p>
-<p>但t-SNE要对所有的point之间都求similarity，因此计算量比较大，在数据量很大的情况下电脑的计算速度会非常慢</p>
-<p>因此，对于很高的dimensions，通常先做降维（PCA），比如可以降维到50维，再使用t-SNE降到2维</p>
-<p><span style="color: red">通常我们使用t-SNE来对高维的数据进行可视化</span></p>
-<p><img src="/2020/06/28/t-SNE/image-20200628211326492.png" alt="image-20200628211326492" style="zoom:50%;"></p>
-<p>在上图中，红色曲线表示SNE，蓝色曲线表示t-SNE，纵轴表示distribution；如果我们想要维持相同的distribution，即在同一个水平线上，就达到了如图所示的效果；相同的几率，t-SNE的$||z^i-z^j||_2$之间的距离越大</p>
-<p>如果本来就离得很近，那么经过t-SNE之间的距离还是很小；如果本来就离得很远，那么从原来的distribution拉到t-SNE之后，距离会更远；</p>
-<p>到实际的例子中，<span style="color: red">如果本来是同一个类别的data，由于这些data之间的距离很近，不会收到t-SNE很大的影响；但如果是属于不同类别的data，距离是比较远的，t-SNE会放大这种距离</span></p>
-<p>对于下图中的MNIST，先使用PCA进行降维，再进行可视化，就可以得到下图中的good visualization</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628213646582.png" alt="image-20200628213646582" style="zoom:50%;"></p>
-<p>下图中有一个更加直观的例子，使用t-SNE算法，运用gradient descent的思想，不同类别的data之间的距离会越来越大</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628214657615.png" alt="image-20200628214657615" style="zoom:50%;"></p>
-<p><img src="/2020/06/28/t-SNE/image-20200628214721028.png" alt="image-20200628214721028" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Dimension Reduction</tag>
-        <tag>LLE</tag>
-        <tag>t-SNE</tag>
       </tags>
   </entry>
   <entry>
@@ -1551,6 +1502,55 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
       <tags>
         <tag>Deep Learning</tag>
         <tag>Sequence to Sequence</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
+    <url>/2020/06/28/t-SNE/</url>
+    <content><![CDATA[<blockquote>
+<p>本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；</p>
+</blockquote>
+<h4 id="Manifold-Learning"><a href="#Manifold-Learning" class="headerlink" title="Manifold Learning"></a>Manifold Learning</h4><p>在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learning 任务</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628202133893.png" alt="image-20200628202133893" style="zoom:50%;"></p>
+<h4 id="Locally-Linear-Embedding-LLE"><a href="#Locally-Linear-Embedding-LLE" class="headerlink" title="Locally Linear Embedding (LLE)"></a>Locally Linear Embedding (LLE)</h4><p>用$w_{ij}$表示$x_i,x_j$之间的联系，先找到使得$\sum_i ||x^i-\sum_jw_{ij}x^j||_2$最小化的$w_{ij}$，再根据这个$w_{ij}$来找到降维的结果$z_i,z_j$</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628202738023.png" alt="image-20200628202738023" style="zoom:50%;"></p>
+<p>如果并不知道之前的$x_i,x_j$，那么就可以用LLE这种方法，也可以得出$z_i,z_j$</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628203501209.png" alt="image-20200628203501209" style="zoom:50%;"></p>
+<h4 id="Laplacian-Eigenmaps"><a href="#Laplacian-Eigenmaps" class="headerlink" title="Laplacian Eigenmaps"></a>Laplacian Eigenmaps</h4><p>Review: 在之前的semi-supervised learning中，如果$x^1,x^2$在一个high density region内是相近的，那么我们就可以认为$\hat y^1,\hat y^2$也有类似的表现</p>
+<p>如果$y^i,y^j$是connected的，那么其$w_{ij}$就是对应的相似度；如果没有connect，其$w_{ij}$就是0</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628204015777.png" alt="image-20200628204015777" style="zoom:50%;"></p>
+<p>我们也可以得出类似smoothness的式子，计算$z^i,z^j$之间的smoothness</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628205136836.png" alt="image-20200628205136836" style="zoom:50%;"></p>
+<p>那么我们现在的目标就是找到$z^i,z^j$，来使S达到最小值，还需要有一些额外的constrains</p>
+<p>现在我们对z加入一些constrains，如果降维后z的维数是M，那么我们就不希望取出来的这些点还生活在比M还低维的空间里面；我们现在希望把塞进高维空间的低维空间展开，我们就不希望展开之后的点在一个更低维的空间里面</p>
+<h4 id="T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><a href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE" class="headerlink" title="T-distributed Stochastic Neighbor Embedding (t-SNE)"></a>T-distributed Stochastic Neighbor Embedding (t-SNE)</h4><p>对于之前的LLE方法，类似的data之间是很close的，<u>但不同类别之间的data却没有分开，是叠成一团的</u></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628210651621.png" alt="image-20200628210651621" style="zoom:50%;"></p>
+<p><strong>为了找到对应的$z^i,z^j$</strong>，先计算$x^i,x^j$之间的相似度$S(x^i,x^j)$，再得出一个分布 $P(x^j|x^i)$；还要计算$z^i,z^j$之间的相似度$S’(z^i,z^j)$，得出分布$Q(z^j|z^i)$；</p>
+<p>这两个分布应该越接近越好，使用L来表示</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628211215304.png" alt="image-20200628211215304" style="zoom:50%;"></p>
+<p>可以使用gradient descent，有了L函数，再分别对$z^i,z^j$求偏微分即可</p>
+<p>但t-SNE要对所有的point之间都求similarity，因此计算量比较大，在数据量很大的情况下电脑的计算速度会非常慢</p>
+<p>因此，对于很高的dimensions，通常先做降维（PCA），比如可以降维到50维，再使用t-SNE降到2维</p>
+<p><span style="color: red">通常我们使用t-SNE来对高维的数据进行可视化</span></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628211326492.png" alt="image-20200628211326492" style="zoom:50%;"></p>
+<p>在上图中，红色曲线表示SNE，蓝色曲线表示t-SNE，纵轴表示distribution；如果我们想要维持相同的distribution，即在同一个水平线上，就达到了如图所示的效果；相同的几率，t-SNE的$||z^i-z^j||_2$之间的距离越大</p>
+<p>如果本来就离得很近，那么经过t-SNE之间的距离还是很小；如果本来就离得很远，那么从原来的distribution拉到t-SNE之后，距离会更远；</p>
+<p>到实际的例子中，<span style="color: red">如果本来是同一个类别的data，由于这些data之间的距离很近，不会收到t-SNE很大的影响；但如果是属于不同类别的data，距离是比较远的，t-SNE会放大这种距离</span></p>
+<p>对于下图中的MNIST，先使用PCA进行降维，再进行可视化，就可以得到下图中的good visualization</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628213646582.png" alt="image-20200628213646582" style="zoom:50%;"></p>
+<p>下图中有一个更加直观的例子，使用t-SNE算法，运用gradient descent的思想，不同类别的data之间的距离会越来越大</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628214657615.png" alt="image-20200628214657615" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628214721028.png" alt="image-20200628214721028" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Dimension Reduction</tag>
+        <tag>LLE</tag>
+        <tag>t-SNE</tag>
       </tags>
   </entry>
   <entry>
@@ -2144,6 +2144,66 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
       </tags>
   </entry>
   <entry>
+    <title>计算机体系结构重要考点</title>
+    <url>/2020/03/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%87%8D%E8%A6%81%E8%80%83%E7%82%B9/</url>
+    <content><![CDATA[<h4 id="同时多线程"><a href="#同时多线程" class="headerlink" title="同时多线程"></a>同时多线程</h4><p>线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。</p>
+<p>线程级并行：指并行执行两个或两个以上的线程。</p>
+<p>同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种改进。通过寄存器命名和动态调度机制，来自各个独立线程的多条指令可以同时流出，而不用考虑它们之间的相互依赖关系。</p>
+<h5 id="实现多线程的主要方法"><a href="#实现多线程的主要方法" class="headerlink" title="实现多线程的主要方法"></a>实现多线程的主要方法</h5><p><u>细粒度多线程</u>：在每条指令之间都可以进行线程的切换，从而使得多个线程可以交替执行。</p>
+<ul>
+<li>优点：能够隐藏由长时间停顿带来的吞吐率的损失，也能够隐藏由段时间停顿带来的损失。</li>
+<li>缺点：减慢了单个线程的执行。即使没有任何停顿的线程也不能连续执行，而且会因为其他线程的指令的插入执行而被延迟。</li>
+</ul>
+<p><u>粗粒度多线程</u>：线程之间的切换只发生在时间较长的停顿出现的时候。</p>
+<ul>
+<li>优点：减少了切换次数，很大程度上也不会降低单个线程的执行速度。</li>
+<li>缺点：减少吞吐率损失的能力有限。由于实现粗粒度多线程的CPU只能执行单个线程的指令，不能交叉执行多个线程，因此当发生停顿时，流水线必须排空或暂停。</li>
+</ul>
+<h4 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h4><h5 id="写策略"><a href="#写策略" class="headerlink" title="写策略"></a>写策略</h5><p>写直达法：在执行写操作时，不仅把数据写入Cathe中相应的块，而且也写入下一级存储器。减少CPU写停顿的常用方法是，采用写缓冲器。</p>
+<p>写回法：只把数据写入Cathe中相应的块，不写入下一级存储器。这些最新数据只有在相应的块被替换出时，才被写回下一级存储器。速度快，要设置“修改位”。</p>
+<p>写不命中时，</p>
+<p>按写分配法：写不命中时，把所写单元的块从主存中调入Cathe，然后再进行写入。与<u>写回法</u>配合。</p>
+<p>不按写分配法：写不命中时，直接写入下一级存储器而不将相应的块调入Cathe。</p>
+<h5 id="三种类型的Cathe不命中"><a href="#三种类型的Cathe不命中" class="headerlink" title="三种类型的Cathe不命中"></a>三种类型的Cathe不命中</h5><p><u>强制性不命中</u>：当第一次访问一个快时，该块不在Cathe中，需从下一级存储器中调入Cathe。（冷启动访问不命中，首次访问不命中）</p>
+<p><u>容量不命中</u>：如果<u>程序执行时所需的块</u>不能全部调入Cathe中，当某些块被调出后，若又重新被访问，就会发生不命中。</p>
+<p><u>冲突不命中</u>：在组相联或者直接映像Cathe中，若太多的块映像到同一组（块）中，则会出现该组中某个块被别的块替换掉，然后又重新被访问的情况。（碰撞不命中，冲突不命中）</p>
+<p>关系：</p>
+<ul>
+<li><strong>相联度</strong>越高，冲突不命中就越少；</li>
+<li>强制性不命中和容量不命中不受相联度的影响；</li>
+<li>强制性不命中不受<strong>Cathe容量</strong>的影响，但容量不命中却随着容量的增加而减少。</li>
+</ul>
+<h4 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h4><h5 id="I-O系统的可靠性、可用性和可信性"><a href="#I-O系统的可靠性、可用性和可信性" class="headerlink" title="I/O系统的可靠性、可用性和可信性"></a>I/O系统的可靠性、可用性和可信性</h5><p>可靠性：系统从某个初始参考点开始<u>一直连续提供服务的能力</u>，用平均无故障时间（<strong>MTTF</strong>）来衡量。MTTF的导数是失效率。系统总体的失效率是各部件的失效率之和。系统<u>中断服务的时间</u>用平均修复时间（<strong>MTTR</strong>）来衡量。</p>
+<p>可用性：系统正常工作的时间在连续两次服务间隔时间中所占的比例。</p>
+<script type="math/tex; mode=display">
+可用性=\frac{MTTF}{MTTF+MTTR}</script><p>   平均失效间隔时间，MTBF</p>
+<script type="math/tex; mode=display">
+MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u>的。</p>
+<h5 id="廉价磁盘冗余阵列-RAID"><a href="#廉价磁盘冗余阵列-RAID" class="headerlink" title="廉价磁盘冗余阵列 (RAID)"></a>廉价磁盘冗余阵列 (RAID)</h5><p>RAID0：<u>无冗余和无校验</u>的磁盘阵列，成本最低。</p>
+<p>RAID1：<u>镜像</u>磁盘阵列。</p>
+<p>RAID2：采用纠错的<u>海明码</u>的磁盘阵列，冗余盘数量为$log_2m$，m为数据盘的个数。</p>
+<p>RAID3：<u>位</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID4：<u>块</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
+<p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
+<p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
+<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。<br>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
+]]></content>
+      <categories>
+        <category>计算机体系结构</category>
+      </categories>
+      <tags>
+        <tag>计算机体系结构</tag>
+        <tag>机群</tag>
+        <tag>MPP</tag>
+        <tag>SMP</tag>
+        <tag>消息传递</tag>
+        <tag>共享存储器</tag>
+        <tag>同时多线程</tag>
+        <tag>RAID</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>软件工程学概述</title>
     <url>/2020/03/08/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%AD%A6%E6%A6%82%E8%BF%B0/</url>
     <content><![CDATA[<h4 id="软件危机"><a href="#软件危机" class="headerlink" title="软件危机"></a>软件危机</h4><ol>
@@ -2307,66 +2367,6 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
         <tag>软件危机</tag>
         <tag>软件生命周期</tag>
         <tag>软件工程方法学</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>计算机体系结构重要考点</title>
-    <url>/2020/03/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%87%8D%E8%A6%81%E8%80%83%E7%82%B9/</url>
-    <content><![CDATA[<h4 id="同时多线程"><a href="#同时多线程" class="headerlink" title="同时多线程"></a>同时多线程</h4><p>线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。</p>
-<p>线程级并行：指并行执行两个或两个以上的线程。</p>
-<p>同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种改进。通过寄存器命名和动态调度机制，来自各个独立线程的多条指令可以同时流出，而不用考虑它们之间的相互依赖关系。</p>
-<h5 id="实现多线程的主要方法"><a href="#实现多线程的主要方法" class="headerlink" title="实现多线程的主要方法"></a>实现多线程的主要方法</h5><p><u>细粒度多线程</u>：在每条指令之间都可以进行线程的切换，从而使得多个线程可以交替执行。</p>
-<ul>
-<li>优点：能够隐藏由长时间停顿带来的吞吐率的损失，也能够隐藏由段时间停顿带来的损失。</li>
-<li>缺点：减慢了单个线程的执行。即使没有任何停顿的线程也不能连续执行，而且会因为其他线程的指令的插入执行而被延迟。</li>
-</ul>
-<p><u>粗粒度多线程</u>：线程之间的切换只发生在时间较长的停顿出现的时候。</p>
-<ul>
-<li>优点：减少了切换次数，很大程度上也不会降低单个线程的执行速度。</li>
-<li>缺点：减少吞吐率损失的能力有限。由于实现粗粒度多线程的CPU只能执行单个线程的指令，不能交叉执行多个线程，因此当发生停顿时，流水线必须排空或暂停。</li>
-</ul>
-<h4 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h4><h5 id="写策略"><a href="#写策略" class="headerlink" title="写策略"></a>写策略</h5><p>写直达法：在执行写操作时，不仅把数据写入Cathe中相应的块，而且也写入下一级存储器。减少CPU写停顿的常用方法是，采用写缓冲器。</p>
-<p>写回法：只把数据写入Cathe中相应的块，不写入下一级存储器。这些最新数据只有在相应的块被替换出时，才被写回下一级存储器。速度快，要设置“修改位”。</p>
-<p>写不命中时，</p>
-<p>按写分配法：写不命中时，把所写单元的块从主存中调入Cathe，然后再进行写入。与<u>写回法</u>配合。</p>
-<p>不按写分配法：写不命中时，直接写入下一级存储器而不将相应的块调入Cathe。</p>
-<h5 id="三种类型的Cathe不命中"><a href="#三种类型的Cathe不命中" class="headerlink" title="三种类型的Cathe不命中"></a>三种类型的Cathe不命中</h5><p><u>强制性不命中</u>：当第一次访问一个快时，该块不在Cathe中，需从下一级存储器中调入Cathe。（冷启动访问不命中，首次访问不命中）</p>
-<p><u>容量不命中</u>：如果<u>程序执行时所需的块</u>不能全部调入Cathe中，当某些块被调出后，若又重新被访问，就会发生不命中。</p>
-<p><u>冲突不命中</u>：在组相联或者直接映像Cathe中，若太多的块映像到同一组（块）中，则会出现该组中某个块被别的块替换掉，然后又重新被访问的情况。（碰撞不命中，冲突不命中）</p>
-<p>关系：</p>
-<ul>
-<li><strong>相联度</strong>越高，冲突不命中就越少；</li>
-<li>强制性不命中和容量不命中不受相联度的影响；</li>
-<li>强制性不命中不受<strong>Cathe容量</strong>的影响，但容量不命中却随着容量的增加而减少。</li>
-</ul>
-<h4 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h4><h5 id="I-O系统的可靠性、可用性和可信性"><a href="#I-O系统的可靠性、可用性和可信性" class="headerlink" title="I/O系统的可靠性、可用性和可信性"></a>I/O系统的可靠性、可用性和可信性</h5><p>可靠性：系统从某个初始参考点开始<u>一直连续提供服务的能力</u>，用平均无故障时间（<strong>MTTF</strong>）来衡量。MTTF的导数是失效率。系统总体的失效率是各部件的失效率之和。系统<u>中断服务的时间</u>用平均修复时间（<strong>MTTR</strong>）来衡量。</p>
-<p>可用性：系统正常工作的时间在连续两次服务间隔时间中所占的比例。</p>
-<script type="math/tex; mode=display">
-可用性=\frac{MTTF}{MTTF+MTTR}</script><p>   平均失效间隔时间，MTBF</p>
-<script type="math/tex; mode=display">
-MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u>的。</p>
-<h5 id="廉价磁盘冗余阵列-RAID"><a href="#廉价磁盘冗余阵列-RAID" class="headerlink" title="廉价磁盘冗余阵列 (RAID)"></a>廉价磁盘冗余阵列 (RAID)</h5><p>RAID0：<u>无冗余和无校验</u>的磁盘阵列，成本最低。</p>
-<p>RAID1：<u>镜像</u>磁盘阵列。</p>
-<p>RAID2：采用纠错的<u>海明码</u>的磁盘阵列，冗余盘数量为$log_2m$，m为数据盘的个数。</p>
-<p>RAID3：<u>位</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
-<p>RAID4：<u>块</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
-<p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
-<p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
-<p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
-<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。<br>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
-]]></content>
-      <categories>
-        <category>计算机体系结构</category>
-      </categories>
-      <tags>
-        <tag>计算机体系结构</tag>
-        <tag>机群</tag>
-        <tag>MPP</tag>
-        <tag>SMP</tag>
-        <tag>消息传递</tag>
-        <tag>共享存储器</tag>
-        <tag>同时多线程</tag>
-        <tag>RAID</tag>
       </tags>
   </entry>
 </search>
