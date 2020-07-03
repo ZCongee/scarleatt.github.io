@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+
+
+
+
+  <meta name="keywords" content="Deep Learning,Anomaly Detection," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Problem Formulation对于给定的训练数据集，做异常检测的目的是找到一个函数，这个函数可以检测输入的x是不是和训练数据集相似的。异常检测知识检测出和训练数据不一样的输入，检测出来的数据并不一定都是不好的，有可能是好的，也有可能是不好的。  那么到底怎么来定义这个similarity呢？这也就是异常检测需要探讨的问题，不同的方法就有不同的定义方式。 What is Anomaly?Q：">
+<meta name="keywords" content="Deep Learning,Anomaly Detection">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Anomaly Detection">
+<meta property="og:url" content="http://yoursite.com/2020/07/03/Anomaly-detection/index.html">
+<meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="Problem Formulation对于给定的训练数据集，做异常检测的目的是找到一个函数，这个函数可以检测输入的x是不是和训练数据集相似的。异常检测知识检测出和训练数据不一样的输入，检测出来的数据并不一定都是不好的，有可能是好的，也有可能是不好的。  那么到底怎么来定义这个similarity呢？这也就是异常检测需要探讨的问题，不同的方法就有不同的定义方式。 What is Anomaly?Q：">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703142752745.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703143729820.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703145452812.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703150215978.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703151112051.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703151635273.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703152031850.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703153414866.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703154546578.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703155315020.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703160756452.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703162036050.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703162819041.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703162727493.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703165414744.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703165502001.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703170742579.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703171432329.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703171722577.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703172257910.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703172908070.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703193052117.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703195322546.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703201627458.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703201402084.png">
+<meta property="og:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703202451744.png">
+<meta property="og:updated_time" content="2020-07-03T12:40:52.964Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Anomaly Detection">
+<meta name="twitter:description" content="Problem Formulation对于给定的训练数据集，做异常检测的目的是找到一个函数，这个函数可以检测输入的x是不是和训练数据集相似的。异常检测知识检测出和训练数据不一样的输入，检测出来的数据并不一定都是不好的，有可能是好的，也有可能是不好的。  那么到底怎么来定义这个similarity呢？这也就是异常检测需要探讨的问题，不同的方法就有不同的定义方式。 What is Anomaly?Q：">
+<meta name="twitter:image" content="http://yoursite.com/2020/07/03/Anomaly-detection/image-20200703142752745.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/07/03/Anomaly-detection/"/>
+
+
+
+
+
+  <title>Anomaly Detection | Scarleatt</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Scarleatt</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/03/Anomaly-detection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Anomaly Detection</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-03T20:30:58+08:00">
+                2020-07-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ML-notes/" itemprop="url" rel="index">
+                    <span itemprop="name">ML-notes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.4k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  12
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="Problem-Formulation"><a href="#Problem-Formulation" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h4><p>对于给定的训练数据集，做异常检测的目的是找到一个函数，这个函数可以检测输入的x是不是和训练数据集相似的。异常检测知识检测出和训练数据不一样的输入，检测出来的数据并不一定都是不好的，有可能是好的，也有可能是不好的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703142752745.png" alt="image-20200703142752745" style="zoom:50%;"></p>
+<p>那么到底怎么来定义这个similarity呢？这也就是异常检测需要探讨的问题，不同的方法就有不同的定义方式。</p>
+<h4 id="What-is-Anomaly"><a href="#What-is-Anomaly" class="headerlink" title="What is Anomaly?"></a>What is Anomaly?</h4><p>Q：那么我们到底如何来定义anomaly呢？如何确定我们检测出来的输入是anomaly的呢？</p>
+<p>A：取决于具体的训练数据集。在下图中，如果训练集中有很多雷丘，那么皮卡丘就是异常；但如果有很多只皮卡丘，那么雷丘就是异常,….</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703143729820.png" alt="image-20200703143729820" style="zoom:50%;"></p>
+<h4 id="Applications"><a href="#Applications" class="headerlink" title="Applications"></a>Applications</h4><p>异常检测有很多应用，以下简要叙述三个：</p>
+<ol>
+<li><p>Fraud Detection，training data是正常刷卡行为， 那么现有一笔新的交易记录x，我们就可以进行异常检测，来判断x是不是盗刷行为；比如日常都是小额消费，但突然多了一些连续的高额消费，就可以认为这是盗刷行为；</p>
+</li>
+<li><p>Network Intrusion Detection，training data是正常连接行为，现在有一个新的连接x进来，那么我们就可以让机器自己进行异常检测，来判断新连接是不是异常的；</p>
+</li>
+<li><p>Cancer Detection，training data是正常细胞的资料，比如细胞核的大小、分裂的频率等，如果来一个新的细胞x，机器可以自己决定到底是正常细胞还是癌细胞。</p>
+</li>
+</ol>
+<h4 id="Binary-Classification"><a href="#Binary-Classification" class="headerlink" title="Binary Classification?"></a>Binary Classification?</h4><p>Q：给定正常的数据（Class 1）为$\{x^1,x^2,..,x^N\}$，异常的数据（Class 2）为$\{\tilde x^1,\tilde x^2,..,\tilde x^N\}$；那么异常检测可以认为是一个二分类问题吗？</p>
+<p>A：如果正常数据集是“宝可梦”，那么异常数据就“不是宝可梦”，但“不是宝可梦”包含很多种类别，比如茶壶、树等；而且异常数据并不像正常数据那么容易收集；因此并不能简单地进行一个二分类问题。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703145452812.png" alt="image-20200703145452812" style="zoom:50%;"></p>
+<h4 id="Categories"><a href="#Categories" class="headerlink" title="Categories"></a>Categories</h4><p>异常检测可以分为以下几个类别：</p>
+<ol>
+<li>training data带label，每个训练数据$x^i$都有对应的标签$\hat y ^i$，一共有N个类别，那么我们就可以训练一个classifier，来进行分类，如果机器能辨别出这个input是1-N个类别，那么就认为是正常数据；如果机器不能辨别，即输出类别为“unknown”，我们就认为这是异常数据；</li>
+<li>如果training data是unlabel，这时又分为两种情况：（1）training data是clean的，所有的数据都是正常的；（2）training data中有一小部分数据是异常的，比如银行要对用户数据进行异常检测，那么training data就不可避免地包括一些异常数据。</li>
+</ol>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703150215978.png" alt="image-20200703150215978" style="zoom:50%;"></p>
+<h4 id="Case-1-With-Classifier"><a href="#Case-1-With-Classifier" class="headerlink" title="Case 1: With Classifier"></a>Case 1: With Classifier</h4><h5 id="Example-Application"><a href="#Example-Application" class="headerlink" title="Example Application"></a>Example Application</h5><p>现在我们判断一个人物是不是来自辛普森的家庭。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703151112051.png" alt="image-20200703151112051" style="zoom:50%;"></p>
+<p>在下图中对于输入的正常数据$\{x^1,x^2,..,x^N\}$，都有其对应的类别标签$\{\hat y^1,\hat y^2,..,\hat y^N\}$，那么我们就可以训练一个classifier，来预测其输出的类别。一位很喜爱辛普森的学者进行了实验，得出了很不错的分类结果。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703151635273.png" alt="image-20200703151635273" style="zoom:50%;"></p>
+<h5 id="How-to-use-the-Classifier"><a href="#How-to-use-the-Classifier" class="headerlink" title="How to use the Classifier"></a>How to use the Classifier</h5><p>那么根据训练出来的classifier来做异常检测，来判断一个人物到底是不是来自辛普森家庭。</p>
+<p>我们可以让classifier再输出一个confidence score，同时我们还需要定义一个界限threshold $\lambda$，如果信心分数$c(x)&gt;\lambda$，就认为是正常数据；否则就认为是异常数据。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703152031850.png" alt="image-20200703152031850" style="zoom:50%;"></p>
+<p>那么我们如何得到这个confidence score呢？</p>
+<p>在下图的例子中，如果是一个辛普森家庭的人物输入classifier，这个分类器能够很自信地得出分类结果是“霸子”（0.97）；但如果是一个非辛普森的人物输入，classifier的输出分类结果就比较均匀，4个分类就过都是0.20+。那么我们就可以认为classifier对第一个input是很自信的，是normal；第二个input则不自信，被认为是anomaly data。</p>
+<p>那么我们就可以把这个confidence score认为是分类结果的distribution中的最大值，也可以做cross-entropy。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703153414866.png" alt="image-20200703153414866" style="zoom:50%;"></p>
+<p>那么现在我们把辛普森家庭和其他动漫图片的所有数据都进行confidence score计算。在下图中，我们可以发现属于辛普森的confidence score distribution，几乎全都是1；但对于其他动漫的人物，只有10%的score为1，其他大多数的图片得到的分数都是比较低的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703154546578.png" alt="image-20200703154546578" style="zoom:50%;"></p>
+<h5 id="Example-Framework"><a href="#Example-Framework" class="headerlink" title="Example Framework"></a><strong>Example Framework</strong></h5><p>训练数据集是带label的，全都是属于辛普森家庭，那么我们可以训练出一个classifier，根据这个分类器，我们可以计算出每张图片的confidence score，根据threshold来判断这张图片是不是anomaly。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703155315020.png" alt="image-20200703155315020" style="zoom:50%;"></p>
+<p><strong>development set</strong>中需要包括带label（是否属于辛普森）的图片，<u>但这个图片不仅包括辛普森家庭的人物，还包括不属于辛普森家庭的人物</u>。将数据输入训练好的classifier，根据不同的$\lambda$，得到系统的performance，那么我们就可以通过development set来调整$\lambda$的值，选择使系统得到最好performance的$\lambda$。</p>
+<h5 id="Evalution"><a href="#Evalution" class="headerlink" title="Evalution"></a>Evalution</h5><p>现在有100张辛普森人物的图片，5张非辛普森。在图中红色部分则表示非辛普森的score，一共有5个方块，得到的分数都很低。</p>
+<p>正确率并不能来准确衡量一个系统的好坏，很可能一个系统有一个很高的正确率，但其实并不好。在下图中，我们可以计算出这个系统所计算出的accuracy为95.2%，但这并不是因为我们的异常检测系统很好，而是因为数据集的分布差异，异常数据所占的比例非常小。这并不是我们想要的异常检测系统，这个系统几乎会把所有的输入都判断成是异常的，但由于异常数据占比很小，最后的正确率还是会很高。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703160756452.png" alt="image-20200703160756452" style="zoom:50%;"></p>
+<p>因此我们不能用正确率accuracy来判断系统的performance。</p>
+<p>在下图中，我们把threshold设置为大于0.5的值，这时只有1个异常值被检测出来，还有剩下4个异常值没有被检测出来，这4个被认为是<u>missing</u>了；而在所有的100个辛普森人物里面，只有1个被检测为异常值，被认为是<u>False alarm</u>，剩下的99个都认为是正常的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703162036050.png" alt="image-20200703162036050" style="zoom:50%;"></p>
+<p>如果我们现在把threshold设置为大于0.8的值，这时只有2个异常值被检测出来，还有剩下3个异常值没有被检测出来（missing）；而在所有的100个辛普森人物里面，只有6个被检测为异常值（false alarm），剩下的94个都认为是正常的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703162819041.png" alt="image-20200703162819041" style="zoom:50%;"></p>
+<p>那么这两个threshold分别为0.5和0.8的异常检测系统，到底哪一个更好呢？这取决于你认为missing更严重，还是false alarm更严重。</p>
+<p>在下图中的<span style="color: red">Cost Table A</span>，如果是missing，就扣一分；如果是false alarm，就扣100分；如果用这种方式来衡量系统的好坏，那么左边的被扣了104分，右边的被扣了603分。</p>
+<p><span style="color: blue">Cost Table B</span>，如果是missing，就扣100分；如果是false alarm，就扣1分；如果用这种方式来衡量系统的好坏，那么左边的被扣了401分，右边的被扣了306分。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703162727493.png" alt="image-20200703162727493" style="zoom:50%;"></p>
+<p>在不同的场景下，就会有不同的cost table。比如癌症检测，missing比false alarm造成的影响大得多，如果这个人患了癌症却没被检测出来，后果会非常严重，因此这种情况我们table B比较好。</p>
+<h5 id="Possible-Issues"><a href="#Possible-Issues" class="headerlink" title="Possible Issues"></a>Possible Issues</h5><p>下图中展示了猫狗分类的例子，黑色线条表示decision boundary，靠近boundary得到的confidence score不高，如果在boundary上，就说明分类器不能确定图片的类别是猫还是狗。对于一些特别像猫的动物，比如老虎，也能够得到很好的分数，因为老虎有着和猫很像的特征，而这个特征是是分类器进行分类的关键，就可以迷惑分类器，得出错误的分类结果。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703165414744.png" alt="image-20200703165414744" style="zoom:50%;"></p>
+<p>如果这个分类器判断是不是辛普森家庭人物的关键是，人物的脸和皮肤是不是黄色。那么我们可以把其他动漫人物的脸涂成黄色，就可以发现分类器判断为辛普森的概率提高了很多。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703165502001.png" alt="image-20200703165502001" style="zoom:50%;"></p>
+<h5 id="To-Learn-More-……"><a href="#To-Learn-More-……" class="headerlink" title="To Learn More ……"></a>To Learn More ……</h5><p>也有一些文献提出了解决方法，</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703170742579.png" alt="image-20200703170742579" style="zoom:50%;"></p>
+<h4 id="Case-2-Without-Labels"><a href="#Case-2-Without-Labels" class="headerlink" title="Case 2: Without Labels"></a>Case 2: Without Labels</h4><h5 id="Twitch-Plays-Pokémon"><a href="#Twitch-Plays-Pokémon" class="headerlink" title="Twitch Plays Pokémon"></a>Twitch Plays Pokémon</h5><p>先介绍一个游戏，Twitch Plays Pokémon，每个用户都可以在switch上输入自己的指令（up、left、…），可以同时有8万个用户，在这些用户中有些是异常用户，会输入无关指令干扰游戏的正常执行。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703171432329.png" alt="image-20200703171432329" style="zoom:50%;"></p>
+<h5 id="Problem-Formulation-1"><a href="#Problem-Formulation-1" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h5><p>那么我们如何移除这些游戏干扰者呢？</p>
+<p>我们首先对每一个玩家都用x表示，即表示成一个向量；对于其中一个维度$x_2$，如果这个人经常发表无政府言论，我们就可以认为这个人是来游戏中捣乱的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703171722577.png" alt="image-20200703171722577" style="zoom:50%;"></p>
+<p>但现在数据集是没有label的，没有classifier了，那么我们可以建立一个模型$P(x)$，这个模型可以告诉我们发生某种行为的概率有多大。如果$P(x)\geq\lambda$，那么我们就可以认为x是正常的，反之则认为是anomaly。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703172257910.png" alt="image-20200703172257910" style="zoom:50%;"></p>
+<p>如果现在对于一个玩家用二维向量来表示，一个维度表示“说垃圾话”的几率，另一个表示“无政府状态发言”的几率。对N个玩家的数据进行可视化，可以得到下图中的散点图。如果我们对其中“说垃圾话”维度的数据进行可视化，可以发现并不是所有的玩家都不说垃圾话，大部分都会说一点点；对于第二个维度，到底有多少人的发言是在无政府状态下进行的，可以发现多数人都是在无政府状态下发言的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703172908070.png" alt="image-20200703172908070" style="zoom:50%;"></p>
+<p>对于$P(x)$比较大的玩家，我们就可以认为是normal的；对于$P(x)$小的玩家，我们就认为其是anomaly的。但这并不具体，我们应该用数值化的方法来计算每一个玩家的score。</p>
+<h5 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a><strong>Maximum Likelihood</strong></h5><p>首先我们假设这些数据点都是从概率密度函数$f_{\theta} (x)$中取出来的，$\theta$决定了概率密度函数的形状，需要从训练数据中学习出来。现在我们已经有了数据点，但不知道其概率分布$f_{\theta} (x)$的形式。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703193052117.png" alt="image-20200703193052117" style="zoom:50%;"></p>
+<p>这里引入了likelihood的概念，表示根据我现在有的概率密度函数$f_{\theta} (x^1),f_{\theta} (x^2),..,f_{\theta} (x^N)$，产生左图数据分布的概率有多大。</p>
+<p>Q：那么我们怎么算图中的数据被产生出来的几率大小呢？</p>
+<p>A：对于图中的所有数据点$\{x^1,x^2,..,x^N\}$，产生数据点$x^1$的概率是$f_{\theta} (x^1)$，产生数据点$x^2$的概率是$f_{\theta} (x^2)$，…，产生数据点$x^N$的概率是$f_{\theta} (x^N)$；那么对于产生所有数据点的概率，就可以用以下的式子表示，</p>
+<script type="math/tex; mode=display">
+L(\theta)=f_{\theta} (x^1)f_{\theta} (x^2)\cdot\cdot\cdot f_{\theta} (x^N)</script><p>也就是likelihood，和$\theta$是有关的，选择不同的$\theta$，就会有不同的概率密度函数，也就会有不同的likelihood，那么现在我们的任务就是找到$\theta^*$，使得likelihood可以取得最大值，即</p>
+<script type="math/tex; mode=display">
+\theta ^*=arg \ \mathop{\rm max}_\theta L(\theta)</script><h5 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a><strong>Gaussian Distribution</strong></h5><p>下图中的$f_{\mu,\sum}(x)$为高斯分布，输入为x，输出为x被sample的概率，是一个数值，$\mu$表示均值，$\sum$表示协方差矩阵。 </p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703195322546.png" alt="image-20200703195322546" style="zoom:50%;"></p>
+<p>由于此时的概率密度函数发生了变化，我们现在将likelihood的形式进行变化，即</p>
+<script type="math/tex; mode=display">
+L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^N)</script><p>那么此时我们就需要找到$\mu^<em>,\sum^</em>$，来使likelihood最大化，</p>
+<script type="math/tex; mode=display">
+\mu^*,\sum=arg \ \mathop{\rm max}_{\mu,\sum} L(\mu,\sum)</script><p>在上图中，由于高斯分布的特性，数据点在$\mu$附近的地方很容易被sample到，越远被sample到的几率就越低；如果$\mu$在数据点很密集的地方，我们就可以认为likelihood的值很大；如果$\mu$在偏离高密度的地方，likelihood会小很多。</p>
+<p>$\mu^*$就是输入数据点求均值，</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703201627458.png" alt="image-20200703201627458" style="zoom:50%;"></p>
+<p>找出了对应的$\mu^<em>,\sum^</em>$之后，我们就可以代入对应的概率密度函数，进行异常检测。如果$f_{\mu^<em>,\sum^</em>}(x)&gt;\lambda$，就认为是正常数据；如果$f_{\mu^<em>,\sum^</em>}(x)\leq\lambda$，则认为是异常数据（anomaly）。</p>
+<p>如果把这个二维平面上所有的数据都输入这个概率分布，我们就可以得出下图；颜色越深，表示这越是一个一般的玩家，颜色越浅，表示异常行为越显著。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703201402084.png" alt="image-20200703201402084" style="zoom:50%;"></p>
+<p>如果现在有三个玩家$x=(x_1,x_2,x_3,x_4,x_5)^T$，表现出了不同的行为，根据模型算出来不同的结果。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703202451744.png" alt="image-20200703202451744" style="zoom:50%;"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/Anomaly-Detection/" rel="tag"># Anomaly Detection</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/" rel="next" title="基于知识图谱和GCN的应用和开发">
+                <i class="fa fa-chevron-left"></i> 基于知识图谱和GCN的应用和开发
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/images/avatar.gif"
+                alt="Scarleatt" />
+            
+              <p class="site-author-name" itemprop="name">Scarleatt</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">80</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/scarleatt" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:fawnliu2333@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Problem-Formulation"><span class="nav-number">1.</span> <span class="nav-text">Problem Formulation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#What-is-Anomaly"><span class="nav-number">2.</span> <span class="nav-text">What is Anomaly?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Applications"><span class="nav-number">3.</span> <span class="nav-text">Applications</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Binary-Classification"><span class="nav-number">4.</span> <span class="nav-text">Binary Classification?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Categories"><span class="nav-number">5.</span> <span class="nav-text">Categories</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Case-1-With-Classifier"><span class="nav-number">6.</span> <span class="nav-text">Case 1: With Classifier</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Example-Application"><span class="nav-number">6.1.</span> <span class="nav-text">Example Application</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#How-to-use-the-Classifier"><span class="nav-number">6.2.</span> <span class="nav-text">How to use the Classifier</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Example-Framework"><span class="nav-number">6.3.</span> <span class="nav-text">Example Framework</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Evalution"><span class="nav-number">6.4.</span> <span class="nav-text">Evalution</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Possible-Issues"><span class="nav-number">6.5.</span> <span class="nav-text">Possible Issues</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#To-Learn-More-……"><span class="nav-number">6.6.</span> <span class="nav-text">To Learn More ……</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Case-2-Without-Labels"><span class="nav-number">7.</span> <span class="nav-text">Case 2: Without Labels</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Twitch-Plays-Pokémon"><span class="nav-number">7.1.</span> <span class="nav-text">Twitch Plays Pokémon</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Problem-Formulation-1"><span class="nav-number">7.2.</span> <span class="nav-text">Problem Formulation</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Maximum-Likelihood"><span class="nav-number">7.3.</span> <span class="nav-text">Maximum Likelihood</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Gaussian-Distribution"><span class="nav-number">7.4.</span> <span class="nav-text">Gaussian Distribution</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017-<span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Scarleatt</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">44.3k</span>
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

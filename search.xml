@@ -1,6 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Anomaly Detection</title>
+    <url>/2020/07/03/Anomaly-detection/</url>
+    <content><![CDATA[<h4 id="Problem-Formulation"><a href="#Problem-Formulation" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h4><p>对于给定的训练数据集，做异常检测的目的是找到一个函数，这个函数可以检测输入的x是不是和训练数据集相似的。异常检测知识检测出和训练数据不一样的输入，检测出来的数据并不一定都是不好的，有可能是好的，也有可能是不好的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703142752745.png" alt="image-20200703142752745" style="zoom:50%;"></p>
+<p>那么到底怎么来定义这个similarity呢？这也就是异常检测需要探讨的问题，不同的方法就有不同的定义方式。</p>
+<h4 id="What-is-Anomaly"><a href="#What-is-Anomaly" class="headerlink" title="What is Anomaly?"></a>What is Anomaly?</h4><p>Q：那么我们到底如何来定义anomaly呢？如何确定我们检测出来的输入是anomaly的呢？</p>
+<p>A：取决于具体的训练数据集。在下图中，如果训练集中有很多雷丘，那么皮卡丘就是异常；但如果有很多只皮卡丘，那么雷丘就是异常,….</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703143729820.png" alt="image-20200703143729820" style="zoom:50%;"></p>
+<h4 id="Applications"><a href="#Applications" class="headerlink" title="Applications"></a>Applications</h4><p>异常检测有很多应用，以下简要叙述三个：</p>
+<ol>
+<li><p>Fraud Detection，training data是正常刷卡行为， 那么现有一笔新的交易记录x，我们就可以进行异常检测，来判断x是不是盗刷行为；比如日常都是小额消费，但突然多了一些连续的高额消费，就可以认为这是盗刷行为；</p>
+</li>
+<li><p>Network Intrusion Detection，training data是正常连接行为，现在有一个新的连接x进来，那么我们就可以让机器自己进行异常检测，来判断新连接是不是异常的；</p>
+</li>
+<li><p>Cancer Detection，training data是正常细胞的资料，比如细胞核的大小、分裂的频率等，如果来一个新的细胞x，机器可以自己决定到底是正常细胞还是癌细胞。</p>
+</li>
+</ol>
+<h4 id="Binary-Classification"><a href="#Binary-Classification" class="headerlink" title="Binary Classification?"></a>Binary Classification?</h4><p>Q：给定正常的数据（Class 1）为$\{x^1,x^2,..,x^N\}$，异常的数据（Class 2）为$\{\tilde x^1,\tilde x^2,..,\tilde x^N\}$；那么异常检测可以认为是一个二分类问题吗？</p>
+<p>A：如果正常数据集是“宝可梦”，那么异常数据就“不是宝可梦”，但“不是宝可梦”包含很多种类别，比如茶壶、树等；而且异常数据并不像正常数据那么容易收集；因此并不能简单地进行一个二分类问题。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703145452812.png" alt="image-20200703145452812" style="zoom:50%;"></p>
+<h4 id="Categories"><a href="#Categories" class="headerlink" title="Categories"></a>Categories</h4><p>异常检测可以分为以下几个类别：</p>
+<ol>
+<li>training data带label，每个训练数据$x^i$都有对应的标签$\hat y ^i$，一共有N个类别，那么我们就可以训练一个classifier，来进行分类，如果机器能辨别出这个input是1-N个类别，那么就认为是正常数据；如果机器不能辨别，即输出类别为“unknown”，我们就认为这是异常数据；</li>
+<li>如果training data是unlabel，这时又分为两种情况：（1）training data是clean的，所有的数据都是正常的；（2）training data中有一小部分数据是异常的，比如银行要对用户数据进行异常检测，那么training data就不可避免地包括一些异常数据。</li>
+</ol>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703150215978.png" alt="image-20200703150215978" style="zoom:50%;"></p>
+<h4 id="Case-1-With-Classifier"><a href="#Case-1-With-Classifier" class="headerlink" title="Case 1: With Classifier"></a>Case 1: With Classifier</h4><h5 id="Example-Application"><a href="#Example-Application" class="headerlink" title="Example Application"></a>Example Application</h5><p>现在我们判断一个人物是不是来自辛普森的家庭。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703151112051.png" alt="image-20200703151112051" style="zoom:50%;"></p>
+<p>在下图中对于输入的正常数据$\{x^1,x^2,..,x^N\}$，都有其对应的类别标签$\{\hat y^1,\hat y^2,..,\hat y^N\}$，那么我们就可以训练一个classifier，来预测其输出的类别。一位很喜爱辛普森的学者进行了实验，得出了很不错的分类结果。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703151635273.png" alt="image-20200703151635273" style="zoom:50%;"></p>
+<h5 id="How-to-use-the-Classifier"><a href="#How-to-use-the-Classifier" class="headerlink" title="How to use the Classifier"></a>How to use the Classifier</h5><p>那么根据训练出来的classifier来做异常检测，来判断一个人物到底是不是来自辛普森家庭。</p>
+<p>我们可以让classifier再输出一个confidence score，同时我们还需要定义一个界限threshold $\lambda$，如果信心分数$c(x)&gt;\lambda$，就认为是正常数据；否则就认为是异常数据。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703152031850.png" alt="image-20200703152031850" style="zoom:50%;"></p>
+<p>那么我们如何得到这个confidence score呢？</p>
+<p>在下图的例子中，如果是一个辛普森家庭的人物输入classifier，这个分类器能够很自信地得出分类结果是“霸子”（0.97）；但如果是一个非辛普森的人物输入，classifier的输出分类结果就比较均匀，4个分类就过都是0.20+。那么我们就可以认为classifier对第一个input是很自信的，是normal；第二个input则不自信，被认为是anomaly data。</p>
+<p>那么我们就可以把这个confidence score认为是分类结果的distribution中的最大值，也可以做cross-entropy。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703153414866.png" alt="image-20200703153414866" style="zoom:50%;"></p>
+<p>那么现在我们把辛普森家庭和其他动漫图片的所有数据都进行confidence score计算。在下图中，我们可以发现属于辛普森的confidence score distribution，几乎全都是1；但对于其他动漫的人物，只有10%的score为1，其他大多数的图片得到的分数都是比较低的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703154546578.png" alt="image-20200703154546578" style="zoom:50%;"></p>
+<h5 id="Example-Framework"><a href="#Example-Framework" class="headerlink" title="Example Framework"></a><strong>Example Framework</strong></h5><p>训练数据集是带label的，全都是属于辛普森家庭，那么我们可以训练出一个classifier，根据这个分类器，我们可以计算出每张图片的confidence score，根据threshold来判断这张图片是不是anomaly。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703155315020.png" alt="image-20200703155315020" style="zoom:50%;"></p>
+<p><strong>development set</strong>中需要包括带label（是否属于辛普森）的图片，<u>但这个图片不仅包括辛普森家庭的人物，还包括不属于辛普森家庭的人物</u>。将数据输入训练好的classifier，根据不同的$\lambda$，得到系统的performance，那么我们就可以通过development set来调整$\lambda$的值，选择使系统得到最好performance的$\lambda$。</p>
+<h5 id="Evalution"><a href="#Evalution" class="headerlink" title="Evalution"></a>Evalution</h5><p>现在有100张辛普森人物的图片，5张非辛普森。在图中红色部分则表示非辛普森的score，一共有5个方块，得到的分数都很低。</p>
+<p>正确率并不能来准确衡量一个系统的好坏，很可能一个系统有一个很高的正确率，但其实并不好。在下图中，我们可以计算出这个系统所计算出的accuracy为95.2%，但这并不是因为我们的异常检测系统很好，而是因为数据集的分布差异，异常数据所占的比例非常小。这并不是我们想要的异常检测系统，这个系统几乎会把所有的输入都判断成是异常的，但由于异常数据占比很小，最后的正确率还是会很高。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703160756452.png" alt="image-20200703160756452" style="zoom:50%;"></p>
+<p>因此我们不能用正确率accuracy来判断系统的performance。</p>
+<p>在下图中，我们把threshold设置为大于0.5的值，这时只有1个异常值被检测出来，还有剩下4个异常值没有被检测出来，这4个被认为是<u>missing</u>了；而在所有的100个辛普森人物里面，只有1个被检测为异常值，被认为是<u>False alarm</u>，剩下的99个都认为是正常的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703162036050.png" alt="image-20200703162036050" style="zoom:50%;"></p>
+<p>如果我们现在把threshold设置为大于0.8的值，这时只有2个异常值被检测出来，还有剩下3个异常值没有被检测出来（missing）；而在所有的100个辛普森人物里面，只有6个被检测为异常值（false alarm），剩下的94个都认为是正常的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703162819041.png" alt="image-20200703162819041" style="zoom:50%;"></p>
+<p>那么这两个threshold分别为0.5和0.8的异常检测系统，到底哪一个更好呢？这取决于你认为missing更严重，还是false alarm更严重。</p>
+<p>在下图中的<span style="color: red">Cost Table A</span>，如果是missing，就扣一分；如果是false alarm，就扣100分；如果用这种方式来衡量系统的好坏，那么左边的被扣了104分，右边的被扣了603分。</p>
+<p><span style="color: blue">Cost Table B</span>，如果是missing，就扣100分；如果是false alarm，就扣1分；如果用这种方式来衡量系统的好坏，那么左边的被扣了401分，右边的被扣了306分。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703162727493.png" alt="image-20200703162727493" style="zoom:50%;"></p>
+<p>在不同的场景下，就会有不同的cost table。比如癌症检测，missing比false alarm造成的影响大得多，如果这个人患了癌症却没被检测出来，后果会非常严重，因此这种情况我们table B比较好。</p>
+<h5 id="Possible-Issues"><a href="#Possible-Issues" class="headerlink" title="Possible Issues"></a>Possible Issues</h5><p>下图中展示了猫狗分类的例子，黑色线条表示decision boundary，靠近boundary得到的confidence score不高，如果在boundary上，就说明分类器不能确定图片的类别是猫还是狗。对于一些特别像猫的动物，比如老虎，也能够得到很好的分数，因为老虎有着和猫很像的特征，而这个特征是是分类器进行分类的关键，就可以迷惑分类器，得出错误的分类结果。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703165414744.png" alt="image-20200703165414744" style="zoom:50%;"></p>
+<p>如果这个分类器判断是不是辛普森家庭人物的关键是，人物的脸和皮肤是不是黄色。那么我们可以把其他动漫人物的脸涂成黄色，就可以发现分类器判断为辛普森的概率提高了很多。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703165502001.png" alt="image-20200703165502001" style="zoom:50%;"></p>
+<h5 id="To-Learn-More-……"><a href="#To-Learn-More-……" class="headerlink" title="To Learn More ……"></a>To Learn More ……</h5><p>也有一些文献提出了解决方法，</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703170742579.png" alt="image-20200703170742579" style="zoom:50%;"></p>
+<h4 id="Case-2-Without-Labels"><a href="#Case-2-Without-Labels" class="headerlink" title="Case 2: Without Labels"></a>Case 2: Without Labels</h4><h5 id="Twitch-Plays-Pokémon"><a href="#Twitch-Plays-Pokémon" class="headerlink" title="Twitch Plays Pokémon"></a>Twitch Plays Pokémon</h5><p>先介绍一个游戏，Twitch Plays Pokémon，每个用户都可以在switch上输入自己的指令（up、left、…），可以同时有8万个用户，在这些用户中有些是异常用户，会输入无关指令干扰游戏的正常执行。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703171432329.png" alt="image-20200703171432329" style="zoom:50%;"></p>
+<h5 id="Problem-Formulation-1"><a href="#Problem-Formulation-1" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h5><p>那么我们如何移除这些游戏干扰者呢？</p>
+<p>我们首先对每一个玩家都用x表示，即表示成一个向量；对于其中一个维度$x_2$，如果这个人经常发表无政府言论，我们就可以认为这个人是来游戏中捣乱的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703171722577.png" alt="image-20200703171722577" style="zoom:50%;"></p>
+<p>但现在数据集是没有label的，没有classifier了，那么我们可以建立一个模型$P(x)$，这个模型可以告诉我们发生某种行为的概率有多大。如果$P(x)\geq\lambda$，那么我们就可以认为x是正常的，反之则认为是anomaly。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703172257910.png" alt="image-20200703172257910" style="zoom:50%;"></p>
+<p>如果现在对于一个玩家用二维向量来表示，一个维度表示“说垃圾话”的几率，另一个表示“无政府状态发言”的几率。对N个玩家的数据进行可视化，可以得到下图中的散点图。如果我们对其中“说垃圾话”维度的数据进行可视化，可以发现并不是所有的玩家都不说垃圾话，大部分都会说一点点；对于第二个维度，到底有多少人的发言是在无政府状态下进行的，可以发现多数人都是在无政府状态下发言的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703172908070.png" alt="image-20200703172908070" style="zoom:50%;"></p>
+<p>对于$P(x)$比较大的玩家，我们就可以认为是normal的；对于$P(x)$小的玩家，我们就认为其是anomaly的。但这并不具体，我们应该用数值化的方法来计算每一个玩家的score。</p>
+<h5 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a><strong>Maximum Likelihood</strong></h5><p>首先我们假设这些数据点都是从概率密度函数$f_{\theta} (x)$中取出来的，$\theta$决定了概率密度函数的形状，需要从训练数据中学习出来。现在我们已经有了数据点，但不知道其概率分布$f_{\theta} (x)$的形式。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703193052117.png" alt="image-20200703193052117" style="zoom:50%;"></p>
+<p>这里引入了likelihood的概念，表示根据我现在有的概率密度函数$f_{\theta} (x^1),f_{\theta} (x^2),..,f_{\theta} (x^N)$，产生左图数据分布的概率有多大。</p>
+<p>Q：那么我们怎么算图中的数据被产生出来的几率大小呢？</p>
+<p>A：对于图中的所有数据点$\{x^1,x^2,..,x^N\}$，产生数据点$x^1$的概率是$f_{\theta} (x^1)$，产生数据点$x^2$的概率是$f_{\theta} (x^2)$，…，产生数据点$x^N$的概率是$f_{\theta} (x^N)$；那么对于产生所有数据点的概率，就可以用以下的式子表示，</p>
+<script type="math/tex; mode=display">
+L(\theta)=f_{\theta} (x^1)f_{\theta} (x^2)\cdot\cdot\cdot f_{\theta} (x^N)</script><p>也就是likelihood，和$\theta$是有关的，选择不同的$\theta$，就会有不同的概率密度函数，也就会有不同的likelihood，那么现在我们的任务就是找到$\theta^*$，使得likelihood可以取得最大值，即</p>
+<script type="math/tex; mode=display">
+\theta ^*=arg \ \mathop{\rm max}_\theta L(\theta)</script><h5 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a><strong>Gaussian Distribution</strong></h5><p>下图中的$f_{\mu,\sum}(x)$为高斯分布，输入为x，输出为x被sample的概率，是一个数值，$\mu$表示均值，$\sum$表示协方差矩阵。 </p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703195322546.png" alt="image-20200703195322546" style="zoom:50%;"></p>
+<p>由于此时的概率密度函数发生了变化，我们现在将likelihood的形式进行变化，即</p>
+<script type="math/tex; mode=display">
+L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^N)</script><p>那么此时我们就需要找到$\mu^<em>,\sum^</em>$，来使likelihood最大化，</p>
+<script type="math/tex; mode=display">
+\mu^*,\sum=arg \ \mathop{\rm max}_{\mu,\sum} L(\mu,\sum)</script><p>在上图中，由于高斯分布的特性，数据点在$\mu$附近的地方很容易被sample到，越远被sample到的几率就越低；如果$\mu$在数据点很密集的地方，我们就可以认为likelihood的值很大；如果$\mu$在偏离高密度的地方，likelihood会小很多。</p>
+<p>$\mu^*$就是输入数据点求均值，</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703201627458.png" alt="image-20200703201627458" style="zoom:50%;"></p>
+<p>找出了对应的$\mu^<em>,\sum^</em>$之后，我们就可以代入对应的概率密度函数，进行异常检测。如果$f_{\mu^<em>,\sum^</em>}(x)&gt;\lambda$，就认为是正常数据；如果$f_{\mu^<em>,\sum^</em>}(x)\leq\lambda$，则认为是异常数据（anomaly）。</p>
+<p>如果把这个二维平面上所有的数据都输入这个概率分布，我们就可以得出下图；颜色越深，表示这越是一个一般的玩家，颜色越浅，表示异常行为越显著。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703201402084.png" alt="image-20200703201402084" style="zoom:50%;"></p>
+<p>如果现在有三个玩家$x=(x_1,x_2,x_3,x_4,x_5)^T$，表现出了不同的行为，根据模型算出来不同的结果。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703202451744.png" alt="image-20200703202451744" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Anomaly Detection</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Attack and Defense</title>
     <url>/2020/06/26/Attack/</url>
     <content><![CDATA[<h4 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h4><p><img src="/2020/06/26/Attack/image-20200626095005396.png" alt="image-20200626095005396" style="zoom:50%;"></p>
@@ -98,19 +201,6 @@ x^*=arg\mathop{min}_\limits {d(x^0,x')\leq\epsilon}L(x')</script><p>这里我们
       </tags>
   </entry>
   <entry>
-    <title>CCF-JSON查询</title>
-    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
-    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
-<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>CCF Answer</category>
-      </categories>
-      <tags>
-        <tag>CCF</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Backpropagation</title>
     <url>/2020/06/06/Backpropagation/</url>
     <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>这里我们再回顾一下gradient descent，对于网络中的参数$w_1,w_2,…,b_1,b_2,…$，通过求出相对应的梯度$\Delta L(\theta)$，再根据梯度更新网络结构中的参数</p>
@@ -174,6 +264,19 @@ w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="/2020/06/06/Backpropagat
       <tags>
         <tag>Deep Learning</tag>
         <tag>backpropagation</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>CCF-JSON查询</title>
+    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
+    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
+<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>CCF Answer</category>
+      </categories>
+      <tags>
+        <tag>CCF</tag>
       </tags>
   </entry>
   <entry>
@@ -401,6 +504,55 @@ L2:\ w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><ul>
       </tags>
   </entry>
   <entry>
+    <title>Classification</title>
+    <url>/2020/06/05/Classification/</url>
+    <content><![CDATA[<p>考虑到宝可梦的两个属性（<strong>Defense</strong>、<strong>SP Defense</strong>），将输入的宝可梦进行属性分类（Water、Normal）</p>
+<p><img src="/2020/06/05/Classification/image-20200605204445258.png" alt="image-20200605204445258" style="zoom:50%;"></p>
+<h4 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a>Gaussian Distribution</h4><p>假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，</p>
+<p><img src="/2020/06/05/Classification/image-20200605202837571.png" alt="image-20200605202837571" style="zoom:50%;"></p>
+<p><img src="/2020/06/05/Classification/image-20200605204129951.png" alt="image-20200605204129951" style="zoom:50%;"></p>
+<h4 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a>Maximum Likelihood</h4><p>第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\mu,\sum)$的表达式，其中$\mu=\mu^<em>,\sum=\sum^</em>$时，函数L得到最大值</p>
+<p><img src="/2020/06/05/Classification/image-20200605203041766.png" alt="image-20200605203041766" style="zoom:50%;"></p>
+<p>这里我们假设有两个类别，其参数和分布如下，</p>
+<p><img src="/2020/06/05/Classification/image-20200605210600803.png" alt="image-20200605210600803" style="zoom:50%;"></p>
+<p>输入样例x是Class 1:Water的概率为，</p>
+<script type="math/tex; mode=display">
+P(C_1|x)=\frac{P(x|C_1)P(C_1)}{P(x)}=\frac{P(x|C_1)P(C_1)}
+{P(x|C_1)P(C_1)+P(x|C_2)P(C_2)}</script><p>再代入相应的表达式，其中$P(x|C_1)=f_{\mu^1,\sum^1},P(x|C_2)=f_{\mu^2,\sum^2}$，即可算出x为C1的概率，如果算出这个概率大于0.5，我们就可以认为x的属性为C1</p>
+<p><img src="/2020/06/05/Classification/image-20200605212347236.png" alt="image-20200605212347236" style="zoom:50%;"></p>
+<p>但这样子算出来的分类精确度很低，只有47%，就算加入其他的属性，精确度也只提高到了54%</p>
+<p><img src="/2020/06/05/Classification/image-20200605214028329.png" alt="image-20200605214028329" style="zoom:50%;"></p>
+<h4 id="Modifying-Model"><a href="#Modifying-Model" class="headerlink" title="Modifying Model"></a>Modifying Model</h4><p>由于上面模型的精确度都不高，所以在此我们对模型进行了修改，模型的参数就只有三个，$\mu^1,\mu^2,\sum=\sum^1=\sum^2$</p>
+<p><img src="/2020/06/05/Classification/image-20200605214245755.png" alt="image-20200605214245755" style="zoom:50%;"></p>
+<p>对于Water属性的宝可梦对应参数为$\mu^1$，Normal属性的宝可梦为$\mu^2$，共同属性为$\sum$，这时对应的最大似然函数为$L(\mu^1,\mu^2,\sum)$，</p>
+<p><img src="/2020/06/05/Classification/image-20200605214446675.png" alt="image-20200605214446675" style="zoom:50%;"></p>
+<p>修改后的模型准确率可以达到54%，如果加入更多的属性，准确率可以提高到73%</p>
+<p><img src="/2020/06/05/Classification/image-20200605215021833.png" alt="image-20200605215021833" style="zoom:50%;"></p>
+<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><p>这里再回忆一下三个步骤：<br>（1）Function Set，计算分类为该类的概率$P(C_1|x)$，如果大于0.5，则认为类别为1，否则为类别2<br>（2）找出相对应的$\mu,\sum$，使得似然函数L取得最大值；<br>（3）得出使似然函数最大化的参数，$\mu^<em>,\sum^</em>$，</p>
+<script type="math/tex; mode=display">
+u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\mu^*)(x^n-\mu^*)^T</script><p><img src="/2020/06/05/Classification/image-20200605220705405.png" alt="image-20200605220705405" style="zoom:50%;"></p>
+<h4 id="Probability-Distribution"><a href="#Probability-Distribution" class="headerlink" title="Probability Distribution"></a>Probability Distribution</h4><p>这里我们所使用的概率分布是</p>
+<p><img src="/2020/06/05/Classification/image-20200605221617855.png" alt="image-20200605221617855" style="zoom:50%;"></p>
+<p>下面开始公式推导，</p>
+<p><img src="/2020/06/05/Classification/image-20200605221733838.png" alt="image-20200605221733838" style="zoom:50%;"></p>
+<p>得出了我们的Sigmoid函数，$\sigma(z)$的函数图像为s型，值域范围为[0,1]，将z化简，并代入$P(C_i)=\frac{N_i}{N_1+N_2}$ (i=1,2)，</p>
+<p><img src="/2020/06/05/Classification/image-20200605221911457.png" alt="image-20200605221911457" style="zoom:50%;"></p>
+<p>将$P(x|C_1),P(x|C_2)$的表达式代入$ln\frac{P(x|C_1)}{P(x|C_2)}$，</p>
+<p><img src="/2020/06/05/Classification/image-20200605222200879.png" alt="image-20200605222200879" style="zoom:50%;"></p>
+<p><img src="/2020/06/05/Classification/image-20200605223207505.png" alt="image-20200605223207505" style="zoom:50%;"></p>
+<p>再进行进一步化简，带入$\sum^1=\sum^2=\sum$，我们可以得出z的简易表达式$z=w\cdot x + b$，可得出$P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)$。当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
+<p><img src="/2020/06/05/Classification/image-20200605223410530.png" alt="image-20200605223410530" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>classification</tag>
+        <tag>sigmoid function</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Deep Autoencoder</title>
     <url>/2020/06/29/Deep-autoencoder/</url>
     <content><![CDATA[<h4 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h4><p>对于输入大小为$28\times28$的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简（compact）的特征；</p>
@@ -460,55 +612,6 @@ L2:\ w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><ul>
         <tag>Unsupervised Learning</tag>
         <tag>Deep Autoencoder</tag>
         <tag>Autoencoder</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Classification</title>
-    <url>/2020/06/05/Classification/</url>
-    <content><![CDATA[<p>考虑到宝可梦的两个属性（<strong>Defense</strong>、<strong>SP Defense</strong>），将输入的宝可梦进行属性分类（Water、Normal）</p>
-<p><img src="/2020/06/05/Classification/image-20200605204445258.png" alt="image-20200605204445258" style="zoom:50%;"></p>
-<h4 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a>Gaussian Distribution</h4><p>假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，</p>
-<p><img src="/2020/06/05/Classification/image-20200605202837571.png" alt="image-20200605202837571" style="zoom:50%;"></p>
-<p><img src="/2020/06/05/Classification/image-20200605204129951.png" alt="image-20200605204129951" style="zoom:50%;"></p>
-<h4 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a>Maximum Likelihood</h4><p>第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\mu,\sum)$的表达式，其中$\mu=\mu^<em>,\sum=\sum^</em>$时，函数L得到最大值</p>
-<p><img src="/2020/06/05/Classification/image-20200605203041766.png" alt="image-20200605203041766" style="zoom:50%;"></p>
-<p>这里我们假设有两个类别，其参数和分布如下，</p>
-<p><img src="/2020/06/05/Classification/image-20200605210600803.png" alt="image-20200605210600803" style="zoom:50%;"></p>
-<p>输入样例x是Class 1:Water的概率为，</p>
-<script type="math/tex; mode=display">
-P(C_1|x)=\frac{P(x|C_1)P(C_1)}{P(x)}=\frac{P(x|C_1)P(C_1)}
-{P(x|C_1)P(C_1)+P(x|C_2)P(C_2)}</script><p>再代入相应的表达式，其中$P(x|C_1)=f_{\mu^1,\sum^1},P(x|C_2)=f_{\mu^2,\sum^2}$，即可算出x为C1的概率，如果算出这个概率大于0.5，我们就可以认为x的属性为C1</p>
-<p><img src="/2020/06/05/Classification/image-20200605212347236.png" alt="image-20200605212347236" style="zoom:50%;"></p>
-<p>但这样子算出来的分类精确度很低，只有47%，就算加入其他的属性，精确度也只提高到了54%</p>
-<p><img src="/2020/06/05/Classification/image-20200605214028329.png" alt="image-20200605214028329" style="zoom:50%;"></p>
-<h4 id="Modifying-Model"><a href="#Modifying-Model" class="headerlink" title="Modifying Model"></a>Modifying Model</h4><p>由于上面模型的精确度都不高，所以在此我们对模型进行了修改，模型的参数就只有三个，$\mu^1,\mu^2,\sum=\sum^1=\sum^2$</p>
-<p><img src="/2020/06/05/Classification/image-20200605214245755.png" alt="image-20200605214245755" style="zoom:50%;"></p>
-<p>对于Water属性的宝可梦对应参数为$\mu^1$，Normal属性的宝可梦为$\mu^2$，共同属性为$\sum$，这时对应的最大似然函数为$L(\mu^1,\mu^2,\sum)$，</p>
-<p><img src="/2020/06/05/Classification/image-20200605214446675.png" alt="image-20200605214446675" style="zoom:50%;"></p>
-<p>修改后的模型准确率可以达到54%，如果加入更多的属性，准确率可以提高到73%</p>
-<p><img src="/2020/06/05/Classification/image-20200605215021833.png" alt="image-20200605215021833" style="zoom:50%;"></p>
-<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><p>这里再回忆一下三个步骤：<br>（1）Function Set，计算分类为该类的概率$P(C_1|x)$，如果大于0.5，则认为类别为1，否则为类别2<br>（2）找出相对应的$\mu,\sum$，使得似然函数L取得最大值；<br>（3）得出使似然函数最大化的参数，$\mu^<em>,\sum^</em>$，</p>
-<script type="math/tex; mode=display">
-u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\mu^*)(x^n-\mu^*)^T</script><p><img src="/2020/06/05/Classification/image-20200605220705405.png" alt="image-20200605220705405" style="zoom:50%;"></p>
-<h4 id="Probability-Distribution"><a href="#Probability-Distribution" class="headerlink" title="Probability Distribution"></a>Probability Distribution</h4><p>这里我们所使用的概率分布是</p>
-<p><img src="/2020/06/05/Classification/image-20200605221617855.png" alt="image-20200605221617855" style="zoom:50%;"></p>
-<p>下面开始公式推导，</p>
-<p><img src="/2020/06/05/Classification/image-20200605221733838.png" alt="image-20200605221733838" style="zoom:50%;"></p>
-<p>得出了我们的Sigmoid函数，$\sigma(z)$的函数图像为s型，值域范围为[0,1]，将z化简，并代入$P(C_i)=\frac{N_i}{N_1+N_2}$ (i=1,2)，</p>
-<p><img src="/2020/06/05/Classification/image-20200605221911457.png" alt="image-20200605221911457" style="zoom:50%;"></p>
-<p>将$P(x|C_1),P(x|C_2)$的表达式代入$ln\frac{P(x|C_1)}{P(x|C_2)}$，</p>
-<p><img src="/2020/06/05/Classification/image-20200605222200879.png" alt="image-20200605222200879" style="zoom:50%;"></p>
-<p><img src="/2020/06/05/Classification/image-20200605223207505.png" alt="image-20200605223207505" style="zoom:50%;"></p>
-<p>再进行进一步化简，带入$\sum^1=\sum^2=\sum$，我们可以得出z的简易表达式$z=w\cdot x + b$，可得出$P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)$。当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
-<p><img src="/2020/06/05/Classification/image-20200605223410530.png" alt="image-20200605223410530" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>classification</tag>
-        <tag>sigmoid function</tag>
       </tags>
   </entry>
   <entry>
@@ -607,33 +710,6 @@ y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情�
       </tags>
   </entry>
   <entry>
-    <title>Mac安装Pytorch</title>
-    <url>/2020/03/29/Mac%E5%AE%89%E8%A3%85Pytorch/</url>
-    <content><![CDATA[<p>先创建一个名为<code>pytorch</code>的虚拟环境，</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda create -n pytorch python=3.7 numpy matplotlib pandas jupyter notebook</div></pre></td></tr></table></figure>
-<p>激活虚拟环境</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda activate pytorch</div></pre></td></tr></table></figure>
-<p>去官网选择合适的pytorch版本的安装命令<a href="https://pytorch.org/get-started/locally/" target="_blank" rel="external">https://pytorch.org/get-started/locally/</a></p>
-<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329101220290.png" alt="image-20200329101220290"></p>
-<p>复制到命令行下，回车运行</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda install pytorch torchvision -c pytorch</div></pre></td></tr></table></figure>
-<p>会出现以下报错信息：</p>
-<p><strong>CondaHTTPError: HTTP 000 CONNECTION FAILED for url</strong></p>
-<p><strong>解决方法：添加镜像站到Anaconda</strong></p>
- <figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</div><div class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</div><div class="line">conda config --set show_channel_urls yes</div><div class="line"></div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/</div></pre></td></tr></table></figure>
-<p>再把官网安装命令的<code>-c pytorch</code>去掉，运行以下命令</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda install pytorch torchvision</div></pre></td></tr></table></figure>
-<p>检测pytorch是否安装成功，命令行运行</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">jupyter notebook</div></pre></td></tr></table></figure>
-<p>运行测试代码，出现以下结果，则说明安装成功</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> torch</div><div class="line">torch.FloatTensor([<span class="number">5</span>, <span class="number">3</span>, <span class="number">5</span>])</div></pre></td></tr></table></figure>
-<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329102655979.png" alt="image-20200329102655979"></p>
-]]></content>
-      <tags>
-        <tag>Pytorch</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Logistic Regression</title>
     <url>/2020/06/06/Logistic-Regression/</url>
     <content><![CDATA[<h4 id="Review"><a href="#Review" class="headerlink" title="Review"></a>Review</h4><p>我们可以得出z的简易表达式$z=w\cdot x + b$，可得出</p>
@@ -684,6 +760,33 @@ P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p>
       <tags>
         <tag>Deep Learning</tag>
         <tag>Logistic Regression</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mac安装Pytorch</title>
+    <url>/2020/03/29/Mac%E5%AE%89%E8%A3%85Pytorch/</url>
+    <content><![CDATA[<p>先创建一个名为<code>pytorch</code>的虚拟环境，</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda create -n pytorch python=3.7 numpy matplotlib pandas jupyter notebook</div></pre></td></tr></table></figure>
+<p>激活虚拟环境</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda activate pytorch</div></pre></td></tr></table></figure>
+<p>去官网选择合适的pytorch版本的安装命令<a href="https://pytorch.org/get-started/locally/" target="_blank" rel="external">https://pytorch.org/get-started/locally/</a></p>
+<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329101220290.png" alt="image-20200329101220290"></p>
+<p>复制到命令行下，回车运行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda install pytorch torchvision -c pytorch</div></pre></td></tr></table></figure>
+<p>会出现以下报错信息：</p>
+<p><strong>CondaHTTPError: HTTP 000 CONNECTION FAILED for url</strong></p>
+<p><strong>解决方法：添加镜像站到Anaconda</strong></p>
+ <figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</div><div class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</div><div class="line">conda config --set show_channel_urls yes</div><div class="line"></div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/</div></pre></td></tr></table></figure>
+<p>再把官网安装命令的<code>-c pytorch</code>去掉，运行以下命令</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda install pytorch torchvision</div></pre></td></tr></table></figure>
+<p>检测pytorch是否安装成功，命令行运行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">jupyter notebook</div></pre></td></tr></table></figure>
+<p>运行测试代码，出现以下结果，则说明安装成功</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> torch</div><div class="line">torch.FloatTensor([<span class="number">5</span>, <span class="number">3</span>, <span class="number">5</span>])</div></pre></td></tr></table></figure>
+<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329102655979.png" alt="image-20200329102655979"></p>
+]]></content>
+      <tags>
+        <tag>Pytorch</tag>
       </tags>
   </entry>
   <entry>
@@ -1008,161 +1111,6 @@ W=\begin{pmatrix}
       </tags>
   </entry>
   <entry>
-    <title>Network Compression</title>
-    <url>/2020/06/27/network-conpression/</url>
-    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
-<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="/2020/06/27/network-conpression/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
-<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="/2020/06/27/network-conpression/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
-<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
-<ul>
-<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
-<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
-</ul>
-<p><img src="/2020/06/27/network-conpression/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
-<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
-<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
-<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
-<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="external">大的network更容易optimize</a></p>
-<p><strong>Lottery Ticket Hypothesis</strong></p>
-<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
-<ul>
-<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
-</li>
-<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
-</li>
-</ul>
-<p><img src="/2020/06/27/network-conpression/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
-<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
-<p><strong>Rethinking the Value of Network Pruning</strong></p>
-<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
-<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
-<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
-<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
-<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
-<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
-<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
-<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
-<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
-<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="/2020/06/27/network-conpression/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
-<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="/2020/06/27/network-conpression/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
-<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
-<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
-<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
-<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
-<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
-<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="/2020/06/27/network-conpression/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
-<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
-<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="/2020/06/27/network-conpression/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
-<p><img src="/2020/06/27/network-conpression/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>network compression</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Semi-supervised</title>
-    <url>/2020/06/10/semi-supervised/</url>
-    <content><![CDATA[<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p><img src="/2020/06/10/semi-supervised/image-20200610195909860.png" alt="image-20200610195909860" style="zoom:50%;"></p>
-<p>对于猫狗分类问题，如果只有一部分data有label，还有其他很大一部分data是unlabeled，那么我们可以认为unlabeled data对我们网络的训练是无用的吗？</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610200040869.png" alt="image-20200610200040869" style="zoom:50%;"></p>
-<p>Q：Why semi-supervised learning helps ?</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610200322008.png" alt="image-20200610200322008" style="zoom:50%;"></p>
-<p>A：如图所示，图中灰色圆点表示unlabeled data，其他圆点表示labeled data。如果没有unlabeled data，此时可以用一条竖直的线将猫狗进行分类，boundary为竖直的那条线；但unlabeled data的分布也可以告诉我们一些信息，对我们的训练也是有帮助的，有了unlabeled data，此时的boundary为斜直线</p>
-<h4 id="Semi-supervised-Learning-for-Generative-Model"><a href="#Semi-supervised-Learning-for-Generative-Model" class="headerlink" title="Semi-supervised Learning for Generative Model"></a>Semi-supervised Learning for Generative Model</h4><h5 id="Intuitive"><a href="#Intuitive" class="headerlink" title="Intuitive"></a>Intuitive</h5><p>不考虑unlabeled data，只有labeled data</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610201326618.png" alt="image-20200610201326618" style="zoom:50%;"></p>
-<p>如果把unlabeled data也考虑进来，此时的boundary 也发生了变化</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610201826012.png" alt="image-20200610201826012" style="zoom:50%;"></p>
-<h5 id="Formulation"><a href="#Formulation" class="headerlink" title="Formulation"></a>Formulation</h5><p><img src="/2020/06/10/semi-supervised/image-20200610204004390.png" alt="image-20200610204004390" style="zoom:50%;"></p>
-<p>不同的maximum likelihood对比</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610204526467.png" alt="image-20200610204526467" style="zoom:50%;"></p>
-<h4 id="Low-density-Separation-Assumption"><a href="#Low-density-Separation-Assumption" class="headerlink" title="Low-density Separation Assumption"></a>Low-density Separation Assumption</h4><p><img src="/2020/06/10/semi-supervised/image-20200610214224919.png" alt="image-20200610214224919" style="zoom:50%;"></p>
-<h5 id="Self-training"><a href="#Self-training" class="headerlink" title="Self-training"></a>Self-training</h5><p>有labeled data和unlabeled data，重复以下过程：</p>
-<ul>
-<li>从labeled data中tarin了模型$f^*$；</li>
-<li>将$f^*$应用到unlabeled data，得到带label的数据，称为Pseudo-label</li>
-<li>从unlabeled data中移出这部分data，并加入labeled data；要移除哪部分data，要根据具体的限制条件而定</li>
-<li>有了更多的label data，就可以继续训练我们的模型，返回第一步</li>
-</ul>
-<p><img src="/2020/06/10/semi-supervised/image-20200610205046125.png" alt="image-20200610205046125" style="zoom:50%;"></p>
-<p>Q：这种训练方式对regression 有用吗 ？</p>
-<p>W：不能，regression输出的是一个真实的值</p>
-<p><strong>hard label vs soft label</strong></p>
-<p>self-training用的是hard label；generative model用的是soft label</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610210239919.png" alt="image-20200610210239919" style="zoom:50%;"></p>
-<h5 id="Entropy-based-Regularization"><a href="#Entropy-based-Regularization" class="headerlink" title="Entropy-based Regularization"></a>Entropy-based Regularization</h5><p>如果输出的每个类别的概率是相近的，那么这个模型就比较bad；输出的类别差距很大，比如某个类别的概率为1，其他都是0；我们可以用$E(y^u)$来衡量</p>
-<script type="math/tex; mode=display">
-E(y^u)=-\sum_{m=1}^5y_m^uln(y_m^u)</script><p>对于第一个和第二个distribution，那么$E(y^u)=0$；</p>
-<p>对于第三个distribution，那么$E(y^u)=-ln(\frac{1}{5})=ln5$</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610211113227.png" alt="image-20200610211113227" style="zoom:50%;"></p>
-<p>那么我们现在就可以重新设计loss function，用cross entropy来估计$y^r,\hat y ^r$之间的差距，即$C(y^r,\hat y^r)$，使用labeled data，还加上了一个regularization term</p>
-<script type="math/tex; mode=display">
-L=\sum_{x^T}C(y^r,\hat y^r)+\lambda \sum_{x^u} E(y^u)</script><h5 id="Outlook-Semi-supervised-SVM"><a href="#Outlook-Semi-supervised-SVM" class="headerlink" title="Outlook: Semi-supervised SVM"></a>Outlook: Semi-supervised SVM</h5><p>对于unlabeled data，如果是SVM 二分类问题，可以把所有的unlabeled data都穷举为Class1或Class2，列举出所有可能的方案，再找出对应的boundary，计算loss，可以发现下图中黑色方框图具有最小的loss</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610213305033.png" alt="image-20200610213305033" style="zoom:50%;"></p>
-<h4 id="Smoothness-Assumption"><a href="#Smoothness-Assumption" class="headerlink" title="Smoothness Assumption"></a>Smoothness Assumption</h4><h5 id="Introduction-1"><a href="#Introduction-1" class="headerlink" title="Introduction"></a>Introduction</h5><p><img src="/2020/06/10/semi-supervised/image-20200610214254778.png" alt="image-20200610214254778" style="zoom:50%;"></p>
-<p>假设：如果x是similar的，那么他们的y也是一样的</p>
-<p>这样的假设是非常不精确的，下面我们做出一个更加精确的假设：</p>
-<ul>
-<li>x是分布不均匀的，有的地方很密集，有的地方很稀疏</li>
-<li>$x^1,x^2$中间有个high density region，那么label $y^1,y^2$就很可能是一样的；但$x^2,x^3$中间没有high density region，其label相同的概率就非常小</li>
-</ul>
-<p><img src="/2020/06/10/semi-supervised/image-20200610214546977.png" alt="image-20200610214546977" style="zoom:50%;"></p>
-<p>对于下图中的数字，2之间是有过渡形态的，所以这两个图片是similar的；而2与3之间没有过渡形态，因此是不similar的</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610215523269.png" alt="image-20200610215523269"></p>
-<p>比较直观的做法是先进行cluster，再进行label</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610221020376.png" alt="image-20200610221020376" style="zoom:50%;"></p>
-<h5 id="Graph-based-Approach"><a href="#Graph-based-Approach" class="headerlink" title="Graph-based Approach"></a>Graph-based Approach</h5><p>那么我们到底要怎么才能知道$x^1,x^2$到底在high density region是不是close呢 ？</p>
-<p>我们可以把data point用图来表示，图的表示有时是比较nature，有时需要我们自己找出来point之间的联系</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610221342226.png" alt="image-20200610221342226" style="zoom:50%;"></p>
-<p> <strong>Graph Construction</strong></p>
-<p>首先定义不同point之间的相似度$s(x^i,x^j)$，可以通过以下两个算法来添加edge：</p>
-<ul>
-<li>KNN，对于图中红色的圆点，与其最相近的三个（k=3）neighbor相连接</li>
-<li>e-Neighborhood，对于周围的neighbor，只有和他相似度大于1的才会被连接起来</li>
-</ul>
-<p><img src="/2020/06/10/semi-supervised/image-20200610221803745.png" alt="image-20200610221803745" style="zoom:50%;"></p>
-<p>edge并不是只有相连和不相连两种选择而已，也可以给edge一些weight，让这个weight和这两个point之间的相似度成正比</p>
-<p>labeled data会影响他的邻居，如果这个point是class1，那么他周围的某些point也可能是class1</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610224513039.png" alt="image-20200610224513039" style="zoom:50%;"></p>
-<p><strong>Definition</strong></p>
-<p>对于下图中的两幅图，如果从直观上看，我们可以认为左边的图更smooth</p>
-<p>现在我们用数字来定量描述，S的定义如下</p>
-<script type="math/tex; mode=display">
-S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算出左图的S=0.5，右图的S=3，值越小越smooth，越小越好</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610224714665.png" alt="image-20200610224714665" style="zoom:50%;"></p>
-<p>对原来的S进行改造一下，$S=y^TLy$</p>
-<p>其中$L=D-W$，W为权重矩阵，D表示将weight每行的和放到对角线的位置</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610225336692.png" alt="image-20200610225336692" style="zoom:50%;"></p>
-<p>loss function其中一项就包括cross entropy计算的loss；smoothness的量S，前面再乘上一个可以调整的参数$\lambda$ ，$\lambda S$就表示一个regularization term</p>
-<p>网络的整体目标是使loss function 取得最小值，即cross entropy项和smoothness都必须要达到最小值，和其他的网络一样，计算相应的gradient，做gradient descent即可</p>
-<p>如果要计算smoothness不一定非要在output的地方，也可以是其他位置，比如hidden layer拿出来进行一些transform，或者直接拿hidden layer，都可以计算smoothness</p>
-<p><img src="/2020/06/10/semi-supervised/image-20200610225851786.png" alt="image-20200610225851786" style="zoom:50%;"></p>
-<h4 id="Better-Representation"><a href="#Better-Representation" class="headerlink" title="Better Representation"></a>Better Representation</h4><p><img src="/2020/06/10/semi-supervised/image-20200610230634932.png" alt="image-20200610230634932" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>semi-supervised</tag>
-        <tag>smoothness</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Generative Models</title>
     <url>/2020/06/29/generative-models/</url>
     <content><![CDATA[<blockquote>
@@ -1272,6 +1220,210 @@ KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href=
         <tag>VAE</tag>
         <tag>GAN</tag>
         <tag>PixelRNN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Network Compression</title>
+    <url>/2020/06/27/network-conpression/</url>
+    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
+<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="/2020/06/27/network-conpression/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
+<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="/2020/06/27/network-conpression/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
+<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
+<ul>
+<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
+<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
+</ul>
+<p><img src="/2020/06/27/network-conpression/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
+<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
+<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
+<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
+<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="external">大的network更容易optimize</a></p>
+<p><strong>Lottery Ticket Hypothesis</strong></p>
+<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
+<ul>
+<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
+</li>
+<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
+</li>
+</ul>
+<p><img src="/2020/06/27/network-conpression/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
+<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
+<p><strong>Rethinking the Value of Network Pruning</strong></p>
+<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
+<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
+<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
+<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
+<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
+<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
+<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
+<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
+<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
+<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="/2020/06/27/network-conpression/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
+<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="/2020/06/27/network-conpression/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
+<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
+<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
+<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
+<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
+<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
+<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="/2020/06/27/network-conpression/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
+<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
+<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="/2020/06/27/network-conpression/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
+<p><img src="/2020/06/27/network-conpression/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>network compression</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
+    <url>/2020/06/28/t-SNE/</url>
+    <content><![CDATA[<blockquote>
+<p>本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；</p>
+</blockquote>
+<h4 id="Manifold-Learning"><a href="#Manifold-Learning" class="headerlink" title="Manifold Learning"></a>Manifold Learning</h4><p>在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learning 任务</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628202133893.png" alt="image-20200628202133893" style="zoom:50%;"></p>
+<h4 id="Locally-Linear-Embedding-LLE"><a href="#Locally-Linear-Embedding-LLE" class="headerlink" title="Locally Linear Embedding (LLE)"></a>Locally Linear Embedding (LLE)</h4><p>用$w_{ij}$表示$x_i,x_j$之间的联系，先找到使得$\sum_i ||x^i-\sum_jw_{ij}x^j||_2$最小化的$w_{ij}$，再根据这个$w_{ij}$来找到降维的结果$z_i,z_j$</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628202738023.png" alt="image-20200628202738023" style="zoom:50%;"></p>
+<p>如果并不知道之前的$x_i,x_j$，那么就可以用LLE这种方法，也可以得出$z_i,z_j$</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628203501209.png" alt="image-20200628203501209" style="zoom:50%;"></p>
+<h4 id="Laplacian-Eigenmaps"><a href="#Laplacian-Eigenmaps" class="headerlink" title="Laplacian Eigenmaps"></a>Laplacian Eigenmaps</h4><p>Review: 在之前的semi-supervised learning中，如果$x^1,x^2$在一个high density region内是相近的，那么我们就可以认为$\hat y^1,\hat y^2$也有类似的表现</p>
+<p>如果$y^i,y^j$是connected的，那么其$w_{ij}$就是对应的相似度；如果没有connect，其$w_{ij}$就是0</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628204015777.png" alt="image-20200628204015777" style="zoom:50%;"></p>
+<p>我们也可以得出类似smoothness的式子，计算$z^i,z^j$之间的smoothness</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628205136836.png" alt="image-20200628205136836" style="zoom:50%;"></p>
+<p>那么我们现在的目标就是找到$z^i,z^j$，来使S达到最小值，还需要有一些额外的constrains</p>
+<p>现在我们对z加入一些constrains，如果降维后z的维数是M，那么我们就不希望取出来的这些点还生活在比M还低维的空间里面；我们现在希望把塞进高维空间的低维空间展开，我们就不希望展开之后的点在一个更低维的空间里面</p>
+<h4 id="T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><a href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE" class="headerlink" title="T-distributed Stochastic Neighbor Embedding (t-SNE)"></a>T-distributed Stochastic Neighbor Embedding (t-SNE)</h4><p>对于之前的LLE方法，类似的data之间是很close的，<u>但不同类别之间的data却没有分开，是叠成一团的</u></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628210651621.png" alt="image-20200628210651621" style="zoom:50%;"></p>
+<p><strong>为了找到对应的$z^i,z^j$</strong>，先计算$x^i,x^j$之间的相似度$S(x^i,x^j)$，再得出一个分布 $P(x^j|x^i)$；还要计算$z^i,z^j$之间的相似度$S’(z^i,z^j)$，得出分布$Q(z^j|z^i)$；</p>
+<p>这两个分布应该越接近越好，使用L来表示</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628211215304.png" alt="image-20200628211215304" style="zoom:50%;"></p>
+<p>可以使用gradient descent，有了L函数，再分别对$z^i,z^j$求偏微分即可</p>
+<p>但t-SNE要对所有的point之间都求similarity，因此计算量比较大，在数据量很大的情况下电脑的计算速度会非常慢</p>
+<p>因此，对于很高的dimensions，通常先做降维（PCA），比如可以降维到50维，再使用t-SNE降到2维</p>
+<p><span style="color: red">通常我们使用t-SNE来对高维的数据进行可视化</span></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628211326492.png" alt="image-20200628211326492" style="zoom:50%;"></p>
+<p>在上图中，红色曲线表示SNE，蓝色曲线表示t-SNE，纵轴表示distribution；如果我们想要维持相同的distribution，即在同一个水平线上，就达到了如图所示的效果；相同的几率，t-SNE的$||z^i-z^j||_2$之间的距离越大</p>
+<p>如果本来就离得很近，那么经过t-SNE之间的距离还是很小；如果本来就离得很远，那么从原来的distribution拉到t-SNE之后，距离会更远；</p>
+<p>到实际的例子中，<span style="color: red">如果本来是同一个类别的data，由于这些data之间的距离很近，不会收到t-SNE很大的影响；但如果是属于不同类别的data，距离是比较远的，t-SNE会放大这种距离</span></p>
+<p>对于下图中的MNIST，先使用PCA进行降维，再进行可视化，就可以得到下图中的good visualization</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628213646582.png" alt="image-20200628213646582" style="zoom:50%;"></p>
+<p>下图中有一个更加直观的例子，使用t-SNE算法，运用gradient descent的思想，不同类别的data之间的距离会越来越大</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628214657615.png" alt="image-20200628214657615" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628214721028.png" alt="image-20200628214721028" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Dimension Reduction</tag>
+        <tag>LLE</tag>
+        <tag>t-SNE</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Semi-supervised</title>
+    <url>/2020/06/10/semi-supervised/</url>
+    <content><![CDATA[<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p><img src="/2020/06/10/semi-supervised/image-20200610195909860.png" alt="image-20200610195909860" style="zoom:50%;"></p>
+<p>对于猫狗分类问题，如果只有一部分data有label，还有其他很大一部分data是unlabeled，那么我们可以认为unlabeled data对我们网络的训练是无用的吗？</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610200040869.png" alt="image-20200610200040869" style="zoom:50%;"></p>
+<p>Q：Why semi-supervised learning helps ?</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610200322008.png" alt="image-20200610200322008" style="zoom:50%;"></p>
+<p>A：如图所示，图中灰色圆点表示unlabeled data，其他圆点表示labeled data。如果没有unlabeled data，此时可以用一条竖直的线将猫狗进行分类，boundary为竖直的那条线；但unlabeled data的分布也可以告诉我们一些信息，对我们的训练也是有帮助的，有了unlabeled data，此时的boundary为斜直线</p>
+<h4 id="Semi-supervised-Learning-for-Generative-Model"><a href="#Semi-supervised-Learning-for-Generative-Model" class="headerlink" title="Semi-supervised Learning for Generative Model"></a>Semi-supervised Learning for Generative Model</h4><h5 id="Intuitive"><a href="#Intuitive" class="headerlink" title="Intuitive"></a>Intuitive</h5><p>不考虑unlabeled data，只有labeled data</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610201326618.png" alt="image-20200610201326618" style="zoom:50%;"></p>
+<p>如果把unlabeled data也考虑进来，此时的boundary 也发生了变化</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610201826012.png" alt="image-20200610201826012" style="zoom:50%;"></p>
+<h5 id="Formulation"><a href="#Formulation" class="headerlink" title="Formulation"></a>Formulation</h5><p><img src="/2020/06/10/semi-supervised/image-20200610204004390.png" alt="image-20200610204004390" style="zoom:50%;"></p>
+<p>不同的maximum likelihood对比</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610204526467.png" alt="image-20200610204526467" style="zoom:50%;"></p>
+<h4 id="Low-density-Separation-Assumption"><a href="#Low-density-Separation-Assumption" class="headerlink" title="Low-density Separation Assumption"></a>Low-density Separation Assumption</h4><p><img src="/2020/06/10/semi-supervised/image-20200610214224919.png" alt="image-20200610214224919" style="zoom:50%;"></p>
+<h5 id="Self-training"><a href="#Self-training" class="headerlink" title="Self-training"></a>Self-training</h5><p>有labeled data和unlabeled data，重复以下过程：</p>
+<ul>
+<li>从labeled data中tarin了模型$f^*$；</li>
+<li>将$f^*$应用到unlabeled data，得到带label的数据，称为Pseudo-label</li>
+<li>从unlabeled data中移出这部分data，并加入labeled data；要移除哪部分data，要根据具体的限制条件而定</li>
+<li>有了更多的label data，就可以继续训练我们的模型，返回第一步</li>
+</ul>
+<p><img src="/2020/06/10/semi-supervised/image-20200610205046125.png" alt="image-20200610205046125" style="zoom:50%;"></p>
+<p>Q：这种训练方式对regression 有用吗 ？</p>
+<p>W：不能，regression输出的是一个真实的值</p>
+<p><strong>hard label vs soft label</strong></p>
+<p>self-training用的是hard label；generative model用的是soft label</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610210239919.png" alt="image-20200610210239919" style="zoom:50%;"></p>
+<h5 id="Entropy-based-Regularization"><a href="#Entropy-based-Regularization" class="headerlink" title="Entropy-based Regularization"></a>Entropy-based Regularization</h5><p>如果输出的每个类别的概率是相近的，那么这个模型就比较bad；输出的类别差距很大，比如某个类别的概率为1，其他都是0；我们可以用$E(y^u)$来衡量</p>
+<script type="math/tex; mode=display">
+E(y^u)=-\sum_{m=1}^5y_m^uln(y_m^u)</script><p>对于第一个和第二个distribution，那么$E(y^u)=0$；</p>
+<p>对于第三个distribution，那么$E(y^u)=-ln(\frac{1}{5})=ln5$</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610211113227.png" alt="image-20200610211113227" style="zoom:50%;"></p>
+<p>那么我们现在就可以重新设计loss function，用cross entropy来估计$y^r,\hat y ^r$之间的差距，即$C(y^r,\hat y^r)$，使用labeled data，还加上了一个regularization term</p>
+<script type="math/tex; mode=display">
+L=\sum_{x^T}C(y^r,\hat y^r)+\lambda \sum_{x^u} E(y^u)</script><h5 id="Outlook-Semi-supervised-SVM"><a href="#Outlook-Semi-supervised-SVM" class="headerlink" title="Outlook: Semi-supervised SVM"></a>Outlook: Semi-supervised SVM</h5><p>对于unlabeled data，如果是SVM 二分类问题，可以把所有的unlabeled data都穷举为Class1或Class2，列举出所有可能的方案，再找出对应的boundary，计算loss，可以发现下图中黑色方框图具有最小的loss</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610213305033.png" alt="image-20200610213305033" style="zoom:50%;"></p>
+<h4 id="Smoothness-Assumption"><a href="#Smoothness-Assumption" class="headerlink" title="Smoothness Assumption"></a>Smoothness Assumption</h4><h5 id="Introduction-1"><a href="#Introduction-1" class="headerlink" title="Introduction"></a>Introduction</h5><p><img src="/2020/06/10/semi-supervised/image-20200610214254778.png" alt="image-20200610214254778" style="zoom:50%;"></p>
+<p>假设：如果x是similar的，那么他们的y也是一样的</p>
+<p>这样的假设是非常不精确的，下面我们做出一个更加精确的假设：</p>
+<ul>
+<li>x是分布不均匀的，有的地方很密集，有的地方很稀疏</li>
+<li>$x^1,x^2$中间有个high density region，那么label $y^1,y^2$就很可能是一样的；但$x^2,x^3$中间没有high density region，其label相同的概率就非常小</li>
+</ul>
+<p><img src="/2020/06/10/semi-supervised/image-20200610214546977.png" alt="image-20200610214546977" style="zoom:50%;"></p>
+<p>对于下图中的数字，2之间是有过渡形态的，所以这两个图片是similar的；而2与3之间没有过渡形态，因此是不similar的</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610215523269.png" alt="image-20200610215523269"></p>
+<p>比较直观的做法是先进行cluster，再进行label</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610221020376.png" alt="image-20200610221020376" style="zoom:50%;"></p>
+<h5 id="Graph-based-Approach"><a href="#Graph-based-Approach" class="headerlink" title="Graph-based Approach"></a>Graph-based Approach</h5><p>那么我们到底要怎么才能知道$x^1,x^2$到底在high density region是不是close呢 ？</p>
+<p>我们可以把data point用图来表示，图的表示有时是比较nature，有时需要我们自己找出来point之间的联系</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610221342226.png" alt="image-20200610221342226" style="zoom:50%;"></p>
+<p> <strong>Graph Construction</strong></p>
+<p>首先定义不同point之间的相似度$s(x^i,x^j)$，可以通过以下两个算法来添加edge：</p>
+<ul>
+<li>KNN，对于图中红色的圆点，与其最相近的三个（k=3）neighbor相连接</li>
+<li>e-Neighborhood，对于周围的neighbor，只有和他相似度大于1的才会被连接起来</li>
+</ul>
+<p><img src="/2020/06/10/semi-supervised/image-20200610221803745.png" alt="image-20200610221803745" style="zoom:50%;"></p>
+<p>edge并不是只有相连和不相连两种选择而已，也可以给edge一些weight，让这个weight和这两个point之间的相似度成正比</p>
+<p>labeled data会影响他的邻居，如果这个point是class1，那么他周围的某些point也可能是class1</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610224513039.png" alt="image-20200610224513039" style="zoom:50%;"></p>
+<p><strong>Definition</strong></p>
+<p>对于下图中的两幅图，如果从直观上看，我们可以认为左边的图更smooth</p>
+<p>现在我们用数字来定量描述，S的定义如下</p>
+<script type="math/tex; mode=display">
+S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算出左图的S=0.5，右图的S=3，值越小越smooth，越小越好</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610224714665.png" alt="image-20200610224714665" style="zoom:50%;"></p>
+<p>对原来的S进行改造一下，$S=y^TLy$</p>
+<p>其中$L=D-W$，W为权重矩阵，D表示将weight每行的和放到对角线的位置</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610225336692.png" alt="image-20200610225336692" style="zoom:50%;"></p>
+<p>loss function其中一项就包括cross entropy计算的loss；smoothness的量S，前面再乘上一个可以调整的参数$\lambda$ ，$\lambda S$就表示一个regularization term</p>
+<p>网络的整体目标是使loss function 取得最小值，即cross entropy项和smoothness都必须要达到最小值，和其他的网络一样，计算相应的gradient，做gradient descent即可</p>
+<p>如果要计算smoothness不一定非要在output的地方，也可以是其他位置，比如hidden layer拿出来进行一些transform，或者直接拿hidden layer，都可以计算smoothness</p>
+<p><img src="/2020/06/10/semi-supervised/image-20200610225851786.png" alt="image-20200610225851786" style="zoom:50%;"></p>
+<h4 id="Better-Representation"><a href="#Better-Representation" class="headerlink" title="Better Representation"></a>Better Representation</h4><p><img src="/2020/06/10/semi-supervised/image-20200610230634932.png" alt="image-20200610230634932" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>semi-supervised</tag>
+        <tag>smoothness</tag>
       </tags>
   </entry>
   <entry>
@@ -1402,52 +1554,88 @@ KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href=
       </tags>
   </entry>
   <entry>
-    <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
-    <url>/2020/06/28/t-SNE/</url>
-    <content><![CDATA[<blockquote>
-<p>本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；</p>
-</blockquote>
-<h4 id="Manifold-Learning"><a href="#Manifold-Learning" class="headerlink" title="Manifold Learning"></a>Manifold Learning</h4><p>在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learning 任务</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628202133893.png" alt="image-20200628202133893" style="zoom:50%;"></p>
-<h4 id="Locally-Linear-Embedding-LLE"><a href="#Locally-Linear-Embedding-LLE" class="headerlink" title="Locally Linear Embedding (LLE)"></a>Locally Linear Embedding (LLE)</h4><p>用$w_{ij}$表示$x_i,x_j$之间的联系，先找到使得$\sum_i ||x^i-\sum_jw_{ij}x^j||_2$最小化的$w_{ij}$，再根据这个$w_{ij}$来找到降维的结果$z_i,z_j$</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628202738023.png" alt="image-20200628202738023" style="zoom:50%;"></p>
-<p>如果并不知道之前的$x_i,x_j$，那么就可以用LLE这种方法，也可以得出$z_i,z_j$</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628203501209.png" alt="image-20200628203501209" style="zoom:50%;"></p>
-<h4 id="Laplacian-Eigenmaps"><a href="#Laplacian-Eigenmaps" class="headerlink" title="Laplacian Eigenmaps"></a>Laplacian Eigenmaps</h4><p>Review: 在之前的semi-supervised learning中，如果$x^1,x^2$在一个high density region内是相近的，那么我们就可以认为$\hat y^1,\hat y^2$也有类似的表现</p>
-<p>如果$y^i,y^j$是connected的，那么其$w_{ij}$就是对应的相似度；如果没有connect，其$w_{ij}$就是0</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628204015777.png" alt="image-20200628204015777" style="zoom:50%;"></p>
-<p>我们也可以得出类似smoothness的式子，计算$z^i,z^j$之间的smoothness</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628205136836.png" alt="image-20200628205136836" style="zoom:50%;"></p>
-<p>那么我们现在的目标就是找到$z^i,z^j$，来使S达到最小值，还需要有一些额外的constrains</p>
-<p>现在我们对z加入一些constrains，如果降维后z的维数是M，那么我们就不希望取出来的这些点还生活在比M还低维的空间里面；我们现在希望把塞进高维空间的低维空间展开，我们就不希望展开之后的点在一个更低维的空间里面</p>
-<h4 id="T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><a href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE" class="headerlink" title="T-distributed Stochastic Neighbor Embedding (t-SNE)"></a>T-distributed Stochastic Neighbor Embedding (t-SNE)</h4><p>对于之前的LLE方法，类似的data之间是很close的，<u>但不同类别之间的data却没有分开，是叠成一团的</u></p>
-<p><img src="/2020/06/28/t-SNE/image-20200628210651621.png" alt="image-20200628210651621" style="zoom:50%;"></p>
-<p><strong>为了找到对应的$z^i,z^j$</strong>，先计算$x^i,x^j$之间的相似度$S(x^i,x^j)$，再得出一个分布 $P(x^j|x^i)$；还要计算$z^i,z^j$之间的相似度$S’(z^i,z^j)$，得出分布$Q(z^j|z^i)$；</p>
-<p>这两个分布应该越接近越好，使用L来表示</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628211215304.png" alt="image-20200628211215304" style="zoom:50%;"></p>
-<p>可以使用gradient descent，有了L函数，再分别对$z^i,z^j$求偏微分即可</p>
-<p>但t-SNE要对所有的point之间都求similarity，因此计算量比较大，在数据量很大的情况下电脑的计算速度会非常慢</p>
-<p>因此，对于很高的dimensions，通常先做降维（PCA），比如可以降维到50维，再使用t-SNE降到2维</p>
-<p><span style="color: red">通常我们使用t-SNE来对高维的数据进行可视化</span></p>
-<p><img src="/2020/06/28/t-SNE/image-20200628211326492.png" alt="image-20200628211326492" style="zoom:50%;"></p>
-<p>在上图中，红色曲线表示SNE，蓝色曲线表示t-SNE，纵轴表示distribution；如果我们想要维持相同的distribution，即在同一个水平线上，就达到了如图所示的效果；相同的几率，t-SNE的$||z^i-z^j||_2$之间的距离越大</p>
-<p>如果本来就离得很近，那么经过t-SNE之间的距离还是很小；如果本来就离得很远，那么从原来的distribution拉到t-SNE之后，距离会更远；</p>
-<p>到实际的例子中，<span style="color: red">如果本来是同一个类别的data，由于这些data之间的距离很近，不会收到t-SNE很大的影响；但如果是属于不同类别的data，距离是比较远的，t-SNE会放大这种距离</span></p>
-<p>对于下图中的MNIST，先使用PCA进行降维，再进行可视化，就可以得到下图中的good visualization</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628213646582.png" alt="image-20200628213646582" style="zoom:50%;"></p>
-<p>下图中有一个更加直观的例子，使用t-SNE算法，运用gradient descent的思想，不同类别的data之间的距离会越来越大</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628214657615.png" alt="image-20200628214657615" style="zoom:50%;"></p>
-<p><img src="/2020/06/28/t-SNE/image-20200628214721028.png" alt="image-20200628214721028" style="zoom:50%;"></p>
+    <title>多处理机</title>
+    <url>/2020/03/11/%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA/</url>
+    <content><![CDATA[<h5 id="计算机分类"><a href="#计算机分类" class="headerlink" title="计算机分类"></a>计算机分类</h5><ul>
+<li>按照<u>Flynn分类</u>法，可将计算机分为<u>SISD、SIMD、MISD、MIMD</u>四类。</li>
+<li><u>冯氏分类</u>法，<u>字串位串、字串位并、字并位串、字并位并</u>。</li>
+<li><u>Handler分类法</u>。</li>
+</ul>
+<h5 id="存储器系统结构"><a href="#存储器系统结构" class="headerlink" title="存储器系统结构"></a>存储器系统结构</h5><ul>
+<li>集中式存储器：各处理器可共享一个集中式的物理存储器；</li>
+<li>分布式存储器：存储器分布到各个处理器中。<ul>
+<li>如果大多数的访存都是针对本地节点进行的，就可以<u>降低</u>对存储器和互联网络的<u>带宽要求</u>；</li>
+<li>对本地存储器的<u>访问延迟小</u>。</li>
+<li>缺点：处理器之间的<u>通信</u>较为<u>复杂</u>。</li>
+</ul>
+</li>
+</ul>
+<p>存储器在物理上分布到各节点中，但<u>逻辑地址空间</u>的组织方式以及处理器之间<u>通信方式</u>不同：</p>
+<ul>
+<li>把在物理上分离的存储器作为一个<u>统一的共享逻辑空间</u>进行编址，不同处理器上的同一个物理地址指向同一个存储单元。<u>分布式共享存储器系统（DSM）</u>。采用<u>共享存储器</u>通信机制。</li>
+<li>把每个节点中的存储器编址为一个<u>独立的地址空间</u>，不同节点的地址空间之间是相互独立的，不同处理器上的同一个物理地址指向不同的存储单元。<u>机群</u>。采用<u>消息传递</u>机制。</li>
+</ul>
+<h5 id="通信机制"><a href="#通信机制" class="headerlink" title="通信机制"></a>通信机制</h5><p><strong>共享存储器</strong></p>
+<p>处理器之间的通信是通过load和store指令对相同存储器地址进行读/写来实现的。</p>
+<ul>
+<li>与常用的对称式多处理机的通信机制兼容；</li>
+<li>处理机之间的通信方式比较复杂时，编程相对容易；</li>
+<li>在开发程序时，可以将重点放到对性能影响较大的数据访问上；</li>
+<li>通信数据量小时，通信开销小，贷款利用好；</li>
+<li>可以通过Cathe缓冲技术来减少远程通信的频度。</li>
+</ul>
+<p><strong>消息传递</strong></p>
+<p>处理器之间是通过显示地发送消息来进行通信的，把消息看成是一个远程进程调用（RPC）。</p>
+<ul>
+<li>硬件更简单；</li>
+<li>通信是显示的，可以更容易搞清楚何时发生通信以及通信开销是多少；</li>
+<li>显示通信可以使编程者重点注意并行计算的主要通信开销，使之有可能开发出结构更好、性能更高的并行程序；</li>
+<li>可以减少不当同步带来错误的可能性。</li>
+</ul>
+<h5 id="并行处理面临的挑战"><a href="#并行处理面临的挑战" class="headerlink" title="并行处理面临的挑战"></a>并行处理面临的挑战</h5><ul>
+<li>程序中的并行性有限；</li>
+<li>相对较大通信开销。</li>
+<li>计算：Amdahl</li>
+</ul>
+<script type="math/tex; mode=display">
+加速比=\frac{1}{\frac{可加速部分比例}{部件加速比}+(1-可加速部分比例)}</script><script type="math/tex; mode=display">
+S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（MIMD）"><a href="#并行计算机系统结构（MIMD）" class="headerlink" title="并行计算机系统结构（MIMD）"></a>并行计算机系统结构（MIMD）</h5><ul>
+<li>PVP</li>
+<li><strong>SMP</strong>，对称式共享存储器多处理机</li>
+<li>DSM</li>
+<li><strong>MPP</strong>，大规模并行处理机</li>
+<li><strong>机群</strong></li>
+</ul>
+<h5 id="对称式共享存储器多处理机（SMP）"><a href="#对称式共享存储器多处理机（SMP）" class="headerlink" title="对称式共享存储器多处理机（SMP）"></a>对称式共享存储器多处理机（SMP）</h5><p>也称为集中式共享多处理机，一般由十几个处理器构成，各处理器共享一个集中式的物理存储器，这个主存相对于各处理器的关系是对称的。</p>
+<ul>
+<li>商用处理器</li>
+<li>共享存储器</li>
+<li>集中共享</li>
+</ul>
+<h5 id="大规模并行处理机（MPP）"><a href="#大规模并行处理机（MPP）" class="headerlink" title="大规模并行处理机（MPP）"></a>大规模并行处理机（MPP）</h5><p>按照当前的标准，具有几百台~几千台处理机的任何机器都是大规模并行处理系统。</p>
+<ul>
+<li>处理节点使用商用微处理器，每个节点可以有多个微处理器；</li>
+<li>具有较好的可扩展性；</li>
+<li>采用分布式非共享的存储器，各节点有自己的地址空间；</li>
+<li>采用消息传递的通信机制。</li>
+</ul>
+<h5 id="机群"><a href="#机群" class="headerlink" title="机群"></a>机群</h5><p>是一种价格低廉、易于构建、扩放性极强的并行计算机系统。它由多台同构或者异构的独立计算机通过高性能网络和局域网连在一起，协同完成特定的并行计算任务。从用户的角度看，它就是一个单一的、集中的计算资源。</p>
+<ul>
+<li>商用处理器</li>
+<li>分布非共享式</li>
+<li>消息传递</li>
+</ul>
 ]]></content>
       <categories>
-        <category>ML-notes</category>
+        <category>计算机体系结构</category>
       </categories>
       <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Dimension Reduction</tag>
-        <tag>LLE</tag>
-        <tag>t-SNE</tag>
+        <tag>计算机体系结构</tag>
+        <tag>机群</tag>
+        <tag>MPP</tag>
+        <tag>SMP</tag>
+        <tag>消息传递</tag>
+        <tag>共享存储器</tag>
       </tags>
   </entry>
   <entry>
@@ -1596,91 +1784,6 @@ L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="/2020/07/03/基于知识图
       </tags>
   </entry>
   <entry>
-    <title>多处理机</title>
-    <url>/2020/03/11/%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA/</url>
-    <content><![CDATA[<h5 id="计算机分类"><a href="#计算机分类" class="headerlink" title="计算机分类"></a>计算机分类</h5><ul>
-<li>按照<u>Flynn分类</u>法，可将计算机分为<u>SISD、SIMD、MISD、MIMD</u>四类。</li>
-<li><u>冯氏分类</u>法，<u>字串位串、字串位并、字并位串、字并位并</u>。</li>
-<li><u>Handler分类法</u>。</li>
-</ul>
-<h5 id="存储器系统结构"><a href="#存储器系统结构" class="headerlink" title="存储器系统结构"></a>存储器系统结构</h5><ul>
-<li>集中式存储器：各处理器可共享一个集中式的物理存储器；</li>
-<li>分布式存储器：存储器分布到各个处理器中。<ul>
-<li>如果大多数的访存都是针对本地节点进行的，就可以<u>降低</u>对存储器和互联网络的<u>带宽要求</u>；</li>
-<li>对本地存储器的<u>访问延迟小</u>。</li>
-<li>缺点：处理器之间的<u>通信</u>较为<u>复杂</u>。</li>
-</ul>
-</li>
-</ul>
-<p>存储器在物理上分布到各节点中，但<u>逻辑地址空间</u>的组织方式以及处理器之间<u>通信方式</u>不同：</p>
-<ul>
-<li>把在物理上分离的存储器作为一个<u>统一的共享逻辑空间</u>进行编址，不同处理器上的同一个物理地址指向同一个存储单元。<u>分布式共享存储器系统（DSM）</u>。采用<u>共享存储器</u>通信机制。</li>
-<li>把每个节点中的存储器编址为一个<u>独立的地址空间</u>，不同节点的地址空间之间是相互独立的，不同处理器上的同一个物理地址指向不同的存储单元。<u>机群</u>。采用<u>消息传递</u>机制。</li>
-</ul>
-<h5 id="通信机制"><a href="#通信机制" class="headerlink" title="通信机制"></a>通信机制</h5><p><strong>共享存储器</strong></p>
-<p>处理器之间的通信是通过load和store指令对相同存储器地址进行读/写来实现的。</p>
-<ul>
-<li>与常用的对称式多处理机的通信机制兼容；</li>
-<li>处理机之间的通信方式比较复杂时，编程相对容易；</li>
-<li>在开发程序时，可以将重点放到对性能影响较大的数据访问上；</li>
-<li>通信数据量小时，通信开销小，贷款利用好；</li>
-<li>可以通过Cathe缓冲技术来减少远程通信的频度。</li>
-</ul>
-<p><strong>消息传递</strong></p>
-<p>处理器之间是通过显示地发送消息来进行通信的，把消息看成是一个远程进程调用（RPC）。</p>
-<ul>
-<li>硬件更简单；</li>
-<li>通信是显示的，可以更容易搞清楚何时发生通信以及通信开销是多少；</li>
-<li>显示通信可以使编程者重点注意并行计算的主要通信开销，使之有可能开发出结构更好、性能更高的并行程序；</li>
-<li>可以减少不当同步带来错误的可能性。</li>
-</ul>
-<h5 id="并行处理面临的挑战"><a href="#并行处理面临的挑战" class="headerlink" title="并行处理面临的挑战"></a>并行处理面临的挑战</h5><ul>
-<li>程序中的并行性有限；</li>
-<li>相对较大通信开销。</li>
-<li>计算：Amdahl</li>
-</ul>
-<script type="math/tex; mode=display">
-加速比=\frac{1}{\frac{可加速部分比例}{部件加速比}+(1-可加速部分比例)}</script><script type="math/tex; mode=display">
-S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（MIMD）"><a href="#并行计算机系统结构（MIMD）" class="headerlink" title="并行计算机系统结构（MIMD）"></a>并行计算机系统结构（MIMD）</h5><ul>
-<li>PVP</li>
-<li><strong>SMP</strong>，对称式共享存储器多处理机</li>
-<li>DSM</li>
-<li><strong>MPP</strong>，大规模并行处理机</li>
-<li><strong>机群</strong></li>
-</ul>
-<h5 id="对称式共享存储器多处理机（SMP）"><a href="#对称式共享存储器多处理机（SMP）" class="headerlink" title="对称式共享存储器多处理机（SMP）"></a>对称式共享存储器多处理机（SMP）</h5><p>也称为集中式共享多处理机，一般由十几个处理器构成，各处理器共享一个集中式的物理存储器，这个主存相对于各处理器的关系是对称的。</p>
-<ul>
-<li>商用处理器</li>
-<li>共享存储器</li>
-<li>集中共享</li>
-</ul>
-<h5 id="大规模并行处理机（MPP）"><a href="#大规模并行处理机（MPP）" class="headerlink" title="大规模并行处理机（MPP）"></a>大规模并行处理机（MPP）</h5><p>按照当前的标准，具有几百台~几千台处理机的任何机器都是大规模并行处理系统。</p>
-<ul>
-<li>处理节点使用商用微处理器，每个节点可以有多个微处理器；</li>
-<li>具有较好的可扩展性；</li>
-<li>采用分布式非共享的存储器，各节点有自己的地址空间；</li>
-<li>采用消息传递的通信机制。</li>
-</ul>
-<h5 id="机群"><a href="#机群" class="headerlink" title="机群"></a>机群</h5><p>是一种价格低廉、易于构建、扩放性极强的并行计算机系统。它由多台同构或者异构的独立计算机通过高性能网络和局域网连在一起，协同完成特定的并行计算任务。从用户的角度看，它就是一个单一的、集中的计算资源。</p>
-<ul>
-<li>商用处理器</li>
-<li>分布非共享式</li>
-<li>消息传递</li>
-</ul>
-]]></content>
-      <categories>
-        <category>计算机体系结构</category>
-      </categories>
-      <tags>
-        <tag>计算机体系结构</tag>
-        <tag>机群</tag>
-        <tag>MPP</tag>
-        <tag>SMP</tag>
-        <tag>消息传递</tag>
-        <tag>共享存储器</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>指令级并行</title>
     <url>/2020/03/11/%E6%8C%87%E4%BB%A4%E7%BA%A7%E5%B9%B6%E8%A1%8C/</url>
     <content><![CDATA[<h5 id="指令级并行"><a href="#指令级并行" class="headerlink" title="指令级并行"></a>指令级并行</h5><p>指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：</p>
@@ -1753,86 +1856,6 @@ S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（M
         <tag>超标量</tag>
         <tag>VLIW</tag>
         <tag>超长指令字</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>流水线</title>
-    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
-    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
-<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
-<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
-<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
-<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
-<li>需要有<u>通过时间与排空时间</u></li>
-</ul>
-<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
-<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
-<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
-<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
-<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
-<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
-<ul>
-<li><p>从前调度</p>
-</li>
-<li><p>从目标处调度</p>
-</li>
-<li><p>从失败出调度</p>
-</li>
-</ul>
-<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
-<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
-<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
-<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>软件工程</category>
-      </categories>
-      <tags>
-        <tag>流水线</tag>
-        <tag>吞吐率</tag>
-        <tag>加速比</tag>
-        <tag>效率</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>测试</title>
-    <url>/2020/03/12/%E6%B5%8B%E8%AF%95/</url>
-    <content><![CDATA[<h5 id="测试步骤"><a href="#测试步骤" class="headerlink" title="测试步骤"></a>测试步骤</h5><ul>
-<li>模块（单元）测试</li>
-<li>子系统测试</li>
-<li>系统（集成）测试</li>
-<li>验收（确认）测试</li>
-<li>平行运行</li>
-</ul>
-<h5 id="单元测试"><a href="#单元测试" class="headerlink" title="单元测试"></a>单元测试</h5><p>主要使用白盒测试技术。集中检测软件设计的最小单元-模块，对重要的执行通路进行测试，可以发现模块内部的错误。可以用代码审查和计算机测试，来完成单元测试工作。测试重点为：</p>
-<ul>
-<li>模块接口</li>
-<li>局部数据结构</li>
-<li>重要的执行通路</li>
-<li>出错处理通路</li>
-<li>边界条件</li>
-</ul>
-<h5 id="集成测试"><a href="#集成测试" class="headerlink" title="集成测试"></a>集成测试</h5><p>是测试和组装软件的系统化技术，把模块组装成程序，在组装的过程进行测试。</p>
-<p>非渐增式：先分别测试所有模块，再把这些模块组合成要求的程序；</p>
-<p>渐增式：把下一个将要测试的模块同已经测试好的那些模块组合到一起进行测试；</p>
-<ul>
-<li>自底向上集成</li>
-<li>自顶向下集成</li>
-</ul>
-<p>模块测试的特点是主要应用白盒测试，对多个模块的测试可以并发进行；集成测试的特点是可以在测试过程发现接口问题。</p>
-<p>回归测试：重新执行已经做过测试的某个测试的子集。</p>
-<p><img src="/2020/03/12/测试/test.png" alt=""></p>
-]]></content>
-      <categories>
-        <category>软件工程</category>
-      </categories>
-      <tags>
-        <tag>软件工程</tag>
-        <tag>单元测试</tag>
-        <tag>集成测试</tag>
-        <tag>白盒测试</tag>
-        <tag>黑盒测试</tag>
       </tags>
   </entry>
   <entry>
@@ -1939,63 +1962,83 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
       </tags>
   </entry>
   <entry>
-    <title>计算机体系结构重要考点</title>
-    <url>/2020/03/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%87%8D%E8%A6%81%E8%80%83%E7%82%B9/</url>
-    <content><![CDATA[<h4 id="同时多线程"><a href="#同时多线程" class="headerlink" title="同时多线程"></a>同时多线程</h4><p>线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。</p>
-<p>线程级并行：指并行执行两个或两个以上的线程。</p>
-<p>同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种改进。通过寄存器命名和动态调度机制，来自各个独立线程的多条指令可以同时流出，而不用考虑它们之间的相互依赖关系。</p>
-<h5 id="实现多线程的主要方法"><a href="#实现多线程的主要方法" class="headerlink" title="实现多线程的主要方法"></a>实现多线程的主要方法</h5><p><u>细粒度多线程</u>：在每条指令之间都可以进行线程的切换，从而使得多个线程可以交替执行。</p>
-<ul>
-<li>优点：能够隐藏由长时间停顿带来的吞吐率的损失，也能够隐藏由段时间停顿带来的损失。</li>
-<li>缺点：减慢了单个线程的执行。即使没有任何停顿的线程也不能连续执行，而且会因为其他线程的指令的插入执行而被延迟。</li>
+    <title>流水线</title>
+    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
+    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
+<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
+<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
+<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
+<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
+<li>需要有<u>通过时间与排空时间</u></li>
 </ul>
-<p><u>粗粒度多线程</u>：线程之间的切换只发生在时间较长的停顿出现的时候。</p>
+<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
+<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
+<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
+<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
+<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
+<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
 <ul>
-<li>优点：减少了切换次数，很大程度上也不会降低单个线程的执行速度。</li>
-<li>缺点：减少吞吐率损失的能力有限。由于实现粗粒度多线程的CPU只能执行单个线程的指令，不能交叉执行多个线程，因此当发生停顿时，流水线必须排空或暂停。</li>
+<li><p>从前调度</p>
+</li>
+<li><p>从目标处调度</p>
+</li>
+<li><p>从失败出调度</p>
+</li>
 </ul>
-<h4 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h4><h5 id="写策略"><a href="#写策略" class="headerlink" title="写策略"></a>写策略</h5><p>写直达法：在执行写操作时，不仅把数据写入Cathe中相应的块，而且也写入下一级存储器。减少CPU写停顿的常用方法是，采用写缓冲器。</p>
-<p>写回法：只把数据写入Cathe中相应的块，不写入下一级存储器。这些最新数据只有在相应的块被替换出时，才被写回下一级存储器。速度快，要设置“修改位”。</p>
-<p>写不命中时，</p>
-<p>按写分配法：写不命中时，把所写单元的块从主存中调入Cathe，然后再进行写入。与<u>写回法</u>配合。</p>
-<p>不按写分配法：写不命中时，直接写入下一级存储器而不将相应的块调入Cathe。</p>
-<h5 id="三种类型的Cathe不命中"><a href="#三种类型的Cathe不命中" class="headerlink" title="三种类型的Cathe不命中"></a>三种类型的Cathe不命中</h5><p><u>强制性不命中</u>：当第一次访问一个快时，该块不在Cathe中，需从下一级存储器中调入Cathe。（冷启动访问不命中，首次访问不命中）</p>
-<p><u>容量不命中</u>：如果<u>程序执行时所需的块</u>不能全部调入Cathe中，当某些块被调出后，若又重新被访问，就会发生不命中。</p>
-<p><u>冲突不命中</u>：在组相联或者直接映像Cathe中，若太多的块映像到同一组（块）中，则会出现该组中某个块被别的块替换掉，然后又重新被访问的情况。（碰撞不命中，冲突不命中）</p>
-<p>关系：</p>
-<ul>
-<li><strong>相联度</strong>越高，冲突不命中就越少；</li>
-<li>强制性不命中和容量不命中不受相联度的影响；</li>
-<li>强制性不命中不受<strong>Cathe容量</strong>的影响，但容量不命中却随着容量的增加而减少。</li>
+<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
+<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
+<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
+<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
 </ul>
-<h4 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h4><h5 id="I-O系统的可靠性、可用性和可信性"><a href="#I-O系统的可靠性、可用性和可信性" class="headerlink" title="I/O系统的可靠性、可用性和可信性"></a>I/O系统的可靠性、可用性和可信性</h5><p>可靠性：系统从某个初始参考点开始<u>一直连续提供服务的能力</u>，用平均无故障时间（<strong>MTTF</strong>）来衡量。MTTF的导数是失效率。系统总体的失效率是各部件的失效率之和。系统<u>中断服务的时间</u>用平均修复时间（<strong>MTTR</strong>）来衡量。</p>
-<p>可用性：系统正常工作的时间在连续两次服务间隔时间中所占的比例。</p>
-<script type="math/tex; mode=display">
-可用性=\frac{MTTF}{MTTF+MTTR}</script><p>   平均失效间隔时间，MTBF</p>
-<script type="math/tex; mode=display">
-MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u>的。</p>
-<h5 id="廉价磁盘冗余阵列-RAID"><a href="#廉价磁盘冗余阵列-RAID" class="headerlink" title="廉价磁盘冗余阵列 (RAID)"></a>廉价磁盘冗余阵列 (RAID)</h5><p>RAID0：<u>无冗余和无校验</u>的磁盘阵列，成本最低。</p>
-<p>RAID1：<u>镜像</u>磁盘阵列。</p>
-<p>RAID2：采用纠错的<u>海明码</u>的磁盘阵列，冗余盘数量为$log_2m$，m为数据盘的个数。</p>
-<p>RAID3：<u>位</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
-<p>RAID4：<u>块</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
-<p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
-<p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
-<p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
-<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。<br>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
 ]]></content>
       <categories>
-        <category>计算机体系结构</category>
+        <category>软件工程</category>
       </categories>
       <tags>
-        <tag>计算机体系结构</tag>
-        <tag>机群</tag>
-        <tag>MPP</tag>
-        <tag>SMP</tag>
-        <tag>消息传递</tag>
-        <tag>共享存储器</tag>
-        <tag>同时多线程</tag>
-        <tag>RAID</tag>
+        <tag>流水线</tag>
+        <tag>吞吐率</tag>
+        <tag>加速比</tag>
+        <tag>效率</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>测试</title>
+    <url>/2020/03/12/%E6%B5%8B%E8%AF%95/</url>
+    <content><![CDATA[<h5 id="测试步骤"><a href="#测试步骤" class="headerlink" title="测试步骤"></a>测试步骤</h5><ul>
+<li>模块（单元）测试</li>
+<li>子系统测试</li>
+<li>系统（集成）测试</li>
+<li>验收（确认）测试</li>
+<li>平行运行</li>
+</ul>
+<h5 id="单元测试"><a href="#单元测试" class="headerlink" title="单元测试"></a>单元测试</h5><p>主要使用白盒测试技术。集中检测软件设计的最小单元-模块，对重要的执行通路进行测试，可以发现模块内部的错误。可以用代码审查和计算机测试，来完成单元测试工作。测试重点为：</p>
+<ul>
+<li>模块接口</li>
+<li>局部数据结构</li>
+<li>重要的执行通路</li>
+<li>出错处理通路</li>
+<li>边界条件</li>
+</ul>
+<h5 id="集成测试"><a href="#集成测试" class="headerlink" title="集成测试"></a>集成测试</h5><p>是测试和组装软件的系统化技术，把模块组装成程序，在组装的过程进行测试。</p>
+<p>非渐增式：先分别测试所有模块，再把这些模块组合成要求的程序；</p>
+<p>渐增式：把下一个将要测试的模块同已经测试好的那些模块组合到一起进行测试；</p>
+<ul>
+<li>自底向上集成</li>
+<li>自顶向下集成</li>
+</ul>
+<p>模块测试的特点是主要应用白盒测试，对多个模块的测试可以并发进行；集成测试的特点是可以在测试过程发现接口问题。</p>
+<p>回归测试：重新执行已经做过测试的某个测试的子集。</p>
+<p><img src="/2020/03/12/测试/test.png" alt=""></p>
+]]></content>
+      <categories>
+        <category>软件工程</category>
+      </categories>
+      <tags>
+        <tag>软件工程</tag>
+        <tag>单元测试</tag>
+        <tag>集成测试</tag>
+        <tag>白盒测试</tag>
+        <tag>黑盒测试</tag>
       </tags>
   </entry>
   <entry>
@@ -2264,6 +2307,66 @@ MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u
         <tag>软件危机</tag>
         <tag>软件生命周期</tag>
         <tag>软件工程方法学</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>计算机体系结构重要考点</title>
+    <url>/2020/03/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%87%8D%E8%A6%81%E8%80%83%E7%82%B9/</url>
+    <content><![CDATA[<h4 id="同时多线程"><a href="#同时多线程" class="headerlink" title="同时多线程"></a>同时多线程</h4><p>线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。</p>
+<p>线程级并行：指并行执行两个或两个以上的线程。</p>
+<p>同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种改进。通过寄存器命名和动态调度机制，来自各个独立线程的多条指令可以同时流出，而不用考虑它们之间的相互依赖关系。</p>
+<h5 id="实现多线程的主要方法"><a href="#实现多线程的主要方法" class="headerlink" title="实现多线程的主要方法"></a>实现多线程的主要方法</h5><p><u>细粒度多线程</u>：在每条指令之间都可以进行线程的切换，从而使得多个线程可以交替执行。</p>
+<ul>
+<li>优点：能够隐藏由长时间停顿带来的吞吐率的损失，也能够隐藏由段时间停顿带来的损失。</li>
+<li>缺点：减慢了单个线程的执行。即使没有任何停顿的线程也不能连续执行，而且会因为其他线程的指令的插入执行而被延迟。</li>
+</ul>
+<p><u>粗粒度多线程</u>：线程之间的切换只发生在时间较长的停顿出现的时候。</p>
+<ul>
+<li>优点：减少了切换次数，很大程度上也不会降低单个线程的执行速度。</li>
+<li>缺点：减少吞吐率损失的能力有限。由于实现粗粒度多线程的CPU只能执行单个线程的指令，不能交叉执行多个线程，因此当发生停顿时，流水线必须排空或暂停。</li>
+</ul>
+<h4 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h4><h5 id="写策略"><a href="#写策略" class="headerlink" title="写策略"></a>写策略</h5><p>写直达法：在执行写操作时，不仅把数据写入Cathe中相应的块，而且也写入下一级存储器。减少CPU写停顿的常用方法是，采用写缓冲器。</p>
+<p>写回法：只把数据写入Cathe中相应的块，不写入下一级存储器。这些最新数据只有在相应的块被替换出时，才被写回下一级存储器。速度快，要设置“修改位”。</p>
+<p>写不命中时，</p>
+<p>按写分配法：写不命中时，把所写单元的块从主存中调入Cathe，然后再进行写入。与<u>写回法</u>配合。</p>
+<p>不按写分配法：写不命中时，直接写入下一级存储器而不将相应的块调入Cathe。</p>
+<h5 id="三种类型的Cathe不命中"><a href="#三种类型的Cathe不命中" class="headerlink" title="三种类型的Cathe不命中"></a>三种类型的Cathe不命中</h5><p><u>强制性不命中</u>：当第一次访问一个快时，该块不在Cathe中，需从下一级存储器中调入Cathe。（冷启动访问不命中，首次访问不命中）</p>
+<p><u>容量不命中</u>：如果<u>程序执行时所需的块</u>不能全部调入Cathe中，当某些块被调出后，若又重新被访问，就会发生不命中。</p>
+<p><u>冲突不命中</u>：在组相联或者直接映像Cathe中，若太多的块映像到同一组（块）中，则会出现该组中某个块被别的块替换掉，然后又重新被访问的情况。（碰撞不命中，冲突不命中）</p>
+<p>关系：</p>
+<ul>
+<li><strong>相联度</strong>越高，冲突不命中就越少；</li>
+<li>强制性不命中和容量不命中不受相联度的影响；</li>
+<li>强制性不命中不受<strong>Cathe容量</strong>的影响，但容量不命中却随着容量的增加而减少。</li>
+</ul>
+<h4 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h4><h5 id="I-O系统的可靠性、可用性和可信性"><a href="#I-O系统的可靠性、可用性和可信性" class="headerlink" title="I/O系统的可靠性、可用性和可信性"></a>I/O系统的可靠性、可用性和可信性</h5><p>可靠性：系统从某个初始参考点开始<u>一直连续提供服务的能力</u>，用平均无故障时间（<strong>MTTF</strong>）来衡量。MTTF的导数是失效率。系统总体的失效率是各部件的失效率之和。系统<u>中断服务的时间</u>用平均修复时间（<strong>MTTR</strong>）来衡量。</p>
+<p>可用性：系统正常工作的时间在连续两次服务间隔时间中所占的比例。</p>
+<script type="math/tex; mode=display">
+可用性=\frac{MTTF}{MTTF+MTTR}</script><p>   平均失效间隔时间，MTBF</p>
+<script type="math/tex; mode=display">
+MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u>的。</p>
+<h5 id="廉价磁盘冗余阵列-RAID"><a href="#廉价磁盘冗余阵列-RAID" class="headerlink" title="廉价磁盘冗余阵列 (RAID)"></a>廉价磁盘冗余阵列 (RAID)</h5><p>RAID0：<u>无冗余和无校验</u>的磁盘阵列，成本最低。</p>
+<p>RAID1：<u>镜像</u>磁盘阵列。</p>
+<p>RAID2：采用纠错的<u>海明码</u>的磁盘阵列，冗余盘数量为$log_2m$，m为数据盘的个数。</p>
+<p>RAID3：<u>位</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID4：<u>块</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
+<p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
+<p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
+<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。<br>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
+]]></content>
+      <categories>
+        <category>计算机体系结构</category>
+      </categories>
+      <tags>
+        <tag>计算机体系结构</tag>
+        <tag>机群</tag>
+        <tag>MPP</tag>
+        <tag>SMP</tag>
+        <tag>消息传递</tag>
+        <tag>共享存储器</tag>
+        <tag>同时多线程</tag>
+        <tag>RAID</tag>
       </tags>
   </entry>
 </search>
