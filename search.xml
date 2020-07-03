@@ -1,6 +1,186 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>CCF-JSON查询</title>
+    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
+    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
+<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>CCF Answer</category>
+      </categories>
+      <tags>
+        <tag>CCF</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Classification</title>
+    <url>/2020/06/05/Classification/</url>
+    <content><![CDATA[<p>考虑到宝可梦的两个属性（<strong>Defense</strong>、<strong>SP Defense</strong>），将输入的宝可梦进行属性分类（Water、Normal）</p>
+<p><img src="/2020/06/05/Classification/image-20200605204445258.png" alt="image-20200605204445258" style="zoom:50%;"></p>
+<h4 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a>Gaussian Distribution</h4><p>假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，</p>
+<p><img src="/2020/06/05/Classification/image-20200605202837571.png" alt="image-20200605202837571" style="zoom:50%;"></p>
+<p><img src="/2020/06/05/Classification/image-20200605204129951.png" alt="image-20200605204129951" style="zoom:50%;"></p>
+<h4 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a>Maximum Likelihood</h4><p>第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\mu,\sum)$的表达式，其中$\mu=\mu^<em>,\sum=\sum^</em>$时，函数L得到最大值</p>
+<p><img src="/2020/06/05/Classification/image-20200605203041766.png" alt="image-20200605203041766" style="zoom:50%;"></p>
+<p>这里我们假设有两个类别，其参数和分布如下，</p>
+<p><img src="/2020/06/05/Classification/image-20200605210600803.png" alt="image-20200605210600803" style="zoom:50%;"></p>
+<p>输入样例x是Class 1:Water的概率为，</p>
+<script type="math/tex; mode=display">
+P(C_1|x)=\frac{P(x|C_1)P(C_1)}{P(x)}=\frac{P(x|C_1)P(C_1)}
+{P(x|C_1)P(C_1)+P(x|C_2)P(C_2)}</script><p>再代入相应的表达式，其中$P(x|C_1)=f_{\mu^1,\sum^1},P(x|C_2)=f_{\mu^2,\sum^2}$，即可算出x为C1的概率，如果算出这个概率大于0.5，我们就可以认为x的属性为C1</p>
+<p><img src="/2020/06/05/Classification/image-20200605212347236.png" alt="image-20200605212347236" style="zoom:50%;"></p>
+<p>但这样子算出来的分类精确度很低，只有47%，就算加入其他的属性，精确度也只提高到了54%</p>
+<p><img src="/2020/06/05/Classification/image-20200605214028329.png" alt="image-20200605214028329" style="zoom:50%;"></p>
+<h4 id="Modifying-Model"><a href="#Modifying-Model" class="headerlink" title="Modifying Model"></a>Modifying Model</h4><p>由于上面模型的精确度都不高，所以在此我们对模型进行了修改，模型的参数就只有三个，$\mu^1,\mu^2,\sum=\sum^1=\sum^2$</p>
+<p><img src="/2020/06/05/Classification/image-20200605214245755.png" alt="image-20200605214245755" style="zoom:50%;"></p>
+<p>对于Water属性的宝可梦对应参数为$\mu^1$，Normal属性的宝可梦为$\mu^2$，共同属性为$\sum$，这时对应的最大似然函数为$L(\mu^1,\mu^2,\sum)$，</p>
+<p><img src="/2020/06/05/Classification/image-20200605214446675.png" alt="image-20200605214446675" style="zoom:50%;"></p>
+<p>修改后的模型准确率可以达到54%，如果加入更多的属性，准确率可以提高到73%</p>
+<p><img src="/2020/06/05/Classification/image-20200605215021833.png" alt="image-20200605215021833" style="zoom:50%;"></p>
+<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><p>这里再回忆一下三个步骤：<br>（1）Function Set，计算分类为该类的概率$P(C_1|x)$，如果大于0.5，则认为类别为1，否则为类别2<br>（2）找出相对应的$\mu,\sum$，使得似然函数L取得最大值；<br>（3）得出使似然函数最大化的参数，$\mu^<em>,\sum^</em>$，</p>
+<script type="math/tex; mode=display">
+u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\mu^*)(x^n-\mu^*)^T</script><p><img src="/2020/06/05/Classification/image-20200605220705405.png" alt="image-20200605220705405" style="zoom:50%;"></p>
+<h4 id="Probability-Distribution"><a href="#Probability-Distribution" class="headerlink" title="Probability Distribution"></a>Probability Distribution</h4><p>这里我们所使用的概率分布是</p>
+<p><img src="/2020/06/05/Classification/image-20200605221617855.png" alt="image-20200605221617855" style="zoom:50%;"></p>
+<p>下面开始公式推导，</p>
+<p><img src="/2020/06/05/Classification/image-20200605221733838.png" alt="image-20200605221733838" style="zoom:50%;"></p>
+<p>得出了我们的Sigmoid函数，$\sigma(z)$的函数图像为s型，值域范围为[0,1]，将z化简，并代入$P(C_i)=\frac{N_i}{N_1+N_2}$ (i=1,2)，</p>
+<p><img src="/2020/06/05/Classification/image-20200605221911457.png" alt="image-20200605221911457" style="zoom:50%;"></p>
+<p>将$P(x|C_1),P(x|C_2)$的表达式代入$ln\frac{P(x|C_1)}{P(x|C_2)}$，</p>
+<p><img src="/2020/06/05/Classification/image-20200605222200879.png" alt="image-20200605222200879" style="zoom:50%;"></p>
+<p><img src="/2020/06/05/Classification/image-20200605223207505.png" alt="image-20200605223207505" style="zoom:50%;"></p>
+<p>再进行进一步化简，带入$\sum^1=\sum^2=\sum$，我们可以得出z的简易表达式$z=w\cdot x + b$，可得出$P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)$。当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
+<p><img src="/2020/06/05/Classification/image-20200605223410530.png" alt="image-20200605223410530" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>classification</tag>
+        <tag>sigmoid function</tag>
+        <tag>Deep Learning</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Convolutional Neural Network</title>
+    <url>/2020/06/08/CNN/</url>
+    <content><![CDATA[<h4 id="Why-CNN-for-Image"><a href="#Why-CNN-for-Image" class="headerlink" title="Why CNN for Image"></a>Why CNN for Image</h4><p>可以使用相同的参数来提取不同图像中的同一种特征，这样就可以降低网络需要学习的参数</p>
+<p><img src="/2020/06/08/CNN/image-20200608170112931.png" alt="image-20200608170112931" style="zoom:50%;"></p>
+<p>CNN还有另外一种操作可以减少网络需要训练的参数，即下采样（subsampling），subsampling可以减少图像的大小。采样层就是使用pooling的技术来实现的，可以用max pooling或average pooling，获取某个像素点及其周围区域的最大值或平均值，将这些像素都用一个像素来表示，就可以缩小图像的大小。</p>
+<p><img src="/2020/06/08/CNN/image-20200608170313635.png" alt="image-20200608170313635" style="zoom:50%;"></p>
+<p>一个完整的CNN网络结构，由多个convolution和pooling层、以及全连接层组成。输入图像先经过多次的convolution、pooling，提取图像中的特征，再把这些特征flatten成一个一维的向量，即全连接层，最后再得出分类结果 cat or dog</p>
+<p><img src="/2020/06/08/CNN/image-20200608170601092.png" alt="image-20200608170601092" style="zoom:50%;"></p>
+<h4 id="convolution"><a href="#convolution" class="headerlink" title="convolution"></a>convolution</h4><p>对于我们想要提取图像中的两个特征，我们使用filter1和filter2这两个过滤器，</p>
+<p><img src="/2020/06/08/CNN/image-20200608172139320.png" alt="image-20200608172139320" style="zoom:50%;"></p>
+<p><img src="/2020/06/08/CNN/image-20200608172200059.png" alt="image-20200608172200059" style="zoom:50%;"></p>
+<p><img src="/2020/06/08/CNN/image-20200608172256317.png" alt="image-20200608172256317" style="zoom:50%;"></p>
+<p><img src="/2020/06/08/CNN/image-20200608172311889.png" alt="image-20200608172311889" style="zoom:50%;"></p>
+<h4 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h4><h5 id="local-field"><a href="#local-field" class="headerlink" title="local field"></a>local field</h5><p>下一层的neural 3，只与前层的9个neural相连接，而不是和前层的全部neural连接</p>
+<p><img src="/2020/06/08/CNN/image-20200608172513373.png" alt="image-20200608172513373" style="zoom:50%;"></p>
+<h5 id="weight-sharing"><a href="#weight-sharing" class="headerlink" title="weight sharing"></a>weight sharing</h5><p>对于图像的同一种特征，只需要一个过滤器filter即可，这样就可以进一步减少图像中的参数</p>
+<p><img src="/2020/06/08/CNN/image-20200608173532837.png" alt="image-20200608173532837" style="zoom:50%;"></p>
+<h4 id="Flatten"><a href="#Flatten" class="headerlink" title="Flatten"></a>Flatten</h4><p>每经过一次convolution和pooling操作，都会生成一张新的图片，这张新图片的大小比原图要小很多，减少了需要训练的参数</p>
+<p><img src="/2020/06/08/CNN/image-20200608173901231.png" alt="image-20200608173901231" style="zoom:50%;"></p>
+<p>再把经过多次convolution和pooling的图像flatten，展开成一维的向量，再输入全连接层</p>
+<p><img src="/2020/06/08/CNN/image-20200608174020284.png" alt="image-20200608174020284" style="zoom:50%;"></p>
+<h4 id="CNN-in-Keras"><a href="#CNN-in-Keras" class="headerlink" title="CNN in Keras"></a>CNN in Keras</h4><p>首先先介绍一下convolution和pooling对图像大小变化的公式，设输入图像的宽度和高度分别为w和h，卷积核大小为$F\times F$，步长stride大小为S，如果再加入Padding操作，经过卷积或池化操作后图像的大小为W和H</p>
+<script type="math/tex; mode=display">
+H/W=\frac{(h/w - F+2P)}{S}+1</script><p>这里引入了keras，先介绍几个主要函数的参数。</p>
+<p>我们可以先通过以下函数来生成一个convolution layer</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><div class="line">model2.add(Convolution2D(<span class="number">25</span>,<span class="number">3</span>,<span class="number">3</span>, input_shape=(<span class="number">28</span>,<span class="number">28</span>,<span class="number">1</span>)))</div></pre></td></tr></table></figure>
+<p>其中25表示filter的数量，$3\times3$表示filter的大小，<code>model2.add()</code>其中的<code>Convolution2D</code>还有一个参数input_shape，表示函数输入的图像大小，例子中表示一个单通道的$28\times28$图像，如果需要输入彩色图像，则是$28\times28\times3$</p>
+<p><img src="/2020/06/08/CNN/image-20200608174611511.png" alt="image-20200608174611511" style="zoom:50%;"></p>
+<p>下面我们将继续介绍通过convolution和pooling操作后参数数量的变化。对于下图中的例子，我们先考虑输入$28\times28$大小的图像，即$w=28,h=28$，这里默认步长为1，padding为0，经过$3\times3$卷积核大小的过滤，图像的大小就变为$26\times26$</p>
+<script type="math/tex; mode=display">
+\frac{28-3+2*0}{1}+1=26</script><p>由于输入的图像只有1个channel，卷积核大小为$3\times3$，因此第一层只有9个参数</p>
+<p>由于前一层有25个filter，经过一次convolution操作后，图像大小为$26\times26$，本层的neural个数为$25\times26\times26$；还需要再进行一次pooling操作，经过pooling操作之后图像大小为$13\times13$，max pooling操作没有filter，不算参数</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><div class="line">model2.add(MaxPooling2D((<span class="number">2</span>,<span class="number">2</span>)))</div></pre></td></tr></table></figure>
+<p>pooling操作后图像宽度的大小为，</p>
+<script type="math/tex; mode=display">
+\frac{26-2+2*0}{2}+1=13</script><p>经过一次convolution和pooling操作之后，neural个数为$25\times13\times13$；</p>
+<p>对于第二次的convolution操作，有50个大小为$3\times3$的filter，输出的neural数量为$50\times11\times11$；一次pooling操作所包含的区域大小为$2\times2$，输出的neural数量为$50\times5\times5$</p>
+<script type="math/tex; mode=display">
+\frac{13-3+2*0}{1}+1=11\\
+\frac{11-2+2*0}{2}+1=5</script><p><img src="/2020/06/08/CNN/image-20200608175330480.png" alt="image-20200608175330480" style="zoom:50%;"></p>
+<p>经过两次的convolution和pooling操作之后，neural的数量为$50\times5\times5$，下一步操作就是将这些神经元flatten，展开成一维向量；再输入激活函数和全连接层</p>
+<p><img src="/2020/06/08/CNN/image-20200608202515115.png" alt="image-20200608202515115" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>CNN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Backpropagation</title>
+    <url>/2020/06/06/Backpropagation/</url>
+    <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>这里我们再回顾一下gradient descent，对于网络中的参数$w_1,w_2,…,b_1,b_2,…$，通过求出相对应的梯度$\Delta L(\theta)$，再根据梯度更新网络结构中的参数</p>
+<script type="math/tex; mode=display">
+\theta ^i=\theta^{i-1}-\eta\Delta L(\theta^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606200029374.png" alt="image-20200606200029374" style="zoom:50%;"></p>
+<h4 id="Chain-Rule"><a href="#Chain-Rule" class="headerlink" title="Chain Rule"></a>Chain Rule</h4><p>backpropagation的核心思想就是链式法则</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606200855314.png" alt="image-20200606200855314" style="zoom:50%;"></p>
+<h4 id="Backpropagation"><a href="#Backpropagation" class="headerlink" title="Backpropagation"></a>Backpropagation</h4><p>这里我们先定义了一个loss函数，$l^n(\theta)$表示training data中$y^n$和$\hat y ^n$之间的loss，这个loss可以通过cross entropy或者MSE计算，再将所有的loss进行求和，得到$L(\theta)$</p>
+<script type="math/tex; mode=display">
+L(\theta)=\sum_{n=1}^Nl^n(\theta)</script><p><img src="/2020/06/06/Backpropagation/image-20200606200827557.png" alt="image-20200606200827557" style="zoom:50%;"></p>
+<p>对w求导，可得$\frac{\partial l^n}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}$，这里我们截取了网络中的部分结构，神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606201320644.png" alt="image-20200606201320644" style="zoom:50%;"></p>
+<h4 id="Forward-pass"><a href="#Forward-pass" class="headerlink" title="Forward pass"></a>Forward pass</h4><p>forward过程计算$\frac{\partial z}{\partial w}$，即为权重所对应的上一层神经元的值(x1,x2)</p>
+<script type="math/tex; mode=display">
+z=x_1w_1+x_2+w_2+b \\
+\frac{\partial z}{\partial w_1}=x_1,\quad\frac{\partial z}{\partial w_2}=x_2</script><p><img src="/2020/06/06/Backpropagation/image-20200606201854092.png" alt="image-20200606201854092" style="zoom:50%;"></p>
+<p>对于forward过程，计算出上层神经元的值后，才可以继续计算下一层神经元的梯度$\frac{\partial z}{\partial w}$，</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606202207055.png" alt="image-20200606202207055" style="zoom:50%;"></p>
+<h4 id="Backward-pass"><a href="#Backward-pass" class="headerlink" title="Backward pass"></a>Backward pass</h4><h5 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h5><p>backward过程计算$\frac{\partial l}{\partial z}$，z为激活函数$\sigma (z)$的输入值。这里我们令$a=\sigma(z)$，简化表达式的形式，根据chain rule</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a}</script><p>其中$\frac{\partial a}{\partial z}=\sigma’(z)$，对激活函数求一阶导数，可以很轻松地表示出来</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606203500895.png" alt="image-20200606203500895" style="zoom:50%;"></p>
+<p>接下来我们开始$\frac{\partial l}{\partial a}$的计算，a会影响$z’,z’’$，因此可以再次使用链式法则</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial a}=\frac{\partial z'}{\partial a}\frac{\partial l}{\partial z'}
++ \frac{\partial z''}{\partial a}\frac{\partial l}{\partial z''}</script><p>由于$z’=aw_3+…,\quad z’’=aw_4+…$，那么我们可以得出</p>
+<script type="math/tex; mode=display">
+\frac{\partial z'}{\partial a}=w_3,\quad\frac{\partial z''}{\partial a}=w_4</script><p>代入原式，可得</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a} =\sigma'(z)\left[w_3\frac{\partial l}{\partial z'}+ w_4\frac{\partial l}{\partial z''}\right]</script><p>对于$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，我们假设可以通过某种方式求得他们的值</p>
+<h5 id="另一个观点"><a href="#另一个观点" class="headerlink" title="另一个观点"></a>另一个观点</h5><p>我们可以从这个图中更加直观地了解backpropagation的过程，这里我们假设有一个神经元（图中的三角形），它不在原来的网络结构中，可以通过$w_3\frac{\partial l}{\partial z’}+ w_4\frac{\partial l}{\partial z’’}$来计算，<u>前面再乘上一个放大系数$\sigma’(z)$，这个放大系数的值是根据forward过程计算的，是一个常数</u>，就可以得出$\frac{\partial l}{\partial z}$的值</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606204707606.png" alt="image-20200606204707606" style="zoom:50%;"></p>
+<h5 id="两种情况"><a href="#两种情况" class="headerlink" title="两种情况"></a>两种情况</h5><p>公式内的其他项都已经计算出来，还有$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$没有得出具体的表达式，此步骤是为了求解$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$的表达式</p>
+<p><strong>Case1：Output Layer</strong></p>
+<p>为了求出$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，这里再次使用了chain rule</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z'}=\frac{\partial y_1}{\partial z'}\frac{\partial l}{\partial y_1}</script><p>其中$\frac{\partial y_1}{\partial z’}$就是激活函数的输出值再对$z’$求导；</p>
+<p>$\frac{\partial l}{\partial y_1}$为相对应的loss函数对y1求导，这个loss函数可以是cross entropy，也可以是MSE，对于不同的loss函数，计算出来的导数也不同</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606213905635.png" alt="image-20200606213905635" style="zoom:50%;"></p>
+<p><strong>Case2: Not output layer</strong></p>
+<p>如果现在假设后层不是output layer，而是hidden layer中的其中一层，计算方式就发生了一些小小的变化</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606215916597.png" alt="image-20200606215916597" style="zoom:50%;"></p>
+<p>根据Case1的推导，知道了$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$之后，就可以对$\frac{\partial l}{\partial z’}$进行求解</p>
+<p>同理可得，知道了$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$，就可以对$\frac{\partial l}{\partial z’}$求解，如下图所示，$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$分别乘上对应的权重$w_5,w_6$，前面再乘一个放大系数，就可得出$\frac{\partial l}{\partial z’}$的表达式</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z'}=\sigma'(z')\left[w_5\frac{\partial l}{\partial z_a}+ w_6\frac{\partial l}{\partial z_b}\right]</script><p><img src="/2020/06/06/Backpropagation/image-20200606221608597.png" alt="image-20200606221608597" style="zoom:50%;"></p>
+<p>知道了$z’,z’’$的值后，就可以根据公式计算z的值；知道了$z_a,z_b$之后，就可以计算$z’$ 的值；……一直循环这个步骤，直到到达output layer为止</p>
+<p>下图中有6个neural，分别是$z_1,z_2,z_3,z_4,z_5,z_6$，为激活函数的输入值，现在要分别求得$l$对这些函数的偏微分$\frac{\partial l}{\partial z_i}$。按照我们之前的做法，要求$\frac{\partial l}{\partial z_1}$，就必须要求$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$，而要求$\frac{\partial l}{\partial z_3}，\frac{\partial l}{\partial z_4}$的值，就必须要分别求两次$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$的值，计算效率很低</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606222718315.png" alt="image-20200606222718315" style="zoom:50%;"></p>
+<p>如果我们先计算$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$，就可以接着计算出$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$的值，再计算出$\frac{\partial l}{\partial z_1},\frac{\partial l}{\partial z_2}$的值，计算效率可以提高很多</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606222732356.png" alt="image-20200606222732356" style="zoom:50%;"></p>
+<h4 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h4><p>神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$，再相乘，就可以得出loss函数对每个hidden layer神经元的梯度，</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}</script><p>代入每次参数更新的公式，就可以得出每次的参数更新结果</p>
+<script type="math/tex; mode=display">
+w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606224217277.png" alt="image-20200606224217277" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>backpropagation</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Attack and Defense</title>
     <url>/2020/06/26/Attack/</url>
     <content><![CDATA[<h4 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h4><p><img src="/2020/06/26/Attack/image-20200626095005396.png" alt="image-20200626095005396" style="zoom:50%;"></p>
@@ -98,183 +278,65 @@ x^*=arg\mathop{min}_\limits {d(x^0,x')\leq\epsilon}L(x')</script><p>这里我们
       </tags>
   </entry>
   <entry>
-    <title>CCF-JSON查询</title>
-    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
-    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
-<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>CCF Answer</category>
-      </categories>
-      <tags>
-        <tag>CCF</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Backpropagation</title>
-    <url>/2020/06/06/Backpropagation/</url>
-    <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>这里我们再回顾一下gradient descent，对于网络中的参数$w_1,w_2,…,b_1,b_2,…$，通过求出相对应的梯度$\Delta L(\theta)$，再根据梯度更新网络结构中的参数</p>
-<script type="math/tex; mode=display">
-\theta ^i=\theta^{i-1}-\eta\Delta L(\theta^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606200029374.png" alt="image-20200606200029374" style="zoom:50%;"></p>
-<h4 id="Chain-Rule"><a href="#Chain-Rule" class="headerlink" title="Chain Rule"></a>Chain Rule</h4><p>backpropagation的核心思想就是链式法则</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606200855314.png" alt="image-20200606200855314" style="zoom:50%;"></p>
-<h4 id="Backpropagation"><a href="#Backpropagation" class="headerlink" title="Backpropagation"></a>Backpropagation</h4><p>这里我们先定义了一个loss函数，$l^n(\theta)$表示training data中$y^n$和$\hat y ^n$之间的loss，这个loss可以通过cross entropy或者MSE计算，再将所有的loss进行求和，得到$L(\theta)$</p>
-<script type="math/tex; mode=display">
-L(\theta)=\sum_{n=1}^Nl^n(\theta)</script><p><img src="/2020/06/06/Backpropagation/image-20200606200827557.png" alt="image-20200606200827557" style="zoom:50%;"></p>
-<p>对w求导，可得$\frac{\partial l^n}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}$，这里我们截取了网络中的部分结构，神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606201320644.png" alt="image-20200606201320644" style="zoom:50%;"></p>
-<h4 id="Forward-pass"><a href="#Forward-pass" class="headerlink" title="Forward pass"></a>Forward pass</h4><p>forward过程计算$\frac{\partial z}{\partial w}$，即为权重所对应的上一层神经元的值(x1,x2)</p>
-<script type="math/tex; mode=display">
-z=x_1w_1+x_2+w_2+b \\
-\frac{\partial z}{\partial w_1}=x_1,\quad\frac{\partial z}{\partial w_2}=x_2</script><p><img src="/2020/06/06/Backpropagation/image-20200606201854092.png" alt="image-20200606201854092" style="zoom:50%;"></p>
-<p>对于forward过程，计算出上层神经元的值后，才可以继续计算下一层神经元的梯度$\frac{\partial z}{\partial w}$，</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606202207055.png" alt="image-20200606202207055" style="zoom:50%;"></p>
-<h4 id="Backward-pass"><a href="#Backward-pass" class="headerlink" title="Backward pass"></a>Backward pass</h4><h5 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h5><p>backward过程计算$\frac{\partial l}{\partial z}$，z为激活函数$\sigma (z)$的输入值。这里我们令$a=\sigma(z)$，简化表达式的形式，根据chain rule</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a}</script><p>其中$\frac{\partial a}{\partial z}=\sigma’(z)$，对激活函数求一阶导数，可以很轻松地表示出来</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606203500895.png" alt="image-20200606203500895" style="zoom:50%;"></p>
-<p>接下来我们开始$\frac{\partial l}{\partial a}$的计算，a会影响$z’,z’’$，因此可以再次使用链式法则</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial a}=\frac{\partial z'}{\partial a}\frac{\partial l}{\partial z'}
-+ \frac{\partial z''}{\partial a}\frac{\partial l}{\partial z''}</script><p>由于$z’=aw_3+…,\quad z’’=aw_4+…$，那么我们可以得出</p>
-<script type="math/tex; mode=display">
-\frac{\partial z'}{\partial a}=w_3,\quad\frac{\partial z''}{\partial a}=w_4</script><p>代入原式，可得</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a} =\sigma'(z)\left[w_3\frac{\partial l}{\partial z'}+ w_4\frac{\partial l}{\partial z''}\right]</script><p>对于$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，我们假设可以通过某种方式求得他们的值</p>
-<h5 id="另一个观点"><a href="#另一个观点" class="headerlink" title="另一个观点"></a>另一个观点</h5><p>我们可以从这个图中更加直观地了解backpropagation的过程，这里我们假设有一个神经元（图中的三角形），它不在原来的网络结构中，可以通过$w_3\frac{\partial l}{\partial z’}+ w_4\frac{\partial l}{\partial z’’}$来计算，<u>前面再乘上一个放大系数$\sigma’(z)$，这个放大系数的值是根据forward过程计算的，是一个常数</u>，就可以得出$\frac{\partial l}{\partial z}$的值</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606204707606.png" alt="image-20200606204707606" style="zoom:50%;"></p>
-<h5 id="两种情况"><a href="#两种情况" class="headerlink" title="两种情况"></a>两种情况</h5><p>公式内的其他项都已经计算出来，还有$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$没有得出具体的表达式，此步骤是为了求解$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$的表达式</p>
-<p><strong>Case1：Output Layer</strong></p>
-<p>为了求出$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，这里再次使用了chain rule</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z'}=\frac{\partial y_1}{\partial z'}\frac{\partial l}{\partial y_1}</script><p>其中$\frac{\partial y_1}{\partial z’}$就是激活函数的输出值再对$z’$求导；</p>
-<p>$\frac{\partial l}{\partial y_1}$为相对应的loss函数对y1求导，这个loss函数可以是cross entropy，也可以是MSE，对于不同的loss函数，计算出来的导数也不同</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606213905635.png" alt="image-20200606213905635" style="zoom:50%;"></p>
-<p><strong>Case2: Not output layer</strong></p>
-<p>如果现在假设后层不是output layer，而是hidden layer中的其中一层，计算方式就发生了一些小小的变化</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606215916597.png" alt="image-20200606215916597" style="zoom:50%;"></p>
-<p>根据Case1的推导，知道了$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$之后，就可以对$\frac{\partial l}{\partial z’}$进行求解</p>
-<p>同理可得，知道了$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$，就可以对$\frac{\partial l}{\partial z’}$求解，如下图所示，$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$分别乘上对应的权重$w_5,w_6$，前面再乘一个放大系数，就可得出$\frac{\partial l}{\partial z’}$的表达式</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z'}=\sigma'(z')\left[w_5\frac{\partial l}{\partial z_a}+ w_6\frac{\partial l}{\partial z_b}\right]</script><p><img src="/2020/06/06/Backpropagation/image-20200606221608597.png" alt="image-20200606221608597" style="zoom:50%;"></p>
-<p>知道了$z’,z’’$的值后，就可以根据公式计算z的值；知道了$z_a,z_b$之后，就可以计算$z’$ 的值；……一直循环这个步骤，直到到达output layer为止</p>
-<p>下图中有6个neural，分别是$z_1,z_2,z_3,z_4,z_5,z_6$，为激活函数的输入值，现在要分别求得$l$对这些函数的偏微分$\frac{\partial l}{\partial z_i}$。按照我们之前的做法，要求$\frac{\partial l}{\partial z_1}$，就必须要求$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$，而要求$\frac{\partial l}{\partial z_3}，\frac{\partial l}{\partial z_4}$的值，就必须要分别求两次$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$的值，计算效率很低</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606222718315.png" alt="image-20200606222718315" style="zoom:50%;"></p>
-<p>如果我们先计算$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$，就可以接着计算出$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$的值，再计算出$\frac{\partial l}{\partial z_1},\frac{\partial l}{\partial z_2}$的值，计算效率可以提高很多</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606222732356.png" alt="image-20200606222732356" style="zoom:50%;"></p>
-<h4 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h4><p>神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$，再相乘，就可以得出loss函数对每个hidden layer神经元的梯度，</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}</script><p>代入每次参数更新的公式，就可以得出每次的参数更新结果</p>
-<script type="math/tex; mode=display">
-w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606224217277.png" alt="image-20200606224217277" style="zoom:50%;"></p>
+    <title>Deep Autoencoder</title>
+    <url>/2020/06/29/Deep-autoencoder/</url>
+    <content><![CDATA[<h4 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h4><p>对于输入大小为$28\times28$的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简（compact）的特征；</p>
+<p>但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；</p>
+<p>那么我们现在就先来做一个decoder，把code恢复成一张image；</p>
+<p>decoder和encoder单独是没办法训练的，因为是无监督学习，因此现在我们将这两者一起学习</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629094326636.png" alt="image-20200629094326636" style="zoom:50%;"></p>
+<h4 id="Recap-PCA"><a href="#Recap-PCA" class="headerlink" title="Recap: PCA"></a>Recap: PCA</h4><p>这里先回顾一下<a href="https://scarleatt.github.io/2020/06/28/dimension-reduction/" target="_blank" rel="external">PCA</a>，对于输入的图像$x$为$784$维，经过PCA降维，可以降低到324维的图像$\hat x$，在encoder和decoder的学习过程中，应达到的目标是最小化$(x-\hat x)^2$，这个结构可以看成是具有一个hidden layer的network</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629100232021.png" alt="image-20200629100232021" style="zoom:50%;"></p>
+<h4 id="Deep-Auto-encoder"><a href="#Deep-Auto-encoder" class="headerlink" title="Deep Auto-encoder"></a>Deep Auto-encoder</h4><h5 id="Structure"><a href="#Structure" class="headerlink" title="Structure"></a>Structure</h5><p>中间的hidden layer也可以不止一个，也可以是多个的hidden layer，这种结构就称作deep auto-encoder</p>
+<p><span style="color: red">注：encoder和decoder的结构不一定非得是对称的。</span></p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629101531636.png" alt="image-20200629101531636" style="zoom:50%;"></p>
+<h5 id="PCA-vs-Deep-Auto-encoder"><a href="#PCA-vs-Deep-Auto-encoder" class="headerlink" title="PCA. vs Deep Auto-encoder"></a>PCA. vs Deep Auto-encoder</h5><p>对于下图中的图像(0,1,2,3,4)，如果我们使用PCA，只有中间一个hidden layer，先从784维降到30维，再从30维恢复到784维，可以发现图像变得比较模糊；</p>
+<p>如果使用deep auto-encoder，先从784到1000，1000到500，500到250，250到300，再使用类似的encoder恢复图像，可以发现结果图像非常清晰</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629101748853.png" alt="image-20200629101748853" style="zoom:50%;"></p>
+<p>如果我们先使用PCA进行降维，把原图从784降到2维，对二维的数据进行可视化，可以发现不同的digit（不同的颜色代表不同的数字）都叠在一起了；</p>
+<p>如果使用deep autoencoder，可以发现这个数字都是分开的</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629102817764.png" alt="image-20200629102817764" style="zoom:50%;"></p>
+<h4 id="Text-Retrieval"><a href="#Text-Retrieval" class="headerlink" title="Text Retrieval"></a>Text Retrieval</h4><p>下图中蓝色的圆点都表示一个document，我们将输入的query也加入这个document，再计算查询的词汇query和每个document之间的inner product或similarity等，距离最近的document，similarity的值是最大的，因此会retrieval距离红色箭头最近的其他两个蓝色箭头</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629103259176.png" alt="image-20200629103259176" style="zoom:50%;"></p>
+<p>还有另外一种方法，使用一个vector来表示所有的词汇，vector对应的值就是每个character出现的次数；但这种方式没有考虑原来的语义顺序，每个character都是independent的</p>
+<p>在下图中，假设bag里面有2000个词汇，把输入的document或query变成对应的vector，再输入相应的encoder，降维成2维，对这二维的数据进行可视化，如右图所示，不同的颜色代表不同的document；</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629104843900.png" alt="image-20200629104843900" style="zoom:50%;"></p>
+<p>如果我们现在输入一个query，再降维到二维，可以发现和图中对应的document是有关的，我们就可以看到query所属的类别是Energy market</p>
+<p>但用LSA就得不到对应的结果</p>
+<h4 id="Similar-Image-Search"><a href="#Similar-Image-Search" class="headerlink" title="Similar Image Search"></a>Similar Image Search</h4><p>以图找图，如果我们只是做pixel上的相似程度，那么我们可以得到以下的结果，迈克杰克逊和马蹄铁也很像，这显然不符合常理</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110009994.png" alt="image-20200629110009994" style="zoom:50%;"></p>
+<p>我们可以把输入的image经过deep auto-encoder，变成一个code，再去做搜寻；由于auto-encoder是unsupervised learning，收集多少数据都行，不缺数据</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110134069.png" alt="image-20200629110134069" style="zoom:50%;"></p>
+<p>用deep auto-encoder来找类似迈克杰克逊，也可以得到更好的结果（至少全是人脸 ）</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110527622.png" alt="image-20200629110527622" style="zoom:50%;"></p>
+<h4 id="Pre-training-DNN"><a href="#Pre-training-DNN" class="headerlink" title="Pre-training DNN"></a>Pre-training DNN</h4><p>autoencoder也可以用到network的pre-training过程，来初始化所需要的weight；在下图中，如果我们要对第一个hidden layer的weight进行初始化，那么我们可以使用autoencoder，先将784维到1000维，再进行reconstruct，使1000维降到784维，来使$x,\hat x$之间的差值最小</p>
+<p>但这样可能会出现一个问题，由于1000维比784维更高维，autoencoder很可能将input直接embed到1000维里，再进行恢复，这样很可能network什么都没有学到；</p>
+<p>对于这个问题，我们可以把1000维再加上一个regularization，比如L1，这1000维的数据中有某些维必须是为0的，这样就可以避免autoencoder直接将input进行embed</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110742780.png" alt="image-20200629110742780" style="zoom:50%;"></p>
+<p>我们可以学习这样的一个autoencoder，先将input转化成一个1000维的vector，再把这个vector转化为<span style="color: green">1000维的code</span>，再把这个code转化为1000维的vector；使input和output越接近越好，<strong>把$W^2$的值保存下来</strong>，</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629111953318.png" alt="image-20200629111953318" style="zoom:50%;"></p>
+<p>再继续下一个layer，使用第三个autoencoder</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629112400780.png" alt="image-20200629112400780" style="zoom:50%;"></p>
+<p>学习到$W^1,W^2,W^3$之后，就把这个weight作为初始值，$W^4$则进行random init，再使用<span style="color: red">back propagation</span>进行fine-tune</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629112513885.png" alt="image-20200629112513885" style="zoom:50%;"></p>
+<p><span style="color: red">如果我们有大量的unlabeled data，labeled data只有很小一部分，那么我们就可以通过这种无监督学习的方式来初始化weight，再使用剩下的label data来对network进行fine-tune即可</span></p>
+<h4 id="De-noising-auto-encoder"><a href="#De-noising-auto-encoder" class="headerlink" title="De-noising auto-encoder"></a>De-noising auto-encoder</h4><p>对于原来的input x，我们先加入一些noise得到$x’$，进行encode之后再进行decode，使之和最早的input之间的差值最小；encoder现在不仅学习到了encode这件事，还学习到了把noise过滤掉这件事</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629113151447.png" alt="image-20200629113151447" style="zoom:50%;"></p>
+<h4 id="Auto-encoder-for-CNN"><a href="#Auto-encoder-for-CNN" class="headerlink" title="Auto-encoder for CNN"></a>Auto-encoder for CNN</h4><p><img src="/2020/06/29/Deep-autoencoder/image-20200629114519998.png" alt="image-20200629114519998" style="zoom:50%;"></p>
+<h5 id="CNN-Unpooling"><a href="#CNN-Unpooling" class="headerlink" title="CNN -Unpooling"></a>CNN -Unpooling</h5><p>在pooling时，会选择四个方框中的最大值，并记住最大值的location；</p>
+<p>在upooling时，就会用到上面的location</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629114730398.png" alt="image-20200629114730398" style="zoom:50%;"></p>
+<h5 id="Deconvolution"><a href="#Deconvolution" class="headerlink" title="Deconvolution"></a>Deconvolution</h5><p>Deconvolution其实就是在做convolution，</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629114919151.png" alt="image-20200629114919151" style="zoom:50%;"></p>
 ]]></content>
       <categories>
         <category>ML-notes</category>
       </categories>
       <tags>
         <tag>Deep Learning</tag>
-        <tag>backpropagation</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Convolutional Neural Network</title>
-    <url>/2020/06/08/CNN/</url>
-    <content><![CDATA[<h4 id="Why-CNN-for-Image"><a href="#Why-CNN-for-Image" class="headerlink" title="Why CNN for Image"></a>Why CNN for Image</h4><p>可以使用相同的参数来提取不同图像中的同一种特征，这样就可以降低网络需要学习的参数</p>
-<p><img src="/2020/06/08/CNN/image-20200608170112931.png" alt="image-20200608170112931" style="zoom:50%;"></p>
-<p>CNN还有另外一种操作可以减少网络需要训练的参数，即下采样（subsampling），subsampling可以减少图像的大小。采样层就是使用pooling的技术来实现的，可以用max pooling或average pooling，获取某个像素点及其周围区域的最大值或平均值，将这些像素都用一个像素来表示，就可以缩小图像的大小。</p>
-<p><img src="/2020/06/08/CNN/image-20200608170313635.png" alt="image-20200608170313635" style="zoom:50%;"></p>
-<p>一个完整的CNN网络结构，由多个convolution和pooling层、以及全连接层组成。输入图像先经过多次的convolution、pooling，提取图像中的特征，再把这些特征flatten成一个一维的向量，即全连接层，最后再得出分类结果 cat or dog</p>
-<p><img src="/2020/06/08/CNN/image-20200608170601092.png" alt="image-20200608170601092" style="zoom:50%;"></p>
-<h4 id="convolution"><a href="#convolution" class="headerlink" title="convolution"></a>convolution</h4><p>对于我们想要提取图像中的两个特征，我们使用filter1和filter2这两个过滤器，</p>
-<p><img src="/2020/06/08/CNN/image-20200608172139320.png" alt="image-20200608172139320" style="zoom:50%;"></p>
-<p><img src="/2020/06/08/CNN/image-20200608172200059.png" alt="image-20200608172200059" style="zoom:50%;"></p>
-<p><img src="/2020/06/08/CNN/image-20200608172256317.png" alt="image-20200608172256317" style="zoom:50%;"></p>
-<p><img src="/2020/06/08/CNN/image-20200608172311889.png" alt="image-20200608172311889" style="zoom:50%;"></p>
-<h4 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h4><h5 id="local-field"><a href="#local-field" class="headerlink" title="local field"></a>local field</h5><p>下一层的neural 3，只与前层的9个neural相连接，而不是和前层的全部neural连接</p>
-<p><img src="/2020/06/08/CNN/image-20200608172513373.png" alt="image-20200608172513373" style="zoom:50%;"></p>
-<h5 id="weight-sharing"><a href="#weight-sharing" class="headerlink" title="weight sharing"></a>weight sharing</h5><p>对于图像的同一种特征，只需要一个过滤器filter即可，这样就可以进一步减少图像中的参数</p>
-<p><img src="/2020/06/08/CNN/image-20200608173532837.png" alt="image-20200608173532837" style="zoom:50%;"></p>
-<h4 id="Flatten"><a href="#Flatten" class="headerlink" title="Flatten"></a>Flatten</h4><p>每经过一次convolution和pooling操作，都会生成一张新的图片，这张新图片的大小比原图要小很多，减少了需要训练的参数</p>
-<p><img src="/2020/06/08/CNN/image-20200608173901231.png" alt="image-20200608173901231" style="zoom:50%;"></p>
-<p>再把经过多次convolution和pooling的图像flatten，展开成一维的向量，再输入全连接层</p>
-<p><img src="/2020/06/08/CNN/image-20200608174020284.png" alt="image-20200608174020284" style="zoom:50%;"></p>
-<h4 id="CNN-in-Keras"><a href="#CNN-in-Keras" class="headerlink" title="CNN in Keras"></a>CNN in Keras</h4><p>首先先介绍一下convolution和pooling对图像大小变化的公式，设输入图像的宽度和高度分别为w和h，卷积核大小为$F\times F$，步长stride大小为S，如果再加入Padding操作，经过卷积或池化操作后图像的大小为W和H</p>
-<script type="math/tex; mode=display">
-H/W=\frac{(h/w - F+2P)}{S}+1</script><p>这里引入了keras，先介绍几个主要函数的参数。</p>
-<p>我们可以先通过以下函数来生成一个convolution layer</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><div class="line">model2.add(Convolution2D(<span class="number">25</span>,<span class="number">3</span>,<span class="number">3</span>, input_shape=(<span class="number">28</span>,<span class="number">28</span>,<span class="number">1</span>)))</div></pre></td></tr></table></figure>
-<p>其中25表示filter的数量，$3\times3$表示filter的大小，<code>model2.add()</code>其中的<code>Convolution2D</code>还有一个参数input_shape，表示函数输入的图像大小，例子中表示一个单通道的$28\times28$图像，如果需要输入彩色图像，则是$28\times28\times3$</p>
-<p><img src="/2020/06/08/CNN/image-20200608174611511.png" alt="image-20200608174611511" style="zoom:50%;"></p>
-<p>下面我们将继续介绍通过convolution和pooling操作后参数数量的变化。对于下图中的例子，我们先考虑输入$28\times28$大小的图像，即$w=28,h=28$，这里默认步长为1，padding为0，经过$3\times3$卷积核大小的过滤，图像的大小就变为$26\times26$</p>
-<script type="math/tex; mode=display">
-\frac{28-3+2*0}{1}+1=26</script><p>由于输入的图像只有1个channel，卷积核大小为$3\times3$，因此第一层只有9个参数</p>
-<p>由于前一层有25个filter，经过一次convolution操作后，图像大小为$26\times26$，本层的neural个数为$25\times26\times26$；还需要再进行一次pooling操作，经过pooling操作之后图像大小为$13\times13$，max pooling操作没有filter，不算参数</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><div class="line">model2.add(MaxPooling2D((<span class="number">2</span>,<span class="number">2</span>)))</div></pre></td></tr></table></figure>
-<p>pooling操作后图像宽度的大小为，</p>
-<script type="math/tex; mode=display">
-\frac{26-2+2*0}{2}+1=13</script><p>经过一次convolution和pooling操作之后，neural个数为$25\times13\times13$；</p>
-<p>对于第二次的convolution操作，有50个大小为$3\times3$的filter，输出的neural数量为$50\times11\times11$；一次pooling操作所包含的区域大小为$2\times2$，输出的neural数量为$50\times5\times5$</p>
-<script type="math/tex; mode=display">
-\frac{13-3+2*0}{1}+1=11\\
-\frac{11-2+2*0}{2}+1=5</script><p><img src="/2020/06/08/CNN/image-20200608175330480.png" alt="image-20200608175330480" style="zoom:50%;"></p>
-<p>经过两次的convolution和pooling操作之后，neural的数量为$50\times5\times5$，下一步操作就是将这些神经元flatten，展开成一维向量；再输入激活函数和全连接层</p>
-<p><img src="/2020/06/08/CNN/image-20200608202515115.png" alt="image-20200608202515115" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>CNN</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Classification</title>
-    <url>/2020/06/05/Classification/</url>
-    <content><![CDATA[<p>考虑到宝可梦的两个属性（<strong>Defense</strong>、<strong>SP Defense</strong>），将输入的宝可梦进行属性分类（Water、Normal）</p>
-<p><img src="/2020/06/05/Classification/image-20200605204445258.png" alt="image-20200605204445258" style="zoom:50%;"></p>
-<h4 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a>Gaussian Distribution</h4><p>假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，</p>
-<p><img src="/2020/06/05/Classification/image-20200605202837571.png" alt="image-20200605202837571" style="zoom:50%;"></p>
-<p><img src="/2020/06/05/Classification/image-20200605204129951.png" alt="image-20200605204129951" style="zoom:50%;"></p>
-<h4 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a>Maximum Likelihood</h4><p>第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\mu,\sum)$的表达式，其中$\mu=\mu^<em>,\sum=\sum^</em>$时，函数L得到最大值</p>
-<p><img src="/2020/06/05/Classification/image-20200605203041766.png" alt="image-20200605203041766" style="zoom:50%;"></p>
-<p>这里我们假设有两个类别，其参数和分布如下，</p>
-<p><img src="/2020/06/05/Classification/image-20200605210600803.png" alt="image-20200605210600803" style="zoom:50%;"></p>
-<p>输入样例x是Class 1:Water的概率为，</p>
-<script type="math/tex; mode=display">
-P(C_1|x)=\frac{P(x|C_1)P(C_1)}{P(x)}=\frac{P(x|C_1)P(C_1)}
-{P(x|C_1)P(C_1)+P(x|C_2)P(C_2)}</script><p>再代入相应的表达式，其中$P(x|C_1)=f_{\mu^1,\sum^1},P(x|C_2)=f_{\mu^2,\sum^2}$，即可算出x为C1的概率，如果算出这个概率大于0.5，我们就可以认为x的属性为C1</p>
-<p><img src="/2020/06/05/Classification/image-20200605212347236.png" alt="image-20200605212347236" style="zoom:50%;"></p>
-<p>但这样子算出来的分类精确度很低，只有47%，就算加入其他的属性，精确度也只提高到了54%</p>
-<p><img src="/2020/06/05/Classification/image-20200605214028329.png" alt="image-20200605214028329" style="zoom:50%;"></p>
-<h4 id="Modifying-Model"><a href="#Modifying-Model" class="headerlink" title="Modifying Model"></a>Modifying Model</h4><p>由于上面模型的精确度都不高，所以在此我们对模型进行了修改，模型的参数就只有三个，$\mu^1,\mu^2,\sum=\sum^1=\sum^2$</p>
-<p><img src="/2020/06/05/Classification/image-20200605214245755.png" alt="image-20200605214245755" style="zoom:50%;"></p>
-<p>对于Water属性的宝可梦对应参数为$\mu^1$，Normal属性的宝可梦为$\mu^2$，共同属性为$\sum$，这时对应的最大似然函数为$L(\mu^1,\mu^2,\sum)$，</p>
-<p><img src="/2020/06/05/Classification/image-20200605214446675.png" alt="image-20200605214446675" style="zoom:50%;"></p>
-<p>修改后的模型准确率可以达到54%，如果加入更多的属性，准确率可以提高到73%</p>
-<p><img src="/2020/06/05/Classification/image-20200605215021833.png" alt="image-20200605215021833" style="zoom:50%;"></p>
-<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><p>这里再回忆一下三个步骤：<br>（1）Function Set，计算分类为该类的概率$P(C_1|x)$，如果大于0.5，则认为类别为1，否则为类别2<br>（2）找出相对应的$\mu,\sum$，使得似然函数L取得最大值；<br>（3）得出使似然函数最大化的参数，$\mu^<em>,\sum^</em>$，</p>
-<script type="math/tex; mode=display">
-u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\mu^*)(x^n-\mu^*)^T</script><p><img src="/2020/06/05/Classification/image-20200605220705405.png" alt="image-20200605220705405" style="zoom:50%;"></p>
-<h4 id="Probability-Distribution"><a href="#Probability-Distribution" class="headerlink" title="Probability Distribution"></a>Probability Distribution</h4><p>这里我们所使用的概率分布是</p>
-<p><img src="/2020/06/05/Classification/image-20200605221617855.png" alt="image-20200605221617855" style="zoom:50%;"></p>
-<p>下面开始公式推导，</p>
-<p><img src="/2020/06/05/Classification/image-20200605221733838.png" alt="image-20200605221733838" style="zoom:50%;"></p>
-<p>得出了我们的Sigmoid函数，$\sigma(z)$的函数图像为s型，值域范围为[0,1]，将z化简，并代入$P(C_i)=\frac{N_i}{N_1+N_2}$ (i=1,2)，</p>
-<p><img src="/2020/06/05/Classification/image-20200605221911457.png" alt="image-20200605221911457" style="zoom:50%;"></p>
-<p>将$P(x|C_1),P(x|C_2)$的表达式代入$ln\frac{P(x|C_1)}{P(x|C_2)}$，</p>
-<p><img src="/2020/06/05/Classification/image-20200605222200879.png" alt="image-20200605222200879" style="zoom:50%;"></p>
-<p><img src="/2020/06/05/Classification/image-20200605223207505.png" alt="image-20200605223207505" style="zoom:50%;"></p>
-<p>再进行进一步化简，带入$\sum^1=\sum^2=\sum$，我们可以得出z的简易表达式$z=w\cdot x + b$，可得出$P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)$。当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
-<p><img src="/2020/06/05/Classification/image-20200605223410530.png" alt="image-20200605223410530" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>classification</tag>
-        <tag>sigmoid function</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Deep Autoencoder</tag>
+        <tag>Autoencoder</tag>
       </tags>
   </entry>
   <entry>
@@ -545,68 +607,6 @@ y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情�
       </tags>
   </entry>
   <entry>
-    <title>Deep Autoencoder</title>
-    <url>/2020/06/29/Deep-autoencoder/</url>
-    <content><![CDATA[<h4 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h4><p>对于输入大小为$28\times28$的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简（compact）的特征；</p>
-<p>但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；</p>
-<p>那么我们现在就先来做一个decoder，把code恢复成一张image；</p>
-<p>decoder和encoder单独是没办法训练的，因为是无监督学习，因此现在我们将这两者一起学习</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629094326636.png" alt="image-20200629094326636" style="zoom:50%;"></p>
-<h4 id="Recap-PCA"><a href="#Recap-PCA" class="headerlink" title="Recap: PCA"></a>Recap: PCA</h4><p>这里先回顾一下<a href="https://scarleatt.github.io/2020/06/28/dimension-reduction/" target="_blank" rel="external">PCA</a>，对于输入的图像$x$为$784$维，经过PCA降维，可以降低到324维的图像$\hat x$，在encoder和decoder的学习过程中，应达到的目标是最小化$(x-\hat x)^2$，这个结构可以看成是具有一个hidden layer的network</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629100232021.png" alt="image-20200629100232021" style="zoom:50%;"></p>
-<h4 id="Deep-Auto-encoder"><a href="#Deep-Auto-encoder" class="headerlink" title="Deep Auto-encoder"></a>Deep Auto-encoder</h4><h5 id="Structure"><a href="#Structure" class="headerlink" title="Structure"></a>Structure</h5><p>中间的hidden layer也可以不止一个，也可以是多个的hidden layer，这种结构就称作deep auto-encoder</p>
-<p><span style="color: red">注：encoder和decoder的结构不一定非得是对称的。</span></p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629101531636.png" alt="image-20200629101531636" style="zoom:50%;"></p>
-<h5 id="PCA-vs-Deep-Auto-encoder"><a href="#PCA-vs-Deep-Auto-encoder" class="headerlink" title="PCA. vs Deep Auto-encoder"></a>PCA. vs Deep Auto-encoder</h5><p>对于下图中的图像(0,1,2,3,4)，如果我们使用PCA，只有中间一个hidden layer，先从784维降到30维，再从30维恢复到784维，可以发现图像变得比较模糊；</p>
-<p>如果使用deep auto-encoder，先从784到1000，1000到500，500到250，250到300，再使用类似的encoder恢复图像，可以发现结果图像非常清晰</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629101748853.png" alt="image-20200629101748853" style="zoom:50%;"></p>
-<p>如果我们先使用PCA进行降维，把原图从784降到2维，对二维的数据进行可视化，可以发现不同的digit（不同的颜色代表不同的数字）都叠在一起了；</p>
-<p>如果使用deep autoencoder，可以发现这个数字都是分开的</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629102817764.png" alt="image-20200629102817764" style="zoom:50%;"></p>
-<h4 id="Text-Retrieval"><a href="#Text-Retrieval" class="headerlink" title="Text Retrieval"></a>Text Retrieval</h4><p>下图中蓝色的圆点都表示一个document，我们将输入的query也加入这个document，再计算查询的词汇query和每个document之间的inner product或similarity等，距离最近的document，similarity的值是最大的，因此会retrieval距离红色箭头最近的其他两个蓝色箭头</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629103259176.png" alt="image-20200629103259176" style="zoom:50%;"></p>
-<p>还有另外一种方法，使用一个vector来表示所有的词汇，vector对应的值就是每个character出现的次数；但这种方式没有考虑原来的语义顺序，每个character都是independent的</p>
-<p>在下图中，假设bag里面有2000个词汇，把输入的document或query变成对应的vector，再输入相应的encoder，降维成2维，对这二维的数据进行可视化，如右图所示，不同的颜色代表不同的document；</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629104843900.png" alt="image-20200629104843900" style="zoom:50%;"></p>
-<p>如果我们现在输入一个query，再降维到二维，可以发现和图中对应的document是有关的，我们就可以看到query所属的类别是Energy market</p>
-<p>但用LSA就得不到对应的结果</p>
-<h4 id="Similar-Image-Search"><a href="#Similar-Image-Search" class="headerlink" title="Similar Image Search"></a>Similar Image Search</h4><p>以图找图，如果我们只是做pixel上的相似程度，那么我们可以得到以下的结果，迈克杰克逊和马蹄铁也很像，这显然不符合常理</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110009994.png" alt="image-20200629110009994" style="zoom:50%;"></p>
-<p>我们可以把输入的image经过deep auto-encoder，变成一个code，再去做搜寻；由于auto-encoder是unsupervised learning，收集多少数据都行，不缺数据</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110134069.png" alt="image-20200629110134069" style="zoom:50%;"></p>
-<p>用deep auto-encoder来找类似迈克杰克逊，也可以得到更好的结果（至少全是人脸 ）</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110527622.png" alt="image-20200629110527622" style="zoom:50%;"></p>
-<h4 id="Pre-training-DNN"><a href="#Pre-training-DNN" class="headerlink" title="Pre-training DNN"></a>Pre-training DNN</h4><p>autoencoder也可以用到network的pre-training过程，来初始化所需要的weight；在下图中，如果我们要对第一个hidden layer的weight进行初始化，那么我们可以使用autoencoder，先将784维到1000维，再进行reconstruct，使1000维降到784维，来使$x,\hat x$之间的差值最小</p>
-<p>但这样可能会出现一个问题，由于1000维比784维更高维，autoencoder很可能将input直接embed到1000维里，再进行恢复，这样很可能network什么都没有学到；</p>
-<p>对于这个问题，我们可以把1000维再加上一个regularization，比如L1，这1000维的数据中有某些维必须是为0的，这样就可以避免autoencoder直接将input进行embed</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110742780.png" alt="image-20200629110742780" style="zoom:50%;"></p>
-<p>我们可以学习这样的一个autoencoder，先将input转化成一个1000维的vector，再把这个vector转化为<span style="color: green">1000维的code</span>，再把这个code转化为1000维的vector；使input和output越接近越好，<strong>把$W^2$的值保存下来</strong>，</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629111953318.png" alt="image-20200629111953318" style="zoom:50%;"></p>
-<p>再继续下一个layer，使用第三个autoencoder</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629112400780.png" alt="image-20200629112400780" style="zoom:50%;"></p>
-<p>学习到$W^1,W^2,W^3$之后，就把这个weight作为初始值，$W^4$则进行random init，再使用<span style="color: red">back propagation</span>进行fine-tune</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629112513885.png" alt="image-20200629112513885" style="zoom:50%;"></p>
-<p><span style="color: red">如果我们有大量的unlabeled data，labeled data只有很小一部分，那么我们就可以通过这种无监督学习的方式来初始化weight，再使用剩下的label data来对network进行fine-tune即可</span></p>
-<h4 id="De-noising-auto-encoder"><a href="#De-noising-auto-encoder" class="headerlink" title="De-noising auto-encoder"></a>De-noising auto-encoder</h4><p>对于原来的input x，我们先加入一些noise得到$x’$，进行encode之后再进行decode，使之和最早的input之间的差值最小；encoder现在不仅学习到了encode这件事，还学习到了把noise过滤掉这件事</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629113151447.png" alt="image-20200629113151447" style="zoom:50%;"></p>
-<h4 id="Auto-encoder-for-CNN"><a href="#Auto-encoder-for-CNN" class="headerlink" title="Auto-encoder for CNN"></a>Auto-encoder for CNN</h4><p><img src="/2020/06/29/Deep-autoencoder/image-20200629114519998.png" alt="image-20200629114519998" style="zoom:50%;"></p>
-<h5 id="CNN-Unpooling"><a href="#CNN-Unpooling" class="headerlink" title="CNN -Unpooling"></a>CNN -Unpooling</h5><p>在pooling时，会选择四个方框中的最大值，并记住最大值的location；</p>
-<p>在upooling时，就会用到上面的location</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629114730398.png" alt="image-20200629114730398" style="zoom:50%;"></p>
-<h5 id="Deconvolution"><a href="#Deconvolution" class="headerlink" title="Deconvolution"></a>Deconvolution</h5><p>Deconvolution其实就是在做convolution，</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629114919151.png" alt="image-20200629114919151" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Deep Autoencoder</tag>
-        <tag>Autoencoder</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Logistic Regression</title>
     <url>/2020/06/06/Logistic-Regression/</url>
     <content><![CDATA[<h4 id="Review"><a href="#Review" class="headerlink" title="Review"></a>Review</h4><p>我们可以得出z的简易表达式$z=w\cdot x + b$，可得出</p>
@@ -657,33 +657,6 @@ P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p>
       <tags>
         <tag>Deep Learning</tag>
         <tag>Logistic Regression</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Mac安装Pytorch</title>
-    <url>/2020/03/29/Mac%E5%AE%89%E8%A3%85Pytorch/</url>
-    <content><![CDATA[<p>先创建一个名为<code>pytorch</code>的虚拟环境，</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda create -n pytorch python=3.7 numpy matplotlib pandas jupyter notebook</div></pre></td></tr></table></figure>
-<p>激活虚拟环境</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda activate pytorch</div></pre></td></tr></table></figure>
-<p>去官网选择合适的pytorch版本的安装命令<a href="https://pytorch.org/get-started/locally/" target="_blank" rel="external">https://pytorch.org/get-started/locally/</a></p>
-<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329101220290.png" alt="image-20200329101220290"></p>
-<p>复制到命令行下，回车运行</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda install pytorch torchvision -c pytorch</div></pre></td></tr></table></figure>
-<p>会出现以下报错信息：</p>
-<p><strong>CondaHTTPError: HTTP 000 CONNECTION FAILED for url</strong></p>
-<p><strong>解决方法：添加镜像站到Anaconda</strong></p>
- <figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</div><div class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</div><div class="line">conda config --set show_channel_urls yes</div><div class="line"></div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/</div></pre></td></tr></table></figure>
-<p>再把官网安装命令的<code>-c pytorch</code>去掉，运行以下命令</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda install pytorch torchvision</div></pre></td></tr></table></figure>
-<p>检测pytorch是否安装成功，命令行运行</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">jupyter notebook</div></pre></td></tr></table></figure>
-<p>运行测试代码，出现以下结果，则说明安装成功</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> torch</div><div class="line">torch.FloatTensor([<span class="number">5</span>, <span class="number">3</span>, <span class="number">5</span>])</div></pre></td></tr></table></figure>
-<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329102655979.png" alt="image-20200329102655979"></p>
-]]></content>
-      <tags>
-        <tag>Pytorch</tag>
       </tags>
   </entry>
   <entry>
@@ -850,51 +823,6 @@ a=h(c')f(z_0)=7</script><p><img src="/2020/06/10/RNN/image-20200609225546396.png
       </tags>
   </entry>
   <entry>
-    <title>Word Embedding</title>
-    <url>/2020/06/11/Word-Embedding/</url>
-    <content><![CDATA[<h4 id="Word-Embedding"><a href="#Word-Embedding" class="headerlink" title="Word Embedding"></a>Word Embedding</h4><p>如果使用1-of-N encoding，每个单词用一个vector表示，那么5个单词就需要5个vector；如果我们把同一个类别的单词都放到那个类里，即属于class1的单词有dog、cat、bird，属于动物类的单词，同理可以得出class2，class3；</p>
-<p>但只做classify是不够的，这些class之间也有一些其他的联系；比如class1属于动物，class3属于植物，他们都是生物，只做classify并不能体现这种联系</p>
-<p>现在我们把每个word都project到一个两个dimension上， 水平的dimension可以是表示生物（class1，class3）和其他类别class2之间的差距，竖直的dimension可以是会动（class2，class3）的和不会动class1之间的差距</p>
-<p>如果现在有10w个单词，1-of-N encoding就需要10w个vector，但word embedding可能只需要50维左右，就可以表示这些所有的word</p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611094055907.png" alt="image-20200611094055907" style="zoom:50%;"></p>
-<p>word2vec是一个无监督学习问题，如果network的input为“Apple”，要输出其对应的vector </p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611095916810.png" alt="image-20200611095916810" style="zoom:50%;"></p>
-<h4 id="How-to-exploit-the-context"><a href="#How-to-exploit-the-context" class="headerlink" title="How to exploit the context?"></a>How to exploit the context?</h4><h5 id="Count-based"><a href="#Count-based" class="headerlink" title="Count based"></a>Count based</h5><p><img src="/2020/06/11/Word-Embedding/image-20200611102225747.png" alt="image-20200611102225747" style="zoom:50%;"></p>
-<h5 id="Prediction-based"><a href="#Prediction-based" class="headerlink" title="Prediction-based"></a>Prediction-based</h5><p>根据词义的上下文来了解词义</p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611102755128.png" alt="image-20200611102755128" style="zoom:50%;"></p>
-<p><strong>Sharing weight</strong></p>
-<p>$w_{i-1},w_{i-2}$的第一维对应$z_1$，其对应的weight是一样的；同理$w_{i-1},w_{i-2}$的第二维对应$z_1$，其对应的weight是一样的,……，如果每一维对应的weight都不一样，那么实际上就输入了两个vector，</p>
-<p>网络输出每个word为下一个生成word的probability</p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611103812991.png" alt="image-20200611103812991" style="zoom:50%;"></p>
-<p>如果我们设置$x_{i-1},x_{i-2}$的长度都是$|V|$，$z$的长度是$|Z|$，那么</p>
-<script type="math/tex; mode=display">
-z=W_1x_{i-2}+W_2x_{i-1}</script><p>其中$W_1=W_2=W$，那么$z=W(x_{i-2}+x_{i-1})$,</p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611104833054.png" alt="image-20200611104833054" style="zoom:50%;"></p>
-<p>那么在实际的网络训练中，我们如何保证$W_1=W_2$呢？</p>
-<p>首先需要将$w_1,w_2$初始化为相同的值，那么</p>
-<script type="math/tex; mode=display">
-w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}\\
-w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}</script><p>由于gradient的值不同，$w_1,w_2$在更新一次参数之后就不相等了，必须保证每次更新之后的值还是一样的，因此</p>
-<script type="math/tex; mode=display">
-w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}-\eta \frac{\partial C}{\partial w_j}\\
-w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}-\eta \frac{\partial C}{\partial w_i}</script><p>这样每次更新的值都一样的，也就保证了$w_1=w_2$</p>
-<p><strong>Training</strong></p>
-<p>对于输入“潮水、退了”，我们希望network的输出和“就”越接近越好，即最小化cross entropy</p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611103701528.png" alt="image-20200611103701528" style="zoom:50%;"></p>
-<p> <strong>Various Architectures</strong></p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611110004840.png" alt="image-20200611110004840" style="zoom:50%;"></p>
-<p><strong>Result</strong></p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611110430525.png" alt="image-20200611110430525" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>word embedding</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>PCA</title>
     <url>/2020/06/28/dimension-reduction/</url>
     <content><![CDATA[<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>unsupervised learning可以分为两大类，dimension reduction和generation</p>
@@ -1008,6 +936,145 @@ W=\begin{pmatrix}
       </tags>
   </entry>
   <entry>
+    <title>Mac安装Pytorch</title>
+    <url>/2020/03/29/Mac%E5%AE%89%E8%A3%85Pytorch/</url>
+    <content><![CDATA[<p>先创建一个名为<code>pytorch</code>的虚拟环境，</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda create -n pytorch python=3.7 numpy matplotlib pandas jupyter notebook</div></pre></td></tr></table></figure>
+<p>激活虚拟环境</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda activate pytorch</div></pre></td></tr></table></figure>
+<p>去官网选择合适的pytorch版本的安装命令<a href="https://pytorch.org/get-started/locally/" target="_blank" rel="external">https://pytorch.org/get-started/locally/</a></p>
+<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329101220290.png" alt="image-20200329101220290"></p>
+<p>复制到命令行下，回车运行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda install pytorch torchvision -c pytorch</div></pre></td></tr></table></figure>
+<p>会出现以下报错信息：</p>
+<p><strong>CondaHTTPError: HTTP 000 CONNECTION FAILED for url</strong></p>
+<p><strong>解决方法：添加镜像站到Anaconda</strong></p>
+ <figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</div><div class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</div><div class="line">conda config --set show_channel_urls yes</div><div class="line"></div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/</div></pre></td></tr></table></figure>
+<p>再把官网安装命令的<code>-c pytorch</code>去掉，运行以下命令</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda install pytorch torchvision</div></pre></td></tr></table></figure>
+<p>检测pytorch是否安装成功，命令行运行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">jupyter notebook</div></pre></td></tr></table></figure>
+<p>运行测试代码，出现以下结果，则说明安装成功</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> torch</div><div class="line">torch.FloatTensor([<span class="number">5</span>, <span class="number">3</span>, <span class="number">5</span>])</div></pre></td></tr></table></figure>
+<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329102655979.png" alt="image-20200329102655979"></p>
+]]></content>
+      <tags>
+        <tag>Pytorch</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Word Embedding</title>
+    <url>/2020/06/11/Word-Embedding/</url>
+    <content><![CDATA[<h4 id="Word-Embedding"><a href="#Word-Embedding" class="headerlink" title="Word Embedding"></a>Word Embedding</h4><p>如果使用1-of-N encoding，每个单词用一个vector表示，那么5个单词就需要5个vector；如果我们把同一个类别的单词都放到那个类里，即属于class1的单词有dog、cat、bird，属于动物类的单词，同理可以得出class2，class3；</p>
+<p>但只做classify是不够的，这些class之间也有一些其他的联系；比如class1属于动物，class3属于植物，他们都是生物，只做classify并不能体现这种联系</p>
+<p>现在我们把每个word都project到一个两个dimension上， 水平的dimension可以是表示生物（class1，class3）和其他类别class2之间的差距，竖直的dimension可以是会动（class2，class3）的和不会动class1之间的差距</p>
+<p>如果现在有10w个单词，1-of-N encoding就需要10w个vector，但word embedding可能只需要50维左右，就可以表示这些所有的word</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611094055907.png" alt="image-20200611094055907" style="zoom:50%;"></p>
+<p>word2vec是一个无监督学习问题，如果network的input为“Apple”，要输出其对应的vector </p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611095916810.png" alt="image-20200611095916810" style="zoom:50%;"></p>
+<h4 id="How-to-exploit-the-context"><a href="#How-to-exploit-the-context" class="headerlink" title="How to exploit the context?"></a>How to exploit the context?</h4><h5 id="Count-based"><a href="#Count-based" class="headerlink" title="Count based"></a>Count based</h5><p><img src="/2020/06/11/Word-Embedding/image-20200611102225747.png" alt="image-20200611102225747" style="zoom:50%;"></p>
+<h5 id="Prediction-based"><a href="#Prediction-based" class="headerlink" title="Prediction-based"></a>Prediction-based</h5><p>根据词义的上下文来了解词义</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611102755128.png" alt="image-20200611102755128" style="zoom:50%;"></p>
+<p><strong>Sharing weight</strong></p>
+<p>$w_{i-1},w_{i-2}$的第一维对应$z_1$，其对应的weight是一样的；同理$w_{i-1},w_{i-2}$的第二维对应$z_1$，其对应的weight是一样的,……，如果每一维对应的weight都不一样，那么实际上就输入了两个vector，</p>
+<p>网络输出每个word为下一个生成word的probability</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611103812991.png" alt="image-20200611103812991" style="zoom:50%;"></p>
+<p>如果我们设置$x_{i-1},x_{i-2}$的长度都是$|V|$，$z$的长度是$|Z|$，那么</p>
+<script type="math/tex; mode=display">
+z=W_1x_{i-2}+W_2x_{i-1}</script><p>其中$W_1=W_2=W$，那么$z=W(x_{i-2}+x_{i-1})$,</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611104833054.png" alt="image-20200611104833054" style="zoom:50%;"></p>
+<p>那么在实际的网络训练中，我们如何保证$W_1=W_2$呢？</p>
+<p>首先需要将$w_1,w_2$初始化为相同的值，那么</p>
+<script type="math/tex; mode=display">
+w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}\\
+w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}</script><p>由于gradient的值不同，$w_1,w_2$在更新一次参数之后就不相等了，必须保证每次更新之后的值还是一样的，因此</p>
+<script type="math/tex; mode=display">
+w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}-\eta \frac{\partial C}{\partial w_j}\\
+w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}-\eta \frac{\partial C}{\partial w_i}</script><p>这样每次更新的值都一样的，也就保证了$w_1=w_2$</p>
+<p><strong>Training</strong></p>
+<p>对于输入“潮水、退了”，我们希望network的输出和“就”越接近越好，即最小化cross entropy</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611103701528.png" alt="image-20200611103701528" style="zoom:50%;"></p>
+<p> <strong>Various Architectures</strong></p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611110004840.png" alt="image-20200611110004840" style="zoom:50%;"></p>
+<p><strong>Result</strong></p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611110430525.png" alt="image-20200611110430525" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>word embedding</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Network Compression</title>
+    <url>/2020/06/27/network-conpression/</url>
+    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
+<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="/2020/06/27/network-conpression/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
+<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="/2020/06/27/network-conpression/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
+<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
+<ul>
+<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
+<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
+</ul>
+<p><img src="/2020/06/27/network-conpression/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
+<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
+<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
+<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
+<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="external">大的network更容易optimize</a></p>
+<p><strong>Lottery Ticket Hypothesis</strong></p>
+<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
+<ul>
+<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
+</li>
+<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
+</li>
+</ul>
+<p><img src="/2020/06/27/network-conpression/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
+<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
+<p><strong>Rethinking the Value of Network Pruning</strong></p>
+<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
+<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
+<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
+<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
+<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
+<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
+<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
+<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
+<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
+<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="/2020/06/27/network-conpression/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
+<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="/2020/06/27/network-conpression/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
+<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
+<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
+<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
+<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
+<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
+<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="/2020/06/27/network-conpression/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
+<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
+<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="/2020/06/27/network-conpression/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
+<p><img src="/2020/06/27/network-conpression/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>network compression</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Generative Models</title>
     <url>/2020/06/29/generative-models/</url>
     <content><![CDATA[<blockquote>
@@ -1117,73 +1184,6 @@ KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href=
         <tag>VAE</tag>
         <tag>GAN</tag>
         <tag>PixelRNN</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Network Compression</title>
-    <url>/2020/06/27/network-conpression/</url>
-    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
-<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="/2020/06/27/network-conpression/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
-<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="/2020/06/27/network-conpression/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
-<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
-<ul>
-<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
-<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
-</ul>
-<p><img src="/2020/06/27/network-conpression/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
-<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
-<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
-<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
-<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="external">大的network更容易optimize</a></p>
-<p><strong>Lottery Ticket Hypothesis</strong></p>
-<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
-<ul>
-<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
-</li>
-<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
-</li>
-</ul>
-<p><img src="/2020/06/27/network-conpression/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
-<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
-<p><strong>Rethinking the Value of Network Pruning</strong></p>
-<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
-<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
-<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
-<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
-<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
-<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
-<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
-<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
-<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
-<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="/2020/06/27/network-conpression/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
-<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="/2020/06/27/network-conpression/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
-<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
-<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
-<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
-<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
-<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
-<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="/2020/06/27/network-conpression/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
-<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
-<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="/2020/06/27/network-conpression/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
-<p><img src="/2020/06/27/network-conpression/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>network compression</tag>
       </tags>
   </entry>
   <entry>
@@ -1451,6 +1451,150 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
       </tags>
   </entry>
   <entry>
+    <title>基于知识图谱和GCN的应用和开发</title>
+    <url>/2020/07/03/%E5%9F%BA%E4%BA%8E%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E5%92%8C%E5%9B%BE%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E5%BC%80%E5%8F%91/</url>
+    <content><![CDATA[<h4 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h4><p>深度学习的主要思想有三个：</p>
+<ul>
+<li><p>权重分配；</p>
+</li>
+<li><p>层级结构：每一层训练的结果都依赖于上一层；</p>
+</li>
+<li><p>欧几里得空间数据：比如图像数据，可以通过二维坐标(x,y)进行表示，语音信号是一个一维的数据，围棋的话也是一个二维数据，目前的大多数数据都是可以用欧几里得空间数据进行表示的，即可以投影到坐标轴上</p>
+</li>
+</ul>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702101528758.png" alt="image-20200702101528758"></p>
+<p>但在实际生活中，有很多数据并不能用欧几里得数据来进行表示，比如在微信上，每个人都相当于一个节点，朋友之间的关系相当于是一条边，相当于图，没有任何的空间信息，是<u>非欧几里得的空间结构</u>（eg. 社交网络、科学网络等） </p>
+<p>那要怎么对这类信息进行训练呢？传统的深度学习方法（CNN和RNN等）并没有办法训练这类数据，因此就产生了图卷积（GCN）</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702103428339.png" alt="image-20200702103428339"></p>
+<h4 id="图卷积背景和基本框架"><a href="#图卷积背景和基本框架" class="headerlink" title="图卷积背景和基本框架"></a>图卷积背景和基本框架</h4><h5 id="图卷积发展历史"><a href="#图卷积发展历史" class="headerlink" title="图卷积发展历史"></a>图卷积发展历史</h5><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104325966.png" alt="image-20200702104325966"></p>
+<h5 id="邻接矩阵"><a href="#邻接矩阵" class="headerlink" title="邻接矩阵"></a>邻接矩阵</h5><p>无向图的邻接矩阵是对角矩阵</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104743073.png" alt="image-20200702104743073"></p>
+<h5 id="图卷积基本框架"><a href="#图卷积基本框架" class="headerlink" title="图卷积基本框架"></a>图卷积基本框架</h5><p>在下图中，A为邻接矩阵，H为特征矩阵（$N\times F$），，N为节点个数，F表示每个节点的特征数；比如我们每个人在社交网络中都是一个节点，也有一些对应的特征，名字、年龄、出生日期，这些特征就构成了这个特征矩阵$N\times F$；</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104938456.png" alt="image-20200702104938456"></p>
+<p>在这个基本框架中，input为邻接矩阵A，第一个hidden layer把特征矩阵点乘到每一个节点上进行训练，再进入下一层，再进行点乘，…，一直不断重复这个过程。每次训练更新的参数是特征矩阵，最后的output和input是一样的，图结构没有发生变化，但特征矩阵达到了收敛（基本上不会发生变化），最后再对图中的每个节点进行分类；</p>
+<p><span style="color: red">把节点和特征矩阵进行点乘，就实现了信息在节点和社区间进行传递</span></p>
+<h4 id="图卷积"><a href="#图卷积" class="headerlink" title="图卷积"></a>图卷积</h4><p>那么下面我们将具体介绍节点和特征矩阵是怎样进行点乘的，怎样一步步进行训练。</p>
+<h5 id="回顾CNN"><a href="#回顾CNN" class="headerlink" title="回顾CNN"></a>回顾CNN</h5><p>我们先回顾一下CNN是如何做卷积操作的，如下图所示，</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702110939157.png" alt="image-20200702110939157"></p>
+<h5 id="图卷积-1"><a href="#图卷积-1" class="headerlink" title="图卷积"></a>图卷积</h5><p>这是卷积操作的参数更新公式，</p>
+<script type="math/tex; mode=display">
+h_i^{l+1}=\sigma(W_0^{(l)}h_0^{(l)}+W_1^{(l)}h_1^{(l)}+\cdot\cdot\cdot+W_8^{(l)}h_8^{(l)})</script><p>图卷积相比较于卷积，在$h_0^{(l)}W_0^{(l)}$的基础上，多了邻接矩阵的信息$\frac{1}{c_{ij}}h_j^{(l)}$，<span style="color: red">权重矩阵W也没有卷积操作那么重要</span>，其参数更新公式为，</p>
+<script type="math/tex; mode=display">
+h_i^{l+1}=\sigma(h_0^{(l)}W_0^{(l)} + 
+\sum_{j\in N_i} \frac{1}{c_{ij}}h_j^{(l)}W_1^{(l)})</script><p>更新参数的时候，通过周围的节点来更新该节点（下图中红色节点），与该节点不直接相连的节点无关</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702111915112.png" alt="image-20200702111915112"></p>
+<p>那么我们就可以通过以下公式来更新特征矩阵，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde AH^{(l)}W^{(l)})</script><p>其中A为邻接矩阵，H为特征矩阵，W为权重矩阵，本次的特征矩阵$H^{(l+1)}$根据上一次的特征矩阵$H^{(l)}$生成；</p>
+<p>如果只根据邻接矩阵来更新H，会出现一些问题：</p>
+<ul>
+<li>无法提取自身信息，邻接矩阵对角线上的元素始终是0（如果没有自环），自身的信息在训练过程中是无法考虑进去的；</li>
+<li>$\tilde A$没有归一化</li>
+</ul>
+<p>我们需要把参数更新公式进行一些变化，首先解决邻接矩阵对角线元素为0的问题，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma((\tilde D-\tilde A)H^{(l)}W^{(l)})</script><p><span style="color: red">其中</span>矩阵$\tilde D$是一个对角矩阵（degree matrix），对角线上的数值表示了每个节点所相连的边数。</p>
+<p>归一化处理主要列出两种方式，要根据不同的输入数据来进行选择，其中第一种归一化方式比较常用</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)\\
+H^{(l+1)}=\sigma(\tilde D^{-1}(\tilde D-\tilde A)\tilde H^{(l)}W^{(l)})</script><h5 id="图卷积的计算"><a href="#图卷积的计算" class="headerlink" title="图卷积的计算"></a>图卷积的计算</h5><p>下面我们将一个具体的例子来讲述公式(1),</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702114057283.png" alt="image-20200702114057283"></p>
+<p>在上图中，degree matrix表示了每个节点所相连的边数，比如2表示1号节点相连的边有2条，该对角矩阵也就是前文提到的$\tilde D$，$(\tilde D-\tilde A)$就是laplacian matrix；</p>
+<p>我们将特征矩阵$H_0$和权重矩阵W进行随机初始化，再代入公式(1)，即可得出训练完成的结果$H_N$，再求出每一列的最大值，即MaxValue$(H(i))=[1,1,4,1,1,4]$，即分类结果，其中第1，2，4，5个节点分类为1，第3，6个节点分类为4，把整个图的节点分成了两类；</p>
+<p>那么为什么可以这样分类呢？我们可以回到原图labeled graph中，节点1，2，5相当于是一个全连接图，可以当作一个类别，而节点4，5都和三个节点相连，有三条边，也可以当作是一个类别；节点3，6就没有前几个节点那样关系比较紧密，因此被分成了第二个类别</p>
+<p>我们可以得出以下两点：</p>
+<ul>
+<li>对于随机产生的特征矩阵，依靠图自身的结构，就可以得到一个很好的分类效果；</li>
+<li>在这个例子中，进行10次运算，特征矩阵就收敛了，收敛速度非常快</li>
+</ul>
+<p>再来回顾下这个核心公式，所有的图卷积的变化和应用都离不开这个公式。W不那么重要，特征矩阵$H^{(l)}$表示每个人根据自己的实际特征来进行特征提取；邻接矩阵$\tilde A$表示每个人（节点）之间的关系，关系不一样就会构建出不同的图</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)</script><p><span style="color: red">那么我们要在图卷积进行创新的话，就只有改变邻接矩阵A和特征矩阵H，即如何新建这个图、如何提取这个特征；由于机器学习和深度学习技术的不断发展，特征提取的方法已经非常成熟，<u>关键的创新点还是如何新建这个图</u></span></p>
+<h5 id="边信息嵌入"><a href="#边信息嵌入" class="headerlink" title="边信息嵌入"></a>边信息嵌入</h5><p>图中的边信息有时候是包含权重的，我们也应该把边的信息值也考虑进去，即把原图转化为一个线图；在下图中，原图中节点为i，j，m，边为a，b，c，转化为线图后，节点变成a，b，c，边为i，j，m，把边变成了点，把点变成了边</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702122014466.png" alt="image-20200702122014466"></p>
+<p>经过两次不同的输入$h_{(i,j)}^l,h_j^{l+1}$，分别对应原图和线图，这样训练就可以把边的信息也整合进去</p>
+<h5 id="Example-1-半监督图分类"><a href="#Example-1-半监督图分类" class="headerlink" title="Example 1: 半监督图分类"></a>Example 1: 半监督图分类</h5><p>在下图中，黑色圈点表示已经知道了分类的类别，其他的没有被黑色线条包围的点表示没有进行分类，目标是预测未分类的节点的类别，这里我们还定义了一个损失函数L，Z表示GCN的输出结果（上文的公式(1)）</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702123720321.png" alt="image-20200702123720321"></p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124159182.png" alt="image-20200702124159182"></p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124253302.png" alt="image-20200702124253302"></p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124330022.png" alt="image-20200702124330022"></p>
+<p>得到实验结果，</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124418966.png" alt="image-20200702124418966"></p>
+<h5 id="Example-2-科学家网络"><a href="#Example-2-科学家网络" class="headerlink" title="Example 2: 科学家网络"></a>Example 2: 科学家网络</h5><p>每篇论文都会有一个题目，互相引用这篇论文则会形成一个关系，我们的任务是根据论文的题目来预测论文的类别（统计、物理、数学）</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124600168.png" alt="image-20200702124600168"></p>
+<p>这个例子只用了2层的GCN，其中$\hat AXW^{(0)}$表示第一层，$\hat A \ {\rm ReLU}(\hat AXW^{(0)})W^{(1)}$表示第二层，再输入softmax函数，整个训练过程更新的参数是X，从表格中的数据也可以看出，GCN取得了非常不错的效果</p>
+<h4 id="基于知识图谱的图卷积"><a href="#基于知识图谱的图卷积" class="headerlink" title="基于知识图谱的图卷积"></a>基于知识图谱的图卷积</h4><h5 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h5><blockquote>
+<p>知识图谱是Google用于增强其搜索引擎功能的知识库。本质上, 知识图谱旨在描述真实世界中存在的各种实体或概念及其关系,其构成一张巨大的语义网络图，节点表示实体或概念，边则由属性或关系构成。现在的知识图谱已被用来泛指各种大规模的知识库。 </p>
+</blockquote>
+<p>如果你输入搜索引擎中国这个词，相应的会出来中国的一些特征，比如中国的城市、国土面积、人口等；中国和国家都可以看作是图中的一个节点，中国和国家的关系就可以看作是一条边</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702145803375.png" alt="image-20200702145803375"></p>
+<h5 id="图卷积：知识图谱"><a href="#图卷积：知识图谱" class="headerlink" title="图卷积：知识图谱"></a>图卷积：知识图谱</h5><p>先把数据用图表示出来，用户为U，实体为V，$y_{uv}=1$则表示用户u和实体v之间有联系，比如我对电影很感兴趣；每个实体u之间会有关系r，比如电影和教父；</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702150629999.png" alt="image-20200702150629999"></p>
+<p>将图卷积应用到知识图谱，可以用以下公式来进行更新，不断更新特征矩阵H直至其收敛即可，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D_u^{-\frac{1}{2}}\tilde A_u\tilde D_u^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad</script><p>那么我们怎么把实体推荐给用户呢？我们又怎么知道用户是不是对这个实体感兴趣呢？</p>
+<p>（1）我们可以针对每个用户再新建一个图，先引入一个函数$S_u(\cdot)$，表示这条边（关系）对用户的重要性；</p>
+<p>（2）再把原来的实体矩阵变成一个有权重的矩阵，比如边$r_1$输入函数$S_u(\cdot)$，得到$S_u(r_1)$，就是新的关系值。<u>每个用户都有一个邻接矩阵，再对每个用户的邻接矩阵进行训练，就可以得出用户到底对哪个电影感兴趣</u>；</p>
+<p>（3）图卷积；</p>
+<p>（4）<strong>标签顺滑</strong>，比如对于一个动物，机器可以很自信地确定这个动物到底是猫还是狗，输出值只有0或者1；由于机器过于自信，可能会导致很多额外的误差，我们现在就可以把这个值改成0.1或者0.9，就可以得到更好的结果。</p>
+<p>总结：先新建一个图（knowledge graph，KG），再把用户对感兴趣的实体新建一个权重矩阵，再进行图卷积和标签顺滑。那么现在我们的损失函数就有了一些小变化，结合了图卷积和标签顺滑，即</p>
+<script type="math/tex; mode=display">
+L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702153035542.png" alt="image-20200702153035542"></p>
+<p>下面我们将简要叙述这个训练的过程，图中的水平虚线表示decision boundary：</p>
+<p>（a）其中蓝色的点表示用户感兴趣的点（observed）；在其下方有一些其他的点（unobserved），我们希望把黄色的点（被黄色方框围住）就推荐给用户，让用户去选择，而剩下蓝色的点，则是用户不感兴趣的，不推荐给用户；</p>
+<p>（b）一共要进行两层的训练，对于第一层的训练结果，我们现在把其中两个黄色的点就推荐给用户了；</p>
+<p>（c）对于第二层的训练结果，就把其中的三个点推荐给用户了，但最左端的点也在decision boundary之上，也会被推荐给用户，模型在训练过程中会存在一定的误差，</p>
+<p>（d）这里就开始对第二个用户的模型进行训练；</p>
+<p>（e）这是加入了标签顺滑（label smoothing）的结果，推荐会更加精准，在图中，我们可以看到用户不感兴趣的点进行下移，用户感兴趣的点（a图中的黄色方框部分）则上移，尽量移到decision boundary之上</p>
+<h5 id="Label-Smoothing-Regularization"><a href="#Label-Smoothing-Regularization" class="headerlink" title="Label Smoothing Regularization"></a>Label Smoothing Regularization</h5><p>（1）在下图的能量方程中，$l_u(e_i)$表示用户u是否对实体$e_i$感兴趣（值为0或1），能量方程可以把相同的label保存下来，把不同的label就去掉了；（2）再找到使得能量方程取得最小值的$l_u^<em>$；（3）再通过KL距离函数求得$y_{uv}$和$\hat l_u^</em>(v)$之间的相似度，也是求最小值，可得$R(A)$，再代入损失函数</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702155919603.png" alt="image-20200702155919603"></p>
+<p>$\lambda$可以不断做调整，来找到损失函数的最小值</p>
+<h5 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h5><p>输入为知识图谱G，新建一个邻接矩阵M后；（2）再把用户对感兴趣的实体新建一个权重矩阵（输入mapping函数S），再进行图卷积更新特征矩阵，即$e_u^{(i)}\leftarrow \sigma (\cdot)$；（3）标签顺滑，更新$l_u^{(i)}(e)$，再代入损失函数中的 J；不断地进行这个过程，只到损失函数收敛为止</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702162309077.png" alt="image-20200702162309077"></p>
+<h5 id="结果演示"><a href="#结果演示" class="headerlink" title="结果演示"></a>结果演示</h5><p>下图是几种推荐算法的比较，推荐给用户Top-K的实体，看最后的准确率如何，可以发现GCN的结构取得了非常不错的效果。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702163653325.png" alt="image-20200702163653325"></p>
+<p>下面是一些可视化的对比，图1是推荐食物，可以看到GCN的结构取得了很好的效果；图2表示取不同的$\lambda$，得到的$R(A_u)$的值；图三对比了不同算法的运行速度，可以看到KGCN用时最少，速度最快</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702163938245.png" alt="image-20200702163938245"></p>
+<h4 id="研究方向"><a href="#研究方向" class="headerlink" title="研究方向"></a>研究方向</h4><h5 id="人体姿势识别"><a href="#人体姿势识别" class="headerlink" title="人体姿势识别"></a>人体姿势识别</h5><p> 人体的关节就可以看作是一个节点，关节之间的骨骼就可以看作是边，结合起来就是一张图；</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702165243019.png" alt="image-20200702165243019"></p>
+<p>核心框架：输入为一个视频，视频的每个时间序列都是一张图像，每一帧的视频取出来就是一张图像；把每一帧的图像先构建成一个骨骼和关节点图，再通过时间的顺序把每一帧对应的关节点都连接起来，形成一张大图，再输入GCN进行训练，通过分类器识别出这是一个跑步的动作。</p>
+<p>在上图中的左下角中，横轴表示每一帧的骨骼图，纵轴表示时间，把相应的骨骼节点连接起来，变成一张大图，再输入GCN进行训练。</p>
+<p>下图为实验结果，</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702170313601.png" alt="image-20200702170313601"></p>
+<h5 id="超图"><a href="#超图" class="headerlink" title="超图"></a>超图</h5><p>超图是图的一个基本概念，下图中的图有8个点，选择不同的点，可以有多种排列组合。如果选一个点，一共有个点可以选择，那么就有8种（$C_n^1$）组合。如果我选两个点，比如$n_3,n_8$，这两个点构成一个子图，就有6种（$C_n^2$）组合。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702170734267.png" alt="image-20200702170734267"></p>
+<p>选出不同的点后，得到不同的邻接矩阵，再进行训练。每一层选出不同组合的邻接矩阵再输入GCN进行图卷积。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093426889.png" alt="image-20200703093426889"></p>
+<p>超图卷积的核心公式就是下图中的公式(11)</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093638629.png" alt="image-20200703093638629"></p>
+<h5 id="图构建"><a href="#图构建" class="headerlink" title="图构建"></a>图构建</h5><p>对于给定的数据，新建图之后再输入GCN进行分类，我们要怎么画成一张图呢？</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093921828.png" alt="image-20200703093921828"></p>
+<p>在上图中，observed dynamics表示5个分子的运动轨迹图，我们的目标是构建新图，并预测分子的下一步轨迹；对于人体的动作，我们也得通过学习才能知道，到底是以左手还是右手为重心。</p>
+<p>在下图中，展示了图构建的大概过程，编码器和解码器都是GCNs。对于编码器部分，先进行了从边到节点($v\rightarrow e$)的过程，再从节点到边($e\rightarrow v$)，再从边到节点($v\rightarrow e$)；对于解码器，先从边到点，再从点到边，进行图卷积，最后再进行分类，得到下一步的运动轨迹。</p>
+<p>其中x表示节点，z表示x这个点与i、j相连的概率，z是一个概率分布。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703095234400.png" alt="image-20200703095234400"></p>
+<p>预测下一步运动轨迹：在下图中，我们可以看出预测图和真实值之间差距并不大，</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703100157533.png" alt="image-20200703100157533"></p>
+<h5 id="子图嵌入"><a href="#子图嵌入" class="headerlink" title="子图嵌入"></a>子图嵌入</h5><p>在原来的GCN中，我们每次只会考虑一个点；如果我们现在把多个点（关联性很大的点）表示成一个点，再输入GCN，效果会不会更好呢？这也是一个很火的研究方向。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703101250920.png" alt="image-20200703101250920"></p>
+<h4 id="场景应用"><a href="#场景应用" class="headerlink" title="场景应用"></a>场景应用</h4><h5 id="用户推荐系统"><a href="#用户推荐系统" class="headerlink" title="用户推荐系统"></a>用户推荐系统</h5><p>在搜索中推荐相关联的朋友给你。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102812106.png" alt="image-20200703102812106"></p>
+<h5 id="舆情监控和控制"><a href="#舆情监控和控制" class="headerlink" title="舆情监控和控制"></a>舆情监控和控制</h5><p>每个国家都需要舆情监控，比如关于假消息和真消息的分类或者监控，在网络传播过程中找到假消息源，进行封锁等，用GCN都可以起到很好的作用。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102736481.png" alt="image-20200703102736481"></p>
+<h5 id="自动驾驶"><a href="#自动驾驶" class="headerlink" title="自动驾驶"></a>自动驾驶</h5><p>所有的车都有一个车载系统，每个车载系统之间进行联网，就可以构成非常大的图。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102850234.png" alt="image-20200703102850234"></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703103300945.png" alt="image-20200703103300945"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>知识图谱</tag>
+        <tag>GCN</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>多处理机</title>
     <url>/2020/03/11/%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA/</url>
     <content><![CDATA[<h5 id="计算机分类"><a href="#计算机分类" class="headerlink" title="计算机分类"></a>计算机分类</h5><ul>
@@ -1533,6 +1677,46 @@ S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（M
         <tag>SMP</tag>
         <tag>消息传递</tag>
         <tag>共享存储器</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>流水线</title>
+    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
+    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
+<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
+<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
+<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
+<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
+<li>需要有<u>通过时间与排空时间</u></li>
+</ul>
+<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
+<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
+<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
+<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
+<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
+<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
+<ul>
+<li><p>从前调度</p>
+</li>
+<li><p>从目标处调度</p>
+</li>
+<li><p>从失败出调度</p>
+</li>
+</ul>
+<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
+<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
+<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
+<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>软件工程</category>
+      </categories>
+      <tags>
+        <tag>流水线</tag>
+        <tag>吞吐率</tag>
+        <tag>加速比</tag>
+        <tag>效率</tag>
       </tags>
   </entry>
   <entry>
@@ -1711,46 +1895,6 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
         <tag>gradient descent</tag>
         <tag>adagrad</tag>
         <tag>SGD</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>流水线</title>
-    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
-    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
-<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
-<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
-<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
-<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
-<li>需要有<u>通过时间与排空时间</u></li>
-</ul>
-<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
-<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
-<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
-<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
-<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
-<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
-<ul>
-<li><p>从前调度</p>
-</li>
-<li><p>从目标处调度</p>
-</li>
-<li><p>从失败出调度</p>
-</li>
-</ul>
-<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
-<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
-<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
-<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>软件工程</category>
-      </categories>
-      <tags>
-        <tag>流水线</tag>
-        <tag>吞吐率</tag>
-        <tag>加速比</tag>
-        <tag>效率</tag>
       </tags>
   </entry>
   <entry>
