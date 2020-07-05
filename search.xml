@@ -1,6 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Attack and Defense</title>
+    <url>/2020/06/26/Attack/</url>
+    <content><![CDATA[<h4 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h4><p><img src="/2020/06/26/Attack/image-20200626095005396.png" alt="image-20200626095005396" style="zoom:50%;"></p>
+<h4 id="What-do-we-want-to-do"><a href="#What-do-we-want-to-do" class="headerlink" title="What do we want to do?"></a>What do we want to do?</h4><p>attack要做的事就是把找到原图片$x^0$对应的$x’$</p>
+<p><img src="/2020/06/26/Attack/image-20200626095352498.png" alt="image-20200626095352498" style="zoom:50%;"></p>
+<h4 id="Loss-Function-for-Attack"><a href="#Loss-Function-for-Attack" class="headerlink" title="Loss Function for Attack"></a>Loss Function for Attack</h4><p><strong>Training</strong>：network训练得出的结果$y^0$必须和$y^{true}$越接近越好，此时的loss function为$L_{train}(\theta)=C(y^0,y^{true})$，<u>输入的$x$是固定的</u>，需要不断调整$\theta$的值，使得$L_{train}(\theta)$取得最小值；</p>
+<p><strong>Non-targeted Attack</strong>：如果我们需要attack一个network，此时network的输出$y’$和$y^{true}$应该越大越好，此时的loss function为$L(x’)=-C(y’,y^{true})$，前面多了一个负号。此时的<u>network中的参数$\theta$是固定的</u>，需要不断调整输入$x’$，使network的输出$y’$和$y^{true}$的差距尽量远；</p>
+<p><strong>Targeted Attack</strong>：如果我们不仅想要$y’,y^{true}$之间的距离尽量远，还想使$y’,y^{false}$之间的距离尽量近，就需要使用targeted attack；此时的loss function为$L(x’)=-C(y’,y^{true})+C(y’,y^{false})$</p>
+<p><img src="/2020/06/26/Attack/image-20200626095914128.png" alt="image-20200626095914128" style="zoom:50%;"></p>
+<p>不仅需要限制输出之间的差异，还需要限制输入$x^0,x’$之间的差异，只有这输入之间的差异d小于$\epsilon$，我们才可以认为$x’$是与$x^0$相似的，才达到了attack 一个network的目的，即使输入尽可能具有迷惑性，从而使网络输出错误的结果</p>
+<h4 id="Constraint"><a href="#Constraint" class="headerlink" title="Constraint"></a>Constraint</h4><p>那么我们怎么计算d呢？</p>
+<p>有以下两种主要的方法：</p>
+<ul>
+<li>L2-norm，为$x^0,x’$之间每个像素差异的平方和；</li>
+<li>L-infinity，为$x^0,x’$之间每个像素差异的最大值</li>
+</ul>
+<p>如果我们改变图中的每个pixel，另外一幅图只改变其中一个pixel，使得这两者之间的L2-norm是一样的，但第二种方式得出的L-infinity更大</p>
+<p><img src="/2020/06/26/Attack/image-20200626102113579.png" alt="image-20200626102113579" style="zoom:50%;"></p>
+<h4 id="How-to-Attack"><a href="#How-to-Attack" class="headerlink" title="How to Attack"></a>How to Attack</h4><p>就像我们训练一个neural network一样，但需要训练的参数是$x’$，此时就需要找到一个参数$x^*$，来最小化$L(x’)$，限制条件是$d(x^0,x’)\leq\epsilon$</p>
+<script type="math/tex; mode=display">
+x^*=arg\mathop{min}_\limits {d(x^0,x')\leq\epsilon}L(x')</script><p>这里我们也使用了gradient descent算法，只是此时需要调整的参数变成了$x^t$</p>
+<p><img src="/2020/06/26/Attack/image-20200626103758330.png" alt="image-20200626103758330" style="zoom:50%;"></p>
+<p>当$d(x^0,x^t)&gt;\epsilon$时，就需要更新这个参数了，使用$fix(x^t)$来更新</p>
+<p><img src="/2020/06/26/Attack/image-20200626123032000.png" alt="image-20200626123032000" style="zoom:50%;"></p>
+<p>更新的参数需要满足一定的条件，</p>
+<ul>
+<li>如果使用L2-norm，必须选择在差值在半径以内的参数，超过了这个半径，就设为$\epsilon $；</li>
+<li>如果使用L-infinity，现在超过了这个方形的区域，就必须想办法把它拉回来，在y轴方向超过了$\epsilon$，就把值设为$\epsilon$；在x轴方向超过了$\epsilon$，就把值设为$\epsilon$</li>
+</ul>
+<p><img src="/2020/06/26/Attack/image-20200626123713569.png" alt="image-20200626123713569" style="zoom:50%;"></p>
+<h4 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h4><p>如果我们现在要attack一个network，其真实类别为Tiger cat，但attack之后的network认为这是star fish</p>
+<p><img src="/2020/06/26/Attack/image-20200626161331898.png" alt="image-20200626161331898" style="zoom:50%;"></p>
+<p>由于这两者之间的差异很小，很难识别，这里我们将差值x50来进行展示</p>
+<p><img src="/2020/06/26/Attack/image-20200626161942541.png" alt="image-20200626161942541" style="zoom:50%;"></p>
+<p>可能猫和猫之间是比较类似的，这里我们将attack的target设置为keyboard，该network认为这是keyboard的概率为0.98</p>
+<p><img src="/2020/06/26/Attack/image-20200626162037439.png" alt="image-20200626162037439" style="zoom:50%;"></p>
+<p>如果我们再对图片加入噪声，network认为这是Persian cat，再继续加入噪声，我们都快分辨不出这张图是一只猫了，network就认为这是fire screen</p>
+<p><img src="/2020/06/26/Attack/image-20200626162150972.png" alt="image-20200626162150972" style="zoom:50%;"></p>
+<p>我们假设$x_0$是在高维平面上的一个点，沿着任意方向随机移动，我们可以看到在接近$x^0$ 的时候，是 tiger cat（正确分类）的可能性是很高的，但如果再移动多一点，是Persian cat和Egyptian cat的可能性是很高的 </p>
+<p>上述说的是随机方向进行移动，如果图片是225*225pixel的，那么就是5万多个高维的方向，现在我们选取其中几个特定的方向。在这几个特定的方向中，$x^0$可变化的范围就变得非常狭窄，$x^0$稍微变化一下，network输出为另一个类别（key board）的可能性就很高</p>
+<p><img src="/2020/06/26/Attack/image-20200626163736373.png" alt="image-20200626163736373" style="zoom:50%;"></p>
+<h4 id="Attack-Approaches"><a href="#Attack-Approaches" class="headerlink" title="Attack Approaches"></a>Attack Approaches</h4><ul>
+<li><p>FGSM (<a href="https://arxiv.org/abs/1412.6572" target="_blank" rel="external">https://arxiv.org/abs/1412.6572</a>)</p>
+</li>
+<li><p>Basic iterative method (<a href="https://arxiv.org/abs/1607.02533" target="_blank" rel="external">https://arxiv.org/abs/1607.02533</a>) </p>
+</li>
+<li><p>L-BFGS (<a href="https://arxiv.org/abs/1312.6199" target="_blank" rel="external">https://arxiv.org/abs/1312.6199</a>)</p>
+</li>
+<li>Deepfool (<a href="https://arxiv.org/abs/1511.04599" target="_blank" rel="external">https://arxiv.org/abs/1511.04599</a>)</li>
+<li>JSMA (<a href="https://arxiv.org/abs/1511.07528" target="_blank" rel="external">https://arxiv.org/abs/1511.07528</a>)</li>
+<li>C&amp;W (<a href="https://arxiv.org/abs/1608.04644" target="_blank" rel="external">https://arxiv.org/abs/1608.04644</a>)</li>
+<li>Elastic net attack (<a href="https://arxiv.org/abs/1709.04114" target="_blank" rel="external">https://arxiv.org/abs/1709.04114</a>)</li>
+<li>Spatially Transformed (<a href="https://arxiv.org/abs/1801.02612" target="_blank" rel="external">https://arxiv.org/abs/1801.02612</a>) </li>
+<li>One Pixel Attack (<a href="https://arxiv.org/abs/1710.08864" target="_blank" rel="external">https://arxiv.org/abs/1710.08864</a>)</li>
+<li>…… only list a few</li>
+</ul>
+<p>虽然有很多方法都可以用来attack network，但这些方法的主要区别在于使用了不同的constrains，或者使用了不同的optimization methods</p>
+<p><img src="/2020/06/26/Attack/image-20200626170309446.png" alt="image-20200626170309446" style="zoom:50%;"></p>
+<p>我们先介绍一下<strong>FGSM</strong>，对于第一维，如果$\frac{\partial L}{\partial x_1}$是大于0的值，那么$\Delta x_1=sign(\frac{\partial L}{\partial x_1})=+1$；如果对于第二维，如果$\frac{\partial L}{\partial x_2}$是小于0的值，不管值多大，都得出$\Delta x_2=sign(\frac{\partial L}{\partial x_2})=-1$；即对于$x^0$的所有维，要么$+\epsilon$，要么$-\epsilon$，即可得到最好的结果$x^*$</p>
+<p><img src="/2020/06/26/Attack/image-20200626171523647.png" alt="image-20200626171523647" style="zoom:50%;"></p>
+<p>FGSM使用L-infinity作为distance constrain，如果gradient指向左下角，那么$x^<em>$就在方框的右上角；如果gradient指向左上角，那么$x^</em>$就在方框的右下角；因此，在FGSM里面，我们只在意gradient的方向，不在意其具体的大小 </p>
+<p>那么FGSM到底是怎么运作的呢？</p>
+<p>我们可以看作FGSM是使用了非常大的一个learning rate，使x飞出了方形区域，由于L-infinity的限制，输出会被限制到方形区域内部，即$x^*$在方形区域的右上角</p>
+<p><img src="/2020/06/26/Attack/image-20200626174020656.png" alt="image-20200626174020656" style="zoom:60%;"></p>
+<h4 id="White-Box-v-s-Black-Box"><a href="#White-Box-v-s-Black-Box" class="headerlink" title="White Box v.s. Black Box"></a>White Box v.s. Black Box</h4><p>在之前的attack中，我们假设已经知道了network的参数$\theta$，目标是找到最优化的$x’$，这种attack就称为<strong>White Box</strong></p>
+<p>但在大多数的情况中，我们都不知道network的参数，但也需要去attack这个network，这就是<strong>Black Box</strong></p>
+<h4 id="Black-Box-Attack"><a href="#Black-Box-Attack" class="headerlink" title="Black Box Attack"></a>Black Box Attack</h4><p>如果我们现在已经知道了black network的training data，那么我们就可以用同样的training data来训练一个proxy network，再生成attacked object，如果能过成功attack新的proxy network，那么我们就可以把这个object也作为black network的输入，也可以attack成功</p>
+<p>如果不能得到相应的training data，network如果是一个在线版本，我们可以输入大量的图片，得出相对应的分类结果，从而可以组合成相对应的训练资料，来得出proxy network</p>
+<p><img src="/2020/06/26/Attack/image-20200626174930630.png" alt="image-20200626174930630" style="zoom:50%;"></p>
+<p>也有一些实验数据证明黑箱攻击是有可能成功的，现在假设Black Box有五种，现在我们来训练proxy network，我们用ResNet-152生成的图片，如果black box的network也是ResNet-152，那么attack成功的几率就会非常高，表格中的4%表示系统辨识的准确率</p>
+<p><img src="/2020/06/26/Attack/image-20200626175459885.png" alt="image-20200626175459885" style="zoom:50%;"></p>
+<h4 id="Attack-in-the-Real-World"><a href="#Attack-in-the-Real-World" class="headerlink" title="Attack in the Real World"></a>Attack in the Real World</h4><p><img src="/2020/06/26/Attack/image-20200626183115909.png" alt="image-20200626183115909" style="zoom:50%;"></p>
+<p><img src="/2020/06/26/Attack/image-20200626183139180.png" alt="image-20200626183139180" style="zoom:50%;"></p>
+<h4 id="Defense"><a href="#Defense" class="headerlink" title="Defense"></a>Defense</h4><p><img src="/2020/06/26/Attack/image-20200626183341651.png" alt="image-20200626183341651" style="zoom:50%;"></p>
+<h5 id="Passive-defense"><a href="#Passive-defense" class="headerlink" title="Passive defense"></a>Passive defense</h5><p><img src="/2020/06/26/Attack/image-20200626183453090.png" alt="image-20200626183453090" style="zoom:50%;"></p>
+<p>这个filter可以是smoothing，对于原来输入的attack图片network认为其是keyboard，经过smoothing之后，network就认为是tiger cat了，是正确的分类结果</p>
+<p>Q：那么为什么smoothing可以达到这种效果呢？</p>
+<p>A：只有某几种方向上的的信号可以使attack成功。如果使用了smoothing这种filter，就把这几种信号改变了，那么attack就失效了 ；加上smoothing并不会伤害原来的图片，所以network仍然可以得出正确的结果</p>
+<p><img src="/2020/06/26/Attack/image-20200626183523115.png" alt="image-20200626183523115" style="zoom:50%;"></p>
+<p>根据这种思想，有学者就提出了feature squeeze</p>
+<p>对于同一个input，我们先得出model的输出结果$Prediction_0$，再根据$Squeeze_1，Squeeze_2$得出结果$Prediction_1,Prediction_2$，如果$Prediction_0$和$Prediction_1,Prediction_2$之间的差值d很大，那么我们就可以认为input是来attack的</p>
+<p><img src="/2020/06/26/Attack/image-20200626184313560.png" alt="image-20200626184313560" style="zoom:50%;"></p>
+<p>还有另外一种方法</p>
+<p><img src="/2020/06/26/Attack/image-20200626184847976.png" alt="image-20200626184847976" style="zoom:50%;"></p>
+<h5 id="Proactive-defense"><a href="#Proactive-defense" class="headerlink" title="Proactive defense"></a>Proactive defense</h5><p>首先我们通过某种算法找出漏洞，找到相应的adversarial input，再把这些input和之前的training data一起作为新的input data，输入network，相当于进行了data augmentation，这个过程进行T次，每次的input data都是不一样的</p>
+<p><img src="/2020/06/26/Attack/image-20200626185155952.png" alt="image-20200626185155952" style="zoom:50%;"></p>
+<p>如果attacker知道了我们是使用算法A来进行模拟，那么attacker可以使用算法B来进行attack，那么我们的network并不能抵御这种attack</p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Attack and Defense</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Anomaly Detection</title>
     <url>/2020/07/03/Anomaly-detection/</url>
     <content><![CDATA[<h4 id="Problem-Formulation"><a href="#Problem-Formulation" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h4><p>对于给定的训练数据集，做异常检测的目的是找到一个函数，这个函数可以检测输入的x是不是和训练数据集相似的。异常检测知识检测出和训练数据不一样的输入，检测出来的数据并不一定都是不好的，有可能是好的，也有可能是不好的。</p>
@@ -104,103 +201,6 @@ L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^
       </tags>
   </entry>
   <entry>
-    <title>Attack and Defense</title>
-    <url>/2020/06/26/Attack/</url>
-    <content><![CDATA[<h4 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h4><p><img src="/2020/06/26/Attack/image-20200626095005396.png" alt="image-20200626095005396" style="zoom:50%;"></p>
-<h4 id="What-do-we-want-to-do"><a href="#What-do-we-want-to-do" class="headerlink" title="What do we want to do?"></a>What do we want to do?</h4><p>attack要做的事就是把找到原图片$x^0$对应的$x’$</p>
-<p><img src="/2020/06/26/Attack/image-20200626095352498.png" alt="image-20200626095352498" style="zoom:50%;"></p>
-<h4 id="Loss-Function-for-Attack"><a href="#Loss-Function-for-Attack" class="headerlink" title="Loss Function for Attack"></a>Loss Function for Attack</h4><p><strong>Training</strong>：network训练得出的结果$y^0$必须和$y^{true}$越接近越好，此时的loss function为$L_{train}(\theta)=C(y^0,y^{true})$，<u>输入的$x$是固定的</u>，需要不断调整$\theta$的值，使得$L_{train}(\theta)$取得最小值；</p>
-<p><strong>Non-targeted Attack</strong>：如果我们需要attack一个network，此时network的输出$y’$和$y^{true}$应该越大越好，此时的loss function为$L(x’)=-C(y’,y^{true})$，前面多了一个负号。此时的<u>network中的参数$\theta$是固定的</u>，需要不断调整输入$x’$，使network的输出$y’$和$y^{true}$的差距尽量远；</p>
-<p><strong>Targeted Attack</strong>：如果我们不仅想要$y’,y^{true}$之间的距离尽量远，还想使$y’,y^{false}$之间的距离尽量近，就需要使用targeted attack；此时的loss function为$L(x’)=-C(y’,y^{true})+C(y’,y^{false})$</p>
-<p><img src="/2020/06/26/Attack/image-20200626095914128.png" alt="image-20200626095914128" style="zoom:50%;"></p>
-<p>不仅需要限制输出之间的差异，还需要限制输入$x^0,x’$之间的差异，只有这输入之间的差异d小于$\epsilon$，我们才可以认为$x’$是与$x^0$相似的，才达到了attack 一个network的目的，即使输入尽可能具有迷惑性，从而使网络输出错误的结果</p>
-<h4 id="Constraint"><a href="#Constraint" class="headerlink" title="Constraint"></a>Constraint</h4><p>那么我们怎么计算d呢？</p>
-<p>有以下两种主要的方法：</p>
-<ul>
-<li>L2-norm，为$x^0,x’$之间每个像素差异的平方和；</li>
-<li>L-infinity，为$x^0,x’$之间每个像素差异的最大值</li>
-</ul>
-<p>如果我们改变图中的每个pixel，另外一幅图只改变其中一个pixel，使得这两者之间的L2-norm是一样的，但第二种方式得出的L-infinity更大</p>
-<p><img src="/2020/06/26/Attack/image-20200626102113579.png" alt="image-20200626102113579" style="zoom:50%;"></p>
-<h4 id="How-to-Attack"><a href="#How-to-Attack" class="headerlink" title="How to Attack"></a>How to Attack</h4><p>就像我们训练一个neural network一样，但需要训练的参数是$x’$，此时就需要找到一个参数$x^*$，来最小化$L(x’)$，限制条件是$d(x^0,x’)\leq\epsilon$</p>
-<script type="math/tex; mode=display">
-x^*=arg\mathop{min}_\limits {d(x^0,x')\leq\epsilon}L(x')</script><p>这里我们也使用了gradient descent算法，只是此时需要调整的参数变成了$x^t$</p>
-<p><img src="/2020/06/26/Attack/image-20200626103758330.png" alt="image-20200626103758330" style="zoom:50%;"></p>
-<p>当$d(x^0,x^t)&gt;\epsilon$时，就需要更新这个参数了，使用$fix(x^t)$来更新</p>
-<p><img src="/2020/06/26/Attack/image-20200626123032000.png" alt="image-20200626123032000" style="zoom:50%;"></p>
-<p>更新的参数需要满足一定的条件，</p>
-<ul>
-<li>如果使用L2-norm，必须选择在差值在半径以内的参数，超过了这个半径，就设为$\epsilon $；</li>
-<li>如果使用L-infinity，现在超过了这个方形的区域，就必须想办法把它拉回来，在y轴方向超过了$\epsilon$，就把值设为$\epsilon$；在x轴方向超过了$\epsilon$，就把值设为$\epsilon$</li>
-</ul>
-<p><img src="/2020/06/26/Attack/image-20200626123713569.png" alt="image-20200626123713569" style="zoom:50%;"></p>
-<h4 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h4><p>如果我们现在要attack一个network，其真实类别为Tiger cat，但attack之后的network认为这是star fish</p>
-<p><img src="/2020/06/26/Attack/image-20200626161331898.png" alt="image-20200626161331898" style="zoom:50%;"></p>
-<p>由于这两者之间的差异很小，很难识别，这里我们将差值x50来进行展示</p>
-<p><img src="/2020/06/26/Attack/image-20200626161942541.png" alt="image-20200626161942541" style="zoom:50%;"></p>
-<p>可能猫和猫之间是比较类似的，这里我们将attack的target设置为keyboard，该network认为这是keyboard的概率为0.98</p>
-<p><img src="/2020/06/26/Attack/image-20200626162037439.png" alt="image-20200626162037439" style="zoom:50%;"></p>
-<p>如果我们再对图片加入噪声，network认为这是Persian cat，再继续加入噪声，我们都快分辨不出这张图是一只猫了，network就认为这是fire screen</p>
-<p><img src="/2020/06/26/Attack/image-20200626162150972.png" alt="image-20200626162150972" style="zoom:50%;"></p>
-<p>我们假设$x_0$是在高维平面上的一个点，沿着任意方向随机移动，我们可以看到在接近$x^0$ 的时候，是 tiger cat（正确分类）的可能性是很高的，但如果再移动多一点，是Persian cat和Egyptian cat的可能性是很高的 </p>
-<p>上述说的是随机方向进行移动，如果图片是225*225pixel的，那么就是5万多个高维的方向，现在我们选取其中几个特定的方向。在这几个特定的方向中，$x^0$可变化的范围就变得非常狭窄，$x^0$稍微变化一下，network输出为另一个类别（key board）的可能性就很高</p>
-<p><img src="/2020/06/26/Attack/image-20200626163736373.png" alt="image-20200626163736373" style="zoom:50%;"></p>
-<h4 id="Attack-Approaches"><a href="#Attack-Approaches" class="headerlink" title="Attack Approaches"></a>Attack Approaches</h4><ul>
-<li><p>FGSM (<a href="https://arxiv.org/abs/1412.6572" target="_blank" rel="external">https://arxiv.org/abs/1412.6572</a>)</p>
-</li>
-<li><p>Basic iterative method (<a href="https://arxiv.org/abs/1607.02533" target="_blank" rel="external">https://arxiv.org/abs/1607.02533</a>) </p>
-</li>
-<li><p>L-BFGS (<a href="https://arxiv.org/abs/1312.6199" target="_blank" rel="external">https://arxiv.org/abs/1312.6199</a>)</p>
-</li>
-<li>Deepfool (<a href="https://arxiv.org/abs/1511.04599" target="_blank" rel="external">https://arxiv.org/abs/1511.04599</a>)</li>
-<li>JSMA (<a href="https://arxiv.org/abs/1511.07528" target="_blank" rel="external">https://arxiv.org/abs/1511.07528</a>)</li>
-<li>C&amp;W (<a href="https://arxiv.org/abs/1608.04644" target="_blank" rel="external">https://arxiv.org/abs/1608.04644</a>)</li>
-<li>Elastic net attack (<a href="https://arxiv.org/abs/1709.04114" target="_blank" rel="external">https://arxiv.org/abs/1709.04114</a>)</li>
-<li>Spatially Transformed (<a href="https://arxiv.org/abs/1801.02612" target="_blank" rel="external">https://arxiv.org/abs/1801.02612</a>) </li>
-<li>One Pixel Attack (<a href="https://arxiv.org/abs/1710.08864" target="_blank" rel="external">https://arxiv.org/abs/1710.08864</a>)</li>
-<li>…… only list a few</li>
-</ul>
-<p>虽然有很多方法都可以用来attack network，但这些方法的主要区别在于使用了不同的constrains，或者使用了不同的optimization methods</p>
-<p><img src="/2020/06/26/Attack/image-20200626170309446.png" alt="image-20200626170309446" style="zoom:50%;"></p>
-<p>我们先介绍一下<strong>FGSM</strong>，对于第一维，如果$\frac{\partial L}{\partial x_1}$是大于0的值，那么$\Delta x_1=sign(\frac{\partial L}{\partial x_1})=+1$；如果对于第二维，如果$\frac{\partial L}{\partial x_2}$是小于0的值，不管值多大，都得出$\Delta x_2=sign(\frac{\partial L}{\partial x_2})=-1$；即对于$x^0$的所有维，要么$+\epsilon$，要么$-\epsilon$，即可得到最好的结果$x^*$</p>
-<p><img src="/2020/06/26/Attack/image-20200626171523647.png" alt="image-20200626171523647" style="zoom:50%;"></p>
-<p>FGSM使用L-infinity作为distance constrain，如果gradient指向左下角，那么$x^<em>$就在方框的右上角；如果gradient指向左上角，那么$x^</em>$就在方框的右下角；因此，在FGSM里面，我们只在意gradient的方向，不在意其具体的大小 </p>
-<p>那么FGSM到底是怎么运作的呢？</p>
-<p>我们可以看作FGSM是使用了非常大的一个learning rate，使x飞出了方形区域，由于L-infinity的限制，输出会被限制到方形区域内部，即$x^*$在方形区域的右上角</p>
-<p><img src="/2020/06/26/Attack/image-20200626174020656.png" alt="image-20200626174020656" style="zoom:60%;"></p>
-<h4 id="White-Box-v-s-Black-Box"><a href="#White-Box-v-s-Black-Box" class="headerlink" title="White Box v.s. Black Box"></a>White Box v.s. Black Box</h4><p>在之前的attack中，我们假设已经知道了network的参数$\theta$，目标是找到最优化的$x’$，这种attack就称为<strong>White Box</strong></p>
-<p>但在大多数的情况中，我们都不知道network的参数，但也需要去attack这个network，这就是<strong>Black Box</strong></p>
-<h4 id="Black-Box-Attack"><a href="#Black-Box-Attack" class="headerlink" title="Black Box Attack"></a>Black Box Attack</h4><p>如果我们现在已经知道了black network的training data，那么我们就可以用同样的training data来训练一个proxy network，再生成attacked object，如果能过成功attack新的proxy network，那么我们就可以把这个object也作为black network的输入，也可以attack成功</p>
-<p>如果不能得到相应的training data，network如果是一个在线版本，我们可以输入大量的图片，得出相对应的分类结果，从而可以组合成相对应的训练资料，来得出proxy network</p>
-<p><img src="/2020/06/26/Attack/image-20200626174930630.png" alt="image-20200626174930630" style="zoom:50%;"></p>
-<p>也有一些实验数据证明黑箱攻击是有可能成功的，现在假设Black Box有五种，现在我们来训练proxy network，我们用ResNet-152生成的图片，如果black box的network也是ResNet-152，那么attack成功的几率就会非常高，表格中的4%表示系统辨识的准确率</p>
-<p><img src="/2020/06/26/Attack/image-20200626175459885.png" alt="image-20200626175459885" style="zoom:50%;"></p>
-<h4 id="Attack-in-the-Real-World"><a href="#Attack-in-the-Real-World" class="headerlink" title="Attack in the Real World"></a>Attack in the Real World</h4><p><img src="/2020/06/26/Attack/image-20200626183115909.png" alt="image-20200626183115909" style="zoom:50%;"></p>
-<p><img src="/2020/06/26/Attack/image-20200626183139180.png" alt="image-20200626183139180" style="zoom:50%;"></p>
-<h4 id="Defense"><a href="#Defense" class="headerlink" title="Defense"></a>Defense</h4><p><img src="/2020/06/26/Attack/image-20200626183341651.png" alt="image-20200626183341651" style="zoom:50%;"></p>
-<h5 id="Passive-defense"><a href="#Passive-defense" class="headerlink" title="Passive defense"></a>Passive defense</h5><p><img src="/2020/06/26/Attack/image-20200626183453090.png" alt="image-20200626183453090" style="zoom:50%;"></p>
-<p>这个filter可以是smoothing，对于原来输入的attack图片network认为其是keyboard，经过smoothing之后，network就认为是tiger cat了，是正确的分类结果</p>
-<p>Q：那么为什么smoothing可以达到这种效果呢？</p>
-<p>A：只有某几种方向上的的信号可以使attack成功。如果使用了smoothing这种filter，就把这几种信号改变了，那么attack就失效了 ；加上smoothing并不会伤害原来的图片，所以network仍然可以得出正确的结果</p>
-<p><img src="/2020/06/26/Attack/image-20200626183523115.png" alt="image-20200626183523115" style="zoom:50%;"></p>
-<p>根据这种思想，有学者就提出了feature squeeze</p>
-<p>对于同一个input，我们先得出model的输出结果$Prediction_0$，再根据$Squeeze_1，Squeeze_2$得出结果$Prediction_1,Prediction_2$，如果$Prediction_0$和$Prediction_1,Prediction_2$之间的差值d很大，那么我们就可以认为input是来attack的</p>
-<p><img src="/2020/06/26/Attack/image-20200626184313560.png" alt="image-20200626184313560" style="zoom:50%;"></p>
-<p>还有另外一种方法</p>
-<p><img src="/2020/06/26/Attack/image-20200626184847976.png" alt="image-20200626184847976" style="zoom:50%;"></p>
-<h5 id="Proactive-defense"><a href="#Proactive-defense" class="headerlink" title="Proactive defense"></a>Proactive defense</h5><p>首先我们通过某种算法找出漏洞，找到相应的adversarial input，再把这些input和之前的training data一起作为新的input data，输入network，相当于进行了data augmentation，这个过程进行T次，每次的input data都是不一样的</p>
-<p><img src="/2020/06/26/Attack/image-20200626185155952.png" alt="image-20200626185155952" style="zoom:50%;"></p>
-<p>如果attacker知道了我们是使用算法A来进行模拟，那么attacker可以使用算法B来进行attack，那么我们的network并不能抵御这种attack</p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Attack and Defense</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>CCF-JSON查询</title>
     <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
     <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
@@ -211,6 +211,68 @@ x^*=arg\mathop{min}_\limits {d(x^0,x')\leq\epsilon}L(x')</script><p>这里我们
       </categories>
       <tags>
         <tag>CCF</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Conditional GAN (CGAN)</title>
+    <url>/2020/07/05/CGAN/</url>
+    <content><![CDATA[<p>对于一般的GAN，都是随机生成一个vector，然后输入GAN，再生成一张image，但我们并不能控制output。对于本文要讲述的CGAN，我们则可以操控其输出的结果。</p>
+<h4 id="Text-to-Image"><a href="#Text-to-Image" class="headerlink" title="Text-to-Image"></a>Text-to-Image</h4><p>对于传统的监督学习的方法，训练数据集是一些带有描述的图片，网络的input是一段文字，output则是一张图片，我们希望输出的图片和target越接近越好。</p>
+<p><img src="/2020/07/05/CGAN/image-20200705145505825.png" alt="image-20200705145505825" style="zoom:60%;"></p>
+<p>如果现在网络的输入文字是“train”，网络会觉得正面的火车是对的，侧面的火车也是对的，网络最后会取这些值的一个平均值，因此会得到一个非常模糊的火车图片。</p>
+<h4 id="Conditional-GAN"><a href="#Conditional-GAN" class="headerlink" title="Conditional GAN"></a>Conditional GAN</h4><p>现在我们使用CGAN来完成这个任务。CGAN现在的generator的输入不仅有z，还有一个condition c（“train”），G的输出为$x=G(z,c)$；</p>
+<p>这时我们还使用原来的Discriminator，把x输入D，D可以对其进行评价分数scalar，对真实的图像输出为1，生成的图像输出为0。</p>
+<p>那么现在就出现了一个新问题，G可以完全不管输入的condition，只生成高质量的、接近真实的图像即可。比如我们把condition设置为“dog”，G如果生成一只猫的图像，这个图像很接近真实图像，那么就可以骗过discriminator。</p>
+<p><img src="/2020/07/05/CGAN/image-20200705150242620.png" alt="image-20200705150242620" style="zoom:60%;"></p>
+<p>因此，这里的discriminator也要做出改变，需要把condition也作为D的其中一个输入。</p>
+<p>那么现在D输出的分数就有两部分组成：（1）x的真实性；（2）x是不是满足condition的条件。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
+<p>给低分0的两个case：（1）如果给出了正确的文字，但生成了模糊的图像；（2）虽然生成了清晰的图像，但和随机输入的文字（condition）是不匹配的。</p>
+<p><img src="/2020/07/05/CGAN/image-20200705151419726.png" alt="image-20200705151419726" style="zoom:60%;"></p>
+<p>这里是具体的算法。</p>
+<p>Learning D：输入是文字和图像的pair，即$\{(c^1,x^1),…,(c^m,x^m)\}$，从（高斯）分布中取出noise $\{z^1,z^2…,z^m\}$，输入G，得到生成的图像 $\tilde x^i=G(c^i,z^i)$；从database中取出m个真实的图像数据 $\{\hat x^1,…,\hat x^m\}$，再输入discriminator D，不断调整$\theta_d$，使得得到的分数越大越好，</p>
+<script type="math/tex; mode=display">
+\tilde V =\frac{1}{m}\sum_{i=1}^m logD(c^i,x^i)+\frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\tilde x^i))
++ \frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\hat x^i))</script><p>其中$D(c^i,x^i)$表示真实图像所得到的分数，D的目标就是使真实图像获得的分数越大越好；而$D(c^i,\tilde x^i)$表示G生成的图像所得到的分数，应该越小越好，所以前面加了负号；而$D(c^i,\hat x^i)$表示生成了清晰的图像，但和condition不匹配，所以前面加了负号。后两个case都是给低分的情况。</p>
+<p>其他过程和之前的GAN差别不大，主要是计算低分数的情况多了一个case。</p>
+<p><img src="/2020/07/05/CGAN/image-20200705153051152.png" alt="image-20200705153051152" style="zoom:67%;"></p>
+<h4 id="Conditional-GAN-Discriminator"><a href="#Conditional-GAN-Discriminator" class="headerlink" title="Conditional GAN - Discriminator"></a>Conditional GAN - Discriminator</h4><p>对于一般的discriminator架构，输入为图像和文字，输出为两部分的分数（x的真实性、x和condition是不是match）。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
+<p><img src="/2020/07/05/CGAN/image-20200705154525712.png" alt="image-20200705154525712" style="zoom:60%;"></p>
+<p>有学者在其他论文中也提出了其他架构，而且效果还不错。首先有object输入<span style="color: green">network</span>，得出第一个分数，表示x是否真实；<span style="color: green">network</span>还会输出一个embedding，再和condition结合，输入<span style="color: blue">network</span>后得到另外一个分数，表示x和c是否match。</p>
+<p>选择第一种架构方法有一个缺点。前文我们提到CGAN会给低分的两种case：x和condition是match的，但生成的图像不好；x和condition是不match的，但生成的图像质量高。如果我们使用第一种架构，网络会比较confused，网络并不知道分数低的原因到底是哪一种case，有可能是图像不够realistic，也有可能是和condition不够match。但<span style="color: red">对于第二种架构，网络则可以清楚地知道到底是因为哪个原因导致的低分。</span></p>
+<p>下面是结果的展示，输入文字condition，输出对应的图像。</p>
+<p><img src="/2020/07/05/CGAN/image-20200705191337832.png" alt="image-20200705191337832" style="zoom:60%;"></p>
+<h4 id="Stack-GAN"><a href="#Stack-GAN" class="headerlink" title="Stack GAN"></a>Stack GAN</h4><p>首先输入一段文字，这些文字先经过embedding的过程，再经过conditioning augmentation的过程（加入噪声），输入generator之后，会生成一张图像（$64\times 64$）；discriminator再来判断这个生成的image和输入的文字是不是match的；</p>
+<p>这里还有第二个generator，输入为刚才$64\times64$的图像和文字的embedding结果；再生成一张$256\times256$的图像；再把新生成的图像输入discriminator，看到底是不是realistic。</p>
+<p><img src="/2020/07/05/CGAN/image-20200705191647515.png" alt="image-20200705191647515" style="zoom: 100%;"></p>
+<h4 id="Image-to-image"><a href="#Image-to-image" class="headerlink" title="Image-to-image"></a>Image-to-image</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>CGAN不仅可以输入一段文字产生一张图像，也可以是image-to-image，比如把简单的几何模型转化为真实的房屋模型，把灰度图转化为彩色图，</p>
+<p><img src="/2020/07/05/CGAN/image-20200705193817063.png" alt="image-20200705193817063"></p>
+<p>如果使用传统的监督学习的方法来完成这个任务，首先需要收集训练数据（几何模型图、对应的真实房屋图），训练network，output是一张图片，我们希望输出的图片和target越接近越好。由于network会产生多种多样的房子，最后的结果会取一个平均值，因此会产生一个非常模糊的图像。</p>
+<p><img src="/2020/07/05/CGAN/image-20200705194028821.png" alt="image-20200705194028821" style="zoom:60%;"></p>
+<p>我们可以使用GAN来完成这个任务。首先把从distribution中sample出来的z和结构图作为G的输入，G会生成一张新的Image；再把Image和原来的结构图（一个pair）输入D，会输出一个分数scalar。可以发现GAN生成的图要相对清晰很多。</p>
+<p>但我们这时发现了一个新问题，GAN产生了一些原来的结构图中没有的东西，比如在图的左上角，产生了一个像是窗户或者天线的东西。这时我们可以加入一个新的constrain（真实的房屋图），希望generator产生的image和训练数据集中对应的图像也越靠近越好。</p>
+<p>这时generator的目标就有两个：产生出足够清晰可以骗过D的图像；产生的新图像和原来的target要接近。这样就会产生结果很好的图（GAN+close），图足够清晰，也不会产生一些奇怪的东西。</p>
+<p><img src="/2020/07/05/CGAN/image-20200705195049882.png" alt="image-20200705195049882" style="zoom:60%;"></p>
+<h5 id="Patch-GAN"><a href="#Patch-GAN" class="headerlink" title="Patch GAN"></a>Patch GAN</h5><p>现在要生成的是一张很大的图像，如果这时discriminator的输入还是一整张大的图像，那么D要对其进行评分，就肯定需要更多的参数，很有可能产生overfiting或者训练所需的时间会很长。</p>
+<p>在这篇论文中，作者也对discriminator的设计进行了变化。discriminator只需要检查图中的一小部分，对这一小块图片来输出评价分数 。区域的大小也是需要调整的参数之一。</p>
+<p><img src="/2020/07/05/CGAN/image-20200705200803367.png" alt="image-20200705200803367" style="zoom:60%;"></p>
+<h4 id="Speech-Enhancement"><a href="#Speech-Enhancement" class="headerlink" title="Speech Enhancement"></a>Speech Enhancement</h4><p>如果我们使用传统的深度学习方法来做语音增强，首先需要把纯净语音加上一些noise再输入CNN，不断地训练CNN，使其能够输出去噪后的纯净语音。</p>
+<p><img src="/2020/07/05/CGAN/image-20200705201419793.png" alt="image-20200705201419793" style="zoom:60%;"></p>
+<p>直接产生同样会有语音频谱图比较模糊的情况，我们在这里也可以使用CGAN算法。</p>
+<p>输入为带noise的语音信号，G的输出为增强语音，增强语音和纯净语音之间应该越接近越好。discriminator的输入为增强语音和带噪语音，输出评价分数，看这个output是不是clean的，还要看output和noise这个pair是不是match的。</p>
+<p><img src="/2020/07/05/CGAN/image-20200705201744963.png" alt="image-20200705201744963" style="zoom:60%;"></p>
+<h4 id="Video-Generation"><a href="#Video-Generation" class="headerlink" title="Video Generation"></a>Video Generation</h4><p>输入一段video，让generator预测下一步会发生什么，产生对应的video；discriminator要同时考虑generator的input和output，可以把它们接到一起，变成一段完整的影片，让discriminator来判断到底是不是一个合理的影片。</p>
+<p><img src="/2020/07/05/CGAN/image-20200705202357625.png" alt="image-20200705202357625" style="zoom:60%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Conditional GAN</tag>
+        <tag>CGAN</tag>
+        <tag>Speech Enhancement</tag>
+        <tag>Video Generation</tag>
+        <tag>Patch GAN</tag>
       </tags>
   </entry>
   <entry>
@@ -263,72 +325,6 @@ H/W=\frac{(h/w - F+2P)}{S}+1</script><p>这里引入了keras，先介绍几个�
       <tags>
         <tag>Deep Learning</tag>
         <tag>CNN</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Backpropagation</title>
-    <url>/2020/06/06/Backpropagation/</url>
-    <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>这里我们再回顾一下gradient descent，对于网络中的参数$w_1,w_2,…,b_1,b_2,…$，通过求出相对应的梯度$\Delta L(\theta)$，再根据梯度更新网络结构中的参数</p>
-<script type="math/tex; mode=display">
-\theta ^i=\theta^{i-1}-\eta\Delta L(\theta^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606200029374.png" alt="image-20200606200029374" style="zoom:50%;"></p>
-<h4 id="Chain-Rule"><a href="#Chain-Rule" class="headerlink" title="Chain Rule"></a>Chain Rule</h4><p>backpropagation的核心思想就是链式法则</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606200855314.png" alt="image-20200606200855314" style="zoom:50%;"></p>
-<h4 id="Backpropagation"><a href="#Backpropagation" class="headerlink" title="Backpropagation"></a>Backpropagation</h4><p>这里我们先定义了一个loss函数，$l^n(\theta)$表示training data中$y^n$和$\hat y ^n$之间的loss，这个loss可以通过cross entropy或者MSE计算，再将所有的loss进行求和，得到$L(\theta)$</p>
-<script type="math/tex; mode=display">
-L(\theta)=\sum_{n=1}^Nl^n(\theta)</script><p><img src="/2020/06/06/Backpropagation/image-20200606200827557.png" alt="image-20200606200827557" style="zoom:50%;"></p>
-<p>对w求导，可得$\frac{\partial l^n}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}$，这里我们截取了网络中的部分结构，神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606201320644.png" alt="image-20200606201320644" style="zoom:50%;"></p>
-<h4 id="Forward-pass"><a href="#Forward-pass" class="headerlink" title="Forward pass"></a>Forward pass</h4><p>forward过程计算$\frac{\partial z}{\partial w}$，即为权重所对应的上一层神经元的值(x1,x2)</p>
-<script type="math/tex; mode=display">
-z=x_1w_1+x_2+w_2+b \\
-\frac{\partial z}{\partial w_1}=x_1,\quad\frac{\partial z}{\partial w_2}=x_2</script><p><img src="/2020/06/06/Backpropagation/image-20200606201854092.png" alt="image-20200606201854092" style="zoom:50%;"></p>
-<p>对于forward过程，计算出上层神经元的值后，才可以继续计算下一层神经元的梯度$\frac{\partial z}{\partial w}$，</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606202207055.png" alt="image-20200606202207055" style="zoom:50%;"></p>
-<h4 id="Backward-pass"><a href="#Backward-pass" class="headerlink" title="Backward pass"></a>Backward pass</h4><h5 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h5><p>backward过程计算$\frac{\partial l}{\partial z}$，z为激活函数$\sigma (z)$的输入值。这里我们令$a=\sigma(z)$，简化表达式的形式，根据chain rule</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a}</script><p>其中$\frac{\partial a}{\partial z}=\sigma’(z)$，对激活函数求一阶导数，可以很轻松地表示出来</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606203500895.png" alt="image-20200606203500895" style="zoom:50%;"></p>
-<p>接下来我们开始$\frac{\partial l}{\partial a}$的计算，a会影响$z’,z’’$，因此可以再次使用链式法则</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial a}=\frac{\partial z'}{\partial a}\frac{\partial l}{\partial z'}
-+ \frac{\partial z''}{\partial a}\frac{\partial l}{\partial z''}</script><p>由于$z’=aw_3+…,\quad z’’=aw_4+…$，那么我们可以得出</p>
-<script type="math/tex; mode=display">
-\frac{\partial z'}{\partial a}=w_3,\quad\frac{\partial z''}{\partial a}=w_4</script><p>代入原式，可得</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a} =\sigma'(z)\left[w_3\frac{\partial l}{\partial z'}+ w_4\frac{\partial l}{\partial z''}\right]</script><p>对于$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，我们假设可以通过某种方式求得他们的值</p>
-<h5 id="另一个观点"><a href="#另一个观点" class="headerlink" title="另一个观点"></a>另一个观点</h5><p>我们可以从这个图中更加直观地了解backpropagation的过程，这里我们假设有一个神经元（图中的三角形），它不在原来的网络结构中，可以通过$w_3\frac{\partial l}{\partial z’}+ w_4\frac{\partial l}{\partial z’’}$来计算，<u>前面再乘上一个放大系数$\sigma’(z)$，这个放大系数的值是根据forward过程计算的，是一个常数</u>，就可以得出$\frac{\partial l}{\partial z}$的值</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606204707606.png" alt="image-20200606204707606" style="zoom:50%;"></p>
-<h5 id="两种情况"><a href="#两种情况" class="headerlink" title="两种情况"></a>两种情况</h5><p>公式内的其他项都已经计算出来，还有$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$没有得出具体的表达式，此步骤是为了求解$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$的表达式</p>
-<p><strong>Case1：Output Layer</strong></p>
-<p>为了求出$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，这里再次使用了chain rule</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z'}=\frac{\partial y_1}{\partial z'}\frac{\partial l}{\partial y_1}</script><p>其中$\frac{\partial y_1}{\partial z’}$就是激活函数的输出值再对$z’$求导；</p>
-<p>$\frac{\partial l}{\partial y_1}$为相对应的loss函数对y1求导，这个loss函数可以是cross entropy，也可以是MSE，对于不同的loss函数，计算出来的导数也不同</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606213905635.png" alt="image-20200606213905635" style="zoom:50%;"></p>
-<p><strong>Case2: Not output layer</strong></p>
-<p>如果现在假设后层不是output layer，而是hidden layer中的其中一层，计算方式就发生了一些小小的变化</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606215916597.png" alt="image-20200606215916597" style="zoom:50%;"></p>
-<p>根据Case1的推导，知道了$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$之后，就可以对$\frac{\partial l}{\partial z’}$进行求解</p>
-<p>同理可得，知道了$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$，就可以对$\frac{\partial l}{\partial z’}$求解，如下图所示，$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$分别乘上对应的权重$w_5,w_6$，前面再乘一个放大系数，就可得出$\frac{\partial l}{\partial z’}$的表达式</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z'}=\sigma'(z')\left[w_5\frac{\partial l}{\partial z_a}+ w_6\frac{\partial l}{\partial z_b}\right]</script><p><img src="/2020/06/06/Backpropagation/image-20200606221608597.png" alt="image-20200606221608597" style="zoom:50%;"></p>
-<p>知道了$z’,z’’$的值后，就可以根据公式计算z的值；知道了$z_a,z_b$之后，就可以计算$z’$ 的值；……一直循环这个步骤，直到到达output layer为止</p>
-<p>下图中有6个neural，分别是$z_1,z_2,z_3,z_4,z_5,z_6$，为激活函数的输入值，现在要分别求得$l$对这些函数的偏微分$\frac{\partial l}{\partial z_i}$。按照我们之前的做法，要求$\frac{\partial l}{\partial z_1}$，就必须要求$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$，而要求$\frac{\partial l}{\partial z_3}，\frac{\partial l}{\partial z_4}$的值，就必须要分别求两次$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$的值，计算效率很低</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606222718315.png" alt="image-20200606222718315" style="zoom:50%;"></p>
-<p>如果我们先计算$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$，就可以接着计算出$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$的值，再计算出$\frac{\partial l}{\partial z_1},\frac{\partial l}{\partial z_2}$的值，计算效率可以提高很多</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606222732356.png" alt="image-20200606222732356" style="zoom:50%;"></p>
-<h4 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h4><p>神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$，再相乘，就可以得出loss函数对每个hidden layer神经元的梯度，</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}</script><p>代入每次参数更新的公式，就可以得出每次的参数更新结果</p>
-<script type="math/tex; mode=display">
-w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606224217277.png" alt="image-20200606224217277" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>backpropagation</tag>
       </tags>
   </entry>
   <entry>
@@ -615,6 +611,101 @@ L2:\ w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><ul>
       </tags>
   </entry>
   <entry>
+    <title>Explainable Machine Learning</title>
+    <url>/2020/06/12/Explainable-AI/</url>
+    <content><![CDATA[<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p>机器不仅要告诉我们结果cat，还要告诉我们为什么 </p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611112308714.png" alt="image-20200611112308714" style="zoom:50%;"></p>
+<h5 id="Why-we-need-Explainable-ML"><a href="#Why-we-need-Explainable-ML" class="headerlink" title="Why we need Explainable ML?"></a>Why we need Explainable ML?</h5><p><u>我们不仅需要机器结果的精确度，还需要进行模型诊断，看机器学习得怎么样；有的任务精确度很高，但实际上机器什么都没学到</u></p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611112911240.png" alt="image-20200611112911240" style="zoom:50%;"></p>
+<p>有模型诊断后，我们就可以根据模型诊断的结果再来调整我们的模型</p>
+<h5 id="Interpretable-v-s-Powerful"><a href="#Interpretable-v-s-Powerful" class="headerlink" title="Interpretable v.s. Powerful"></a>Interpretable v.s. Powerful</h5><p><img src="/2020/06/12/Explainable-AI/image-20200611195115774.png" alt="image-20200611195115774" style="zoom:50%;"></p>
+<p>那么有没有model是Interpretable，也是powerful的呢 ？</p>
+<p>决策树可以interpretable，也是比较powerful的；对于第一个分支节点，“这些动物呼吸空气吗？”，就包含了interpretable的信息</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611195220007.png" alt="image-20200611195220007" style="zoom:50%;"></p>
+<p>当分支特别多的时候，决策树的表现也会很差</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611195426930.png" alt="image-20200611195426930" style="zoom:50%;"></p>
+<h4 id="Local-Explanation"><a href="#Local-Explanation" class="headerlink" title="Local Explanation"></a>Local Explanation</h4><h5 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h5><p>对于输入的x，我们将其分成components $\{x_1,…,x_n,…x_N\}$，每个component由一个像素，或者一小块组成</p>
+<p>我们现在的目标是知道每个component对making the decision的重要性有多少，那么我们可以通过remove或者modify其中一个component的值，看此时的decision会有什么变化</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611200230303.png" alt="image-20200611200230303" style="zoom:50%;"></p>
+<p>把灰色方块放到图像中，覆盖图像的一小部分；如果我们把灰色方块放到下图中的红色区域，那么对解释的结果影响不大，第一幅图还是一只狗</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611200829405.png" alt="image-20200611200829405" style="zoom:50%;"></p>
+<p>还有另一种方法</p>
+<p>对于输入的$\{x_1,…,x_n,..,x_N\}$，对于其中的某个关键的pixel $x_n$加上$\Delta x$，这个pixel对我们识别这是不是一只狗具有很重要的作用</p>
+<p>那么我们就可以用$\frac{\Delta y}{\Delta x}$来表示这个小小的扰动对y的影响，可以通过$\frac{\partial y_k}{\partial x_n}$来进行计算，表示$y_k$对$x_n$的偏微分，最后取绝对值，表示某一个pixel对现在y影响的大小</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611214135944.png" alt="image-20200611214135944" style="zoom:50%;"></p>
+<p>在上图中，下半部分由3幅图saliency map，亮度越大，绝对值就越大，亮度越大的地方就表示该pixel对结果的影响越大</p>
+<h5 id="Limitation-of-Gradient-based-Approaches"><a href="#Limitation-of-Gradient-based-Approaches" class="headerlink" title="Limitation of Gradient based Approaches"></a>Limitation of Gradient based Approaches</h5><p><img src="/2020/06/12/Explainable-AI/image-20200611220206992.png" alt="image-20200611220206992" style="zoom:50%;"></p>
+<h5 id="Attack-Interpretation"><a href="#Attack-Interpretation" class="headerlink" title="Attack Interpretation"></a>Attack Interpretation</h5><p><img src="/2020/06/12/Explainable-AI/image-20200611221032938.png" alt="image-20200611221032938" style="zoom:50%;"></p>
+<h4 id="Global-Explanation"><a href="#Global-Explanation" class="headerlink" title="Global Explanation"></a>Global Explanation</h4><p>Interprete the whole Model</p>
+<h5 id="Activation-Minimization-review"><a href="#Activation-Minimization-review" class="headerlink" title="Activation Minimization (review)"></a><strong>Activation Minimization</strong> (review)</h5><p>让我们先review一下activation minimization，现在我们的目标是找到一个$x^*$，使得输出的值$y_i$最大</p>
+<p>我们可以加入一些噪声，加上噪声后人并不能识别出来，但机器可以识别出来，看出来下图中的噪声是0 1 2 3 4 5 6 7 8</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611221428166.png" alt="image-20200611221428166" style="zoom:50%;"></p>
+<p>之前我们的目标是找到一个image，使得输出的y达到最大值；现在我们的目标不仅是找到x使输出y达到最大值，还需要把image变得更像是一个digit，不像左边那个图，几乎全部的像素点都是白色，右边的图只有和输出的digit相关的pixel才是白色</p>
+<p>这里我们通过加入了一个新的限制$R(x)$来实现，可以表示图像和digit的相似度</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611223152859.png" alt="image-20200611223152859" style="zoom:50%;"></p>
+<h5 id="Constraint-from-Generator"><a href="#Constraint-from-Generator" class="headerlink" title="Constraint from Generator"></a>Constraint from Generator</h5><p>如下图所示，我们输入一个低维的vector z到generator里面，输出Image x；</p>
+<p>现在我们将生成的Image x再输入Image classifier，输出分类结果$y_i$，那么我们现在的目标就是找到$z^*$，使得属于那个类别的可能性$y_i$最大</p>
+<script type="math/tex; mode=display">
+z^*=arg \ max y_i</script><p>找到最好的$z^<em>$，再输入Generator，根据$x^</em>=G(z^<em>)$得出$x^</em>$，产生一个好的Image</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612105833703.png" alt="image-20200612105833703" style="zoom:50%;"></p>
+<p>结果展示。现在你问机器蚂蚁长什么样子呢？机器就会给你画一堆蚂蚁的图片出来，再放到classifier里面，得出分类结果到底是火山还是蚂蚁</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612113355921.png" alt="image-20200612113355921" style="zoom:50%;"></p>
+<h4 id="Using-a-model-to-explain-another"><a href="#Using-a-model-to-explain-another" class="headerlink" title="Using a model to explain another"></a>Using a model to explain another</h4><p>现在我们使用一个interpretable model来模仿另外一个uninterpretable model；下图中的Black Box为uninterpretable model，比如Neural Network，蓝色方框是一个interpretable model，比如Linear model；现在我们的目标是使用相同的输入$x^1,x^2,…,x^N$，使linear model和Neural Network有相近的输出</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612155736839.png" alt="image-20200612155736839" style="zoom:50%;"></p>
+<p>实际上并不能使用linear model来模拟整个neural network，但可以用来模拟其中一个local region</p>
+<h5 id="Local-Interpretable-Model-Agnostic-Explanations-LIME"><a href="#Local-Interpretable-Model-Agnostic-Explanations-LIME" class="headerlink" title="Local Interpretable Model-Agnostic Explanations (LIME)"></a>Local Interpretable Model-Agnostic Explanations (LIME)</h5><p><strong>General</strong></p>
+<p>下图中input为x，output为y，都是一维的，表示Black Box中x和y的关系，由于我们并不能用linear model来模拟整个neural network，但可以用来模拟其中一个local region</p>
+<ol>
+<li><p>首先给出要explain的point，代入black box里面</p>
+</li>
+<li><p>在第三个蓝色point（我们想要模拟的区域）周围sample附近的point，nearby的区域不同，结果也会不同</p>
+</li>
+<li><p>使用linear model来模拟neural network在这个区域的行为</p>
+</li>
+<li><p>得知了该区域的linear model之后，我们就可以知道在该区域x和y的关系，即x越大，y越小，也就interpret了原来的neural network在这部分区域的行为</p>
+</li>
+</ol>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612161607923.png" alt="image-20200612161607923" style="zoom:50%;"></p>
+<p>那么到底什么算是nearby呢？<u>用不同的方法进行sample，结果不太一样。</u>对于下图中的region，可以看到离第三个蓝色point的距离很远，取得的效果就非常不好了</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612163829515.png" alt="image-20200612163829515" style="zoom:50%;"></p>
+<p><strong>LIME-Image</strong></p>
+<p>刚才说了general的情况，下面我们讲解LIME应用于image的情况</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612164116470.png" alt="image-20200612164116470" style="zoom:50%;"></p>
+<ol>
+<li>首先需要一张需要解释的image；为什么这张图片可以被classify为树蛙？</li>
+<li>sample at the nearby：首先把image分成多个segment，再随机去掉图中的一些segment，就得到了不同的新图片，这些新的图片就是sample的结果；再把这些新生成的图片输入black box，得到新图片是frog的可能性；</li>
+<li>fit with linear model：即找到一个linear model来fit第3步输出的结果；先extract生成的新图片的特征，再把这些特征输入linear model；</li>
+</ol>
+<p>Q：那么如何将image转化为一个vector呢？</p>
+<p>A：这里我们将image中的每个segment使用$x_i$来表示，其中$i=1,…,m,…,M$，M为segment的数量；$x_i$为1，表示当前segment被deleted，如果为0，表示exist；</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612165520599.png" alt="image-20200612165520599" style="zoom:50%;"></p>
+<p>4.$\ $Interpret the model：对于学习出来的linear model，我们就可以对其进行interpret；首先需要将$x_i$和y的关系用一个公式表示出来，即</p>
+<script type="math/tex; mode=display">
+y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情况：</p>
+<ul>
+<li>$w_m\approx 0$，segment $x_m$被认为对分类为frog没有影响；</li>
+<li>$w_m&gt; 0$， $x_m$对图片分类为frog是有正面的影响的；</li>
+<li>$w_m&lt;0$， 看到这个segment，反而会让机器认为图片不是frog</li>
+</ul>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612170336857.png" alt="image-20200612170336857" style="zoom:50%;"></p>
+<h5 id="Decision-Tree"><a href="#Decision-Tree" class="headerlink" title="Decision Tree"></a>Decision Tree</h5><p>如果我们用不限制深度的decision tree，那么我们就可以使用decision tree来模拟black box（neural network），使两者的输出相近</p>
+<p>但decision tree的深度不可能是没有限制的。这里我们设neural network的参数为$\theta$，decision tree的参数为$T_\theta$，使用$O(T_\theta)$来表示$T_\theta$的复杂度，复杂度可以用$T_\theta$的深度来表示，也可以用neural的个数来表示；<u>现在我们的目标不仅是使两者输出相近，还需要使$O(T_\theta)$的值最小化</u></p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612171916382.png" alt="image-20200612171916382" style="zoom:50%;"></p>
+<p>那么我们如何来实现使$O(T_\theta)$越小越好呢？</p>
+<p>如下图所示，我们首先训练一个network，这个network可以很容易地被decision tree解释，使decision tree的复杂度没有那么高；这里我们加入了一个正则项$\lambda O(T_\theta)$，在训练network的同时，不仅要最小化loss function，还需要使$O(T_\theta)$的值尽量小，这时需要找到的network参数为$\theta^*$，</p>
+<script type="math/tex; mode=display">
+\theta^*=arg\ {\rm min}\ L(\theta) + \lambda O(T_\theta)</script><p><img src="/2020/06/12/Explainable-AI/image-20200612172838929.png" alt="image-20200612172838929" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>explainable machine learning</tag>
+        <tag>LIME</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Introduction of Generative Adversarial Network (GAN)</title>
     <url>/2020/07/04/GAN-intro/</url>
     <content><![CDATA[<p>有很多种不同类型GAN，可以在这里查看<a href="https://github.com/hindupuravinash/the-gan-zoo" target="_blank" rel="external">https://github.com/hindupuravinash/the-gan-zoo</a></p>
@@ -765,101 +856,6 @@ L2:\ w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><ul>
         <tag>Auto-Encoder</tag>
         <tag>VAE</tag>
         <tag>GAN</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Explainable Machine Learning</title>
-    <url>/2020/06/12/Explainable-AI/</url>
-    <content><![CDATA[<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p>机器不仅要告诉我们结果cat，还要告诉我们为什么 </p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611112308714.png" alt="image-20200611112308714" style="zoom:50%;"></p>
-<h5 id="Why-we-need-Explainable-ML"><a href="#Why-we-need-Explainable-ML" class="headerlink" title="Why we need Explainable ML?"></a>Why we need Explainable ML?</h5><p><u>我们不仅需要机器结果的精确度，还需要进行模型诊断，看机器学习得怎么样；有的任务精确度很高，但实际上机器什么都没学到</u></p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611112911240.png" alt="image-20200611112911240" style="zoom:50%;"></p>
-<p>有模型诊断后，我们就可以根据模型诊断的结果再来调整我们的模型</p>
-<h5 id="Interpretable-v-s-Powerful"><a href="#Interpretable-v-s-Powerful" class="headerlink" title="Interpretable v.s. Powerful"></a>Interpretable v.s. Powerful</h5><p><img src="/2020/06/12/Explainable-AI/image-20200611195115774.png" alt="image-20200611195115774" style="zoom:50%;"></p>
-<p>那么有没有model是Interpretable，也是powerful的呢 ？</p>
-<p>决策树可以interpretable，也是比较powerful的；对于第一个分支节点，“这些动物呼吸空气吗？”，就包含了interpretable的信息</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611195220007.png" alt="image-20200611195220007" style="zoom:50%;"></p>
-<p>当分支特别多的时候，决策树的表现也会很差</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611195426930.png" alt="image-20200611195426930" style="zoom:50%;"></p>
-<h4 id="Local-Explanation"><a href="#Local-Explanation" class="headerlink" title="Local Explanation"></a>Local Explanation</h4><h5 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h5><p>对于输入的x，我们将其分成components $\{x_1,…,x_n,…x_N\}$，每个component由一个像素，或者一小块组成</p>
-<p>我们现在的目标是知道每个component对making the decision的重要性有多少，那么我们可以通过remove或者modify其中一个component的值，看此时的decision会有什么变化</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611200230303.png" alt="image-20200611200230303" style="zoom:50%;"></p>
-<p>把灰色方块放到图像中，覆盖图像的一小部分；如果我们把灰色方块放到下图中的红色区域，那么对解释的结果影响不大，第一幅图还是一只狗</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611200829405.png" alt="image-20200611200829405" style="zoom:50%;"></p>
-<p>还有另一种方法</p>
-<p>对于输入的$\{x_1,…,x_n,..,x_N\}$，对于其中的某个关键的pixel $x_n$加上$\Delta x$，这个pixel对我们识别这是不是一只狗具有很重要的作用</p>
-<p>那么我们就可以用$\frac{\Delta y}{\Delta x}$来表示这个小小的扰动对y的影响，可以通过$\frac{\partial y_k}{\partial x_n}$来进行计算，表示$y_k$对$x_n$的偏微分，最后取绝对值，表示某一个pixel对现在y影响的大小</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611214135944.png" alt="image-20200611214135944" style="zoom:50%;"></p>
-<p>在上图中，下半部分由3幅图saliency map，亮度越大，绝对值就越大，亮度越大的地方就表示该pixel对结果的影响越大</p>
-<h5 id="Limitation-of-Gradient-based-Approaches"><a href="#Limitation-of-Gradient-based-Approaches" class="headerlink" title="Limitation of Gradient based Approaches"></a>Limitation of Gradient based Approaches</h5><p><img src="/2020/06/12/Explainable-AI/image-20200611220206992.png" alt="image-20200611220206992" style="zoom:50%;"></p>
-<h5 id="Attack-Interpretation"><a href="#Attack-Interpretation" class="headerlink" title="Attack Interpretation"></a>Attack Interpretation</h5><p><img src="/2020/06/12/Explainable-AI/image-20200611221032938.png" alt="image-20200611221032938" style="zoom:50%;"></p>
-<h4 id="Global-Explanation"><a href="#Global-Explanation" class="headerlink" title="Global Explanation"></a>Global Explanation</h4><p>Interprete the whole Model</p>
-<h5 id="Activation-Minimization-review"><a href="#Activation-Minimization-review" class="headerlink" title="Activation Minimization (review)"></a><strong>Activation Minimization</strong> (review)</h5><p>让我们先review一下activation minimization，现在我们的目标是找到一个$x^*$，使得输出的值$y_i$最大</p>
-<p>我们可以加入一些噪声，加上噪声后人并不能识别出来，但机器可以识别出来，看出来下图中的噪声是0 1 2 3 4 5 6 7 8</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611221428166.png" alt="image-20200611221428166" style="zoom:50%;"></p>
-<p>之前我们的目标是找到一个image，使得输出的y达到最大值；现在我们的目标不仅是找到x使输出y达到最大值，还需要把image变得更像是一个digit，不像左边那个图，几乎全部的像素点都是白色，右边的图只有和输出的digit相关的pixel才是白色</p>
-<p>这里我们通过加入了一个新的限制$R(x)$来实现，可以表示图像和digit的相似度</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611223152859.png" alt="image-20200611223152859" style="zoom:50%;"></p>
-<h5 id="Constraint-from-Generator"><a href="#Constraint-from-Generator" class="headerlink" title="Constraint from Generator"></a>Constraint from Generator</h5><p>如下图所示，我们输入一个低维的vector z到generator里面，输出Image x；</p>
-<p>现在我们将生成的Image x再输入Image classifier，输出分类结果$y_i$，那么我们现在的目标就是找到$z^*$，使得属于那个类别的可能性$y_i$最大</p>
-<script type="math/tex; mode=display">
-z^*=arg \ max y_i</script><p>找到最好的$z^<em>$，再输入Generator，根据$x^</em>=G(z^<em>)$得出$x^</em>$，产生一个好的Image</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612105833703.png" alt="image-20200612105833703" style="zoom:50%;"></p>
-<p>结果展示。现在你问机器蚂蚁长什么样子呢？机器就会给你画一堆蚂蚁的图片出来，再放到classifier里面，得出分类结果到底是火山还是蚂蚁</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612113355921.png" alt="image-20200612113355921" style="zoom:50%;"></p>
-<h4 id="Using-a-model-to-explain-another"><a href="#Using-a-model-to-explain-another" class="headerlink" title="Using a model to explain another"></a>Using a model to explain another</h4><p>现在我们使用一个interpretable model来模仿另外一个uninterpretable model；下图中的Black Box为uninterpretable model，比如Neural Network，蓝色方框是一个interpretable model，比如Linear model；现在我们的目标是使用相同的输入$x^1,x^2,…,x^N$，使linear model和Neural Network有相近的输出</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612155736839.png" alt="image-20200612155736839" style="zoom:50%;"></p>
-<p>实际上并不能使用linear model来模拟整个neural network，但可以用来模拟其中一个local region</p>
-<h5 id="Local-Interpretable-Model-Agnostic-Explanations-LIME"><a href="#Local-Interpretable-Model-Agnostic-Explanations-LIME" class="headerlink" title="Local Interpretable Model-Agnostic Explanations (LIME)"></a>Local Interpretable Model-Agnostic Explanations (LIME)</h5><p><strong>General</strong></p>
-<p>下图中input为x，output为y，都是一维的，表示Black Box中x和y的关系，由于我们并不能用linear model来模拟整个neural network，但可以用来模拟其中一个local region</p>
-<ol>
-<li><p>首先给出要explain的point，代入black box里面</p>
-</li>
-<li><p>在第三个蓝色point（我们想要模拟的区域）周围sample附近的point，nearby的区域不同，结果也会不同</p>
-</li>
-<li><p>使用linear model来模拟neural network在这个区域的行为</p>
-</li>
-<li><p>得知了该区域的linear model之后，我们就可以知道在该区域x和y的关系，即x越大，y越小，也就interpret了原来的neural network在这部分区域的行为</p>
-</li>
-</ol>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612161607923.png" alt="image-20200612161607923" style="zoom:50%;"></p>
-<p>那么到底什么算是nearby呢？<u>用不同的方法进行sample，结果不太一样。</u>对于下图中的region，可以看到离第三个蓝色point的距离很远，取得的效果就非常不好了</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612163829515.png" alt="image-20200612163829515" style="zoom:50%;"></p>
-<p><strong>LIME-Image</strong></p>
-<p>刚才说了general的情况，下面我们讲解LIME应用于image的情况</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612164116470.png" alt="image-20200612164116470" style="zoom:50%;"></p>
-<ol>
-<li>首先需要一张需要解释的image；为什么这张图片可以被classify为树蛙？</li>
-<li>sample at the nearby：首先把image分成多个segment，再随机去掉图中的一些segment，就得到了不同的新图片，这些新的图片就是sample的结果；再把这些新生成的图片输入black box，得到新图片是frog的可能性；</li>
-<li>fit with linear model：即找到一个linear model来fit第3步输出的结果；先extract生成的新图片的特征，再把这些特征输入linear model；</li>
-</ol>
-<p>Q：那么如何将image转化为一个vector呢？</p>
-<p>A：这里我们将image中的每个segment使用$x_i$来表示，其中$i=1,…,m,…,M$，M为segment的数量；$x_i$为1，表示当前segment被deleted，如果为0，表示exist；</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612165520599.png" alt="image-20200612165520599" style="zoom:50%;"></p>
-<p>4.$\ $Interpret the model：对于学习出来的linear model，我们就可以对其进行interpret；首先需要将$x_i$和y的关系用一个公式表示出来，即</p>
-<script type="math/tex; mode=display">
-y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情况：</p>
-<ul>
-<li>$w_m\approx 0$，segment $x_m$被认为对分类为frog没有影响；</li>
-<li>$w_m&gt; 0$， $x_m$对图片分类为frog是有正面的影响的；</li>
-<li>$w_m&lt;0$， 看到这个segment，反而会让机器认为图片不是frog</li>
-</ul>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612170336857.png" alt="image-20200612170336857" style="zoom:50%;"></p>
-<h5 id="Decision-Tree"><a href="#Decision-Tree" class="headerlink" title="Decision Tree"></a>Decision Tree</h5><p>如果我们用不限制深度的decision tree，那么我们就可以使用decision tree来模拟black box（neural network），使两者的输出相近</p>
-<p>但decision tree的深度不可能是没有限制的。这里我们设neural network的参数为$\theta$，decision tree的参数为$T_\theta$，使用$O(T_\theta)$来表示$T_\theta$的复杂度，复杂度可以用$T_\theta$的深度来表示，也可以用neural的个数来表示；<u>现在我们的目标不仅是使两者输出相近，还需要使$O(T_\theta)$的值最小化</u></p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612171916382.png" alt="image-20200612171916382" style="zoom:50%;"></p>
-<p>那么我们如何来实现使$O(T_\theta)$越小越好呢？</p>
-<p>如下图所示，我们首先训练一个network，这个network可以很容易地被decision tree解释，使decision tree的复杂度没有那么高；这里我们加入了一个正则项$\lambda O(T_\theta)$，在训练network的同时，不仅要最小化loss function，还需要使$O(T_\theta)$的值尽量小，这时需要找到的network参数为$\theta^*$，</p>
-<script type="math/tex; mode=display">
-\theta^*=arg\ {\rm min}\ L(\theta) + \lambda O(T_\theta)</script><p><img src="/2020/06/12/Explainable-AI/image-20200612172838929.png" alt="image-20200612172838929" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>explainable machine learning</tag>
-        <tag>LIME</tag>
       </tags>
   </entry>
   <entry>
@@ -1106,6 +1102,72 @@ a=h(c')f(z_0)=7</script><p><img src="/2020/06/10/RNN/image-20200609225546396.png
       </tags>
   </entry>
   <entry>
+    <title>Backpropagation</title>
+    <url>/2020/06/06/Backpropagation/</url>
+    <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>这里我们再回顾一下gradient descent，对于网络中的参数$w_1,w_2,…,b_1,b_2,…$，通过求出相对应的梯度$\Delta L(\theta)$，再根据梯度更新网络结构中的参数</p>
+<script type="math/tex; mode=display">
+\theta ^i=\theta^{i-1}-\eta\Delta L(\theta^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606200029374.png" alt="image-20200606200029374" style="zoom:50%;"></p>
+<h4 id="Chain-Rule"><a href="#Chain-Rule" class="headerlink" title="Chain Rule"></a>Chain Rule</h4><p>backpropagation的核心思想就是链式法则</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606200855314.png" alt="image-20200606200855314" style="zoom:50%;"></p>
+<h4 id="Backpropagation"><a href="#Backpropagation" class="headerlink" title="Backpropagation"></a>Backpropagation</h4><p>这里我们先定义了一个loss函数，$l^n(\theta)$表示training data中$y^n$和$\hat y ^n$之间的loss，这个loss可以通过cross entropy或者MSE计算，再将所有的loss进行求和，得到$L(\theta)$</p>
+<script type="math/tex; mode=display">
+L(\theta)=\sum_{n=1}^Nl^n(\theta)</script><p><img src="/2020/06/06/Backpropagation/image-20200606200827557.png" alt="image-20200606200827557" style="zoom:50%;"></p>
+<p>对w求导，可得$\frac{\partial l^n}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}$，这里我们截取了网络中的部分结构，神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606201320644.png" alt="image-20200606201320644" style="zoom:50%;"></p>
+<h4 id="Forward-pass"><a href="#Forward-pass" class="headerlink" title="Forward pass"></a>Forward pass</h4><p>forward过程计算$\frac{\partial z}{\partial w}$，即为权重所对应的上一层神经元的值(x1,x2)</p>
+<script type="math/tex; mode=display">
+z=x_1w_1+x_2+w_2+b \\
+\frac{\partial z}{\partial w_1}=x_1,\quad\frac{\partial z}{\partial w_2}=x_2</script><p><img src="/2020/06/06/Backpropagation/image-20200606201854092.png" alt="image-20200606201854092" style="zoom:50%;"></p>
+<p>对于forward过程，计算出上层神经元的值后，才可以继续计算下一层神经元的梯度$\frac{\partial z}{\partial w}$，</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606202207055.png" alt="image-20200606202207055" style="zoom:50%;"></p>
+<h4 id="Backward-pass"><a href="#Backward-pass" class="headerlink" title="Backward pass"></a>Backward pass</h4><h5 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h5><p>backward过程计算$\frac{\partial l}{\partial z}$，z为激活函数$\sigma (z)$的输入值。这里我们令$a=\sigma(z)$，简化表达式的形式，根据chain rule</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a}</script><p>其中$\frac{\partial a}{\partial z}=\sigma’(z)$，对激活函数求一阶导数，可以很轻松地表示出来</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606203500895.png" alt="image-20200606203500895" style="zoom:50%;"></p>
+<p>接下来我们开始$\frac{\partial l}{\partial a}$的计算，a会影响$z’,z’’$，因此可以再次使用链式法则</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial a}=\frac{\partial z'}{\partial a}\frac{\partial l}{\partial z'}
++ \frac{\partial z''}{\partial a}\frac{\partial l}{\partial z''}</script><p>由于$z’=aw_3+…,\quad z’’=aw_4+…$，那么我们可以得出</p>
+<script type="math/tex; mode=display">
+\frac{\partial z'}{\partial a}=w_3,\quad\frac{\partial z''}{\partial a}=w_4</script><p>代入原式，可得</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a} =\sigma'(z)\left[w_3\frac{\partial l}{\partial z'}+ w_4\frac{\partial l}{\partial z''}\right]</script><p>对于$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，我们假设可以通过某种方式求得他们的值</p>
+<h5 id="另一个观点"><a href="#另一个观点" class="headerlink" title="另一个观点"></a>另一个观点</h5><p>我们可以从这个图中更加直观地了解backpropagation的过程，这里我们假设有一个神经元（图中的三角形），它不在原来的网络结构中，可以通过$w_3\frac{\partial l}{\partial z’}+ w_4\frac{\partial l}{\partial z’’}$来计算，<u>前面再乘上一个放大系数$\sigma’(z)$，这个放大系数的值是根据forward过程计算的，是一个常数</u>，就可以得出$\frac{\partial l}{\partial z}$的值</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606204707606.png" alt="image-20200606204707606" style="zoom:50%;"></p>
+<h5 id="两种情况"><a href="#两种情况" class="headerlink" title="两种情况"></a>两种情况</h5><p>公式内的其他项都已经计算出来，还有$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$没有得出具体的表达式，此步骤是为了求解$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$的表达式</p>
+<p><strong>Case1：Output Layer</strong></p>
+<p>为了求出$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，这里再次使用了chain rule</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z'}=\frac{\partial y_1}{\partial z'}\frac{\partial l}{\partial y_1}</script><p>其中$\frac{\partial y_1}{\partial z’}$就是激活函数的输出值再对$z’$求导；</p>
+<p>$\frac{\partial l}{\partial y_1}$为相对应的loss函数对y1求导，这个loss函数可以是cross entropy，也可以是MSE，对于不同的loss函数，计算出来的导数也不同</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606213905635.png" alt="image-20200606213905635" style="zoom:50%;"></p>
+<p><strong>Case2: Not output layer</strong></p>
+<p>如果现在假设后层不是output layer，而是hidden layer中的其中一层，计算方式就发生了一些小小的变化</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606215916597.png" alt="image-20200606215916597" style="zoom:50%;"></p>
+<p>根据Case1的推导，知道了$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$之后，就可以对$\frac{\partial l}{\partial z’}$进行求解</p>
+<p>同理可得，知道了$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$，就可以对$\frac{\partial l}{\partial z’}$求解，如下图所示，$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$分别乘上对应的权重$w_5,w_6$，前面再乘一个放大系数，就可得出$\frac{\partial l}{\partial z’}$的表达式</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z'}=\sigma'(z')\left[w_5\frac{\partial l}{\partial z_a}+ w_6\frac{\partial l}{\partial z_b}\right]</script><p><img src="/2020/06/06/Backpropagation/image-20200606221608597.png" alt="image-20200606221608597" style="zoom:50%;"></p>
+<p>知道了$z’,z’’$的值后，就可以根据公式计算z的值；知道了$z_a,z_b$之后，就可以计算$z’$ 的值；……一直循环这个步骤，直到到达output layer为止</p>
+<p>下图中有6个neural，分别是$z_1,z_2,z_3,z_4,z_5,z_6$，为激活函数的输入值，现在要分别求得$l$对这些函数的偏微分$\frac{\partial l}{\partial z_i}$。按照我们之前的做法，要求$\frac{\partial l}{\partial z_1}$，就必须要求$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$，而要求$\frac{\partial l}{\partial z_3}，\frac{\partial l}{\partial z_4}$的值，就必须要分别求两次$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$的值，计算效率很低</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606222718315.png" alt="image-20200606222718315" style="zoom:50%;"></p>
+<p>如果我们先计算$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$，就可以接着计算出$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$的值，再计算出$\frac{\partial l}{\partial z_1},\frac{\partial l}{\partial z_2}$的值，计算效率可以提高很多</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606222732356.png" alt="image-20200606222732356" style="zoom:50%;"></p>
+<h4 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h4><p>神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$，再相乘，就可以得出loss函数对每个hidden layer神经元的梯度，</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}</script><p>代入每次参数更新的公式，就可以得出每次的参数更新结果</p>
+<script type="math/tex; mode=display">
+w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606224217277.png" alt="image-20200606224217277" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>backpropagation</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Word Embedding</title>
     <url>/2020/06/11/Word-Embedding/</url>
     <content><![CDATA[<h4 id="Word-Embedding"><a href="#Word-Embedding" class="headerlink" title="Word Embedding"></a>Word Embedding</h4><p>如果使用1-of-N encoding，每个单词用一个vector表示，那么5个单词就需要5个vector；如果我们把同一个类别的单词都放到那个类里，即属于class1的单词有dog、cat、bird，属于动物类的单词，同理可以得出class2，class3；</p>
@@ -1275,73 +1337,6 @@ W=\begin{pmatrix}
       </tags>
   </entry>
   <entry>
-    <title>Network Compression</title>
-    <url>/2020/06/27/network-conpression/</url>
-    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
-<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="/2020/06/27/network-conpression/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
-<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="/2020/06/27/network-conpression/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
-<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
-<ul>
-<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
-<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
-</ul>
-<p><img src="/2020/06/27/network-conpression/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
-<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
-<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
-<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
-<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="external">大的network更容易optimize</a></p>
-<p><strong>Lottery Ticket Hypothesis</strong></p>
-<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
-<ul>
-<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
-</li>
-<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
-</li>
-</ul>
-<p><img src="/2020/06/27/network-conpression/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
-<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
-<p><strong>Rethinking the Value of Network Pruning</strong></p>
-<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
-<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
-<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
-<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
-<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
-<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
-<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
-<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
-<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
-<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="/2020/06/27/network-conpression/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
-<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="/2020/06/27/network-conpression/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
-<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
-<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
-<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
-<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
-<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
-<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="/2020/06/27/network-conpression/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
-<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
-<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="/2020/06/27/network-conpression/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
-<p><img src="/2020/06/27/network-conpression/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>network compression</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Generative Models</title>
     <url>/2020/06/29/generative-models/</url>
     <content><![CDATA[<blockquote>
@@ -1454,6 +1449,73 @@ KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href=
       </tags>
   </entry>
   <entry>
+    <title>Network Compression</title>
+    <url>/2020/06/27/network-conpression/</url>
+    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
+<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="/2020/06/27/network-conpression/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
+<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="/2020/06/27/network-conpression/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
+<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
+<ul>
+<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
+<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
+</ul>
+<p><img src="/2020/06/27/network-conpression/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
+<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
+<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
+<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
+<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="external">大的network更容易optimize</a></p>
+<p><strong>Lottery Ticket Hypothesis</strong></p>
+<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
+<ul>
+<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
+</li>
+<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
+</li>
+</ul>
+<p><img src="/2020/06/27/network-conpression/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
+<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
+<p><strong>Rethinking the Value of Network Pruning</strong></p>
+<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
+<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
+<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
+<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
+<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
+<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
+<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
+<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
+<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
+<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="/2020/06/27/network-conpression/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
+<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="/2020/06/27/network-conpression/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
+<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
+<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
+<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
+<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
+<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
+<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="/2020/06/27/network-conpression/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
+<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
+<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="/2020/06/27/network-conpression/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
+<p><img src="/2020/06/27/network-conpression/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>network compression</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Semi-supervised</title>
     <url>/2020/06/10/semi-supervised/</url>
     <content><![CDATA[<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p><img src="/2020/06/10/semi-supervised/image-20200610195909860.png" alt="image-20200610195909860" style="zoom:50%;"></p>
@@ -1539,6 +1601,151 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
         <tag>Deep Learning</tag>
         <tag>semi-supervised</tag>
         <tag>smoothness</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>基于知识图谱和GCN的应用和开发</title>
+    <url>/2020/07/03/%E5%9F%BA%E4%BA%8E%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E5%92%8C%E5%9B%BE%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E5%BC%80%E5%8F%91/</url>
+    <content><![CDATA[<h4 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h4><p>深度学习的主要思想有三个：</p>
+<ul>
+<li><p>权重分配；</p>
+</li>
+<li><p>层级结构：每一层训练的结果都依赖于上一层；</p>
+</li>
+<li><p>欧几里得空间数据：比如图像数据，可以通过二维坐标(x,y)进行表示，语音信号是一个一维的数据，围棋的话也是一个二维数据，目前的大多数数据都是可以用欧几里得空间数据进行表示的，即可以投影到坐标轴上</p>
+</li>
+</ul>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702101528758.png" alt="image-20200702101528758"></p>
+<p>但在实际生活中，有很多数据并不能用欧几里得数据来进行表示，比如在微信上，每个人都相当于一个节点，朋友之间的关系相当于是一条边，相当于图，没有任何的空间信息，是<u>非欧几里得的空间结构</u>（eg. 社交网络、科学网络等） </p>
+<p>那要怎么对这类信息进行训练呢？传统的深度学习方法（CNN和RNN等）并没有办法训练这类数据，因此就产生了图卷积（GCN）</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702103428339.png" alt="image-20200702103428339"></p>
+<h4 id="图卷积背景和基本框架"><a href="#图卷积背景和基本框架" class="headerlink" title="图卷积背景和基本框架"></a>图卷积背景和基本框架</h4><h5 id="图卷积发展历史"><a href="#图卷积发展历史" class="headerlink" title="图卷积发展历史"></a>图卷积发展历史</h5><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104325966.png" alt="image-20200702104325966"></p>
+<h5 id="邻接矩阵"><a href="#邻接矩阵" class="headerlink" title="邻接矩阵"></a>邻接矩阵</h5><p>无向图的邻接矩阵是对角矩阵</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104743073.png" alt="image-20200702104743073"></p>
+<h5 id="图卷积基本框架"><a href="#图卷积基本框架" class="headerlink" title="图卷积基本框架"></a>图卷积基本框架</h5><p>在下图中，A为邻接矩阵，H为特征矩阵（$N\times F$），，N为节点个数，F表示每个节点的特征数；比如我们每个人在社交网络中都是一个节点，也有一些对应的特征，名字、年龄、出生日期，这些特征就构成了这个特征矩阵$N\times F$；</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104938456.png" alt="image-20200702104938456"></p>
+<p>在这个基本框架中，input为邻接矩阵A，第一个hidden layer把特征矩阵点乘到每一个节点上进行训练，再进入下一层，再进行点乘，…，一直不断重复这个过程。每次训练更新的参数是特征矩阵，最后的output和input是一样的，图结构没有发生变化，但特征矩阵达到了收敛（基本上不会发生变化），最后再对图中的每个节点进行分类；</p>
+<p><span style="color: red">把节点和特征矩阵进行点乘，就实现了信息在节点和社区间进行传递</span></p>
+<h4 id="图卷积"><a href="#图卷积" class="headerlink" title="图卷积"></a>图卷积</h4><p>那么下面我们将具体介绍节点和特征矩阵是怎样进行点乘的，怎样一步步进行训练。</p>
+<h5 id="回顾CNN"><a href="#回顾CNN" class="headerlink" title="回顾CNN"></a>回顾CNN</h5><p>我们先回顾一下CNN是如何做卷积操作的，如下图所示，</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702110939157.png" alt="image-20200702110939157"></p>
+<h5 id="图卷积-1"><a href="#图卷积-1" class="headerlink" title="图卷积"></a>图卷积</h5><p>这是卷积操作的参数更新公式，</p>
+<script type="math/tex; mode=display">
+h_i^{l+1}=\sigma(W_0^{(l)}h_0^{(l)}+W_1^{(l)}h_1^{(l)}+\cdot\cdot\cdot+W_8^{(l)}h_8^{(l)})</script><p>图卷积相比较于卷积，在$h_0^{(l)}W_0^{(l)}$的基础上，多了邻接矩阵的信息$\frac{1}{c_{ij}}h_j^{(l)}$，<span style="color: red">权重矩阵W也没有卷积操作那么重要</span>，其参数更新公式为，</p>
+<script type="math/tex; mode=display">
+h_i^{l+1}=\sigma(h_0^{(l)}W_0^{(l)} + 
+\sum_{j\in N_i} \frac{1}{c_{ij}}h_j^{(l)}W_1^{(l)})</script><p>更新参数的时候，通过周围的节点来更新该节点（下图中红色节点），与该节点不直接相连的节点无关</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702111915112.png" alt="image-20200702111915112"></p>
+<p>那么我们就可以通过以下公式来更新特征矩阵，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde AH^{(l)}W^{(l)})</script><p>其中A为邻接矩阵，H为特征矩阵，W为权重矩阵，本次的特征矩阵$H^{(l+1)}$根据上一次的特征矩阵$H^{(l)}$生成；</p>
+<p>如果只根据邻接矩阵来更新H，会出现一些问题：</p>
+<ul>
+<li>无法提取自身信息，邻接矩阵对角线上的元素始终是0（如果没有自环），自身的信息在训练过程中是无法考虑进去的；</li>
+<li>$\tilde A$没有归一化</li>
+</ul>
+<p>我们需要把参数更新公式进行一些变化，首先解决邻接矩阵对角线元素为0的问题，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma((\tilde D-\tilde A)H^{(l)}W^{(l)})</script><p><span style="color: red">其中</span>矩阵$\tilde D$是一个对角矩阵（degree matrix），对角线上的数值表示了每个节点所相连的边数。</p>
+<p>归一化处理主要列出两种方式，要根据不同的输入数据来进行选择，其中第一种归一化方式比较常用</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)\\
+H^{(l+1)}=\sigma(\tilde D^{-1}(\tilde D-\tilde A)\tilde H^{(l)}W^{(l)})</script><h5 id="图卷积的计算"><a href="#图卷积的计算" class="headerlink" title="图卷积的计算"></a>图卷积的计算</h5><p>下面我们将一个具体的例子来讲述公式(1),</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702114057283.png" alt="image-20200702114057283"></p>
+<p>在上图中，degree matrix表示了每个节点所相连的边数，比如2表示1号节点相连的边有2条，该对角矩阵也就是前文提到的$\tilde D$，$(\tilde D-\tilde A)$就是laplacian matrix；</p>
+<p>我们将特征矩阵$H_0$和权重矩阵W进行随机初始化，再代入公式(1)，即可得出训练完成的结果$H_N$，再求出每一列的最大值，即MaxValue$(H(i))=[1,1,4,1,1,4]$，即分类结果，其中第1，2，4，5个节点分类为1，第3，6个节点分类为4，把整个图的节点分成了两类；</p>
+<p>那么为什么可以这样分类呢？我们可以回到原图labeled graph中，节点1，2，5相当于是一个全连接图，可以当作一个类别，而节点4，5都和三个节点相连，有三条边，也可以当作是一个类别；节点3，6就没有前几个节点那样关系比较紧密，因此被分成了第二个类别</p>
+<p>我们可以得出以下两点：</p>
+<ul>
+<li>对于随机产生的特征矩阵，依靠图自身的结构，就可以得到一个很好的分类效果；</li>
+<li>在这个例子中，进行10次运算，特征矩阵就收敛了，收敛速度非常快</li>
+</ul>
+<p>再来回顾下这个核心公式，所有的图卷积的变化和应用都离不开这个公式。W不那么重要，特征矩阵$H^{(l)}$表示每个人根据自己的实际特征来进行特征提取；邻接矩阵$\tilde A$表示每个人（节点）之间的关系，关系不一样就会构建出不同的图</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)</script><p><span style="color: red">那么我们要在图卷积进行创新的话，就只有改变邻接矩阵A和特征矩阵H，即如何新建这个图、如何提取这个特征；由于机器学习和深度学习技术的不断发展，特征提取的方法已经非常成熟，<u>关键的创新点还是如何新建这个图</u></span></p>
+<h5 id="边信息嵌入"><a href="#边信息嵌入" class="headerlink" title="边信息嵌入"></a>边信息嵌入</h5><p>图中的边信息有时候是包含权重的，我们也应该把边的信息值也考虑进去，即把原图转化为一个线图；在下图中，原图中节点为i，j，m，边为a，b，c，转化为线图后，节点变成a，b，c，边为i，j，m，把边变成了点，把点变成了边</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702122014466.png" alt="image-20200702122014466"></p>
+<p>经过两次不同的输入$h_{(i,j)}^l,h_j^{l+1}$，分别对应原图和线图，这样训练就可以把边的信息也整合进去</p>
+<h5 id="Example-1-半监督图分类"><a href="#Example-1-半监督图分类" class="headerlink" title="Example 1: 半监督图分类"></a>Example 1: 半监督图分类</h5><p>在下图中，黑色圈点表示已经知道了分类的类别，其他的没有被黑色线条包围的点表示没有进行分类，目标是预测未分类的节点的类别，这里我们还定义了一个损失函数L，Z表示GCN的输出结果（上文的公式(1)）</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702123720321.png" alt="image-20200702123720321"></p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124159182.png" alt="image-20200702124159182"></p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124253302.png" alt="image-20200702124253302"></p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124330022.png" alt="image-20200702124330022"></p>
+<p>得到实验结果，</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124418966.png" alt="image-20200702124418966"></p>
+<h5 id="Example-2-科学家网络"><a href="#Example-2-科学家网络" class="headerlink" title="Example 2: 科学家网络"></a>Example 2: 科学家网络</h5><p>每篇论文都会有一个题目，互相引用这篇论文则会形成一个关系，我们的任务是根据论文的题目来预测论文的类别（统计、物理、数学）</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124600168.png" alt="image-20200702124600168"></p>
+<p>这个例子只用了2层的GCN，其中$\hat AXW^{(0)}$表示第一层，$\hat A \ {\rm ReLU}(\hat AXW^{(0)})W^{(1)}$表示第二层，再输入softmax函数，整个训练过程更新的参数是X，从表格中的数据也可以看出，GCN取得了非常不错的效果</p>
+<h4 id="基于知识图谱的图卷积"><a href="#基于知识图谱的图卷积" class="headerlink" title="基于知识图谱的图卷积"></a>基于知识图谱的图卷积</h4><h5 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h5><blockquote>
+<p>知识图谱是Google用于增强其搜索引擎功能的知识库。本质上, 知识图谱旨在描述真实世界中存在的各种实体或概念及其关系,其构成一张巨大的语义网络图，节点表示实体或概念，边则由属性或关系构成。现在的知识图谱已被用来泛指各种大规模的知识库。 </p>
+</blockquote>
+<p>如果你输入搜索引擎中国这个词，相应的会出来中国的一些特征，比如中国的城市、国土面积、人口等；中国和国家都可以看作是图中的一个节点，中国和国家的关系就可以看作是一条边</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702145803375.png" alt="image-20200702145803375"></p>
+<h5 id="图卷积：知识图谱"><a href="#图卷积：知识图谱" class="headerlink" title="图卷积：知识图谱"></a>图卷积：知识图谱</h5><p>先把数据用图表示出来，用户为U，实体为V，$y_{uv}=1$则表示用户u和实体v之间有联系，比如我对电影很感兴趣；每个实体u之间会有关系r，比如电影和教父；</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702150629999.png" alt="image-20200702150629999"></p>
+<p>将图卷积应用到知识图谱，可以用以下公式来进行更新，不断更新特征矩阵H直至其收敛即可，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D_u^{-\frac{1}{2}}\tilde A_u\tilde D_u^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad</script><p>那么我们怎么把实体推荐给用户呢？我们又怎么知道用户是不是对这个实体感兴趣呢？</p>
+<p>（1）我们可以针对每个用户再新建一个图，先引入一个函数$S_u(\cdot)$，表示这条边（关系）对用户的重要性；</p>
+<p>（2）再把原来的实体矩阵变成一个有权重的矩阵，比如边$r_1$输入函数$S_u(\cdot)$，得到$S_u(r_1)$，就是新的关系值。<u>每个用户都有一个邻接矩阵，再对每个用户的邻接矩阵进行训练，就可以得出用户到底对哪个电影感兴趣</u>；</p>
+<p>（3）图卷积；</p>
+<p>（4）<strong>标签顺滑</strong>，比如对于一个动物，机器可以很自信地确定这个动物到底是猫还是狗，输出值只有0或者1；由于机器过于自信，可能会导致很多额外的误差，我们现在就可以把这个值改成0.1或者0.9，就可以得到更好的结果。</p>
+<p>总结：先新建一个图（knowledge graph，KG），再把用户对感兴趣的实体新建一个权重矩阵，再进行图卷积和标签顺滑。那么现在我们的损失函数就有了一些小变化，结合了图卷积和标签顺滑，即</p>
+<script type="math/tex; mode=display">
+L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702153035542.png" alt="image-20200702153035542"></p>
+<p>下面我们将简要叙述这个训练的过程，图中的水平虚线表示decision boundary：</p>
+<p>（a）其中蓝色的点表示用户感兴趣的点（observed）；在其下方有一些其他的点（unobserved），我们希望把黄色的点（被黄色方框围住）就推荐给用户，让用户去选择，而剩下蓝色的点，则是用户不感兴趣的，不推荐给用户；</p>
+<p>（b）一共要进行两层的训练，对于第一层的训练结果，我们现在把其中两个黄色的点就推荐给用户了；</p>
+<p>（c）对于第二层的训练结果，就把其中的三个点推荐给用户了，但最左端的点也在decision boundary之上，也会被推荐给用户，模型在训练过程中会存在一定的误差，</p>
+<p>（d）这里就开始对第二个用户的模型进行训练；</p>
+<p>（e）这是加入了标签顺滑（label smoothing）的结果，推荐会更加精准，在图中，我们可以看到用户不感兴趣的点进行下移，用户感兴趣的点（a图中的黄色方框部分）则上移，尽量移到decision boundary之上</p>
+<h5 id="Label-Smoothing-Regularization"><a href="#Label-Smoothing-Regularization" class="headerlink" title="Label Smoothing Regularization"></a>Label Smoothing Regularization</h5><p>（1）在下图的能量方程中，$l_u(e_i)$表示用户u是否对实体$e_i$感兴趣（值为0或1），能量方程可以把相同的label保存下来，把不同的label就去掉了；（2）再找到使得能量方程取得最小值的$l_u^<em>$；（3）再通过KL距离函数求得$y_{uv}$和$\hat l_u^</em>(v)$之间的相似度，也是求最小值，可得$R(A)$，再代入损失函数</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702155919603.png" alt="image-20200702155919603"></p>
+<p>$\lambda$可以不断做调整，来找到损失函数的最小值</p>
+<h5 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h5><p>输入为知识图谱G，新建一个邻接矩阵M后；（2）再把用户对感兴趣的实体新建一个权重矩阵（输入mapping函数S），再进行图卷积更新特征矩阵，即$e_u^{(i)}\leftarrow \sigma (\cdot)$；（3）标签顺滑，更新$l_u^{(i)}(e)$，再代入损失函数中的 J；不断地进行这个过程，只到损失函数收敛为止</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702162309077.png" alt="image-20200702162309077"></p>
+<h5 id="结果演示"><a href="#结果演示" class="headerlink" title="结果演示"></a>结果演示</h5><p>下图是几种推荐算法的比较，推荐给用户Top-K的实体，看最后的准确率如何，可以发现GCN的结构取得了非常不错的效果。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702163653325.png" alt="image-20200702163653325"></p>
+<p>下面是一些可视化的对比，图1是推荐食物，可以看到GCN的结构取得了很好的效果；图2表示取不同的$\lambda$，得到的$R(A_u)$的值；图三对比了不同算法的运行速度，可以看到KGCN用时最少，速度最快</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702163938245.png" alt="image-20200702163938245"></p>
+<h4 id="研究方向"><a href="#研究方向" class="headerlink" title="研究方向"></a>研究方向</h4><h5 id="人体姿势识别"><a href="#人体姿势识别" class="headerlink" title="人体姿势识别"></a>人体姿势识别</h5><p> 人体的关节就可以看作是一个节点，关节之间的骨骼就可以看作是边，结合起来就是一张图；</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702165243019.png" alt="image-20200702165243019"></p>
+<p>核心框架：输入为一个视频，视频的每个时间序列都是一张图像，每一帧的视频取出来就是一张图像；把每一帧的图像先构建成一个骨骼和关节点图，再通过时间的顺序把每一帧对应的关节点都连接起来，形成一张大图，再输入GCN进行训练，通过分类器识别出这是一个跑步的动作。</p>
+<p>在上图中的左下角中，横轴表示每一帧的骨骼图，纵轴表示时间，把相应的骨骼节点连接起来，变成一张大图，再输入GCN进行训练。</p>
+<p>下图为实验结果，</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702170313601.png" alt="image-20200702170313601"></p>
+<h5 id="超图"><a href="#超图" class="headerlink" title="超图"></a>超图</h5><p>超图是图的一个基本概念，下图中的图有8个点，选择不同的点，可以有多种排列组合。如果选一个点，一共有个点可以选择，那么就有8种（$C_n^1$）组合。如果我选两个点，比如$n_3,n_8$，这两个点构成一个子图，就有6种（$C_n^2$）组合。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702170734267.png" alt="image-20200702170734267"></p>
+<p>选出不同的点后，得到不同的邻接矩阵，再进行训练。每一层选出不同组合的邻接矩阵再输入GCN进行图卷积。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093426889.png" alt="image-20200703093426889"></p>
+<p>超图卷积的核心公式就是下图中的公式(11)</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093638629.png" alt="image-20200703093638629"></p>
+<h5 id="图构建"><a href="#图构建" class="headerlink" title="图构建"></a>图构建</h5><p>对于给定的数据，新建图之后再输入GCN进行分类，我们要怎么画成一张图呢？</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093921828.png" alt="image-20200703093921828"></p>
+<p>在上图中，observed dynamics表示5个分子的运动轨迹图，我们的目标是构建新图，并预测分子的下一步轨迹；对于人体的动作，我们也得通过学习才能知道，到底是以左手还是右手为重心。</p>
+<p>在下图中，展示了图构建的大概过程，编码器和解码器都是GCNs。对于编码器部分，先进行了从边到节点($v\rightarrow e$)的过程，再从节点到边($e\rightarrow v$)，再从边到节点($v\rightarrow e$)；对于解码器，先从边到点，再从点到边，进行图卷积，最后再进行分类，得到下一步的运动轨迹。</p>
+<p>其中x表示节点，z表示x这个点与i、j相连的概率，z是一个概率分布。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703095234400.png" alt="image-20200703095234400"></p>
+<p>预测下一步运动轨迹：在下图中，我们可以看出预测图和真实值之间差距并不大，</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703100157533.png" alt="image-20200703100157533"></p>
+<h5 id="子图嵌入"><a href="#子图嵌入" class="headerlink" title="子图嵌入"></a>子图嵌入</h5><p>在原来的GCN中，我们每次只会考虑一个点；如果我们现在把多个点（关联性很大的点）表示成一个点，再输入GCN，效果会不会更好呢？这也是一个很火的研究方向。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703101250920.png" alt="image-20200703101250920"></p>
+<h4 id="场景应用"><a href="#场景应用" class="headerlink" title="场景应用"></a>场景应用</h4><h5 id="用户推荐系统"><a href="#用户推荐系统" class="headerlink" title="用户推荐系统"></a>用户推荐系统</h5><p>在搜索中推荐相关联的朋友给你。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102812106.png" alt="image-20200703102812106"></p>
+<h5 id="舆情监控和控制"><a href="#舆情监控和控制" class="headerlink" title="舆情监控和控制"></a>舆情监控和控制</h5><p>每个国家都需要舆情监控，比如关于假消息和真消息的分类或者监控，在网络传播过程中找到假消息源，进行封锁等，用GCN都可以起到很好的作用。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102736481.png" alt="image-20200703102736481"></p>
+<h5 id="自动驾驶"><a href="#自动驾驶" class="headerlink" title="自动驾驶"></a>自动驾驶</h5><p>所有的车都有一个车载系统，每个车载系统之间进行联网，就可以构成非常大的图。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102850234.png" alt="image-20200703102850234"></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703103300945.png" alt="image-20200703103300945"></p>
+<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><p>本文是观看杨栋老师在B上讲解的直播课程《基于知识图谱和图卷积神经网络的应用和开发》的笔记，直播地址：<a href="https://live.bilibili.com/11869202" target="_blank" rel="external">https://live.bilibili.com/11869202</a> ，贪心科技官网录播回放：<a href="https://www.greedyai.com/course/139" target="_blank" rel="external">https://www.greedyai.com/course/139</a></p>
+]]></content>
+      <categories>
+        <category>知识图谱</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>知识图谱</tag>
+        <tag>GCN</tag>
       </tags>
   </entry>
   <entry>
@@ -1751,151 +1958,6 @@ S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（M
         <tag>SMP</tag>
         <tag>消息传递</tag>
         <tag>共享存储器</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>基于知识图谱和GCN的应用和开发</title>
-    <url>/2020/07/03/%E5%9F%BA%E4%BA%8E%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E5%92%8C%E5%9B%BE%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E5%BC%80%E5%8F%91/</url>
-    <content><![CDATA[<h4 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h4><p>深度学习的主要思想有三个：</p>
-<ul>
-<li><p>权重分配；</p>
-</li>
-<li><p>层级结构：每一层训练的结果都依赖于上一层；</p>
-</li>
-<li><p>欧几里得空间数据：比如图像数据，可以通过二维坐标(x,y)进行表示，语音信号是一个一维的数据，围棋的话也是一个二维数据，目前的大多数数据都是可以用欧几里得空间数据进行表示的，即可以投影到坐标轴上</p>
-</li>
-</ul>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702101528758.png" alt="image-20200702101528758"></p>
-<p>但在实际生活中，有很多数据并不能用欧几里得数据来进行表示，比如在微信上，每个人都相当于一个节点，朋友之间的关系相当于是一条边，相当于图，没有任何的空间信息，是<u>非欧几里得的空间结构</u>（eg. 社交网络、科学网络等） </p>
-<p>那要怎么对这类信息进行训练呢？传统的深度学习方法（CNN和RNN等）并没有办法训练这类数据，因此就产生了图卷积（GCN）</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702103428339.png" alt="image-20200702103428339"></p>
-<h4 id="图卷积背景和基本框架"><a href="#图卷积背景和基本框架" class="headerlink" title="图卷积背景和基本框架"></a>图卷积背景和基本框架</h4><h5 id="图卷积发展历史"><a href="#图卷积发展历史" class="headerlink" title="图卷积发展历史"></a>图卷积发展历史</h5><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104325966.png" alt="image-20200702104325966"></p>
-<h5 id="邻接矩阵"><a href="#邻接矩阵" class="headerlink" title="邻接矩阵"></a>邻接矩阵</h5><p>无向图的邻接矩阵是对角矩阵</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104743073.png" alt="image-20200702104743073"></p>
-<h5 id="图卷积基本框架"><a href="#图卷积基本框架" class="headerlink" title="图卷积基本框架"></a>图卷积基本框架</h5><p>在下图中，A为邻接矩阵，H为特征矩阵（$N\times F$），，N为节点个数，F表示每个节点的特征数；比如我们每个人在社交网络中都是一个节点，也有一些对应的特征，名字、年龄、出生日期，这些特征就构成了这个特征矩阵$N\times F$；</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104938456.png" alt="image-20200702104938456"></p>
-<p>在这个基本框架中，input为邻接矩阵A，第一个hidden layer把特征矩阵点乘到每一个节点上进行训练，再进入下一层，再进行点乘，…，一直不断重复这个过程。每次训练更新的参数是特征矩阵，最后的output和input是一样的，图结构没有发生变化，但特征矩阵达到了收敛（基本上不会发生变化），最后再对图中的每个节点进行分类；</p>
-<p><span style="color: red">把节点和特征矩阵进行点乘，就实现了信息在节点和社区间进行传递</span></p>
-<h4 id="图卷积"><a href="#图卷积" class="headerlink" title="图卷积"></a>图卷积</h4><p>那么下面我们将具体介绍节点和特征矩阵是怎样进行点乘的，怎样一步步进行训练。</p>
-<h5 id="回顾CNN"><a href="#回顾CNN" class="headerlink" title="回顾CNN"></a>回顾CNN</h5><p>我们先回顾一下CNN是如何做卷积操作的，如下图所示，</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702110939157.png" alt="image-20200702110939157"></p>
-<h5 id="图卷积-1"><a href="#图卷积-1" class="headerlink" title="图卷积"></a>图卷积</h5><p>这是卷积操作的参数更新公式，</p>
-<script type="math/tex; mode=display">
-h_i^{l+1}=\sigma(W_0^{(l)}h_0^{(l)}+W_1^{(l)}h_1^{(l)}+\cdot\cdot\cdot+W_8^{(l)}h_8^{(l)})</script><p>图卷积相比较于卷积，在$h_0^{(l)}W_0^{(l)}$的基础上，多了邻接矩阵的信息$\frac{1}{c_{ij}}h_j^{(l)}$，<span style="color: red">权重矩阵W也没有卷积操作那么重要</span>，其参数更新公式为，</p>
-<script type="math/tex; mode=display">
-h_i^{l+1}=\sigma(h_0^{(l)}W_0^{(l)} + 
-\sum_{j\in N_i} \frac{1}{c_{ij}}h_j^{(l)}W_1^{(l)})</script><p>更新参数的时候，通过周围的节点来更新该节点（下图中红色节点），与该节点不直接相连的节点无关</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702111915112.png" alt="image-20200702111915112"></p>
-<p>那么我们就可以通过以下公式来更新特征矩阵，</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde AH^{(l)}W^{(l)})</script><p>其中A为邻接矩阵，H为特征矩阵，W为权重矩阵，本次的特征矩阵$H^{(l+1)}$根据上一次的特征矩阵$H^{(l)}$生成；</p>
-<p>如果只根据邻接矩阵来更新H，会出现一些问题：</p>
-<ul>
-<li>无法提取自身信息，邻接矩阵对角线上的元素始终是0（如果没有自环），自身的信息在训练过程中是无法考虑进去的；</li>
-<li>$\tilde A$没有归一化</li>
-</ul>
-<p>我们需要把参数更新公式进行一些变化，首先解决邻接矩阵对角线元素为0的问题，</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma((\tilde D-\tilde A)H^{(l)}W^{(l)})</script><p><span style="color: red">其中</span>矩阵$\tilde D$是一个对角矩阵（degree matrix），对角线上的数值表示了每个节点所相连的边数。</p>
-<p>归一化处理主要列出两种方式，要根据不同的输入数据来进行选择，其中第一种归一化方式比较常用</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)\\
-H^{(l+1)}=\sigma(\tilde D^{-1}(\tilde D-\tilde A)\tilde H^{(l)}W^{(l)})</script><h5 id="图卷积的计算"><a href="#图卷积的计算" class="headerlink" title="图卷积的计算"></a>图卷积的计算</h5><p>下面我们将一个具体的例子来讲述公式(1),</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702114057283.png" alt="image-20200702114057283"></p>
-<p>在上图中，degree matrix表示了每个节点所相连的边数，比如2表示1号节点相连的边有2条，该对角矩阵也就是前文提到的$\tilde D$，$(\tilde D-\tilde A)$就是laplacian matrix；</p>
-<p>我们将特征矩阵$H_0$和权重矩阵W进行随机初始化，再代入公式(1)，即可得出训练完成的结果$H_N$，再求出每一列的最大值，即MaxValue$(H(i))=[1,1,4,1,1,4]$，即分类结果，其中第1，2，4，5个节点分类为1，第3，6个节点分类为4，把整个图的节点分成了两类；</p>
-<p>那么为什么可以这样分类呢？我们可以回到原图labeled graph中，节点1，2，5相当于是一个全连接图，可以当作一个类别，而节点4，5都和三个节点相连，有三条边，也可以当作是一个类别；节点3，6就没有前几个节点那样关系比较紧密，因此被分成了第二个类别</p>
-<p>我们可以得出以下两点：</p>
-<ul>
-<li>对于随机产生的特征矩阵，依靠图自身的结构，就可以得到一个很好的分类效果；</li>
-<li>在这个例子中，进行10次运算，特征矩阵就收敛了，收敛速度非常快</li>
-</ul>
-<p>再来回顾下这个核心公式，所有的图卷积的变化和应用都离不开这个公式。W不那么重要，特征矩阵$H^{(l)}$表示每个人根据自己的实际特征来进行特征提取；邻接矩阵$\tilde A$表示每个人（节点）之间的关系，关系不一样就会构建出不同的图</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)</script><p><span style="color: red">那么我们要在图卷积进行创新的话，就只有改变邻接矩阵A和特征矩阵H，即如何新建这个图、如何提取这个特征；由于机器学习和深度学习技术的不断发展，特征提取的方法已经非常成熟，<u>关键的创新点还是如何新建这个图</u></span></p>
-<h5 id="边信息嵌入"><a href="#边信息嵌入" class="headerlink" title="边信息嵌入"></a>边信息嵌入</h5><p>图中的边信息有时候是包含权重的，我们也应该把边的信息值也考虑进去，即把原图转化为一个线图；在下图中，原图中节点为i，j，m，边为a，b，c，转化为线图后，节点变成a，b，c，边为i，j，m，把边变成了点，把点变成了边</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702122014466.png" alt="image-20200702122014466"></p>
-<p>经过两次不同的输入$h_{(i,j)}^l,h_j^{l+1}$，分别对应原图和线图，这样训练就可以把边的信息也整合进去</p>
-<h5 id="Example-1-半监督图分类"><a href="#Example-1-半监督图分类" class="headerlink" title="Example 1: 半监督图分类"></a>Example 1: 半监督图分类</h5><p>在下图中，黑色圈点表示已经知道了分类的类别，其他的没有被黑色线条包围的点表示没有进行分类，目标是预测未分类的节点的类别，这里我们还定义了一个损失函数L，Z表示GCN的输出结果（上文的公式(1)）</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702123720321.png" alt="image-20200702123720321"></p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124159182.png" alt="image-20200702124159182"></p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124253302.png" alt="image-20200702124253302"></p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124330022.png" alt="image-20200702124330022"></p>
-<p>得到实验结果，</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124418966.png" alt="image-20200702124418966"></p>
-<h5 id="Example-2-科学家网络"><a href="#Example-2-科学家网络" class="headerlink" title="Example 2: 科学家网络"></a>Example 2: 科学家网络</h5><p>每篇论文都会有一个题目，互相引用这篇论文则会形成一个关系，我们的任务是根据论文的题目来预测论文的类别（统计、物理、数学）</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124600168.png" alt="image-20200702124600168"></p>
-<p>这个例子只用了2层的GCN，其中$\hat AXW^{(0)}$表示第一层，$\hat A \ {\rm ReLU}(\hat AXW^{(0)})W^{(1)}$表示第二层，再输入softmax函数，整个训练过程更新的参数是X，从表格中的数据也可以看出，GCN取得了非常不错的效果</p>
-<h4 id="基于知识图谱的图卷积"><a href="#基于知识图谱的图卷积" class="headerlink" title="基于知识图谱的图卷积"></a>基于知识图谱的图卷积</h4><h5 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h5><blockquote>
-<p>知识图谱是Google用于增强其搜索引擎功能的知识库。本质上, 知识图谱旨在描述真实世界中存在的各种实体或概念及其关系,其构成一张巨大的语义网络图，节点表示实体或概念，边则由属性或关系构成。现在的知识图谱已被用来泛指各种大规模的知识库。 </p>
-</blockquote>
-<p>如果你输入搜索引擎中国这个词，相应的会出来中国的一些特征，比如中国的城市、国土面积、人口等；中国和国家都可以看作是图中的一个节点，中国和国家的关系就可以看作是一条边</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702145803375.png" alt="image-20200702145803375"></p>
-<h5 id="图卷积：知识图谱"><a href="#图卷积：知识图谱" class="headerlink" title="图卷积：知识图谱"></a>图卷积：知识图谱</h5><p>先把数据用图表示出来，用户为U，实体为V，$y_{uv}=1$则表示用户u和实体v之间有联系，比如我对电影很感兴趣；每个实体u之间会有关系r，比如电影和教父；</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702150629999.png" alt="image-20200702150629999"></p>
-<p>将图卷积应用到知识图谱，可以用以下公式来进行更新，不断更新特征矩阵H直至其收敛即可，</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde D_u^{-\frac{1}{2}}\tilde A_u\tilde D_u^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad</script><p>那么我们怎么把实体推荐给用户呢？我们又怎么知道用户是不是对这个实体感兴趣呢？</p>
-<p>（1）我们可以针对每个用户再新建一个图，先引入一个函数$S_u(\cdot)$，表示这条边（关系）对用户的重要性；</p>
-<p>（2）再把原来的实体矩阵变成一个有权重的矩阵，比如边$r_1$输入函数$S_u(\cdot)$，得到$S_u(r_1)$，就是新的关系值。<u>每个用户都有一个邻接矩阵，再对每个用户的邻接矩阵进行训练，就可以得出用户到底对哪个电影感兴趣</u>；</p>
-<p>（3）图卷积；</p>
-<p>（4）<strong>标签顺滑</strong>，比如对于一个动物，机器可以很自信地确定这个动物到底是猫还是狗，输出值只有0或者1；由于机器过于自信，可能会导致很多额外的误差，我们现在就可以把这个值改成0.1或者0.9，就可以得到更好的结果。</p>
-<p>总结：先新建一个图（knowledge graph，KG），再把用户对感兴趣的实体新建一个权重矩阵，再进行图卷积和标签顺滑。那么现在我们的损失函数就有了一些小变化，结合了图卷积和标签顺滑，即</p>
-<script type="math/tex; mode=display">
-L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702153035542.png" alt="image-20200702153035542"></p>
-<p>下面我们将简要叙述这个训练的过程，图中的水平虚线表示decision boundary：</p>
-<p>（a）其中蓝色的点表示用户感兴趣的点（observed）；在其下方有一些其他的点（unobserved），我们希望把黄色的点（被黄色方框围住）就推荐给用户，让用户去选择，而剩下蓝色的点，则是用户不感兴趣的，不推荐给用户；</p>
-<p>（b）一共要进行两层的训练，对于第一层的训练结果，我们现在把其中两个黄色的点就推荐给用户了；</p>
-<p>（c）对于第二层的训练结果，就把其中的三个点推荐给用户了，但最左端的点也在decision boundary之上，也会被推荐给用户，模型在训练过程中会存在一定的误差，</p>
-<p>（d）这里就开始对第二个用户的模型进行训练；</p>
-<p>（e）这是加入了标签顺滑（label smoothing）的结果，推荐会更加精准，在图中，我们可以看到用户不感兴趣的点进行下移，用户感兴趣的点（a图中的黄色方框部分）则上移，尽量移到decision boundary之上</p>
-<h5 id="Label-Smoothing-Regularization"><a href="#Label-Smoothing-Regularization" class="headerlink" title="Label Smoothing Regularization"></a>Label Smoothing Regularization</h5><p>（1）在下图的能量方程中，$l_u(e_i)$表示用户u是否对实体$e_i$感兴趣（值为0或1），能量方程可以把相同的label保存下来，把不同的label就去掉了；（2）再找到使得能量方程取得最小值的$l_u^<em>$；（3）再通过KL距离函数求得$y_{uv}$和$\hat l_u^</em>(v)$之间的相似度，也是求最小值，可得$R(A)$，再代入损失函数</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702155919603.png" alt="image-20200702155919603"></p>
-<p>$\lambda$可以不断做调整，来找到损失函数的最小值</p>
-<h5 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h5><p>输入为知识图谱G，新建一个邻接矩阵M后；（2）再把用户对感兴趣的实体新建一个权重矩阵（输入mapping函数S），再进行图卷积更新特征矩阵，即$e_u^{(i)}\leftarrow \sigma (\cdot)$；（3）标签顺滑，更新$l_u^{(i)}(e)$，再代入损失函数中的 J；不断地进行这个过程，只到损失函数收敛为止</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702162309077.png" alt="image-20200702162309077"></p>
-<h5 id="结果演示"><a href="#结果演示" class="headerlink" title="结果演示"></a>结果演示</h5><p>下图是几种推荐算法的比较，推荐给用户Top-K的实体，看最后的准确率如何，可以发现GCN的结构取得了非常不错的效果。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702163653325.png" alt="image-20200702163653325"></p>
-<p>下面是一些可视化的对比，图1是推荐食物，可以看到GCN的结构取得了很好的效果；图2表示取不同的$\lambda$，得到的$R(A_u)$的值；图三对比了不同算法的运行速度，可以看到KGCN用时最少，速度最快</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702163938245.png" alt="image-20200702163938245"></p>
-<h4 id="研究方向"><a href="#研究方向" class="headerlink" title="研究方向"></a>研究方向</h4><h5 id="人体姿势识别"><a href="#人体姿势识别" class="headerlink" title="人体姿势识别"></a>人体姿势识别</h5><p> 人体的关节就可以看作是一个节点，关节之间的骨骼就可以看作是边，结合起来就是一张图；</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702165243019.png" alt="image-20200702165243019"></p>
-<p>核心框架：输入为一个视频，视频的每个时间序列都是一张图像，每一帧的视频取出来就是一张图像；把每一帧的图像先构建成一个骨骼和关节点图，再通过时间的顺序把每一帧对应的关节点都连接起来，形成一张大图，再输入GCN进行训练，通过分类器识别出这是一个跑步的动作。</p>
-<p>在上图中的左下角中，横轴表示每一帧的骨骼图，纵轴表示时间，把相应的骨骼节点连接起来，变成一张大图，再输入GCN进行训练。</p>
-<p>下图为实验结果，</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702170313601.png" alt="image-20200702170313601"></p>
-<h5 id="超图"><a href="#超图" class="headerlink" title="超图"></a>超图</h5><p>超图是图的一个基本概念，下图中的图有8个点，选择不同的点，可以有多种排列组合。如果选一个点，一共有个点可以选择，那么就有8种（$C_n^1$）组合。如果我选两个点，比如$n_3,n_8$，这两个点构成一个子图，就有6种（$C_n^2$）组合。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702170734267.png" alt="image-20200702170734267"></p>
-<p>选出不同的点后，得到不同的邻接矩阵，再进行训练。每一层选出不同组合的邻接矩阵再输入GCN进行图卷积。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093426889.png" alt="image-20200703093426889"></p>
-<p>超图卷积的核心公式就是下图中的公式(11)</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093638629.png" alt="image-20200703093638629"></p>
-<h5 id="图构建"><a href="#图构建" class="headerlink" title="图构建"></a>图构建</h5><p>对于给定的数据，新建图之后再输入GCN进行分类，我们要怎么画成一张图呢？</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093921828.png" alt="image-20200703093921828"></p>
-<p>在上图中，observed dynamics表示5个分子的运动轨迹图，我们的目标是构建新图，并预测分子的下一步轨迹；对于人体的动作，我们也得通过学习才能知道，到底是以左手还是右手为重心。</p>
-<p>在下图中，展示了图构建的大概过程，编码器和解码器都是GCNs。对于编码器部分，先进行了从边到节点($v\rightarrow e$)的过程，再从节点到边($e\rightarrow v$)，再从边到节点($v\rightarrow e$)；对于解码器，先从边到点，再从点到边，进行图卷积，最后再进行分类，得到下一步的运动轨迹。</p>
-<p>其中x表示节点，z表示x这个点与i、j相连的概率，z是一个概率分布。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703095234400.png" alt="image-20200703095234400"></p>
-<p>预测下一步运动轨迹：在下图中，我们可以看出预测图和真实值之间差距并不大，</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703100157533.png" alt="image-20200703100157533"></p>
-<h5 id="子图嵌入"><a href="#子图嵌入" class="headerlink" title="子图嵌入"></a>子图嵌入</h5><p>在原来的GCN中，我们每次只会考虑一个点；如果我们现在把多个点（关联性很大的点）表示成一个点，再输入GCN，效果会不会更好呢？这也是一个很火的研究方向。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703101250920.png" alt="image-20200703101250920"></p>
-<h4 id="场景应用"><a href="#场景应用" class="headerlink" title="场景应用"></a>场景应用</h4><h5 id="用户推荐系统"><a href="#用户推荐系统" class="headerlink" title="用户推荐系统"></a>用户推荐系统</h5><p>在搜索中推荐相关联的朋友给你。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102812106.png" alt="image-20200703102812106"></p>
-<h5 id="舆情监控和控制"><a href="#舆情监控和控制" class="headerlink" title="舆情监控和控制"></a>舆情监控和控制</h5><p>每个国家都需要舆情监控，比如关于假消息和真消息的分类或者监控，在网络传播过程中找到假消息源，进行封锁等，用GCN都可以起到很好的作用。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102736481.png" alt="image-20200703102736481"></p>
-<h5 id="自动驾驶"><a href="#自动驾驶" class="headerlink" title="自动驾驶"></a>自动驾驶</h5><p>所有的车都有一个车载系统，每个车载系统之间进行联网，就可以构成非常大的图。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102850234.png" alt="image-20200703102850234"></p>
-<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703103300945.png" alt="image-20200703103300945"></p>
-<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><p>本文是观看杨栋老师在B上讲解的直播课程《基于知识图谱和图卷积神经网络的应用和开发》的笔记，直播地址：<a href="https://live.bilibili.com/11869202" target="_blank" rel="external">https://live.bilibili.com/11869202</a> ，贪心科技官网录播回放：<a href="https://www.greedyai.com/course/139" target="_blank" rel="external">https://www.greedyai.com/course/139</a></p>
-]]></content>
-      <categories>
-        <category>知识图谱</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>知识图谱</tag>
-        <tag>GCN</tag>
       </tags>
   </entry>
   <entry>
@@ -2308,6 +2370,66 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
       </tags>
   </entry>
   <entry>
+    <title>计算机体系结构重要考点</title>
+    <url>/2020/03/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%87%8D%E8%A6%81%E8%80%83%E7%82%B9/</url>
+    <content><![CDATA[<h4 id="同时多线程"><a href="#同时多线程" class="headerlink" title="同时多线程"></a>同时多线程</h4><p>线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。</p>
+<p>线程级并行：指并行执行两个或两个以上的线程。</p>
+<p>同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种改进。通过寄存器命名和动态调度机制，来自各个独立线程的多条指令可以同时流出，而不用考虑它们之间的相互依赖关系。</p>
+<h5 id="实现多线程的主要方法"><a href="#实现多线程的主要方法" class="headerlink" title="实现多线程的主要方法"></a>实现多线程的主要方法</h5><p><u>细粒度多线程</u>：在每条指令之间都可以进行线程的切换，从而使得多个线程可以交替执行。</p>
+<ul>
+<li>优点：能够隐藏由长时间停顿带来的吞吐率的损失，也能够隐藏由段时间停顿带来的损失。</li>
+<li>缺点：减慢了单个线程的执行。即使没有任何停顿的线程也不能连续执行，而且会因为其他线程的指令的插入执行而被延迟。</li>
+</ul>
+<p><u>粗粒度多线程</u>：线程之间的切换只发生在时间较长的停顿出现的时候。</p>
+<ul>
+<li>优点：减少了切换次数，很大程度上也不会降低单个线程的执行速度。</li>
+<li>缺点：减少吞吐率损失的能力有限。由于实现粗粒度多线程的CPU只能执行单个线程的指令，不能交叉执行多个线程，因此当发生停顿时，流水线必须排空或暂停。</li>
+</ul>
+<h4 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h4><h5 id="写策略"><a href="#写策略" class="headerlink" title="写策略"></a>写策略</h5><p>写直达法：在执行写操作时，不仅把数据写入Cathe中相应的块，而且也写入下一级存储器。减少CPU写停顿的常用方法是，采用写缓冲器。</p>
+<p>写回法：只把数据写入Cathe中相应的块，不写入下一级存储器。这些最新数据只有在相应的块被替换出时，才被写回下一级存储器。速度快，要设置“修改位”。</p>
+<p>写不命中时，</p>
+<p>按写分配法：写不命中时，把所写单元的块从主存中调入Cathe，然后再进行写入。与<u>写回法</u>配合。</p>
+<p>不按写分配法：写不命中时，直接写入下一级存储器而不将相应的块调入Cathe。</p>
+<h5 id="三种类型的Cathe不命中"><a href="#三种类型的Cathe不命中" class="headerlink" title="三种类型的Cathe不命中"></a>三种类型的Cathe不命中</h5><p><u>强制性不命中</u>：当第一次访问一个快时，该块不在Cathe中，需从下一级存储器中调入Cathe。（冷启动访问不命中，首次访问不命中）</p>
+<p><u>容量不命中</u>：如果<u>程序执行时所需的块</u>不能全部调入Cathe中，当某些块被调出后，若又重新被访问，就会发生不命中。</p>
+<p><u>冲突不命中</u>：在组相联或者直接映像Cathe中，若太多的块映像到同一组（块）中，则会出现该组中某个块被别的块替换掉，然后又重新被访问的情况。（碰撞不命中，冲突不命中）</p>
+<p>关系：</p>
+<ul>
+<li><strong>相联度</strong>越高，冲突不命中就越少；</li>
+<li>强制性不命中和容量不命中不受相联度的影响；</li>
+<li>强制性不命中不受<strong>Cathe容量</strong>的影响，但容量不命中却随着容量的增加而减少。</li>
+</ul>
+<h4 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h4><h5 id="I-O系统的可靠性、可用性和可信性"><a href="#I-O系统的可靠性、可用性和可信性" class="headerlink" title="I/O系统的可靠性、可用性和可信性"></a>I/O系统的可靠性、可用性和可信性</h5><p>可靠性：系统从某个初始参考点开始<u>一直连续提供服务的能力</u>，用平均无故障时间（<strong>MTTF</strong>）来衡量。MTTF的导数是失效率。系统总体的失效率是各部件的失效率之和。系统<u>中断服务的时间</u>用平均修复时间（<strong>MTTR</strong>）来衡量。</p>
+<p>可用性：系统正常工作的时间在连续两次服务间隔时间中所占的比例。</p>
+<script type="math/tex; mode=display">
+可用性=\frac{MTTF}{MTTF+MTTR}</script><p>   平均失效间隔时间，MTBF</p>
+<script type="math/tex; mode=display">
+MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u>的。</p>
+<h5 id="廉价磁盘冗余阵列-RAID"><a href="#廉价磁盘冗余阵列-RAID" class="headerlink" title="廉价磁盘冗余阵列 (RAID)"></a>廉价磁盘冗余阵列 (RAID)</h5><p>RAID0：<u>无冗余和无校验</u>的磁盘阵列，成本最低。</p>
+<p>RAID1：<u>镜像</u>磁盘阵列。</p>
+<p>RAID2：采用纠错的<u>海明码</u>的磁盘阵列，冗余盘数量为$log_2m$，m为数据盘的个数。</p>
+<p>RAID3：<u>位</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID4：<u>块</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
+<p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
+<p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
+<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。<br>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
+]]></content>
+      <categories>
+        <category>计算机体系结构</category>
+      </categories>
+      <tags>
+        <tag>计算机体系结构</tag>
+        <tag>机群</tag>
+        <tag>MPP</tag>
+        <tag>SMP</tag>
+        <tag>消息传递</tag>
+        <tag>共享存储器</tag>
+        <tag>同时多线程</tag>
+        <tag>RAID</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>软件工程学概述</title>
     <url>/2020/03/08/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%AD%A6%E6%A6%82%E8%BF%B0/</url>
     <content><![CDATA[<h4 id="软件危机"><a href="#软件危机" class="headerlink" title="软件危机"></a>软件危机</h4><ol>
@@ -2471,66 +2593,6 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
         <tag>软件危机</tag>
         <tag>软件生命周期</tag>
         <tag>软件工程方法学</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>计算机体系结构重要考点</title>
-    <url>/2020/03/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%87%8D%E8%A6%81%E8%80%83%E7%82%B9/</url>
-    <content><![CDATA[<h4 id="同时多线程"><a href="#同时多线程" class="headerlink" title="同时多线程"></a>同时多线程</h4><p>线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。</p>
-<p>线程级并行：指并行执行两个或两个以上的线程。</p>
-<p>同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种改进。通过寄存器命名和动态调度机制，来自各个独立线程的多条指令可以同时流出，而不用考虑它们之间的相互依赖关系。</p>
-<h5 id="实现多线程的主要方法"><a href="#实现多线程的主要方法" class="headerlink" title="实现多线程的主要方法"></a>实现多线程的主要方法</h5><p><u>细粒度多线程</u>：在每条指令之间都可以进行线程的切换，从而使得多个线程可以交替执行。</p>
-<ul>
-<li>优点：能够隐藏由长时间停顿带来的吞吐率的损失，也能够隐藏由段时间停顿带来的损失。</li>
-<li>缺点：减慢了单个线程的执行。即使没有任何停顿的线程也不能连续执行，而且会因为其他线程的指令的插入执行而被延迟。</li>
-</ul>
-<p><u>粗粒度多线程</u>：线程之间的切换只发生在时间较长的停顿出现的时候。</p>
-<ul>
-<li>优点：减少了切换次数，很大程度上也不会降低单个线程的执行速度。</li>
-<li>缺点：减少吞吐率损失的能力有限。由于实现粗粒度多线程的CPU只能执行单个线程的指令，不能交叉执行多个线程，因此当发生停顿时，流水线必须排空或暂停。</li>
-</ul>
-<h4 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h4><h5 id="写策略"><a href="#写策略" class="headerlink" title="写策略"></a>写策略</h5><p>写直达法：在执行写操作时，不仅把数据写入Cathe中相应的块，而且也写入下一级存储器。减少CPU写停顿的常用方法是，采用写缓冲器。</p>
-<p>写回法：只把数据写入Cathe中相应的块，不写入下一级存储器。这些最新数据只有在相应的块被替换出时，才被写回下一级存储器。速度快，要设置“修改位”。</p>
-<p>写不命中时，</p>
-<p>按写分配法：写不命中时，把所写单元的块从主存中调入Cathe，然后再进行写入。与<u>写回法</u>配合。</p>
-<p>不按写分配法：写不命中时，直接写入下一级存储器而不将相应的块调入Cathe。</p>
-<h5 id="三种类型的Cathe不命中"><a href="#三种类型的Cathe不命中" class="headerlink" title="三种类型的Cathe不命中"></a>三种类型的Cathe不命中</h5><p><u>强制性不命中</u>：当第一次访问一个快时，该块不在Cathe中，需从下一级存储器中调入Cathe。（冷启动访问不命中，首次访问不命中）</p>
-<p><u>容量不命中</u>：如果<u>程序执行时所需的块</u>不能全部调入Cathe中，当某些块被调出后，若又重新被访问，就会发生不命中。</p>
-<p><u>冲突不命中</u>：在组相联或者直接映像Cathe中，若太多的块映像到同一组（块）中，则会出现该组中某个块被别的块替换掉，然后又重新被访问的情况。（碰撞不命中，冲突不命中）</p>
-<p>关系：</p>
-<ul>
-<li><strong>相联度</strong>越高，冲突不命中就越少；</li>
-<li>强制性不命中和容量不命中不受相联度的影响；</li>
-<li>强制性不命中不受<strong>Cathe容量</strong>的影响，但容量不命中却随着容量的增加而减少。</li>
-</ul>
-<h4 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h4><h5 id="I-O系统的可靠性、可用性和可信性"><a href="#I-O系统的可靠性、可用性和可信性" class="headerlink" title="I/O系统的可靠性、可用性和可信性"></a>I/O系统的可靠性、可用性和可信性</h5><p>可靠性：系统从某个初始参考点开始<u>一直连续提供服务的能力</u>，用平均无故障时间（<strong>MTTF</strong>）来衡量。MTTF的导数是失效率。系统总体的失效率是各部件的失效率之和。系统<u>中断服务的时间</u>用平均修复时间（<strong>MTTR</strong>）来衡量。</p>
-<p>可用性：系统正常工作的时间在连续两次服务间隔时间中所占的比例。</p>
-<script type="math/tex; mode=display">
-可用性=\frac{MTTF}{MTTF+MTTR}</script><p>   平均失效间隔时间，MTBF</p>
-<script type="math/tex; mode=display">
-MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u>的。</p>
-<h5 id="廉价磁盘冗余阵列-RAID"><a href="#廉价磁盘冗余阵列-RAID" class="headerlink" title="廉价磁盘冗余阵列 (RAID)"></a>廉价磁盘冗余阵列 (RAID)</h5><p>RAID0：<u>无冗余和无校验</u>的磁盘阵列，成本最低。</p>
-<p>RAID1：<u>镜像</u>磁盘阵列。</p>
-<p>RAID2：采用纠错的<u>海明码</u>的磁盘阵列，冗余盘数量为$log_2m$，m为数据盘的个数。</p>
-<p>RAID3：<u>位</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
-<p>RAID4：<u>块</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
-<p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
-<p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
-<p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
-<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。<br>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
-]]></content>
-      <categories>
-        <category>计算机体系结构</category>
-      </categories>
-      <tags>
-        <tag>计算机体系结构</tag>
-        <tag>机群</tag>
-        <tag>MPP</tag>
-        <tag>SMP</tag>
-        <tag>消息传递</tag>
-        <tag>共享存储器</tag>
-        <tag>同时多线程</tag>
-        <tag>RAID</tag>
       </tags>
   </entry>
 </search>
