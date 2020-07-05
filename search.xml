@@ -98,6 +98,85 @@ x^*=arg\mathop{min}_\limits {d(x^0,x')\leq\epsilon}L(x')</script><p>这里我们
       </tags>
   </entry>
   <entry>
+    <title>CCF-JSON查询</title>
+    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
+    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
+<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>CCF Answer</category>
+      </categories>
+      <tags>
+        <tag>CCF</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Backpropagation</title>
+    <url>/2020/06/06/Backpropagation/</url>
+    <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>这里我们再回顾一下gradient descent，对于网络中的参数$w_1,w_2,…,b_1,b_2,…$，通过求出相对应的梯度$\Delta L(\theta)$，再根据梯度更新网络结构中的参数</p>
+<script type="math/tex; mode=display">
+\theta ^i=\theta^{i-1}-\eta\Delta L(\theta^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606200029374.png" alt="image-20200606200029374" style="zoom:50%;"></p>
+<h4 id="Chain-Rule"><a href="#Chain-Rule" class="headerlink" title="Chain Rule"></a>Chain Rule</h4><p>backpropagation的核心思想就是链式法则</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606200855314.png" alt="image-20200606200855314" style="zoom:50%;"></p>
+<h4 id="Backpropagation"><a href="#Backpropagation" class="headerlink" title="Backpropagation"></a>Backpropagation</h4><p>这里我们先定义了一个loss函数，$l^n(\theta)$表示training data中$y^n$和$\hat y ^n$之间的loss，这个loss可以通过cross entropy或者MSE计算，再将所有的loss进行求和，得到$L(\theta)$</p>
+<script type="math/tex; mode=display">
+L(\theta)=\sum_{n=1}^Nl^n(\theta)</script><p><img src="/2020/06/06/Backpropagation/image-20200606200827557.png" alt="image-20200606200827557" style="zoom:50%;"></p>
+<p>对w求导，可得$\frac{\partial l^n}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}$，这里我们截取了网络中的部分结构，神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606201320644.png" alt="image-20200606201320644" style="zoom:50%;"></p>
+<h4 id="Forward-pass"><a href="#Forward-pass" class="headerlink" title="Forward pass"></a>Forward pass</h4><p>forward过程计算$\frac{\partial z}{\partial w}$，即为权重所对应的上一层神经元的值(x1,x2)</p>
+<script type="math/tex; mode=display">
+z=x_1w_1+x_2+w_2+b \\
+\frac{\partial z}{\partial w_1}=x_1,\quad\frac{\partial z}{\partial w_2}=x_2</script><p><img src="/2020/06/06/Backpropagation/image-20200606201854092.png" alt="image-20200606201854092" style="zoom:50%;"></p>
+<p>对于forward过程，计算出上层神经元的值后，才可以继续计算下一层神经元的梯度$\frac{\partial z}{\partial w}$，</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606202207055.png" alt="image-20200606202207055" style="zoom:50%;"></p>
+<h4 id="Backward-pass"><a href="#Backward-pass" class="headerlink" title="Backward pass"></a>Backward pass</h4><h5 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h5><p>backward过程计算$\frac{\partial l}{\partial z}$，z为激活函数$\sigma (z)$的输入值。这里我们令$a=\sigma(z)$，简化表达式的形式，根据chain rule</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a}</script><p>其中$\frac{\partial a}{\partial z}=\sigma’(z)$，对激活函数求一阶导数，可以很轻松地表示出来</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606203500895.png" alt="image-20200606203500895" style="zoom:50%;"></p>
+<p>接下来我们开始$\frac{\partial l}{\partial a}$的计算，a会影响$z’,z’’$，因此可以再次使用链式法则</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial a}=\frac{\partial z'}{\partial a}\frac{\partial l}{\partial z'}
++ \frac{\partial z''}{\partial a}\frac{\partial l}{\partial z''}</script><p>由于$z’=aw_3+…,\quad z’’=aw_4+…$，那么我们可以得出</p>
+<script type="math/tex; mode=display">
+\frac{\partial z'}{\partial a}=w_3,\quad\frac{\partial z''}{\partial a}=w_4</script><p>代入原式，可得</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a} =\sigma'(z)\left[w_3\frac{\partial l}{\partial z'}+ w_4\frac{\partial l}{\partial z''}\right]</script><p>对于$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，我们假设可以通过某种方式求得他们的值</p>
+<h5 id="另一个观点"><a href="#另一个观点" class="headerlink" title="另一个观点"></a>另一个观点</h5><p>我们可以从这个图中更加直观地了解backpropagation的过程，这里我们假设有一个神经元（图中的三角形），它不在原来的网络结构中，可以通过$w_3\frac{\partial l}{\partial z’}+ w_4\frac{\partial l}{\partial z’’}$来计算，<u>前面再乘上一个放大系数$\sigma’(z)$，这个放大系数的值是根据forward过程计算的，是一个常数</u>，就可以得出$\frac{\partial l}{\partial z}$的值</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606204707606.png" alt="image-20200606204707606" style="zoom:50%;"></p>
+<h5 id="两种情况"><a href="#两种情况" class="headerlink" title="两种情况"></a>两种情况</h5><p>公式内的其他项都已经计算出来，还有$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$没有得出具体的表达式，此步骤是为了求解$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$的表达式</p>
+<p><strong>Case1：Output Layer</strong></p>
+<p>为了求出$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，这里再次使用了chain rule</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z'}=\frac{\partial y_1}{\partial z'}\frac{\partial l}{\partial y_1}</script><p>其中$\frac{\partial y_1}{\partial z’}$就是激活函数的输出值再对$z’$求导；</p>
+<p>$\frac{\partial l}{\partial y_1}$为相对应的loss函数对y1求导，这个loss函数可以是cross entropy，也可以是MSE，对于不同的loss函数，计算出来的导数也不同</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606213905635.png" alt="image-20200606213905635" style="zoom:50%;"></p>
+<p><strong>Case2: Not output layer</strong></p>
+<p>如果现在假设后层不是output layer，而是hidden layer中的其中一层，计算方式就发生了一些小小的变化</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606215916597.png" alt="image-20200606215916597" style="zoom:50%;"></p>
+<p>根据Case1的推导，知道了$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$之后，就可以对$\frac{\partial l}{\partial z’}$进行求解</p>
+<p>同理可得，知道了$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$，就可以对$\frac{\partial l}{\partial z’}$求解，如下图所示，$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$分别乘上对应的权重$w_5,w_6$，前面再乘一个放大系数，就可得出$\frac{\partial l}{\partial z’}$的表达式</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial z'}=\sigma'(z')\left[w_5\frac{\partial l}{\partial z_a}+ w_6\frac{\partial l}{\partial z_b}\right]</script><p><img src="/2020/06/06/Backpropagation/image-20200606221608597.png" alt="image-20200606221608597" style="zoom:50%;"></p>
+<p>知道了$z’,z’’$的值后，就可以根据公式计算z的值；知道了$z_a,z_b$之后，就可以计算$z’$ 的值；……一直循环这个步骤，直到到达output layer为止</p>
+<p>下图中有6个neural，分别是$z_1,z_2,z_3,z_4,z_5,z_6$，为激活函数的输入值，现在要分别求得$l$对这些函数的偏微分$\frac{\partial l}{\partial z_i}$。按照我们之前的做法，要求$\frac{\partial l}{\partial z_1}$，就必须要求$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$，而要求$\frac{\partial l}{\partial z_3}，\frac{\partial l}{\partial z_4}$的值，就必须要分别求两次$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$的值，计算效率很低</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606222718315.png" alt="image-20200606222718315" style="zoom:50%;"></p>
+<p>如果我们先计算$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$，就可以接着计算出$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$的值，再计算出$\frac{\partial l}{\partial z_1},\frac{\partial l}{\partial z_2}$的值，计算效率可以提高很多</p>
+<p><img src="/2020/06/06/Backpropagation/image-20200606222732356.png" alt="image-20200606222732356" style="zoom:50%;"></p>
+<h4 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h4><p>神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$，再相乘，就可以得出loss函数对每个hidden layer神经元的梯度，</p>
+<script type="math/tex; mode=display">
+\frac{\partial l}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}</script><p>代入每次参数更新的公式，就可以得出每次的参数更新结果</p>
+<script type="math/tex; mode=display">
+w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606224217277.png" alt="image-20200606224217277" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>backpropagation</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Anomaly Detection</title>
     <url>/2020/07/03/Anomaly-detection/</url>
     <content><![CDATA[<h4 id="Problem-Formulation"><a href="#Problem-Formulation" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h4><p>对于给定的训练数据集，做异常检测的目的是找到一个函数，这个函数可以检测输入的x是不是和训练数据集相似的。异常检测知识检测出和训练数据不一样的输入，检测出来的数据并不一定都是不好的，有可能是好的，也有可能是不好的。</p>
@@ -201,81 +280,6 @@ L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^
       </tags>
   </entry>
   <entry>
-    <title>CCF-JSON查询</title>
-    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
-    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
-<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>CCF Answer</category>
-      </categories>
-      <tags>
-        <tag>CCF</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Conditional GAN (CGAN)</title>
-    <url>/2020/07/05/CGAN/</url>
-    <content><![CDATA[<p>对于一般的GAN，都是随机生成一个vector，然后输入GAN，再生成一张image，但我们并不能控制output。对于本文要讲述的CGAN，我们则可以操控其输出的结果。</p>
-<h4 id="Text-to-Image"><a href="#Text-to-Image" class="headerlink" title="Text-to-Image"></a>Text-to-Image</h4><p>对于传统的监督学习的方法，训练数据集是一些带有描述的图片，网络的input是一段文字，output则是一张图片，我们希望输出的图片和target越接近越好。</p>
-<p><img src="/2020/07/05/CGAN/image-20200705145505825.png" alt="image-20200705145505825" style="zoom:60%;"></p>
-<p>如果现在网络的输入文字是“train”，网络会觉得正面的火车是对的，侧面的火车也是对的，网络最后会取这些值的一个平均值，因此会得到一个非常模糊的火车图片。</p>
-<h4 id="Conditional-GAN"><a href="#Conditional-GAN" class="headerlink" title="Conditional GAN"></a>Conditional GAN</h4><p>现在我们使用CGAN来完成这个任务。CGAN现在的generator的输入不仅有z，还有一个condition c（“train”），G的输出为$x=G(z,c)$；</p>
-<p>这时我们还使用原来的Discriminator，把x输入D，D可以对其进行评价分数scalar，对真实的图像输出为1，生成的图像输出为0。</p>
-<p>那么现在就出现了一个新问题，G可以完全不管输入的condition，只生成高质量的、接近真实的图像即可。比如我们把condition设置为“dog”，G如果生成一只猫的图像，这个图像很接近真实图像，那么就可以骗过discriminator。</p>
-<p><img src="/2020/07/05/CGAN/image-20200705150242620.png" alt="image-20200705150242620" style="zoom:60%;"></p>
-<p>因此，这里的discriminator也要做出改变，需要把condition也作为D的其中一个输入。</p>
-<p>那么现在D输出的分数就有两部分组成：（1）x的真实性；（2）x是不是满足condition的条件。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
-<p>给低分0的两个case：（1）如果给出了正确的文字，但生成了模糊的图像；（2）虽然生成了清晰的图像，但和随机输入的文字（condition）是不匹配的。</p>
-<p><img src="/2020/07/05/CGAN/image-20200705151419726.png" alt="image-20200705151419726" style="zoom:60%;"></p>
-<p>这里是具体的算法。</p>
-<p>Learning D：输入是文字和图像的pair，即$\{(c^1,x^1),…,(c^m,x^m)\}$，从（高斯）分布中取出noise $\{z^1,z^2…,z^m\}$，输入G，得到生成的图像 $\tilde x^i=G(c^i,z^i)$；从database中取出m个真实的图像数据 $\{\hat x^1,…,\hat x^m\}$，再输入discriminator D，不断调整$\theta_d$，使得得到的分数越大越好，</p>
-<script type="math/tex; mode=display">
-\tilde V =\frac{1}{m}\sum_{i=1}^m logD(c^i,x^i)+\frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\tilde x^i))
-+ \frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\hat x^i))</script><p>其中$D(c^i,x^i)$表示真实图像所得到的分数，D的目标就是使真实图像获得的分数越大越好；而$D(c^i,\tilde x^i)$表示G生成的图像所得到的分数，应该越小越好，所以前面加了负号；而$D(c^i,\hat x^i)$表示生成了清晰的图像，但和condition不匹配，所以前面加了负号。后两个case都是给低分的情况。</p>
-<p>其他过程和之前的GAN差别不大，主要是计算低分数的情况多了一个case。</p>
-<p><img src="/2020/07/05/CGAN/image-20200705153051152.png" alt="image-20200705153051152" style="zoom:67%;"></p>
-<h4 id="Conditional-GAN-Discriminator"><a href="#Conditional-GAN-Discriminator" class="headerlink" title="Conditional GAN - Discriminator"></a>Conditional GAN - Discriminator</h4><p>对于一般的discriminator架构，输入为图像和文字，输出为两部分的分数（x的真实性、x和condition是不是match）。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
-<p><img src="/2020/07/05/CGAN/image-20200705154525712.png" alt="image-20200705154525712" style="zoom:60%;"></p>
-<p>有学者在其他论文中也提出了其他架构，而且效果还不错。首先有object输入<span style="color: green">network</span>，得出第一个分数，表示x是否真实；<span style="color: green">network</span>还会输出一个embedding，再和condition结合，输入<span style="color: blue">network</span>后得到另外一个分数，表示x和c是否match。</p>
-<p>选择第一种架构方法有一个缺点。前文我们提到CGAN会给低分的两种case：x和condition是match的，但生成的图像不好；x和condition是不match的，但生成的图像质量高。如果我们使用第一种架构，网络会比较confused，网络并不知道分数低的原因到底是哪一种case，有可能是图像不够realistic，也有可能是和condition不够match。但<span style="color: red">对于第二种架构，网络则可以清楚地知道到底是因为哪个原因导致的低分。</span></p>
-<p>下面是结果的展示，输入文字condition，输出对应的图像。</p>
-<p><img src="/2020/07/05/CGAN/image-20200705191337832.png" alt="image-20200705191337832" style="zoom:60%;"></p>
-<h4 id="Stack-GAN"><a href="#Stack-GAN" class="headerlink" title="Stack GAN"></a>Stack GAN</h4><p>首先输入一段文字，这些文字先经过embedding的过程，再经过conditioning augmentation的过程（加入噪声），输入generator之后，会生成一张图像（$64\times 64$）；discriminator再来判断这个生成的image和输入的文字是不是match的；</p>
-<p>这里还有第二个generator，输入为刚才$64\times64$的图像和文字的embedding结果；再生成一张$256\times256$的图像；再把新生成的图像输入discriminator，看到底是不是realistic。</p>
-<p><img src="/2020/07/05/CGAN/image-20200705191647515.png" alt="image-20200705191647515" style="zoom: 100%;"></p>
-<h4 id="Image-to-image"><a href="#Image-to-image" class="headerlink" title="Image-to-image"></a>Image-to-image</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>CGAN不仅可以输入一段文字产生一张图像，也可以是image-to-image，比如把简单的几何模型转化为真实的房屋模型，把灰度图转化为彩色图，</p>
-<p><img src="/2020/07/05/CGAN/image-20200705193817063.png" alt="image-20200705193817063"></p>
-<p>如果使用传统的监督学习的方法来完成这个任务，首先需要收集训练数据（几何模型图、对应的真实房屋图），训练network，output是一张图片，我们希望输出的图片和target越接近越好。由于network会产生多种多样的房子，最后的结果会取一个平均值，因此会产生一个非常模糊的图像。</p>
-<p><img src="/2020/07/05/CGAN/image-20200705194028821.png" alt="image-20200705194028821" style="zoom:60%;"></p>
-<p>我们可以使用GAN来完成这个任务。首先把从distribution中sample出来的z和结构图作为G的输入，G会生成一张新的Image；再把Image和原来的结构图（一个pair）输入D，会输出一个分数scalar。可以发现GAN生成的图要相对清晰很多。</p>
-<p>但我们这时发现了一个新问题，GAN产生了一些原来的结构图中没有的东西，比如在图的左上角，产生了一个像是窗户或者天线的东西。这时我们可以加入一个新的constrain（真实的房屋图），希望generator产生的image和训练数据集中对应的图像也越靠近越好。</p>
-<p>这时generator的目标就有两个：产生出足够清晰可以骗过D的图像；产生的新图像和原来的target要接近。这样就会产生结果很好的图（GAN+close），图足够清晰，也不会产生一些奇怪的东西。</p>
-<p><img src="/2020/07/05/CGAN/image-20200705195049882.png" alt="image-20200705195049882" style="zoom:60%;"></p>
-<h5 id="Patch-GAN"><a href="#Patch-GAN" class="headerlink" title="Patch GAN"></a>Patch GAN</h5><p>现在要生成的是一张很大的图像，如果这时discriminator的输入还是一整张大的图像，那么D要对其进行评分，就肯定需要更多的参数，很有可能产生overfiting或者训练所需的时间会很长。</p>
-<p>在这篇论文中，作者也对discriminator的设计进行了变化。discriminator只需要检查图中的一小部分，对这一小块图片来输出评价分数 。区域的大小也是需要调整的参数之一。</p>
-<p><img src="/2020/07/05/CGAN/image-20200705200803367.png" alt="image-20200705200803367" style="zoom:60%;"></p>
-<h4 id="Speech-Enhancement"><a href="#Speech-Enhancement" class="headerlink" title="Speech Enhancement"></a>Speech Enhancement</h4><p>如果我们使用传统的深度学习方法来做语音增强，首先需要把纯净语音加上一些noise再输入CNN，不断地训练CNN，使其能够输出去噪后的纯净语音。</p>
-<p><img src="/2020/07/05/CGAN/image-20200705201419793.png" alt="image-20200705201419793" style="zoom:60%;"></p>
-<p>直接产生同样会有语音频谱图比较模糊的情况，我们在这里也可以使用CGAN算法。</p>
-<p>输入为带noise的语音信号，G的输出为增强语音，增强语音和纯净语音之间应该越接近越好。discriminator的输入为增强语音和带噪语音，输出评价分数，看这个output是不是clean的，还要看output和noise这个pair是不是match的。</p>
-<p><img src="/2020/07/05/CGAN/image-20200705201744963.png" alt="image-20200705201744963" style="zoom:60%;"></p>
-<h4 id="Video-Generation"><a href="#Video-Generation" class="headerlink" title="Video Generation"></a>Video Generation</h4><p>输入一段video，让generator预测下一步会发生什么，产生对应的video；discriminator要同时考虑generator的input和output，可以把它们接到一起，变成一段完整的影片，让discriminator来判断到底是不是一个合理的影片。</p>
-<p><img src="/2020/07/05/CGAN/image-20200705202357625.png" alt="image-20200705202357625" style="zoom:60%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Conditional GAN</tag>
-        <tag>CGAN</tag>
-        <tag>Speech Enhancement</tag>
-        <tag>Video Generation</tag>
-        <tag>Patch GAN</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Convolutional Neural Network</title>
     <url>/2020/06/08/CNN/</url>
     <content><![CDATA[<h4 id="Why-CNN-for-Image"><a href="#Why-CNN-for-Image" class="headerlink" title="Why CNN for Image"></a>Why CNN for Image</h4><p>可以使用相同的参数来提取不同图像中的同一种特征，这样就可以降低网络需要学习的参数</p>
@@ -325,6 +329,68 @@ H/W=\frac{(h/w - F+2P)}{S}+1</script><p>这里引入了keras，先介绍几个�
       <tags>
         <tag>Deep Learning</tag>
         <tag>CNN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Conditional GAN (CGAN)</title>
+    <url>/2020/07/05/CGAN/</url>
+    <content><![CDATA[<p>对于一般的GAN，都是随机生成一个vector，然后输入GAN，再生成一张image，但我们并不能控制output。对于本文要讲述的CGAN，我们则可以操控其输出的结果。</p>
+<h4 id="Text-to-Image"><a href="#Text-to-Image" class="headerlink" title="Text-to-Image"></a>Text-to-Image</h4><p>对于传统的监督学习的方法，训练数据集是一些带有描述的图片，网络的input是一段文字，output则是一张图片，我们希望输出的图片和target越接近越好。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705145505825.png" alt="image-20200705145505825" style="zoom:60%;"></p>
+<p>如果现在网络的输入文字是“train”，网络会觉得正面的火车是对的，侧面的火车也是对的，网络最后会取这些值的一个平均值，因此会得到一个非常模糊的火车图片。</p>
+<h4 id="Conditional-GAN"><a href="#Conditional-GAN" class="headerlink" title="Conditional GAN"></a>Conditional GAN</h4><p>现在我们使用CGAN来完成这个任务。CGAN现在的generator的输入不仅有z，还有一个condition c（“train”），G的输出为$x=G(z,c)$；</p>
+<p>这时我们还使用原来的Discriminator，把x输入D，D可以对其进行评价分数scalar，对真实的图像输出为1，生成的图像输出为0。</p>
+<p>那么现在就出现了一个新问题，G可以完全不管输入的condition，只生成高质量的、接近真实的图像即可。比如我们把condition设置为“dog”，G如果生成一只猫的图像，这个图像很接近真实图像，那么就可以骗过discriminator。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705150242620.png" alt="image-20200705150242620" style="zoom:60%;"></p>
+<p>因此，这里的discriminator也要做出改变，需要把condition也作为D的其中一个输入。</p>
+<p>那么现在D输出的分数就有两部分组成：（1）x的真实性；（2）x是不是满足condition的条件。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
+<p>给低分0的两个case：（1）如果给出了正确的文字，但生成了模糊的图像；（2）虽然生成了清晰的图像，但和随机输入的文字（condition）是不匹配的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705151419726.png" alt="image-20200705151419726" style="zoom:60%;"></p>
+<p>这里是具体的算法。</p>
+<p>Learning D：输入是文字和图像的pair，即$\{(c^1,x^1),…,(c^m,x^m)\}$，从（高斯）分布中取出noise $\{z^1,z^2…,z^m\}$，输入G，得到生成的图像 $\tilde x^i=G(c^i,z^i)$；从database中取出m个真实的图像数据 $\{\hat x^1,…,\hat x^m\}$，再输入discriminator D，不断调整$\theta_d$，使得得到的分数越大越好，</p>
+<script type="math/tex; mode=display">
+\tilde V =\frac{1}{m}\sum_{i=1}^m logD(c^i,x^i)+\frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\tilde x^i))
++ \frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\hat x^i))</script><p>其中$D(c^i,x^i)$表示真实图像所得到的分数，D的目标就是使真实图像获得的分数越大越好；而$D(c^i,\tilde x^i)$表示G生成的图像所得到的分数，应该越小越好，所以前面加了负号；而$D(c^i,\hat x^i)$表示生成了清晰的图像，但和condition不匹配，所以前面加了负号。后两个case都是给低分的情况。</p>
+<p>其他过程和之前的GAN差别不大，主要是计算低分数的情况多了一个case。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705153051152.png" alt="image-20200705153051152" style="zoom:67%;"></p>
+<h4 id="Conditional-GAN-Discriminator"><a href="#Conditional-GAN-Discriminator" class="headerlink" title="Conditional GAN - Discriminator"></a>Conditional GAN - Discriminator</h4><p>对于一般的discriminator架构，输入为图像和文字，输出为两部分的分数（x的真实性、x和condition是不是match）。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705154525712.png" alt="image-20200705154525712" style="zoom:60%;"></p>
+<p>有学者在其他论文中也提出了其他架构，而且效果还不错。首先有object输入<span style="color: green">network</span>，得出第一个分数，表示x是否真实；<span style="color: green">network</span>还会输出一个embedding，再和condition结合，输入<span style="color: blue">network</span>后得到另外一个分数，表示x和c是否match。</p>
+<p>选择第一种架构方法有一个缺点。前文我们提到CGAN会给低分的两种case：x和condition是match的，但生成的图像不好；x和condition是不match的，但生成的图像质量高。如果我们使用第一种架构，网络会比较confused，网络并不知道分数低的原因到底是哪一种case，有可能是图像不够realistic，也有可能是和condition不够match。但<span style="color: red">对于第二种架构，网络则可以清楚地知道到底是因为哪个原因导致的低分。</span></p>
+<p>下面是结果的展示，输入文字condition，输出对应的图像。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705191337832.png" alt="image-20200705191337832" style="zoom:60%;"></p>
+<h4 id="Stack-GAN"><a href="#Stack-GAN" class="headerlink" title="Stack GAN"></a>Stack GAN</h4><p>首先输入一段文字，这些文字先经过embedding的过程，再经过conditioning augmentation的过程（加入噪声），输入generator之后，会生成一张图像（$64\times 64$）；discriminator再来判断这个生成的image和输入的文字是不是match的；</p>
+<p>这里还有第二个generator，输入为刚才$64\times64$的图像和文字的embedding结果；再生成一张$256\times256$的图像；再把新生成的图像输入discriminator，看到底是不是realistic。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705191647515.png" alt="image-20200705191647515" style="zoom: 100%;"></p>
+<h4 id="Image-to-image"><a href="#Image-to-image" class="headerlink" title="Image-to-image"></a>Image-to-image</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>CGAN不仅可以输入一段文字产生一张图像，也可以是image-to-image，比如把简单的几何模型转化为真实的房屋模型，把灰度图转化为彩色图，</p>
+<p><img src="/2020/07/05/CGAN/image-20200705193817063.png" alt="image-20200705193817063"></p>
+<p>如果使用传统的监督学习的方法来完成这个任务，首先需要收集训练数据（几何模型图、对应的真实房屋图），训练network，output是一张图片，我们希望输出的图片和target越接近越好。由于network会产生多种多样的房子，最后的结果会取一个平均值，因此会产生一个非常模糊的图像。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705194028821.png" alt="image-20200705194028821" style="zoom:60%;"></p>
+<p>我们可以使用GAN来完成这个任务。首先把从distribution中sample出来的z和结构图作为G的输入，G会生成一张新的Image；再把Image和原来的结构图（一个pair）输入D，会输出一个分数scalar。可以发现GAN生成的图要相对清晰很多。</p>
+<p>但我们这时发现了一个新问题，GAN产生了一些原来的结构图中没有的东西，比如在图的左上角，产生了一个像是窗户或者天线的东西。这时我们可以加入一个新的constrain（真实的房屋图），希望generator产生的image和训练数据集中对应的图像也越靠近越好。</p>
+<p>这时generator的目标就有两个：产生出足够清晰可以骗过D的图像；产生的新图像和原来的target要接近。这样就会产生结果很好的图（GAN+close），图足够清晰，也不会产生一些奇怪的东西。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705195049882.png" alt="image-20200705195049882" style="zoom:60%;"></p>
+<h5 id="Patch-GAN"><a href="#Patch-GAN" class="headerlink" title="Patch GAN"></a>Patch GAN</h5><p>现在要生成的是一张很大的图像，如果这时discriminator的输入还是一整张大的图像，那么D要对其进行评分，就肯定需要更多的参数，很有可能产生overfiting或者训练所需的时间会很长。</p>
+<p>在这篇论文中，作者也对discriminator的设计进行了变化。discriminator只需要检查图中的一小部分，对这一小块图片来输出评价分数 。区域的大小也是需要调整的参数之一。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705200803367.png" alt="image-20200705200803367" style="zoom:60%;"></p>
+<h4 id="Speech-Enhancement"><a href="#Speech-Enhancement" class="headerlink" title="Speech Enhancement"></a>Speech Enhancement</h4><p>如果我们使用传统的深度学习方法来做语音增强，首先需要把纯净语音加上一些noise再输入CNN，不断地训练CNN，使其能够输出去噪后的纯净语音。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705201419793.png" alt="image-20200705201419793" style="zoom:60%;"></p>
+<p>直接产生同样会有语音频谱图比较模糊的情况，我们在这里也可以使用CGAN算法。</p>
+<p>输入为带noise的语音信号，G的输出为增强语音，增强语音和纯净语音之间应该越接近越好。discriminator的输入为增强语音和带噪语音，输出评价分数，看这个output是不是clean的，还要看output和noise这个pair是不是match的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705201744963.png" alt="image-20200705201744963" style="zoom:60%;"></p>
+<h4 id="Video-Generation"><a href="#Video-Generation" class="headerlink" title="Video Generation"></a>Video Generation</h4><p>输入一段video，让generator预测下一步会发生什么，产生对应的video；discriminator要同时考虑generator的input和output，可以把它们接到一起，变成一段完整的影片，让discriminator来判断到底是不是一个合理的影片。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705202357625.png" alt="image-20200705202357625" style="zoom:60%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Conditional GAN</tag>
+        <tag>CGAN</tag>
+        <tag>Speech Enhancement</tag>
+        <tag>Video Generation</tag>
+        <tag>Patch GAN</tag>
       </tags>
   </entry>
   <entry>
@@ -1102,72 +1168,6 @@ a=h(c')f(z_0)=7</script><p><img src="/2020/06/10/RNN/image-20200609225546396.png
       </tags>
   </entry>
   <entry>
-    <title>Backpropagation</title>
-    <url>/2020/06/06/Backpropagation/</url>
-    <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>这里我们再回顾一下gradient descent，对于网络中的参数$w_1,w_2,…,b_1,b_2,…$，通过求出相对应的梯度$\Delta L(\theta)$，再根据梯度更新网络结构中的参数</p>
-<script type="math/tex; mode=display">
-\theta ^i=\theta^{i-1}-\eta\Delta L(\theta^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606200029374.png" alt="image-20200606200029374" style="zoom:50%;"></p>
-<h4 id="Chain-Rule"><a href="#Chain-Rule" class="headerlink" title="Chain Rule"></a>Chain Rule</h4><p>backpropagation的核心思想就是链式法则</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606200855314.png" alt="image-20200606200855314" style="zoom:50%;"></p>
-<h4 id="Backpropagation"><a href="#Backpropagation" class="headerlink" title="Backpropagation"></a>Backpropagation</h4><p>这里我们先定义了一个loss函数，$l^n(\theta)$表示training data中$y^n$和$\hat y ^n$之间的loss，这个loss可以通过cross entropy或者MSE计算，再将所有的loss进行求和，得到$L(\theta)$</p>
-<script type="math/tex; mode=display">
-L(\theta)=\sum_{n=1}^Nl^n(\theta)</script><p><img src="/2020/06/06/Backpropagation/image-20200606200827557.png" alt="image-20200606200827557" style="zoom:50%;"></p>
-<p>对w求导，可得$\frac{\partial l^n}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}$，这里我们截取了网络中的部分结构，神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606201320644.png" alt="image-20200606201320644" style="zoom:50%;"></p>
-<h4 id="Forward-pass"><a href="#Forward-pass" class="headerlink" title="Forward pass"></a>Forward pass</h4><p>forward过程计算$\frac{\partial z}{\partial w}$，即为权重所对应的上一层神经元的值(x1,x2)</p>
-<script type="math/tex; mode=display">
-z=x_1w_1+x_2+w_2+b \\
-\frac{\partial z}{\partial w_1}=x_1,\quad\frac{\partial z}{\partial w_2}=x_2</script><p><img src="/2020/06/06/Backpropagation/image-20200606201854092.png" alt="image-20200606201854092" style="zoom:50%;"></p>
-<p>对于forward过程，计算出上层神经元的值后，才可以继续计算下一层神经元的梯度$\frac{\partial z}{\partial w}$，</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606202207055.png" alt="image-20200606202207055" style="zoom:50%;"></p>
-<h4 id="Backward-pass"><a href="#Backward-pass" class="headerlink" title="Backward pass"></a>Backward pass</h4><h5 id="公式推导"><a href="#公式推导" class="headerlink" title="公式推导"></a>公式推导</h5><p>backward过程计算$\frac{\partial l}{\partial z}$，z为激活函数$\sigma (z)$的输入值。这里我们令$a=\sigma(z)$，简化表达式的形式，根据chain rule</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a}</script><p>其中$\frac{\partial a}{\partial z}=\sigma’(z)$，对激活函数求一阶导数，可以很轻松地表示出来</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606203500895.png" alt="image-20200606203500895" style="zoom:50%;"></p>
-<p>接下来我们开始$\frac{\partial l}{\partial a}$的计算，a会影响$z’,z’’$，因此可以再次使用链式法则</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial a}=\frac{\partial z'}{\partial a}\frac{\partial l}{\partial z'}
-+ \frac{\partial z''}{\partial a}\frac{\partial l}{\partial z''}</script><p>由于$z’=aw_3+…,\quad z’’=aw_4+…$，那么我们可以得出</p>
-<script type="math/tex; mode=display">
-\frac{\partial z'}{\partial a}=w_3,\quad\frac{\partial z''}{\partial a}=w_4</script><p>代入原式，可得</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z}=\frac{\partial a}{\partial z}\frac{\partial l}{\partial a} =\sigma'(z)\left[w_3\frac{\partial l}{\partial z'}+ w_4\frac{\partial l}{\partial z''}\right]</script><p>对于$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，我们假设可以通过某种方式求得他们的值</p>
-<h5 id="另一个观点"><a href="#另一个观点" class="headerlink" title="另一个观点"></a>另一个观点</h5><p>我们可以从这个图中更加直观地了解backpropagation的过程，这里我们假设有一个神经元（图中的三角形），它不在原来的网络结构中，可以通过$w_3\frac{\partial l}{\partial z’}+ w_4\frac{\partial l}{\partial z’’}$来计算，<u>前面再乘上一个放大系数$\sigma’(z)$，这个放大系数的值是根据forward过程计算的，是一个常数</u>，就可以得出$\frac{\partial l}{\partial z}$的值</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606204707606.png" alt="image-20200606204707606" style="zoom:50%;"></p>
-<h5 id="两种情况"><a href="#两种情况" class="headerlink" title="两种情况"></a>两种情况</h5><p>公式内的其他项都已经计算出来，还有$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$没有得出具体的表达式，此步骤是为了求解$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$的表达式</p>
-<p><strong>Case1：Output Layer</strong></p>
-<p>为了求出$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$，这里再次使用了chain rule</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z'}=\frac{\partial y_1}{\partial z'}\frac{\partial l}{\partial y_1}</script><p>其中$\frac{\partial y_1}{\partial z’}$就是激活函数的输出值再对$z’$求导；</p>
-<p>$\frac{\partial l}{\partial y_1}$为相对应的loss函数对y1求导，这个loss函数可以是cross entropy，也可以是MSE，对于不同的loss函数，计算出来的导数也不同</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606213905635.png" alt="image-20200606213905635" style="zoom:50%;"></p>
-<p><strong>Case2: Not output layer</strong></p>
-<p>如果现在假设后层不是output layer，而是hidden layer中的其中一层，计算方式就发生了一些小小的变化</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606215916597.png" alt="image-20200606215916597" style="zoom:50%;"></p>
-<p>根据Case1的推导，知道了$\frac{\partial l}{\partial z’},\frac{\partial l}{\partial z’’}$之后，就可以对$\frac{\partial l}{\partial z’}$进行求解</p>
-<p>同理可得，知道了$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$，就可以对$\frac{\partial l}{\partial z’}$求解，如下图所示，$\frac{\partial l}{\partial z_a},\frac{\partial l}{\partial z_b}$分别乘上对应的权重$w_5,w_6$，前面再乘一个放大系数，就可得出$\frac{\partial l}{\partial z’}$的表达式</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial z'}=\sigma'(z')\left[w_5\frac{\partial l}{\partial z_a}+ w_6\frac{\partial l}{\partial z_b}\right]</script><p><img src="/2020/06/06/Backpropagation/image-20200606221608597.png" alt="image-20200606221608597" style="zoom:50%;"></p>
-<p>知道了$z’,z’’$的值后，就可以根据公式计算z的值；知道了$z_a,z_b$之后，就可以计算$z’$ 的值；……一直循环这个步骤，直到到达output layer为止</p>
-<p>下图中有6个neural，分别是$z_1,z_2,z_3,z_4,z_5,z_6$，为激活函数的输入值，现在要分别求得$l$对这些函数的偏微分$\frac{\partial l}{\partial z_i}$。按照我们之前的做法，要求$\frac{\partial l}{\partial z_1}$，就必须要求$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$，而要求$\frac{\partial l}{\partial z_3}，\frac{\partial l}{\partial z_4}$的值，就必须要分别求两次$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$的值，计算效率很低</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606222718315.png" alt="image-20200606222718315" style="zoom:50%;"></p>
-<p>如果我们先计算$\frac{\partial l}{\partial z_5},\frac{\partial l}{\partial z_6}$，就可以接着计算出$\frac{\partial l}{\partial z_3},\frac{\partial l}{\partial z_4}$的值，再计算出$\frac{\partial l}{\partial z_1},\frac{\partial l}{\partial z_2}$的值，计算效率可以提高很多</p>
-<p><img src="/2020/06/06/Backpropagation/image-20200606222732356.png" alt="image-20200606222732356" style="zoom:50%;"></p>
-<h4 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h4><p>神经网络的forward过程计算$\frac{\partial z}{\partial w}$，backward过程计算$\frac{\partial l}{\partial z}$，再相乘，就可以得出loss函数对每个hidden layer神经元的梯度，</p>
-<script type="math/tex; mode=display">
-\frac{\partial l}{\partial w}=\frac{\partial z}{\partial w}\frac{\partial l}{\partial z}</script><p>代入每次参数更新的公式，就可以得出每次的参数更新结果</p>
-<script type="math/tex; mode=display">
-w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="/2020/06/06/Backpropagation/image-20200606224217277.png" alt="image-20200606224217277" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>backpropagation</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Word Embedding</title>
     <url>/2020/06/11/Word-Embedding/</url>
     <content><![CDATA[<h4 id="Word-Embedding"><a href="#Word-Embedding" class="headerlink" title="Word Embedding"></a>Word Embedding</h4><p>如果使用1-of-N encoding，每个单词用一个vector表示，那么5个单词就需要5个vector；如果我们把同一个类别的单词都放到那个类里，即属于class1的单词有dog、cat、bird，属于动物类的单词，同理可以得出class2，class3；</p>
@@ -1604,6 +1604,267 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
       </tags>
   </entry>
   <entry>
+    <title>Sequence to Sequence</title>
+    <url>/2020/06/28/seq2seq/</url>
+    <content><![CDATA[<h4 id="Generation"><a href="#Generation" class="headerlink" title="Generation"></a>Generation</h4><p>可以generation文字，也可以generation图片</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627143309760.png" alt="image-20200627143309760" style="zoom:50%;"></p>
+<p>如果想生成一张图片，我们可以把图片的每个pixel看成一个character，从而组成一个sentence，比如下图中蓝色pixel就表示blue，红色的pixel表示red,……</p>
+<p>接下来就可以用language model来生成图片，最初时间步的输入是特殊字符BOS</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627143546864.png" alt="image-20200627143546864" style="zoom:50%;"></p>
+<p>对于一般的generation，如下图的右上部分所示，先根据蓝色pixel生成红色pixel，再根据红色pixel生成黄色pixel，再根据黄色pixel生成灰色pixel，….，并没有考虑pixel之间的位置关系</p>
+<p>还有另外一个比较理想的生成图像方法，如果考虑了pixel之间的位置关系，如下图的右下部分所示，黑色pixel由附近的红色和灰色pixel生成</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627144748287.png" alt="image-20200627144748287" style="zoom:50%;"></p>
+<p>在上图的左上角部分，该lstm块输入了三组参数，也输出了三组参数，把这些方块叠起来就可以达到中部位置图像的效果</p>
+<p>对于一个$3\times 3$的画布，就是我们想要生成的图像的大小，一开始画布上还没有任何内容；现在在画布的左下角放入一个convolution的filter， 把其输出在放到3D的lstm的左下角（input），由于lstm也是有memory的，经过不断的process，可以到左上角，从而产生蓝色的pixel；再把蓝色的pixel放到画布的左下角</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627150215465.png" alt="image-20200627150215465" style="zoom:50%;"></p>
+<p>把filter向右移，结合上次蓝色pixel的输出，根据上文的步骤，就可以生成红色的pixel，再把红色pixel放到画布对应的位置</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627150953989.png" alt="image-20200627150953989" style="zoom:50%;"></p>
+<h4 id="Conditional-Generation"><a href="#Conditional-Generation" class="headerlink" title="Conditional Generation"></a>Conditional Generation</h4><p>必须是有条件的generation，要联系上下文</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627152018372.png" alt="image-20200627152018372" style="zoom:50%;"></p>
+<p>如果要对一张图片进行解释，我们先使用一个CNN model将image转化为一个vector（红色方框），先生成了第一个单词”A”，在生成第二个单词时，还需要将整个image的vector作为输入，不然RNN可能会忘记image的一些信息</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627152512575.png" alt="image-20200627152512575" style="zoom:50%;"></p>
+<p>RNN也可以用来做机器翻译，比如我们想要翻译“机器学习”，就先把这四个字分别输入绿色的RNN里面，最后一个时间节点的输出（红色方框）就包含了整个sentence的information，这个过程称之为<strong>Encoder</strong></p>
+<p>把encoder的information再作为另外一个rnn的input，再进行output，这个过程称之为<strong>Decoder</strong></p>
+<p>encoder和decoder是jointly train的，这两者的参数可以是一样的，也可以是不一样的</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627153002771.png" alt="image-20200627153002771" style="zoom:50%;"></p>
+<p> encoder将之前所有说过的话都进行整合了，再作为decoder的input</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627154111622.png" alt="image-20200627154111622" style="zoom:50%;"></p>
+<h4 id="Attention"><a href="#Attention" class="headerlink" title="Attention"></a>Attention</h4><h5 id="Dynamic-Conditional-Generation"><a href="#Dynamic-Conditional-Generation" class="headerlink" title="Dynamic Conditional Generation"></a>Dynamic Conditional Generation</h5><p>如果需要翻译的文字非常复杂，无法用一个vector来表示，就算可以表示也没办法表示全部的关键信息，这时候如果decoder每次input的都还是同一个vector，就不会得到很好的结果</p>
+<p>因此我们现在先把“机器”作为decoder的第一个输入$c^1$，这样就可以得到更好的结果</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627154318421.png" alt="image-20200627154318421" style="zoom:50%;"></p>
+<h5 id="Machine-Translation"><a href="#Machine-Translation" class="headerlink" title="Machine Translation"></a>Machine Translation</h5><p>绿色方块为RNN中hidden layer的output，分别是$h^1,h^2,h^3,h^4$；还有一个vector $z^0$，是可以通过network学出来的；把这两者输入一个match函数，可以得到$h^1,z^0$之间的match分数 $\alpha _0^1$</p>
+<p>这个match函数可以自己设计，可以有参数，也可以没有参数</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627154905302.png" alt="image-20200627154905302" style="zoom:50%;"></p>
+<p>得出的$\alpha _0^1,\alpha _0^2,\alpha _0^3,\alpha _0^4$再输入softmax函数，得到$\hat\alpha _0^1,\hat\alpha _0^2,\hat\alpha _0^3,\hat\alpha _0^4$，乘上$h^i$再加起来，就可以得到$c^0$，来作为decoder input，根据decoder，可得出第一个翻译的单词“machine”；$z^1$为decoder RNN其中hidden layer的输出，用$z^1$再来得出相应的decoder input</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627155414554.png" alt="image-20200627155414554" style="zoom:50%;"></p>
+<p>再来计算$z^1,h^1$之间的match分数$\alpha_1^1$，</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627155937349.png" alt="image-20200627155937349" style="zoom:50%;"></p>
+<p>再继续算出$c^1$作为decoder的input，从而得出第二个单词“learning”</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627160046413.png" alt="image-20200627160046413" style="zoom:50%;"></p>
+<p>一直重复这个过程，只到全部翻译完成</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627160411647.png" alt="image-20200627160411647" style="zoom:50%;"></p>
+<h5 id="Speech-Recognition"><a href="#Speech-Recognition" class="headerlink" title="Speech Recognition"></a>Speech Recognition</h5><p>语音信号也可以看成一系列的vector sequence，第一个红色方框所在的帧match分数很高，就把对应的vector放到decoder，machine就会得出“h”</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627193908934.png" alt="image-20200627193908934" style="zoom:50%;"></p>
+<h5 id="Image-Caption-Generation"><a href="#Image-Caption-Generation" class="headerlink" title="Image Caption Generation"></a>Image Caption Generation</h5><p>image可以分成多个region，每个region可以用一个vector来表示，计算这些vector和$z^0$之间match的分数，为0.7、0.1….，再进行weighted sum，得到红色方框的结果，再输入RNN，得到Word1，此时hidden layer的输出为$z^1$</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627195250525.png" alt="image-20200627195250525" style="zoom:50%;"><img src="/2020/06/28/seq2seq/image-20200627195503429.png" alt="image-20200627195503429"></p>
+<p>再计算$z^1$和vector之间的match分数，把分数作为RNN的input，从而得出Word 2</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627195511422.png" alt="image-20200627195511422" style="zoom:50%;"></p>
+<p>这里是一些具体的例子</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627195914955.png" alt="image-20200627195914955" style="zoom:50%;"></p>
+<p>但也会产生一些不好的结果</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627200010931.png" alt="image-20200627200010931" style="zoom:50%;"></p>
+<h5 id="Memory-Network"><a href="#Memory-Network" class="headerlink" title="Memory Network"></a>Memory Network</h5><p>memory network是有一篇文章，问machine一个问题，machine能够给出对应的答案</p>
+<p>先将document分成多个vector，再给出这些vector与问题q之间match的分数$\alpha^1,..,\alpha^N$，与$x^i$分别相乘，得到extracted information，作为DNN的input，再进行不断的训练，从而得出对应的answer</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627200439344.png" alt="image-20200627200439344" style="zoom:50%;"></p>
+<p>还有一个更加复杂的版本</p>
+<p>match的部分和extracted的部分不一定是一样的，相当于输入了两组不同的参数，比如可以把$x^i$乘上一个matrix，就可以变成另外一组参数$h^i$，这个matrix是可以自动学出来的</p>
+<p>这时计算extracted information的方式就发生了一些变化；sum之后的值不仅输入DNN，还会与问题q进行结合，再重新计算match分数，不断进行一个反复思考的过程</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627201014065.png" alt="image-20200627201014065" style="zoom:50%;"></p>
+<p>q可以用来计算attention，计算出extracted information之后，与q加起来；上一次sum的结果会再继续参与计算attention，再extract，再进行sum，作为DNN的input，得到最后的答案</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627201933880.png" alt="image-20200627201933880" style="zoom:50%;"></p>
+<p>可以把这个模型看作是两层layer的network，也有back propagation来更新network的参数</p>
+<h5 id="Neural-Turing-Machine"><a href="#Neural-Turing-Machine" class="headerlink" title="Neural Turing Machine"></a>Neural Turing Machine</h5><p>Neural Turing Machine不仅可以读取memory的内容，也可以根据match分数来修改memory的内容；即你不仅可以通过memory读取information，也可以把information写到memory里面去</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627202652334.png" alt="image-20200627202652334" style="zoom:50%;"></p>
+<p>对于初始值的memory $m_0^i$，计算出对应的match分数$\hat\alpha_0^i$，在进行weighted sum，得出$r^0$，来作为另外一个network f的input，这个network相当于是一个controller，f可以是DNN、SVM、GRU等；</p>
+<p>$r^0,x^1$作为该network的输入，可以得出三个output，这些output可以控memory，比如新的attention是什么，新的memory里面的值如何进行修改</p>
+<p>新的attention计算加入了$k^1$，即$\alpha_1^i=cos(m_0^i,k^1)$，再输入softmax，得到新的$\hat\alpha_1^i$的distribution</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627203211682.png" alt="image-20200627203211682" style="zoom:50%;"></p>
+<p>$e^1$里面的值表示把原来memory里面的值清空，$a^1$表示把新的值写入memory，通过下面的公式再计算新的memory $m_1^i$</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627204251989.png" alt="image-20200627204251989" style="zoom:50%;"></p>
+<p>得到新的memory $m_1^i$之后，再计算出新的attention $\hat\alpha_1^i$，再进行weighted sum得到$r^1$，加上新的$x^2$作为network的input，得出新的output，再来对整个network进行操控</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627204747750.png" alt="image-20200627204747750" style="zoom:50%;"></p>
+<h4 id="Tips-for-Generation"><a href="#Tips-for-Generation" class="headerlink" title="Tips for Generation"></a>Tips for Generation</h4><h5 id="Attention-1"><a href="#Attention-1" class="headerlink" title="Attention"></a>Attention</h5><p>$\alpha_t^i$下标表示time，上标表示component，该视频包括4个component，有4个时间节点；在第一个时间节点产生attention $\alpha_1^1,\alpha_1^2,\alpha_1^3,\alpha_1^4$，生成了第一个word $w_1$</p>
+<p>attention也是可以调节的，有时会出现一些<strong>bad attention</strong>，在产生第二个word（$w_2$,<span style="color: red">women</span>）时，focus到第二个component，在产生第四个word $w_4$时，也focus到第二个component上，也是<span style="color: green">women</span>，多次attent在同一个frame上，就会产生一些很奇怪的结果</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627205536622.png" alt="image-20200627205536622" style="zoom:50%;"></p>
+<p><strong>Good Attention</strong>：至少要包含input的每一个frame，每个frame都应该attent一下，每个frame进行attent的量也不能太多，这个量最好是同等级的</p>
+<p>Q：那么如何保证这个标准呢？</p>
+<p>A：有学者提出了一个regularization term，有一个新的可学习的参数$\tau$，$\sum_t\alpha_t^i$表示所有attention的sum，再计算$\sum_i(\tau-\sum_t\alpha_t^i)^2$的值，这个值越小越好；对于上文所说的bad attention的情况，这个值算出来是很大的，因此network就会再进行不断地学习，只到term的值不断减小</p>
+<h5 id="Mismatch-between-Train-and-Test"><a href="#Mismatch-between-Train-and-Test" class="headerlink" title="Mismatch between Train and Test"></a>Mismatch between Train and Test</h5><p><img src="/2020/06/28/seq2seq/image-20200627213016984.png" alt="image-20200627213016984" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/seq2seq/image-20200627213436202.png" alt="image-20200627213436202" style="zoom:50%;"></p>
+<p><strong>Exposure Bias</strong>：在training的时候，input为真正的答案；但在testing的时候，input为上一个时间节点的output</p>
+<p>在下图中，由于RNN从来没有到右子树B训练过，但如果在testing时一开始就遇到了B，network就会出现错误</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627214936987.png" alt="image-20200627214936987" style="zoom:50%;"></p>
+<h5 id="Modifying-Training-Process"><a href="#Modifying-Training-Process" class="headerlink" title="Modifying Training Process?"></a>Modifying Training Process?</h5><p>那么我们如何解决这种mismatch问题呢？可以尝试modify训练process</p>
+<p>如果machine现在output B，即使是错误的output（和reference A不一样），我们也应该让这个错误的output作为下一次的input，那么training和testing就是match的</p>
+<p>但在实际操作中，training是非常麻烦的；现在我们使用gradient descent来进行training，第一个gradient的方向告诉我们要把A的几率增大，output B，在第二个时间点，input为B，看到reference为B，把B的几率增大，就可以和reference相对应起来；</p>
+<p>但实际上，第一个output为A的几率上升，那么output发生了变化，第二个时间点的input就发生了变化，是A；那么我们之前学习到的让B上升就没有意义了</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627215358053.png" alt="image-20200627215358053" style="zoom:50%;"></p>
+<h5 id="Scheduled-Sampling"><a href="#Scheduled-Sampling" class="headerlink" title="Scheduled Sampling"></a><strong>Scheduled Sampling</strong></h5><p>由于使用Modifying Training Process很难train，现在我们就使用Scheduled Sampling</p>
+<p>对于到底是model里的ouput，还是reference来作为input，我们可以给一个几率；铜板是正面，就使用model的output，如果是反面，就用reference</p>
+<p>右上角的图，纵轴表示from reference的几率，一开始只看reference，reference的几率不断变小，model的几率不断增加</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627221402859.png" alt="image-20200627221402859" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/seq2seq/image-20200627221933432.png" alt="image-20200627221933432" style="zoom:50%;"></p>
+<h5 id="Beam-Search"><a href="#Beam-Search" class="headerlink" title="Beam Search"></a>Beam Search</h5><p><img src="/2020/06/28/seq2seq/image-20200627221956837.png" alt="image-20200627221956837" style="zoom:50%;"></p>
+<p>同时走两条path</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627222144464.png" alt="image-20200627222144464" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/seq2seq/image-20200627222358014.png" alt="image-20200627222358014" style="zoom:50%;"></p>
+<h5 id="Better-idea？"><a href="#Better-idea？" class="headerlink" title="Better idea？"></a>Better idea？</h5><p>为什么不直接把distribution作为下一个input呢？即下图中的右图</p>
+<p>但右边的结果会比较差，对于几率接近的输入，左图会sample一个几率最高的（高兴），但右图会保留这个distribution</p>
+<p><img src="/2020/06/28/seq2seq/image-20200627222713634.png" alt="image-20200627222713634" style="zoom:50%;"></p>
+<h5 id="Object-level-v-s-Component-level"><a href="#Object-level-v-s-Component-level" class="headerlink" title="Object level v.s. Component level"></a>Object level v.s. Component level</h5><p><img src="/2020/06/28/seq2seq/image-20200627223140253.png" alt="image-20200627223140253" style="zoom:50%;"></p>
+<p>应该是考虑整个sentence的准确率如何，而不应该只考虑单个的word</p>
+<h5 id="Reinforcement-learning"><a href="#Reinforcement-learning" class="headerlink" title="Reinforcement learning?"></a>Reinforcement learning?</h5><p><img src="/2020/06/28/seq2seq/image-20200627223424266.png" alt="image-20200627223424266" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/seq2seq/image-20200627223531560.png" alt="image-20200627223531560" style="zoom:50%;"></p>
+<h4 id="Pointer-Network"><a href="#Pointer-Network" class="headerlink" title="Pointer Network"></a>Pointer Network</h4><p>定义如下，找到其中的几个point，将剩下的point包围起来</p>
+<p><img src="/2020/06/28/seq2seq/image-20200628095239086.png" alt="image-20200628095239086" style="zoom:50%;"></p>
+<h5 id="Seq2seq"><a href="#Seq2seq" class="headerlink" title="Seq2seq"></a>Seq2seq</h5><p>input为4个point，但output只有三个point ($P_1,P_2,P_4$)，那这个问题还是sequence to sequence吗？</p>
+<p><img src="/2020/06/28/seq2seq/image-20200628095644699.png" alt="image-20200628095644699" style="zoom:50%;"></p>
+<p>由于output的个数是提前设定好的，并不能动态改变；<span style="color: red">在training的时候，output很只有50个point，但在testing的时候，output有100个point，由于之前只学习了50个point，因此现在并不能生成51-100之间的点</span>；因此这种做法是不可取的</p>
+<p>这里我们对network进行了改进</p>
+<p>对于输入的5个point（加入了END），先得到RNN中hidden layer的输出（$h^0,h^1,h^2,h^3,h^4,h^5$），计算attention weight（match score），再把这个distribution输入argmax函数，输出概率最大的point，即 1</p>
+<p><img src="/2020/06/28/seq2seq/image-20200628100108506.png" alt="image-20200628100108506" style="zoom:50%;"></p>
+<p>把这个output 1再输入另外一个RNN network，其hidden layer的输出为$z^1$，再根据$z^1,h^i$来计算相应的attention weight，输入argmax函数，得到output为 4</p>
+<p>再把point 4作为另外一个RNN network的input，其hidden layer的输出为$z^2$，….</p>
+<p>这个process会一直持续，知道END出现</p>
+<p><img src="/2020/06/28/seq2seq/image-20200628101004928.png" alt="image-20200628101004928" style="zoom:50%;"></p>
+<p><span style="color: red">对于改进后的network，如果现在的input是100个，那么其output就会有100个不同的选择，没有了之前的限制</span></p>
+<h5 id="Applications"><a href="#Applications" class="headerlink" title="Applications"></a>Applications</h5><p>对于机器翻译，如果input包含一些地名、人名，并不需要进行翻译，这是我们就可以用pointer network，将这些名词直接copy</p>
+<p><img src="/2020/06/28/seq2seq/image-20200628102849708.png" alt="image-20200628102849708" style="zoom:50%;"></p>
+<p>对于chat-bot，也有一些名词并不需要学习，可以直接copy</p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Sequence to Sequence</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
+    <url>/2020/06/28/t-SNE/</url>
+    <content><![CDATA[<blockquote>
+<p>本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；</p>
+</blockquote>
+<h4 id="Manifold-Learning"><a href="#Manifold-Learning" class="headerlink" title="Manifold Learning"></a>Manifold Learning</h4><p>在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learning 任务</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628202133893.png" alt="image-20200628202133893" style="zoom:50%;"></p>
+<h4 id="Locally-Linear-Embedding-LLE"><a href="#Locally-Linear-Embedding-LLE" class="headerlink" title="Locally Linear Embedding (LLE)"></a>Locally Linear Embedding (LLE)</h4><p>用$w_{ij}$表示$x_i,x_j$之间的联系，先找到使得$\sum_i ||x^i-\sum_jw_{ij}x^j||_2$最小化的$w_{ij}$，再根据这个$w_{ij}$来找到降维的结果$z_i,z_j$</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628202738023.png" alt="image-20200628202738023" style="zoom:50%;"></p>
+<p>如果并不知道之前的$x_i,x_j$，那么就可以用LLE这种方法，也可以得出$z_i,z_j$</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628203501209.png" alt="image-20200628203501209" style="zoom:50%;"></p>
+<h4 id="Laplacian-Eigenmaps"><a href="#Laplacian-Eigenmaps" class="headerlink" title="Laplacian Eigenmaps"></a>Laplacian Eigenmaps</h4><p>Review: 在之前的semi-supervised learning中，如果$x^1,x^2$在一个high density region内是相近的，那么我们就可以认为$\hat y^1,\hat y^2$也有类似的表现</p>
+<p>如果$y^i,y^j$是connected的，那么其$w_{ij}$就是对应的相似度；如果没有connect，其$w_{ij}$就是0</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628204015777.png" alt="image-20200628204015777" style="zoom:50%;"></p>
+<p>我们也可以得出类似smoothness的式子，计算$z^i,z^j$之间的smoothness</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628205136836.png" alt="image-20200628205136836" style="zoom:50%;"></p>
+<p>那么我们现在的目标就是找到$z^i,z^j$，来使S达到最小值，还需要有一些额外的constrains</p>
+<p>现在我们对z加入一些constrains，如果降维后z的维数是M，那么我们就不希望取出来的这些点还生活在比M还低维的空间里面；我们现在希望把塞进高维空间的低维空间展开，我们就不希望展开之后的点在一个更低维的空间里面</p>
+<h4 id="T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><a href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE" class="headerlink" title="T-distributed Stochastic Neighbor Embedding (t-SNE)"></a>T-distributed Stochastic Neighbor Embedding (t-SNE)</h4><p>对于之前的LLE方法，类似的data之间是很close的，<u>但不同类别之间的data却没有分开，是叠成一团的</u></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628210651621.png" alt="image-20200628210651621" style="zoom:50%;"></p>
+<p><strong>为了找到对应的$z^i,z^j$</strong>，先计算$x^i,x^j$之间的相似度$S(x^i,x^j)$，再得出一个分布 $P(x^j|x^i)$；还要计算$z^i,z^j$之间的相似度$S’(z^i,z^j)$，得出分布$Q(z^j|z^i)$；</p>
+<p>这两个分布应该越接近越好，使用L来表示</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628211215304.png" alt="image-20200628211215304" style="zoom:50%;"></p>
+<p>可以使用gradient descent，有了L函数，再分别对$z^i,z^j$求偏微分即可</p>
+<p>但t-SNE要对所有的point之间都求similarity，因此计算量比较大，在数据量很大的情况下电脑的计算速度会非常慢</p>
+<p>因此，对于很高的dimensions，通常先做降维（PCA），比如可以降维到50维，再使用t-SNE降到2维</p>
+<p><span style="color: red">通常我们使用t-SNE来对高维的数据进行可视化</span></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628211326492.png" alt="image-20200628211326492" style="zoom:50%;"></p>
+<p>在上图中，红色曲线表示SNE，蓝色曲线表示t-SNE，纵轴表示distribution；如果我们想要维持相同的distribution，即在同一个水平线上，就达到了如图所示的效果；相同的几率，t-SNE的$||z^i-z^j||_2$之间的距离越大</p>
+<p>如果本来就离得很近，那么经过t-SNE之间的距离还是很小；如果本来就离得很远，那么从原来的distribution拉到t-SNE之后，距离会更远；</p>
+<p>到实际的例子中，<span style="color: red">如果本来是同一个类别的data，由于这些data之间的距离很近，不会收到t-SNE很大的影响；但如果是属于不同类别的data，距离是比较远的，t-SNE会放大这种距离</span></p>
+<p>对于下图中的MNIST，先使用PCA进行降维，再进行可视化，就可以得到下图中的good visualization</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628213646582.png" alt="image-20200628213646582" style="zoom:50%;"></p>
+<p>下图中有一个更加直观的例子，使用t-SNE算法，运用gradient descent的思想，不同类别的data之间的距离会越来越大</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628214657615.png" alt="image-20200628214657615" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628214721028.png" alt="image-20200628214721028" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Dimension Reduction</tag>
+        <tag>LLE</tag>
+        <tag>t-SNE</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>多处理机</title>
+    <url>/2020/03/11/%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA/</url>
+    <content><![CDATA[<h5 id="计算机分类"><a href="#计算机分类" class="headerlink" title="计算机分类"></a>计算机分类</h5><ul>
+<li>按照<u>Flynn分类</u>法，可将计算机分为<u>SISD、SIMD、MISD、MIMD</u>四类。</li>
+<li><u>冯氏分类</u>法，<u>字串位串、字串位并、字并位串、字并位并</u>。</li>
+<li><u>Handler分类法</u>。</li>
+</ul>
+<h5 id="存储器系统结构"><a href="#存储器系统结构" class="headerlink" title="存储器系统结构"></a>存储器系统结构</h5><ul>
+<li>集中式存储器：各处理器可共享一个集中式的物理存储器；</li>
+<li>分布式存储器：存储器分布到各个处理器中。<ul>
+<li>如果大多数的访存都是针对本地节点进行的，就可以<u>降低</u>对存储器和互联网络的<u>带宽要求</u>；</li>
+<li>对本地存储器的<u>访问延迟小</u>。</li>
+<li>缺点：处理器之间的<u>通信</u>较为<u>复杂</u>。</li>
+</ul>
+</li>
+</ul>
+<p>存储器在物理上分布到各节点中，但<u>逻辑地址空间</u>的组织方式以及处理器之间<u>通信方式</u>不同：</p>
+<ul>
+<li>把在物理上分离的存储器作为一个<u>统一的共享逻辑空间</u>进行编址，不同处理器上的同一个物理地址指向同一个存储单元。<u>分布式共享存储器系统（DSM）</u>。采用<u>共享存储器</u>通信机制。</li>
+<li>把每个节点中的存储器编址为一个<u>独立的地址空间</u>，不同节点的地址空间之间是相互独立的，不同处理器上的同一个物理地址指向不同的存储单元。<u>机群</u>。采用<u>消息传递</u>机制。</li>
+</ul>
+<h5 id="通信机制"><a href="#通信机制" class="headerlink" title="通信机制"></a>通信机制</h5><p><strong>共享存储器</strong></p>
+<p>处理器之间的通信是通过load和store指令对相同存储器地址进行读/写来实现的。</p>
+<ul>
+<li>与常用的对称式多处理机的通信机制兼容；</li>
+<li>处理机之间的通信方式比较复杂时，编程相对容易；</li>
+<li>在开发程序时，可以将重点放到对性能影响较大的数据访问上；</li>
+<li>通信数据量小时，通信开销小，贷款利用好；</li>
+<li>可以通过Cathe缓冲技术来减少远程通信的频度。</li>
+</ul>
+<p><strong>消息传递</strong></p>
+<p>处理器之间是通过显示地发送消息来进行通信的，把消息看成是一个远程进程调用（RPC）。</p>
+<ul>
+<li>硬件更简单；</li>
+<li>通信是显示的，可以更容易搞清楚何时发生通信以及通信开销是多少；</li>
+<li>显示通信可以使编程者重点注意并行计算的主要通信开销，使之有可能开发出结构更好、性能更高的并行程序；</li>
+<li>可以减少不当同步带来错误的可能性。</li>
+</ul>
+<h5 id="并行处理面临的挑战"><a href="#并行处理面临的挑战" class="headerlink" title="并行处理面临的挑战"></a>并行处理面临的挑战</h5><ul>
+<li>程序中的并行性有限；</li>
+<li>相对较大通信开销。</li>
+<li>计算：Amdahl</li>
+</ul>
+<script type="math/tex; mode=display">
+加速比=\frac{1}{\frac{可加速部分比例}{部件加速比}+(1-可加速部分比例)}</script><script type="math/tex; mode=display">
+S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（MIMD）"><a href="#并行计算机系统结构（MIMD）" class="headerlink" title="并行计算机系统结构（MIMD）"></a>并行计算机系统结构（MIMD）</h5><ul>
+<li>PVP</li>
+<li><strong>SMP</strong>，对称式共享存储器多处理机</li>
+<li>DSM</li>
+<li><strong>MPP</strong>，大规模并行处理机</li>
+<li><strong>机群</strong></li>
+</ul>
+<h5 id="对称式共享存储器多处理机（SMP）"><a href="#对称式共享存储器多处理机（SMP）" class="headerlink" title="对称式共享存储器多处理机（SMP）"></a>对称式共享存储器多处理机（SMP）</h5><p>也称为集中式共享多处理机，一般由十几个处理器构成，各处理器共享一个集中式的物理存储器，这个主存相对于各处理器的关系是对称的。</p>
+<ul>
+<li>商用处理器</li>
+<li>共享存储器</li>
+<li>集中共享</li>
+</ul>
+<h5 id="大规模并行处理机（MPP）"><a href="#大规模并行处理机（MPP）" class="headerlink" title="大规模并行处理机（MPP）"></a>大规模并行处理机（MPP）</h5><p>按照当前的标准，具有几百台~几千台处理机的任何机器都是大规模并行处理系统。</p>
+<ul>
+<li>处理节点使用商用微处理器，每个节点可以有多个微处理器；</li>
+<li>具有较好的可扩展性；</li>
+<li>采用分布式非共享的存储器，各节点有自己的地址空间；</li>
+<li>采用消息传递的通信机制。</li>
+</ul>
+<h5 id="机群"><a href="#机群" class="headerlink" title="机群"></a>机群</h5><p>是一种价格低廉、易于构建、扩放性极强的并行计算机系统。它由多台同构或者异构的独立计算机通过高性能网络和局域网连在一起，协同完成特定的并行计算任务。从用户的角度看，它就是一个单一的、集中的计算资源。</p>
+<ul>
+<li>商用处理器</li>
+<li>分布非共享式</li>
+<li>消息传递</li>
+</ul>
+]]></content>
+      <categories>
+        <category>计算机体系结构</category>
+      </categories>
+      <tags>
+        <tag>计算机体系结构</tag>
+        <tag>机群</tag>
+        <tag>MPP</tag>
+        <tag>SMP</tag>
+        <tag>消息传递</tag>
+        <tag>共享存储器</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>基于知识图谱和GCN的应用和开发</title>
     <url>/2020/07/03/%E5%9F%BA%E4%BA%8E%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E5%92%8C%E5%9B%BE%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E5%BC%80%E5%8F%91/</url>
     <content><![CDATA[<h4 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h4><p>深度学习的主要思想有三个：</p>
@@ -1749,218 +2010,6 @@ L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="/2020/07/03/基于知识图
       </tags>
   </entry>
   <entry>
-    <title>Sequence to Sequence</title>
-    <url>/2020/06/28/seq2seq/</url>
-    <content><![CDATA[<h4 id="Generation"><a href="#Generation" class="headerlink" title="Generation"></a>Generation</h4><p>可以generation文字，也可以generation图片</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627143309760.png" alt="image-20200627143309760" style="zoom:50%;"></p>
-<p>如果想生成一张图片，我们可以把图片的每个pixel看成一个character，从而组成一个sentence，比如下图中蓝色pixel就表示blue，红色的pixel表示red,……</p>
-<p>接下来就可以用language model来生成图片，最初时间步的输入是特殊字符BOS</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627143546864.png" alt="image-20200627143546864" style="zoom:50%;"></p>
-<p>对于一般的generation，如下图的右上部分所示，先根据蓝色pixel生成红色pixel，再根据红色pixel生成黄色pixel，再根据黄色pixel生成灰色pixel，….，并没有考虑pixel之间的位置关系</p>
-<p>还有另外一个比较理想的生成图像方法，如果考虑了pixel之间的位置关系，如下图的右下部分所示，黑色pixel由附近的红色和灰色pixel生成</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627144748287.png" alt="image-20200627144748287" style="zoom:50%;"></p>
-<p>在上图的左上角部分，该lstm块输入了三组参数，也输出了三组参数，把这些方块叠起来就可以达到中部位置图像的效果</p>
-<p>对于一个$3\times 3$的画布，就是我们想要生成的图像的大小，一开始画布上还没有任何内容；现在在画布的左下角放入一个convolution的filter， 把其输出在放到3D的lstm的左下角（input），由于lstm也是有memory的，经过不断的process，可以到左上角，从而产生蓝色的pixel；再把蓝色的pixel放到画布的左下角</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627150215465.png" alt="image-20200627150215465" style="zoom:50%;"></p>
-<p>把filter向右移，结合上次蓝色pixel的输出，根据上文的步骤，就可以生成红色的pixel，再把红色pixel放到画布对应的位置</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627150953989.png" alt="image-20200627150953989" style="zoom:50%;"></p>
-<h4 id="Conditional-Generation"><a href="#Conditional-Generation" class="headerlink" title="Conditional Generation"></a>Conditional Generation</h4><p>必须是有条件的generation，要联系上下文</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627152018372.png" alt="image-20200627152018372" style="zoom:50%;"></p>
-<p>如果要对一张图片进行解释，我们先使用一个CNN model将image转化为一个vector（红色方框），先生成了第一个单词”A”，在生成第二个单词时，还需要将整个image的vector作为输入，不然RNN可能会忘记image的一些信息</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627152512575.png" alt="image-20200627152512575" style="zoom:50%;"></p>
-<p>RNN也可以用来做机器翻译，比如我们想要翻译“机器学习”，就先把这四个字分别输入绿色的RNN里面，最后一个时间节点的输出（红色方框）就包含了整个sentence的information，这个过程称之为<strong>Encoder</strong></p>
-<p>把encoder的information再作为另外一个rnn的input，再进行output，这个过程称之为<strong>Decoder</strong></p>
-<p>encoder和decoder是jointly train的，这两者的参数可以是一样的，也可以是不一样的</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627153002771.png" alt="image-20200627153002771" style="zoom:50%;"></p>
-<p> encoder将之前所有说过的话都进行整合了，再作为decoder的input</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627154111622.png" alt="image-20200627154111622" style="zoom:50%;"></p>
-<h4 id="Attention"><a href="#Attention" class="headerlink" title="Attention"></a>Attention</h4><h5 id="Dynamic-Conditional-Generation"><a href="#Dynamic-Conditional-Generation" class="headerlink" title="Dynamic Conditional Generation"></a>Dynamic Conditional Generation</h5><p>如果需要翻译的文字非常复杂，无法用一个vector来表示，就算可以表示也没办法表示全部的关键信息，这时候如果decoder每次input的都还是同一个vector，就不会得到很好的结果</p>
-<p>因此我们现在先把“机器”作为decoder的第一个输入$c^1$，这样就可以得到更好的结果</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627154318421.png" alt="image-20200627154318421" style="zoom:50%;"></p>
-<h5 id="Machine-Translation"><a href="#Machine-Translation" class="headerlink" title="Machine Translation"></a>Machine Translation</h5><p>绿色方块为RNN中hidden layer的output，分别是$h^1,h^2,h^3,h^4$；还有一个vector $z^0$，是可以通过network学出来的；把这两者输入一个match函数，可以得到$h^1,z^0$之间的match分数 $\alpha _0^1$</p>
-<p>这个match函数可以自己设计，可以有参数，也可以没有参数</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627154905302.png" alt="image-20200627154905302" style="zoom:50%;"></p>
-<p>得出的$\alpha _0^1,\alpha _0^2,\alpha _0^3,\alpha _0^4$再输入softmax函数，得到$\hat\alpha _0^1,\hat\alpha _0^2,\hat\alpha _0^3,\hat\alpha _0^4$，乘上$h^i$再加起来，就可以得到$c^0$，来作为decoder input，根据decoder，可得出第一个翻译的单词“machine”；$z^1$为decoder RNN其中hidden layer的输出，用$z^1$再来得出相应的decoder input</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627155414554.png" alt="image-20200627155414554" style="zoom:50%;"></p>
-<p>再来计算$z^1,h^1$之间的match分数$\alpha_1^1$，</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627155937349.png" alt="image-20200627155937349" style="zoom:50%;"></p>
-<p>再继续算出$c^1$作为decoder的input，从而得出第二个单词“learning”</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627160046413.png" alt="image-20200627160046413" style="zoom:50%;"></p>
-<p>一直重复这个过程，只到全部翻译完成</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627160411647.png" alt="image-20200627160411647" style="zoom:50%;"></p>
-<h5 id="Speech-Recognition"><a href="#Speech-Recognition" class="headerlink" title="Speech Recognition"></a>Speech Recognition</h5><p>语音信号也可以看成一系列的vector sequence，第一个红色方框所在的帧match分数很高，就把对应的vector放到decoder，machine就会得出“h”</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627193908934.png" alt="image-20200627193908934" style="zoom:50%;"></p>
-<h5 id="Image-Caption-Generation"><a href="#Image-Caption-Generation" class="headerlink" title="Image Caption Generation"></a>Image Caption Generation</h5><p>image可以分成多个region，每个region可以用一个vector来表示，计算这些vector和$z^0$之间match的分数，为0.7、0.1….，再进行weighted sum，得到红色方框的结果，再输入RNN，得到Word1，此时hidden layer的输出为$z^1$</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627195250525.png" alt="image-20200627195250525" style="zoom:50%;"><img src="/2020/06/28/seq2seq/image-20200627195503429.png" alt="image-20200627195503429"></p>
-<p>再计算$z^1$和vector之间的match分数，把分数作为RNN的input，从而得出Word 2</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627195511422.png" alt="image-20200627195511422" style="zoom:50%;"></p>
-<p>这里是一些具体的例子</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627195914955.png" alt="image-20200627195914955" style="zoom:50%;"></p>
-<p>但也会产生一些不好的结果</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627200010931.png" alt="image-20200627200010931" style="zoom:50%;"></p>
-<h5 id="Memory-Network"><a href="#Memory-Network" class="headerlink" title="Memory Network"></a>Memory Network</h5><p>memory network是有一篇文章，问machine一个问题，machine能够给出对应的答案</p>
-<p>先将document分成多个vector，再给出这些vector与问题q之间match的分数$\alpha^1,..,\alpha^N$，与$x^i$分别相乘，得到extracted information，作为DNN的input，再进行不断的训练，从而得出对应的answer</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627200439344.png" alt="image-20200627200439344" style="zoom:50%;"></p>
-<p>还有一个更加复杂的版本</p>
-<p>match的部分和extracted的部分不一定是一样的，相当于输入了两组不同的参数，比如可以把$x^i$乘上一个matrix，就可以变成另外一组参数$h^i$，这个matrix是可以自动学出来的</p>
-<p>这时计算extracted information的方式就发生了一些变化；sum之后的值不仅输入DNN，还会与问题q进行结合，再重新计算match分数，不断进行一个反复思考的过程</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627201014065.png" alt="image-20200627201014065" style="zoom:50%;"></p>
-<p>q可以用来计算attention，计算出extracted information之后，与q加起来；上一次sum的结果会再继续参与计算attention，再extract，再进行sum，作为DNN的input，得到最后的答案</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627201933880.png" alt="image-20200627201933880" style="zoom:50%;"></p>
-<p>可以把这个模型看作是两层layer的network，也有back propagation来更新network的参数</p>
-<h5 id="Neural-Turing-Machine"><a href="#Neural-Turing-Machine" class="headerlink" title="Neural Turing Machine"></a>Neural Turing Machine</h5><p>Neural Turing Machine不仅可以读取memory的内容，也可以根据match分数来修改memory的内容；即你不仅可以通过memory读取information，也可以把information写到memory里面去</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627202652334.png" alt="image-20200627202652334" style="zoom:50%;"></p>
-<p>对于初始值的memory $m_0^i$，计算出对应的match分数$\hat\alpha_0^i$，在进行weighted sum，得出$r^0$，来作为另外一个network f的input，这个network相当于是一个controller，f可以是DNN、SVM、GRU等；</p>
-<p>$r^0,x^1$作为该network的输入，可以得出三个output，这些output可以控memory，比如新的attention是什么，新的memory里面的值如何进行修改</p>
-<p>新的attention计算加入了$k^1$，即$\alpha_1^i=cos(m_0^i,k^1)$，再输入softmax，得到新的$\hat\alpha_1^i$的distribution</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627203211682.png" alt="image-20200627203211682" style="zoom:50%;"></p>
-<p>$e^1$里面的值表示把原来memory里面的值清空，$a^1$表示把新的值写入memory，通过下面的公式再计算新的memory $m_1^i$</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627204251989.png" alt="image-20200627204251989" style="zoom:50%;"></p>
-<p>得到新的memory $m_1^i$之后，再计算出新的attention $\hat\alpha_1^i$，再进行weighted sum得到$r^1$，加上新的$x^2$作为network的input，得出新的output，再来对整个network进行操控</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627204747750.png" alt="image-20200627204747750" style="zoom:50%;"></p>
-<h4 id="Tips-for-Generation"><a href="#Tips-for-Generation" class="headerlink" title="Tips for Generation"></a>Tips for Generation</h4><h5 id="Attention-1"><a href="#Attention-1" class="headerlink" title="Attention"></a>Attention</h5><p>$\alpha_t^i$下标表示time，上标表示component，该视频包括4个component，有4个时间节点；在第一个时间节点产生attention $\alpha_1^1,\alpha_1^2,\alpha_1^3,\alpha_1^4$，生成了第一个word $w_1$</p>
-<p>attention也是可以调节的，有时会出现一些<strong>bad attention</strong>，在产生第二个word（$w_2$,<span style="color: red">women</span>）时，focus到第二个component，在产生第四个word $w_4$时，也focus到第二个component上，也是<span style="color: green">women</span>，多次attent在同一个frame上，就会产生一些很奇怪的结果</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627205536622.png" alt="image-20200627205536622" style="zoom:50%;"></p>
-<p><strong>Good Attention</strong>：至少要包含input的每一个frame，每个frame都应该attent一下，每个frame进行attent的量也不能太多，这个量最好是同等级的</p>
-<p>Q：那么如何保证这个标准呢？</p>
-<p>A：有学者提出了一个regularization term，有一个新的可学习的参数$\tau$，$\sum_t\alpha_t^i$表示所有attention的sum，再计算$\sum_i(\tau-\sum_t\alpha_t^i)^2$的值，这个值越小越好；对于上文所说的bad attention的情况，这个值算出来是很大的，因此network就会再进行不断地学习，只到term的值不断减小</p>
-<h5 id="Mismatch-between-Train-and-Test"><a href="#Mismatch-between-Train-and-Test" class="headerlink" title="Mismatch between Train and Test"></a>Mismatch between Train and Test</h5><p><img src="/2020/06/28/seq2seq/image-20200627213016984.png" alt="image-20200627213016984" style="zoom:50%;"></p>
-<p><img src="/2020/06/28/seq2seq/image-20200627213436202.png" alt="image-20200627213436202" style="zoom:50%;"></p>
-<p><strong>Exposure Bias</strong>：在training的时候，input为真正的答案；但在testing的时候，input为上一个时间节点的output</p>
-<p>在下图中，由于RNN从来没有到右子树B训练过，但如果在testing时一开始就遇到了B，network就会出现错误</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627214936987.png" alt="image-20200627214936987" style="zoom:50%;"></p>
-<h5 id="Modifying-Training-Process"><a href="#Modifying-Training-Process" class="headerlink" title="Modifying Training Process?"></a>Modifying Training Process?</h5><p>那么我们如何解决这种mismatch问题呢？可以尝试modify训练process</p>
-<p>如果machine现在output B，即使是错误的output（和reference A不一样），我们也应该让这个错误的output作为下一次的input，那么training和testing就是match的</p>
-<p>但在实际操作中，training是非常麻烦的；现在我们使用gradient descent来进行training，第一个gradient的方向告诉我们要把A的几率增大，output B，在第二个时间点，input为B，看到reference为B，把B的几率增大，就可以和reference相对应起来；</p>
-<p>但实际上，第一个output为A的几率上升，那么output发生了变化，第二个时间点的input就发生了变化，是A；那么我们之前学习到的让B上升就没有意义了</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627215358053.png" alt="image-20200627215358053" style="zoom:50%;"></p>
-<h5 id="Scheduled-Sampling"><a href="#Scheduled-Sampling" class="headerlink" title="Scheduled Sampling"></a><strong>Scheduled Sampling</strong></h5><p>由于使用Modifying Training Process很难train，现在我们就使用Scheduled Sampling</p>
-<p>对于到底是model里的ouput，还是reference来作为input，我们可以给一个几率；铜板是正面，就使用model的output，如果是反面，就用reference</p>
-<p>右上角的图，纵轴表示from reference的几率，一开始只看reference，reference的几率不断变小，model的几率不断增加</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627221402859.png" alt="image-20200627221402859" style="zoom:50%;"></p>
-<p><img src="/2020/06/28/seq2seq/image-20200627221933432.png" alt="image-20200627221933432" style="zoom:50%;"></p>
-<h5 id="Beam-Search"><a href="#Beam-Search" class="headerlink" title="Beam Search"></a>Beam Search</h5><p><img src="/2020/06/28/seq2seq/image-20200627221956837.png" alt="image-20200627221956837" style="zoom:50%;"></p>
-<p>同时走两条path</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627222144464.png" alt="image-20200627222144464" style="zoom:50%;"></p>
-<p><img src="/2020/06/28/seq2seq/image-20200627222358014.png" alt="image-20200627222358014" style="zoom:50%;"></p>
-<h5 id="Better-idea？"><a href="#Better-idea？" class="headerlink" title="Better idea？"></a>Better idea？</h5><p>为什么不直接把distribution作为下一个input呢？即下图中的右图</p>
-<p>但右边的结果会比较差，对于几率接近的输入，左图会sample一个几率最高的（高兴），但右图会保留这个distribution</p>
-<p><img src="/2020/06/28/seq2seq/image-20200627222713634.png" alt="image-20200627222713634" style="zoom:50%;"></p>
-<h5 id="Object-level-v-s-Component-level"><a href="#Object-level-v-s-Component-level" class="headerlink" title="Object level v.s. Component level"></a>Object level v.s. Component level</h5><p><img src="/2020/06/28/seq2seq/image-20200627223140253.png" alt="image-20200627223140253" style="zoom:50%;"></p>
-<p>应该是考虑整个sentence的准确率如何，而不应该只考虑单个的word</p>
-<h5 id="Reinforcement-learning"><a href="#Reinforcement-learning" class="headerlink" title="Reinforcement learning?"></a>Reinforcement learning?</h5><p><img src="/2020/06/28/seq2seq/image-20200627223424266.png" alt="image-20200627223424266" style="zoom:50%;"></p>
-<p><img src="/2020/06/28/seq2seq/image-20200627223531560.png" alt="image-20200627223531560" style="zoom:50%;"></p>
-<h4 id="Pointer-Network"><a href="#Pointer-Network" class="headerlink" title="Pointer Network"></a>Pointer Network</h4><p>定义如下，找到其中的几个point，将剩下的point包围起来</p>
-<p><img src="/2020/06/28/seq2seq/image-20200628095239086.png" alt="image-20200628095239086" style="zoom:50%;"></p>
-<h5 id="Seq2seq"><a href="#Seq2seq" class="headerlink" title="Seq2seq"></a>Seq2seq</h5><p>input为4个point，但output只有三个point ($P_1,P_2,P_4$)，那这个问题还是sequence to sequence吗？</p>
-<p><img src="/2020/06/28/seq2seq/image-20200628095644699.png" alt="image-20200628095644699" style="zoom:50%;"></p>
-<p>由于output的个数是提前设定好的，并不能动态改变；<span style="color: red">在training的时候，output很只有50个point，但在testing的时候，output有100个point，由于之前只学习了50个point，因此现在并不能生成51-100之间的点</span>；因此这种做法是不可取的</p>
-<p>这里我们对network进行了改进</p>
-<p>对于输入的5个point（加入了END），先得到RNN中hidden layer的输出（$h^0,h^1,h^2,h^3,h^4,h^5$），计算attention weight（match score），再把这个distribution输入argmax函数，输出概率最大的point，即 1</p>
-<p><img src="/2020/06/28/seq2seq/image-20200628100108506.png" alt="image-20200628100108506" style="zoom:50%;"></p>
-<p>把这个output 1再输入另外一个RNN network，其hidden layer的输出为$z^1$，再根据$z^1,h^i$来计算相应的attention weight，输入argmax函数，得到output为 4</p>
-<p>再把point 4作为另外一个RNN network的input，其hidden layer的输出为$z^2$，….</p>
-<p>这个process会一直持续，知道END出现</p>
-<p><img src="/2020/06/28/seq2seq/image-20200628101004928.png" alt="image-20200628101004928" style="zoom:50%;"></p>
-<p><span style="color: red">对于改进后的network，如果现在的input是100个，那么其output就会有100个不同的选择，没有了之前的限制</span></p>
-<h5 id="Applications"><a href="#Applications" class="headerlink" title="Applications"></a>Applications</h5><p>对于机器翻译，如果input包含一些地名、人名，并不需要进行翻译，这是我们就可以用pointer network，将这些名词直接copy</p>
-<p><img src="/2020/06/28/seq2seq/image-20200628102849708.png" alt="image-20200628102849708" style="zoom:50%;"></p>
-<p>对于chat-bot，也有一些名词并不需要学习，可以直接copy</p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Sequence to Sequence</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>多处理机</title>
-    <url>/2020/03/11/%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA/</url>
-    <content><![CDATA[<h5 id="计算机分类"><a href="#计算机分类" class="headerlink" title="计算机分类"></a>计算机分类</h5><ul>
-<li>按照<u>Flynn分类</u>法，可将计算机分为<u>SISD、SIMD、MISD、MIMD</u>四类。</li>
-<li><u>冯氏分类</u>法，<u>字串位串、字串位并、字并位串、字并位并</u>。</li>
-<li><u>Handler分类法</u>。</li>
-</ul>
-<h5 id="存储器系统结构"><a href="#存储器系统结构" class="headerlink" title="存储器系统结构"></a>存储器系统结构</h5><ul>
-<li>集中式存储器：各处理器可共享一个集中式的物理存储器；</li>
-<li>分布式存储器：存储器分布到各个处理器中。<ul>
-<li>如果大多数的访存都是针对本地节点进行的，就可以<u>降低</u>对存储器和互联网络的<u>带宽要求</u>；</li>
-<li>对本地存储器的<u>访问延迟小</u>。</li>
-<li>缺点：处理器之间的<u>通信</u>较为<u>复杂</u>。</li>
-</ul>
-</li>
-</ul>
-<p>存储器在物理上分布到各节点中，但<u>逻辑地址空间</u>的组织方式以及处理器之间<u>通信方式</u>不同：</p>
-<ul>
-<li>把在物理上分离的存储器作为一个<u>统一的共享逻辑空间</u>进行编址，不同处理器上的同一个物理地址指向同一个存储单元。<u>分布式共享存储器系统（DSM）</u>。采用<u>共享存储器</u>通信机制。</li>
-<li>把每个节点中的存储器编址为一个<u>独立的地址空间</u>，不同节点的地址空间之间是相互独立的，不同处理器上的同一个物理地址指向不同的存储单元。<u>机群</u>。采用<u>消息传递</u>机制。</li>
-</ul>
-<h5 id="通信机制"><a href="#通信机制" class="headerlink" title="通信机制"></a>通信机制</h5><p><strong>共享存储器</strong></p>
-<p>处理器之间的通信是通过load和store指令对相同存储器地址进行读/写来实现的。</p>
-<ul>
-<li>与常用的对称式多处理机的通信机制兼容；</li>
-<li>处理机之间的通信方式比较复杂时，编程相对容易；</li>
-<li>在开发程序时，可以将重点放到对性能影响较大的数据访问上；</li>
-<li>通信数据量小时，通信开销小，贷款利用好；</li>
-<li>可以通过Cathe缓冲技术来减少远程通信的频度。</li>
-</ul>
-<p><strong>消息传递</strong></p>
-<p>处理器之间是通过显示地发送消息来进行通信的，把消息看成是一个远程进程调用（RPC）。</p>
-<ul>
-<li>硬件更简单；</li>
-<li>通信是显示的，可以更容易搞清楚何时发生通信以及通信开销是多少；</li>
-<li>显示通信可以使编程者重点注意并行计算的主要通信开销，使之有可能开发出结构更好、性能更高的并行程序；</li>
-<li>可以减少不当同步带来错误的可能性。</li>
-</ul>
-<h5 id="并行处理面临的挑战"><a href="#并行处理面临的挑战" class="headerlink" title="并行处理面临的挑战"></a>并行处理面临的挑战</h5><ul>
-<li>程序中的并行性有限；</li>
-<li>相对较大通信开销。</li>
-<li>计算：Amdahl</li>
-</ul>
-<script type="math/tex; mode=display">
-加速比=\frac{1}{\frac{可加速部分比例}{部件加速比}+(1-可加速部分比例)}</script><script type="math/tex; mode=display">
-S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（MIMD）"><a href="#并行计算机系统结构（MIMD）" class="headerlink" title="并行计算机系统结构（MIMD）"></a>并行计算机系统结构（MIMD）</h5><ul>
-<li>PVP</li>
-<li><strong>SMP</strong>，对称式共享存储器多处理机</li>
-<li>DSM</li>
-<li><strong>MPP</strong>，大规模并行处理机</li>
-<li><strong>机群</strong></li>
-</ul>
-<h5 id="对称式共享存储器多处理机（SMP）"><a href="#对称式共享存储器多处理机（SMP）" class="headerlink" title="对称式共享存储器多处理机（SMP）"></a>对称式共享存储器多处理机（SMP）</h5><p>也称为集中式共享多处理机，一般由十几个处理器构成，各处理器共享一个集中式的物理存储器，这个主存相对于各处理器的关系是对称的。</p>
-<ul>
-<li>商用处理器</li>
-<li>共享存储器</li>
-<li>集中共享</li>
-</ul>
-<h5 id="大规模并行处理机（MPP）"><a href="#大规模并行处理机（MPP）" class="headerlink" title="大规模并行处理机（MPP）"></a>大规模并行处理机（MPP）</h5><p>按照当前的标准，具有几百台~几千台处理机的任何机器都是大规模并行处理系统。</p>
-<ul>
-<li>处理节点使用商用微处理器，每个节点可以有多个微处理器；</li>
-<li>具有较好的可扩展性；</li>
-<li>采用分布式非共享的存储器，各节点有自己的地址空间；</li>
-<li>采用消息传递的通信机制。</li>
-</ul>
-<h5 id="机群"><a href="#机群" class="headerlink" title="机群"></a>机群</h5><p>是一种价格低廉、易于构建、扩放性极强的并行计算机系统。它由多台同构或者异构的独立计算机通过高性能网络和局域网连在一起，协同完成特定的并行计算任务。从用户的角度看，它就是一个单一的、集中的计算资源。</p>
-<ul>
-<li>商用处理器</li>
-<li>分布非共享式</li>
-<li>消息传递</li>
-</ul>
-]]></content>
-      <categories>
-        <category>计算机体系结构</category>
-      </categories>
-      <tags>
-        <tag>计算机体系结构</tag>
-        <tag>机群</tag>
-        <tag>MPP</tag>
-        <tag>SMP</tag>
-        <tag>消息传递</tag>
-        <tag>共享存储器</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>指令级并行</title>
     <url>/2020/03/11/%E6%8C%87%E4%BB%A4%E7%BA%A7%E5%B9%B6%E8%A1%8C/</url>
     <content><![CDATA[<h5 id="指令级并行"><a href="#指令级并行" class="headerlink" title="指令级并行"></a>指令级并行</h5><p>指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：</p>
@@ -2036,52 +2085,43 @@ S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（M
       </tags>
   </entry>
   <entry>
-    <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
-    <url>/2020/06/28/t-SNE/</url>
-    <content><![CDATA[<blockquote>
-<p>本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；</p>
-</blockquote>
-<h4 id="Manifold-Learning"><a href="#Manifold-Learning" class="headerlink" title="Manifold Learning"></a>Manifold Learning</h4><p>在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learning 任务</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628202133893.png" alt="image-20200628202133893" style="zoom:50%;"></p>
-<h4 id="Locally-Linear-Embedding-LLE"><a href="#Locally-Linear-Embedding-LLE" class="headerlink" title="Locally Linear Embedding (LLE)"></a>Locally Linear Embedding (LLE)</h4><p>用$w_{ij}$表示$x_i,x_j$之间的联系，先找到使得$\sum_i ||x^i-\sum_jw_{ij}x^j||_2$最小化的$w_{ij}$，再根据这个$w_{ij}$来找到降维的结果$z_i,z_j$</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628202738023.png" alt="image-20200628202738023" style="zoom:50%;"></p>
-<p>如果并不知道之前的$x_i,x_j$，那么就可以用LLE这种方法，也可以得出$z_i,z_j$</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628203501209.png" alt="image-20200628203501209" style="zoom:50%;"></p>
-<h4 id="Laplacian-Eigenmaps"><a href="#Laplacian-Eigenmaps" class="headerlink" title="Laplacian Eigenmaps"></a>Laplacian Eigenmaps</h4><p>Review: 在之前的semi-supervised learning中，如果$x^1,x^2$在一个high density region内是相近的，那么我们就可以认为$\hat y^1,\hat y^2$也有类似的表现</p>
-<p>如果$y^i,y^j$是connected的，那么其$w_{ij}$就是对应的相似度；如果没有connect，其$w_{ij}$就是0</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628204015777.png" alt="image-20200628204015777" style="zoom:50%;"></p>
-<p>我们也可以得出类似smoothness的式子，计算$z^i,z^j$之间的smoothness</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628205136836.png" alt="image-20200628205136836" style="zoom:50%;"></p>
-<p>那么我们现在的目标就是找到$z^i,z^j$，来使S达到最小值，还需要有一些额外的constrains</p>
-<p>现在我们对z加入一些constrains，如果降维后z的维数是M，那么我们就不希望取出来的这些点还生活在比M还低维的空间里面；我们现在希望把塞进高维空间的低维空间展开，我们就不希望展开之后的点在一个更低维的空间里面</p>
-<h4 id="T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><a href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE" class="headerlink" title="T-distributed Stochastic Neighbor Embedding (t-SNE)"></a>T-distributed Stochastic Neighbor Embedding (t-SNE)</h4><p>对于之前的LLE方法，类似的data之间是很close的，<u>但不同类别之间的data却没有分开，是叠成一团的</u></p>
-<p><img src="/2020/06/28/t-SNE/image-20200628210651621.png" alt="image-20200628210651621" style="zoom:50%;"></p>
-<p><strong>为了找到对应的$z^i,z^j$</strong>，先计算$x^i,x^j$之间的相似度$S(x^i,x^j)$，再得出一个分布 $P(x^j|x^i)$；还要计算$z^i,z^j$之间的相似度$S’(z^i,z^j)$，得出分布$Q(z^j|z^i)$；</p>
-<p>这两个分布应该越接近越好，使用L来表示</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628211215304.png" alt="image-20200628211215304" style="zoom:50%;"></p>
-<p>可以使用gradient descent，有了L函数，再分别对$z^i,z^j$求偏微分即可</p>
-<p>但t-SNE要对所有的point之间都求similarity，因此计算量比较大，在数据量很大的情况下电脑的计算速度会非常慢</p>
-<p>因此，对于很高的dimensions，通常先做降维（PCA），比如可以降维到50维，再使用t-SNE降到2维</p>
-<p><span style="color: red">通常我们使用t-SNE来对高维的数据进行可视化</span></p>
-<p><img src="/2020/06/28/t-SNE/image-20200628211326492.png" alt="image-20200628211326492" style="zoom:50%;"></p>
-<p>在上图中，红色曲线表示SNE，蓝色曲线表示t-SNE，纵轴表示distribution；如果我们想要维持相同的distribution，即在同一个水平线上，就达到了如图所示的效果；相同的几率，t-SNE的$||z^i-z^j||_2$之间的距离越大</p>
-<p>如果本来就离得很近，那么经过t-SNE之间的距离还是很小；如果本来就离得很远，那么从原来的distribution拉到t-SNE之后，距离会更远；</p>
-<p>到实际的例子中，<span style="color: red">如果本来是同一个类别的data，由于这些data之间的距离很近，不会收到t-SNE很大的影响；但如果是属于不同类别的data，距离是比较远的，t-SNE会放大这种距离</span></p>
-<p>对于下图中的MNIST，先使用PCA进行降维，再进行可视化，就可以得到下图中的good visualization</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628213646582.png" alt="image-20200628213646582" style="zoom:50%;"></p>
-<p>下图中有一个更加直观的例子，使用t-SNE算法，运用gradient descent的思想，不同类别的data之间的距离会越来越大</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628214657615.png" alt="image-20200628214657615" style="zoom:50%;"></p>
-<p><img src="/2020/06/28/t-SNE/image-20200628214721028.png" alt="image-20200628214721028" style="zoom:50%;"></p>
+    <title>流水线</title>
+    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
+    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
+<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
+<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
+<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
+<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
+<li>需要有<u>通过时间与排空时间</u></li>
+</ul>
+<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
+<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
+<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
+<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
+<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
+<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
+<ul>
+<li><p>从前调度</p>
+</li>
+<li><p>从目标处调度</p>
+</li>
+<li><p>从失败出调度</p>
+</li>
+</ul>
+<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
+<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
+<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
+<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
+</ul>
 ]]></content>
       <categories>
-        <category>ML-notes</category>
+        <category>软件工程</category>
       </categories>
       <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Dimension Reduction</tag>
-        <tag>LLE</tag>
-        <tag>t-SNE</tag>
+        <tag>流水线</tag>
+        <tag>吞吐率</tag>
+        <tag>加速比</tag>
+        <tag>效率</tag>
       </tags>
   </entry>
   <entry>
@@ -2185,46 +2225,6 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
         <tag>gradient descent</tag>
         <tag>adagrad</tag>
         <tag>SGD</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>流水线</title>
-    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
-    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
-<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
-<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
-<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
-<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
-<li>需要有<u>通过时间与排空时间</u></li>
-</ul>
-<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
-<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
-<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
-<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
-<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
-<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
-<ul>
-<li><p>从前调度</p>
-</li>
-<li><p>从目标处调度</p>
-</li>
-<li><p>从失败出调度</p>
-</li>
-</ul>
-<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
-<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
-<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
-<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>软件工程</category>
-      </categories>
-      <tags>
-        <tag>流水线</tag>
-        <tag>吞吐率</tag>
-        <tag>加速比</tag>
-        <tag>效率</tag>
       </tags>
   </entry>
   <entry>
