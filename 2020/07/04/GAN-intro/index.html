@@ -111,9 +111,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/07/04/GAN-intro/image-20200704163400098.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/04/GAN-intro/image-20200704163657239.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/04/GAN-intro/image-20200704163846888.png">
-<meta property="og:image" content="http://yoursite.com/2020/07/04/GAN-intro/image-20200704164150666.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/04/GAN-intro/image-20200704164316549.png">
-<meta property="og:image" content="http://yoursite.com/2020/07/04/GAN-intro/image-20200704165311165.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/04/GAN-intro/image-20200704165316903.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/04/GAN-intro/image-20200704171245512.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/04/GAN-intro/image-20200704172041505.png">
@@ -136,7 +134,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/07/04/GAN-intro/image-20200704220700604.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/04/GAN-intro/image-20200704220709098.png">
 <meta property="og:image" content="http://yoursite.com/2020/07/04/GAN-intro/image-20200704220719432.png">
-<meta property="og:updated_time" content="2020-07-04T14:11:53.171Z">
+<meta property="og:updated_time" content="2020-07-05T01:28:36.332Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Introduction of Generative Adversarial Network (GAN)">
 <meta name="twitter:description" content="有很多种不同类型GAN，可以在这里查看https://github.com/hindupuravinash/the-gan-zoo Generation对于Image generation，要实现的是输入一个vector，输出一个image；而对于Sentence generation，则实现的是输入一个vector，输出为一个sentence。那么GAN就是用来实现这个中间的NN Generat">
@@ -539,11 +537,11 @@
 <p>但使用auto-encoder也会产生一些问题，如果输入vector为a，那么会产生1的图像，如果输入vector为b，会产生斜着的1；</p>
 <p>Q：那么0.5a+0.5b的vector会产生什么样的结果呢？</p>
 <p>A：由于NN Generator是network，不是线性的，很可能产生不是数字的图像。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704163846888.png" alt="image-20200704163846888" style="zoom:50%;"><img src="/2020/07/04/GAN-intro/image-20200704164150666.png" alt="image-20200704164150666"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704163846888.png" alt="image-20200704163846888" style="zoom:50%;"></p>
 <h5 id="VAE（Variational-Auto-encoder）"><a href="#VAE（Variational-Auto-encoder）" class="headerlink" title="VAE（Variational Auto-encoder）"></a>VAE（<strong>Variational Auto-encoder</strong>）</h5><p>我们可以用VAE来解决这个问题，输入vector a之后，generator不仅产生code m，还会产生每一维的方差$\sigma$，还有一个额外的vector e（noise），最后根据$c_i=exp(\sigma_i)\times e_i+m_i$得出需要的code；decoder需要根据这个带有noise的code，来还原出和input类似的图像。</p>
 <p>那么现在machine不仅看到vector a会产生数字，看到vector b也会产生数字；看到vector a+noise也会产生数字，看到vector b+noise也会产生数字。</p>
 <p>因此，<span style="color: red">对于现在的generator，如果input是在训练的时候从来没见过的vector，也可能output出合理的object。</span></p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704164316549.png" alt="image-20200704164316549" style="zoom:50%;"><img src="/2020/07/04/GAN-intro/image-20200704165311165.png" alt="image-20200704165311165"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704164316549.png" alt="image-20200704164316549" style="zoom:50%;"></p>
 <h5 id="What-do-we-miss"><a href="#What-do-we-miss" class="headerlink" title="What do we miss?"></a>What do we miss?</h5><p>现在有一张真实图像Target，通过generator生成的图像为generated image，目标是使这两者之间的差距越小越好。通常这两者之间的差距，可以通过每个像素点之间的差值来进行计算，比如可以将两张图像都表示成一个vector，再通过L1/L2计算两者之间的distance。</p>
 <p><img src="/2020/07/04/GAN-intro/image-20200704165316903.png" alt="image-20200704165316903" style="zoom:50%;"></p>
 <p>在一种理想的条件下，generator可以生成和Target完全一样的图像。但实际上，generator通常会犯一些错误，在生成的时候会有一些取舍，在一些地方会不得不做出妥协，选择在什么地方做妥协，对结果也会产生至关重要的影响。</p>

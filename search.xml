@@ -1,6 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Attack and Defense</title>
+    <url>/2020/06/26/Attack/</url>
+    <content><![CDATA[<h4 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h4><p><img src="/2020/06/26/Attack/image-20200626095005396.png" alt="image-20200626095005396" style="zoom:50%;"></p>
+<h4 id="What-do-we-want-to-do"><a href="#What-do-we-want-to-do" class="headerlink" title="What do we want to do?"></a>What do we want to do?</h4><p>attack要做的事就是把找到原图片$x^0$对应的$x’$</p>
+<p><img src="/2020/06/26/Attack/image-20200626095352498.png" alt="image-20200626095352498" style="zoom:50%;"></p>
+<h4 id="Loss-Function-for-Attack"><a href="#Loss-Function-for-Attack" class="headerlink" title="Loss Function for Attack"></a>Loss Function for Attack</h4><p><strong>Training</strong>：network训练得出的结果$y^0$必须和$y^{true}$越接近越好，此时的loss function为$L_{train}(\theta)=C(y^0,y^{true})$，<u>输入的$x$是固定的</u>，需要不断调整$\theta$的值，使得$L_{train}(\theta)$取得最小值；</p>
+<p><strong>Non-targeted Attack</strong>：如果我们需要attack一个network，此时network的输出$y’$和$y^{true}$应该越大越好，此时的loss function为$L(x’)=-C(y’,y^{true})$，前面多了一个负号。此时的<u>network中的参数$\theta$是固定的</u>，需要不断调整输入$x’$，使network的输出$y’$和$y^{true}$的差距尽量远；</p>
+<p><strong>Targeted Attack</strong>：如果我们不仅想要$y’,y^{true}$之间的距离尽量远，还想使$y’,y^{false}$之间的距离尽量近，就需要使用targeted attack；此时的loss function为$L(x’)=-C(y’,y^{true})+C(y’,y^{false})$</p>
+<p><img src="/2020/06/26/Attack/image-20200626095914128.png" alt="image-20200626095914128" style="zoom:50%;"></p>
+<p>不仅需要限制输出之间的差异，还需要限制输入$x^0,x’$之间的差异，只有这输入之间的差异d小于$\epsilon$，我们才可以认为$x’$是与$x^0$相似的，才达到了attack 一个network的目的，即使输入尽可能具有迷惑性，从而使网络输出错误的结果</p>
+<h4 id="Constraint"><a href="#Constraint" class="headerlink" title="Constraint"></a>Constraint</h4><p>那么我们怎么计算d呢？</p>
+<p>有以下两种主要的方法：</p>
+<ul>
+<li>L2-norm，为$x^0,x’$之间每个像素差异的平方和；</li>
+<li>L-infinity，为$x^0,x’$之间每个像素差异的最大值</li>
+</ul>
+<p>如果我们改变图中的每个pixel，另外一幅图只改变其中一个pixel，使得这两者之间的L2-norm是一样的，但第二种方式得出的L-infinity更大</p>
+<p><img src="/2020/06/26/Attack/image-20200626102113579.png" alt="image-20200626102113579" style="zoom:50%;"></p>
+<h4 id="How-to-Attack"><a href="#How-to-Attack" class="headerlink" title="How to Attack"></a>How to Attack</h4><p>就像我们训练一个neural network一样，但需要训练的参数是$x’$，此时就需要找到一个参数$x^*$，来最小化$L(x’)$，限制条件是$d(x^0,x’)\leq\epsilon$</p>
+<script type="math/tex; mode=display">
+x^*=arg\mathop{min}_\limits {d(x^0,x')\leq\epsilon}L(x')</script><p>这里我们也使用了gradient descent算法，只是此时需要调整的参数变成了$x^t$</p>
+<p><img src="/2020/06/26/Attack/image-20200626103758330.png" alt="image-20200626103758330" style="zoom:50%;"></p>
+<p>当$d(x^0,x^t)&gt;\epsilon$时，就需要更新这个参数了，使用$fix(x^t)$来更新</p>
+<p><img src="/2020/06/26/Attack/image-20200626123032000.png" alt="image-20200626123032000" style="zoom:50%;"></p>
+<p>更新的参数需要满足一定的条件，</p>
+<ul>
+<li>如果使用L2-norm，必须选择在差值在半径以内的参数，超过了这个半径，就设为$\epsilon $；</li>
+<li>如果使用L-infinity，现在超过了这个方形的区域，就必须想办法把它拉回来，在y轴方向超过了$\epsilon$，就把值设为$\epsilon$；在x轴方向超过了$\epsilon$，就把值设为$\epsilon$</li>
+</ul>
+<p><img src="/2020/06/26/Attack/image-20200626123713569.png" alt="image-20200626123713569" style="zoom:50%;"></p>
+<h4 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h4><p>如果我们现在要attack一个network，其真实类别为Tiger cat，但attack之后的network认为这是star fish</p>
+<p><img src="/2020/06/26/Attack/image-20200626161331898.png" alt="image-20200626161331898" style="zoom:50%;"></p>
+<p>由于这两者之间的差异很小，很难识别，这里我们将差值x50来进行展示</p>
+<p><img src="/2020/06/26/Attack/image-20200626161942541.png" alt="image-20200626161942541" style="zoom:50%;"></p>
+<p>可能猫和猫之间是比较类似的，这里我们将attack的target设置为keyboard，该network认为这是keyboard的概率为0.98</p>
+<p><img src="/2020/06/26/Attack/image-20200626162037439.png" alt="image-20200626162037439" style="zoom:50%;"></p>
+<p>如果我们再对图片加入噪声，network认为这是Persian cat，再继续加入噪声，我们都快分辨不出这张图是一只猫了，network就认为这是fire screen</p>
+<p><img src="/2020/06/26/Attack/image-20200626162150972.png" alt="image-20200626162150972" style="zoom:50%;"></p>
+<p>我们假设$x_0$是在高维平面上的一个点，沿着任意方向随机移动，我们可以看到在接近$x^0$ 的时候，是 tiger cat（正确分类）的可能性是很高的，但如果再移动多一点，是Persian cat和Egyptian cat的可能性是很高的 </p>
+<p>上述说的是随机方向进行移动，如果图片是225*225pixel的，那么就是5万多个高维的方向，现在我们选取其中几个特定的方向。在这几个特定的方向中，$x^0$可变化的范围就变得非常狭窄，$x^0$稍微变化一下，network输出为另一个类别（key board）的可能性就很高</p>
+<p><img src="/2020/06/26/Attack/image-20200626163736373.png" alt="image-20200626163736373" style="zoom:50%;"></p>
+<h4 id="Attack-Approaches"><a href="#Attack-Approaches" class="headerlink" title="Attack Approaches"></a>Attack Approaches</h4><ul>
+<li><p>FGSM (<a href="https://arxiv.org/abs/1412.6572" target="_blank" rel="external">https://arxiv.org/abs/1412.6572</a>)</p>
+</li>
+<li><p>Basic iterative method (<a href="https://arxiv.org/abs/1607.02533" target="_blank" rel="external">https://arxiv.org/abs/1607.02533</a>) </p>
+</li>
+<li><p>L-BFGS (<a href="https://arxiv.org/abs/1312.6199" target="_blank" rel="external">https://arxiv.org/abs/1312.6199</a>)</p>
+</li>
+<li>Deepfool (<a href="https://arxiv.org/abs/1511.04599" target="_blank" rel="external">https://arxiv.org/abs/1511.04599</a>)</li>
+<li>JSMA (<a href="https://arxiv.org/abs/1511.07528" target="_blank" rel="external">https://arxiv.org/abs/1511.07528</a>)</li>
+<li>C&amp;W (<a href="https://arxiv.org/abs/1608.04644" target="_blank" rel="external">https://arxiv.org/abs/1608.04644</a>)</li>
+<li>Elastic net attack (<a href="https://arxiv.org/abs/1709.04114" target="_blank" rel="external">https://arxiv.org/abs/1709.04114</a>)</li>
+<li>Spatially Transformed (<a href="https://arxiv.org/abs/1801.02612" target="_blank" rel="external">https://arxiv.org/abs/1801.02612</a>) </li>
+<li>One Pixel Attack (<a href="https://arxiv.org/abs/1710.08864" target="_blank" rel="external">https://arxiv.org/abs/1710.08864</a>)</li>
+<li>…… only list a few</li>
+</ul>
+<p>虽然有很多方法都可以用来attack network，但这些方法的主要区别在于使用了不同的constrains，或者使用了不同的optimization methods</p>
+<p><img src="/2020/06/26/Attack/image-20200626170309446.png" alt="image-20200626170309446" style="zoom:50%;"></p>
+<p>我们先介绍一下<strong>FGSM</strong>，对于第一维，如果$\frac{\partial L}{\partial x_1}$是大于0的值，那么$\Delta x_1=sign(\frac{\partial L}{\partial x_1})=+1$；如果对于第二维，如果$\frac{\partial L}{\partial x_2}$是小于0的值，不管值多大，都得出$\Delta x_2=sign(\frac{\partial L}{\partial x_2})=-1$；即对于$x^0$的所有维，要么$+\epsilon$，要么$-\epsilon$，即可得到最好的结果$x^*$</p>
+<p><img src="/2020/06/26/Attack/image-20200626171523647.png" alt="image-20200626171523647" style="zoom:50%;"></p>
+<p>FGSM使用L-infinity作为distance constrain，如果gradient指向左下角，那么$x^<em>$就在方框的右上角；如果gradient指向左上角，那么$x^</em>$就在方框的右下角；因此，在FGSM里面，我们只在意gradient的方向，不在意其具体的大小 </p>
+<p>那么FGSM到底是怎么运作的呢？</p>
+<p>我们可以看作FGSM是使用了非常大的一个learning rate，使x飞出了方形区域，由于L-infinity的限制，输出会被限制到方形区域内部，即$x^*$在方形区域的右上角</p>
+<p><img src="/2020/06/26/Attack/image-20200626174020656.png" alt="image-20200626174020656" style="zoom:60%;"></p>
+<h4 id="White-Box-v-s-Black-Box"><a href="#White-Box-v-s-Black-Box" class="headerlink" title="White Box v.s. Black Box"></a>White Box v.s. Black Box</h4><p>在之前的attack中，我们假设已经知道了network的参数$\theta$，目标是找到最优化的$x’$，这种attack就称为<strong>White Box</strong></p>
+<p>但在大多数的情况中，我们都不知道network的参数，但也需要去attack这个network，这就是<strong>Black Box</strong></p>
+<h4 id="Black-Box-Attack"><a href="#Black-Box-Attack" class="headerlink" title="Black Box Attack"></a>Black Box Attack</h4><p>如果我们现在已经知道了black network的training data，那么我们就可以用同样的training data来训练一个proxy network，再生成attacked object，如果能过成功attack新的proxy network，那么我们就可以把这个object也作为black network的输入，也可以attack成功</p>
+<p>如果不能得到相应的training data，network如果是一个在线版本，我们可以输入大量的图片，得出相对应的分类结果，从而可以组合成相对应的训练资料，来得出proxy network</p>
+<p><img src="/2020/06/26/Attack/image-20200626174930630.png" alt="image-20200626174930630" style="zoom:50%;"></p>
+<p>也有一些实验数据证明黑箱攻击是有可能成功的，现在假设Black Box有五种，现在我们来训练proxy network，我们用ResNet-152生成的图片，如果black box的network也是ResNet-152，那么attack成功的几率就会非常高，表格中的4%表示系统辨识的准确率</p>
+<p><img src="/2020/06/26/Attack/image-20200626175459885.png" alt="image-20200626175459885" style="zoom:50%;"></p>
+<h4 id="Attack-in-the-Real-World"><a href="#Attack-in-the-Real-World" class="headerlink" title="Attack in the Real World"></a>Attack in the Real World</h4><p><img src="/2020/06/26/Attack/image-20200626183115909.png" alt="image-20200626183115909" style="zoom:50%;"></p>
+<p><img src="/2020/06/26/Attack/image-20200626183139180.png" alt="image-20200626183139180" style="zoom:50%;"></p>
+<h4 id="Defense"><a href="#Defense" class="headerlink" title="Defense"></a>Defense</h4><p><img src="/2020/06/26/Attack/image-20200626183341651.png" alt="image-20200626183341651" style="zoom:50%;"></p>
+<h5 id="Passive-defense"><a href="#Passive-defense" class="headerlink" title="Passive defense"></a>Passive defense</h5><p><img src="/2020/06/26/Attack/image-20200626183453090.png" alt="image-20200626183453090" style="zoom:50%;"></p>
+<p>这个filter可以是smoothing，对于原来输入的attack图片network认为其是keyboard，经过smoothing之后，network就认为是tiger cat了，是正确的分类结果</p>
+<p>Q：那么为什么smoothing可以达到这种效果呢？</p>
+<p>A：只有某几种方向上的的信号可以使attack成功。如果使用了smoothing这种filter，就把这几种信号改变了，那么attack就失效了 ；加上smoothing并不会伤害原来的图片，所以network仍然可以得出正确的结果</p>
+<p><img src="/2020/06/26/Attack/image-20200626183523115.png" alt="image-20200626183523115" style="zoom:50%;"></p>
+<p>根据这种思想，有学者就提出了feature squeeze</p>
+<p>对于同一个input，我们先得出model的输出结果$Prediction_0$，再根据$Squeeze_1，Squeeze_2$得出结果$Prediction_1,Prediction_2$，如果$Prediction_0$和$Prediction_1,Prediction_2$之间的差值d很大，那么我们就可以认为input是来attack的</p>
+<p><img src="/2020/06/26/Attack/image-20200626184313560.png" alt="image-20200626184313560" style="zoom:50%;"></p>
+<p>还有另外一种方法</p>
+<p><img src="/2020/06/26/Attack/image-20200626184847976.png" alt="image-20200626184847976" style="zoom:50%;"></p>
+<h5 id="Proactive-defense"><a href="#Proactive-defense" class="headerlink" title="Proactive defense"></a>Proactive defense</h5><p>首先我们通过某种算法找出漏洞，找到相应的adversarial input，再把这些input和之前的training data一起作为新的input data，输入network，相当于进行了data augmentation，这个过程进行T次，每次的input data都是不一样的</p>
+<p><img src="/2020/06/26/Attack/image-20200626185155952.png" alt="image-20200626185155952" style="zoom:50%;"></p>
+<p>如果attacker知道了我们是使用算法A来进行模拟，那么attacker可以使用算法B来进行attack，那么我们的network并不能抵御这种attack</p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Attack and Defense</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Anomaly Detection</title>
     <url>/2020/07/03/Anomaly-detection/</url>
     <content><![CDATA[<h4 id="Problem-Formulation"><a href="#Problem-Formulation" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h4><p>对于给定的训练数据集，做异常检测的目的是找到一个函数，这个函数可以检测输入的x是不是和训练数据集相似的。异常检测知识检测出和训练数据不一样的输入，检测出来的数据并不一定都是不好的，有可能是好的，也有可能是不好的。</p>
@@ -104,100 +201,16 @@ L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^
       </tags>
   </entry>
   <entry>
-    <title>Attack and Defense</title>
-    <url>/2020/06/26/Attack/</url>
-    <content><![CDATA[<h4 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h4><p><img src="/2020/06/26/Attack/image-20200626095005396.png" alt="image-20200626095005396" style="zoom:50%;"></p>
-<h4 id="What-do-we-want-to-do"><a href="#What-do-we-want-to-do" class="headerlink" title="What do we want to do?"></a>What do we want to do?</h4><p>attack要做的事就是把找到原图片$x^0$对应的$x’$</p>
-<p><img src="/2020/06/26/Attack/image-20200626095352498.png" alt="image-20200626095352498" style="zoom:50%;"></p>
-<h4 id="Loss-Function-for-Attack"><a href="#Loss-Function-for-Attack" class="headerlink" title="Loss Function for Attack"></a>Loss Function for Attack</h4><p><strong>Training</strong>：network训练得出的结果$y^0$必须和$y^{true}$越接近越好，此时的loss function为$L_{train}(\theta)=C(y^0,y^{true})$，<u>输入的$x$是固定的</u>，需要不断调整$\theta$的值，使得$L_{train}(\theta)$取得最小值；</p>
-<p><strong>Non-targeted Attack</strong>：如果我们需要attack一个network，此时network的输出$y’$和$y^{true}$应该越大越好，此时的loss function为$L(x’)=-C(y’,y^{true})$，前面多了一个负号。此时的<u>network中的参数$\theta$是固定的</u>，需要不断调整输入$x’$，使network的输出$y’$和$y^{true}$的差距尽量远；</p>
-<p><strong>Targeted Attack</strong>：如果我们不仅想要$y’,y^{true}$之间的距离尽量远，还想使$y’,y^{false}$之间的距离尽量近，就需要使用targeted attack；此时的loss function为$L(x’)=-C(y’,y^{true})+C(y’,y^{false})$</p>
-<p><img src="/2020/06/26/Attack/image-20200626095914128.png" alt="image-20200626095914128" style="zoom:50%;"></p>
-<p>不仅需要限制输出之间的差异，还需要限制输入$x^0,x’$之间的差异，只有这输入之间的差异d小于$\epsilon$，我们才可以认为$x’$是与$x^0$相似的，才达到了attack 一个network的目的，即使输入尽可能具有迷惑性，从而使网络输出错误的结果</p>
-<h4 id="Constraint"><a href="#Constraint" class="headerlink" title="Constraint"></a>Constraint</h4><p>那么我们怎么计算d呢？</p>
-<p>有以下两种主要的方法：</p>
-<ul>
-<li>L2-norm，为$x^0,x’$之间每个像素差异的平方和；</li>
-<li>L-infinity，为$x^0,x’$之间每个像素差异的最大值</li>
-</ul>
-<p>如果我们改变图中的每个pixel，另外一幅图只改变其中一个pixel，使得这两者之间的L2-norm是一样的，但第二种方式得出的L-infinity更大</p>
-<p><img src="/2020/06/26/Attack/image-20200626102113579.png" alt="image-20200626102113579" style="zoom:50%;"></p>
-<h4 id="How-to-Attack"><a href="#How-to-Attack" class="headerlink" title="How to Attack"></a>How to Attack</h4><p>就像我们训练一个neural network一样，但需要训练的参数是$x’$，此时就需要找到一个参数$x^*$，来最小化$L(x’)$，限制条件是$d(x^0,x’)\leq\epsilon$</p>
-<script type="math/tex; mode=display">
-x^*=arg\mathop{min}_\limits {d(x^0,x')\leq\epsilon}L(x')</script><p>这里我们也使用了gradient descent算法，只是此时需要调整的参数变成了$x^t$</p>
-<p><img src="/2020/06/26/Attack/image-20200626103758330.png" alt="image-20200626103758330" style="zoom:50%;"></p>
-<p>当$d(x^0,x^t)&gt;\epsilon$时，就需要更新这个参数了，使用$fix(x^t)$来更新</p>
-<p><img src="/2020/06/26/Attack/image-20200626123032000.png" alt="image-20200626123032000" style="zoom:50%;"></p>
-<p>更新的参数需要满足一定的条件，</p>
-<ul>
-<li>如果使用L2-norm，必须选择在差值在半径以内的参数，超过了这个半径，就设为$\epsilon $；</li>
-<li>如果使用L-infinity，现在超过了这个方形的区域，就必须想办法把它拉回来，在y轴方向超过了$\epsilon$，就把值设为$\epsilon$；在x轴方向超过了$\epsilon$，就把值设为$\epsilon$</li>
-</ul>
-<p><img src="/2020/06/26/Attack/image-20200626123713569.png" alt="image-20200626123713569" style="zoom:50%;"></p>
-<h4 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h4><p>如果我们现在要attack一个network，其真实类别为Tiger cat，但attack之后的network认为这是star fish</p>
-<p><img src="/2020/06/26/Attack/image-20200626161331898.png" alt="image-20200626161331898" style="zoom:50%;"></p>
-<p>由于这两者之间的差异很小，很难识别，这里我们将差值x50来进行展示</p>
-<p><img src="/2020/06/26/Attack/image-20200626161942541.png" alt="image-20200626161942541" style="zoom:50%;"></p>
-<p>可能猫和猫之间是比较类似的，这里我们将attack的target设置为keyboard，该network认为这是keyboard的概率为0.98</p>
-<p><img src="/2020/06/26/Attack/image-20200626162037439.png" alt="image-20200626162037439" style="zoom:50%;"></p>
-<p>如果我们再对图片加入噪声，network认为这是Persian cat，再继续加入噪声，我们都快分辨不出这张图是一只猫了，network就认为这是fire screen</p>
-<p><img src="/2020/06/26/Attack/image-20200626162150972.png" alt="image-20200626162150972" style="zoom:50%;"></p>
-<p>我们假设$x_0$是在高维平面上的一个点，沿着任意方向随机移动，我们可以看到在接近$x^0$ 的时候，是 tiger cat（正确分类）的可能性是很高的，但如果再移动多一点，是Persian cat和Egyptian cat的可能性是很高的 </p>
-<p>上述说的是随机方向进行移动，如果图片是225*225pixel的，那么就是5万多个高维的方向，现在我们选取其中几个特定的方向。在这几个特定的方向中，$x^0$可变化的范围就变得非常狭窄，$x^0$稍微变化一下，network输出为另一个类别（key board）的可能性就很高</p>
-<p><img src="/2020/06/26/Attack/image-20200626163736373.png" alt="image-20200626163736373" style="zoom:50%;"></p>
-<h4 id="Attack-Approaches"><a href="#Attack-Approaches" class="headerlink" title="Attack Approaches"></a>Attack Approaches</h4><ul>
-<li><p>FGSM (<a href="https://arxiv.org/abs/1412.6572" target="_blank" rel="external">https://arxiv.org/abs/1412.6572</a>)</p>
-</li>
-<li><p>Basic iterative method (<a href="https://arxiv.org/abs/1607.02533" target="_blank" rel="external">https://arxiv.org/abs/1607.02533</a>) </p>
-</li>
-<li><p>L-BFGS (<a href="https://arxiv.org/abs/1312.6199" target="_blank" rel="external">https://arxiv.org/abs/1312.6199</a>)</p>
-</li>
-<li>Deepfool (<a href="https://arxiv.org/abs/1511.04599" target="_blank" rel="external">https://arxiv.org/abs/1511.04599</a>)</li>
-<li>JSMA (<a href="https://arxiv.org/abs/1511.07528" target="_blank" rel="external">https://arxiv.org/abs/1511.07528</a>)</li>
-<li>C&amp;W (<a href="https://arxiv.org/abs/1608.04644" target="_blank" rel="external">https://arxiv.org/abs/1608.04644</a>)</li>
-<li>Elastic net attack (<a href="https://arxiv.org/abs/1709.04114" target="_blank" rel="external">https://arxiv.org/abs/1709.04114</a>)</li>
-<li>Spatially Transformed (<a href="https://arxiv.org/abs/1801.02612" target="_blank" rel="external">https://arxiv.org/abs/1801.02612</a>) </li>
-<li>One Pixel Attack (<a href="https://arxiv.org/abs/1710.08864" target="_blank" rel="external">https://arxiv.org/abs/1710.08864</a>)</li>
-<li>…… only list a few</li>
-</ul>
-<p>虽然有很多方法都可以用来attack network，但这些方法的主要区别在于使用了不同的constrains，或者使用了不同的optimization methods</p>
-<p><img src="/2020/06/26/Attack/image-20200626170309446.png" alt="image-20200626170309446" style="zoom:50%;"></p>
-<p>我们先介绍一下<strong>FGSM</strong>，对于第一维，如果$\frac{\partial L}{\partial x_1}$是大于0的值，那么$\Delta x_1=sign(\frac{\partial L}{\partial x_1})=+1$；如果对于第二维，如果$\frac{\partial L}{\partial x_2}$是小于0的值，不管值多大，都得出$\Delta x_2=sign(\frac{\partial L}{\partial x_2})=-1$；即对于$x^0$的所有维，要么$+\epsilon$，要么$-\epsilon$，即可得到最好的结果$x^*$</p>
-<p><img src="/2020/06/26/Attack/image-20200626171523647.png" alt="image-20200626171523647" style="zoom:50%;"></p>
-<p>FGSM使用L-infinity作为distance constrain，如果gradient指向左下角，那么$x^<em>$就在方框的右上角；如果gradient指向左上角，那么$x^</em>$就在方框的右下角；因此，在FGSM里面，我们只在意gradient的方向，不在意其具体的大小 </p>
-<p>那么FGSM到底是怎么运作的呢？</p>
-<p>我们可以看作FGSM是使用了非常大的一个learning rate，使x飞出了方形区域，由于L-infinity的限制，输出会被限制到方形区域内部，即$x^*$在方形区域的右上角</p>
-<p><img src="/2020/06/26/Attack/image-20200626174020656.png" alt="image-20200626174020656" style="zoom:60%;"></p>
-<h4 id="White-Box-v-s-Black-Box"><a href="#White-Box-v-s-Black-Box" class="headerlink" title="White Box v.s. Black Box"></a>White Box v.s. Black Box</h4><p>在之前的attack中，我们假设已经知道了network的参数$\theta$，目标是找到最优化的$x’$，这种attack就称为<strong>White Box</strong></p>
-<p>但在大多数的情况中，我们都不知道network的参数，但也需要去attack这个network，这就是<strong>Black Box</strong></p>
-<h4 id="Black-Box-Attack"><a href="#Black-Box-Attack" class="headerlink" title="Black Box Attack"></a>Black Box Attack</h4><p>如果我们现在已经知道了black network的training data，那么我们就可以用同样的training data来训练一个proxy network，再生成attacked object，如果能过成功attack新的proxy network，那么我们就可以把这个object也作为black network的输入，也可以attack成功</p>
-<p>如果不能得到相应的training data，network如果是一个在线版本，我们可以输入大量的图片，得出相对应的分类结果，从而可以组合成相对应的训练资料，来得出proxy network</p>
-<p><img src="/2020/06/26/Attack/image-20200626174930630.png" alt="image-20200626174930630" style="zoom:50%;"></p>
-<p>也有一些实验数据证明黑箱攻击是有可能成功的，现在假设Black Box有五种，现在我们来训练proxy network，我们用ResNet-152生成的图片，如果black box的network也是ResNet-152，那么attack成功的几率就会非常高，表格中的4%表示系统辨识的准确率</p>
-<p><img src="/2020/06/26/Attack/image-20200626175459885.png" alt="image-20200626175459885" style="zoom:50%;"></p>
-<h4 id="Attack-in-the-Real-World"><a href="#Attack-in-the-Real-World" class="headerlink" title="Attack in the Real World"></a>Attack in the Real World</h4><p><img src="/2020/06/26/Attack/image-20200626183115909.png" alt="image-20200626183115909" style="zoom:50%;"></p>
-<p><img src="/2020/06/26/Attack/image-20200626183139180.png" alt="image-20200626183139180" style="zoom:50%;"></p>
-<h4 id="Defense"><a href="#Defense" class="headerlink" title="Defense"></a>Defense</h4><p><img src="/2020/06/26/Attack/image-20200626183341651.png" alt="image-20200626183341651" style="zoom:50%;"></p>
-<h5 id="Passive-defense"><a href="#Passive-defense" class="headerlink" title="Passive defense"></a>Passive defense</h5><p><img src="/2020/06/26/Attack/image-20200626183453090.png" alt="image-20200626183453090" style="zoom:50%;"></p>
-<p>这个filter可以是smoothing，对于原来输入的attack图片network认为其是keyboard，经过smoothing之后，network就认为是tiger cat了，是正确的分类结果</p>
-<p>Q：那么为什么smoothing可以达到这种效果呢？</p>
-<p>A：只有某几种方向上的的信号可以使attack成功。如果使用了smoothing这种filter，就把这几种信号改变了，那么attack就失效了 ；加上smoothing并不会伤害原来的图片，所以network仍然可以得出正确的结果</p>
-<p><img src="/2020/06/26/Attack/image-20200626183523115.png" alt="image-20200626183523115" style="zoom:50%;"></p>
-<p>根据这种思想，有学者就提出了feature squeeze</p>
-<p>对于同一个input，我们先得出model的输出结果$Prediction_0$，再根据$Squeeze_1，Squeeze_2$得出结果$Prediction_1,Prediction_2$，如果$Prediction_0$和$Prediction_1,Prediction_2$之间的差值d很大，那么我们就可以认为input是来attack的</p>
-<p><img src="/2020/06/26/Attack/image-20200626184313560.png" alt="image-20200626184313560" style="zoom:50%;"></p>
-<p>还有另外一种方法</p>
-<p><img src="/2020/06/26/Attack/image-20200626184847976.png" alt="image-20200626184847976" style="zoom:50%;"></p>
-<h5 id="Proactive-defense"><a href="#Proactive-defense" class="headerlink" title="Proactive defense"></a>Proactive defense</h5><p>首先我们通过某种算法找出漏洞，找到相应的adversarial input，再把这些input和之前的training data一起作为新的input data，输入network，相当于进行了data augmentation，这个过程进行T次，每次的input data都是不一样的</p>
-<p><img src="/2020/06/26/Attack/image-20200626185155952.png" alt="image-20200626185155952" style="zoom:50%;"></p>
-<p>如果attacker知道了我们是使用算法A来进行模拟，那么attacker可以使用算法B来进行attack，那么我们的network并不能抵御这种attack</p>
-]]></content>
+    <title>CCF-JSON查询</title>
+    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
+    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
+<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
       <categories>
-        <category>ML-notes</category>
+        <category>CCF Answer</category>
       </categories>
       <tags>
-        <tag>Deep Learning</tag>
-        <tag>Attack and Defense</tag>
+        <tag>CCF</tag>
       </tags>
   </entry>
   <entry>
@@ -365,114 +378,6 @@ u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\
         <tag>Deep Learning</tag>
         <tag>classification</tag>
         <tag>sigmoid function</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>CCF-JSON查询</title>
-    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
-    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
-<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>CCF Answer</category>
-      </categories>
-      <tags>
-        <tag>CCF</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Explainable Machine Learning</title>
-    <url>/2020/06/12/Explainable-AI/</url>
-    <content><![CDATA[<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p>机器不仅要告诉我们结果cat，还要告诉我们为什么 </p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611112308714.png" alt="image-20200611112308714" style="zoom:50%;"></p>
-<h5 id="Why-we-need-Explainable-ML"><a href="#Why-we-need-Explainable-ML" class="headerlink" title="Why we need Explainable ML?"></a>Why we need Explainable ML?</h5><p><u>我们不仅需要机器结果的精确度，还需要进行模型诊断，看机器学习得怎么样；有的任务精确度很高，但实际上机器什么都没学到</u></p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611112911240.png" alt="image-20200611112911240" style="zoom:50%;"></p>
-<p>有模型诊断后，我们就可以根据模型诊断的结果再来调整我们的模型</p>
-<h5 id="Interpretable-v-s-Powerful"><a href="#Interpretable-v-s-Powerful" class="headerlink" title="Interpretable v.s. Powerful"></a>Interpretable v.s. Powerful</h5><p><img src="/2020/06/12/Explainable-AI/image-20200611195115774.png" alt="image-20200611195115774" style="zoom:50%;"></p>
-<p>那么有没有model是Interpretable，也是powerful的呢 ？</p>
-<p>决策树可以interpretable，也是比较powerful的；对于第一个分支节点，“这些动物呼吸空气吗？”，就包含了interpretable的信息</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611195220007.png" alt="image-20200611195220007" style="zoom:50%;"></p>
-<p>当分支特别多的时候，决策树的表现也会很差</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611195426930.png" alt="image-20200611195426930" style="zoom:50%;"></p>
-<h4 id="Local-Explanation"><a href="#Local-Explanation" class="headerlink" title="Local Explanation"></a>Local Explanation</h4><h5 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h5><p>对于输入的x，我们将其分成components $\{x_1,…,x_n,…x_N\}$，每个component由一个像素，或者一小块组成</p>
-<p>我们现在的目标是知道每个component对making the decision的重要性有多少，那么我们可以通过remove或者modify其中一个component的值，看此时的decision会有什么变化</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611200230303.png" alt="image-20200611200230303" style="zoom:50%;"></p>
-<p>把灰色方块放到图像中，覆盖图像的一小部分；如果我们把灰色方块放到下图中的红色区域，那么对解释的结果影响不大，第一幅图还是一只狗</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611200829405.png" alt="image-20200611200829405" style="zoom:50%;"></p>
-<p>还有另一种方法</p>
-<p>对于输入的$\{x_1,…,x_n,..,x_N\}$，对于其中的某个关键的pixel $x_n$加上$\Delta x$，这个pixel对我们识别这是不是一只狗具有很重要的作用</p>
-<p>那么我们就可以用$\frac{\Delta y}{\Delta x}$来表示这个小小的扰动对y的影响，可以通过$\frac{\partial y_k}{\partial x_n}$来进行计算，表示$y_k$对$x_n$的偏微分，最后取绝对值，表示某一个pixel对现在y影响的大小</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611214135944.png" alt="image-20200611214135944" style="zoom:50%;"></p>
-<p>在上图中，下半部分由3幅图saliency map，亮度越大，绝对值就越大，亮度越大的地方就表示该pixel对结果的影响越大</p>
-<h5 id="Limitation-of-Gradient-based-Approaches"><a href="#Limitation-of-Gradient-based-Approaches" class="headerlink" title="Limitation of Gradient based Approaches"></a>Limitation of Gradient based Approaches</h5><p><img src="/2020/06/12/Explainable-AI/image-20200611220206992.png" alt="image-20200611220206992" style="zoom:50%;"></p>
-<h5 id="Attack-Interpretation"><a href="#Attack-Interpretation" class="headerlink" title="Attack Interpretation"></a>Attack Interpretation</h5><p><img src="/2020/06/12/Explainable-AI/image-20200611221032938.png" alt="image-20200611221032938" style="zoom:50%;"></p>
-<h4 id="Global-Explanation"><a href="#Global-Explanation" class="headerlink" title="Global Explanation"></a>Global Explanation</h4><p>Interprete the whole Model</p>
-<h5 id="Activation-Minimization-review"><a href="#Activation-Minimization-review" class="headerlink" title="Activation Minimization (review)"></a><strong>Activation Minimization</strong> (review)</h5><p>让我们先review一下activation minimization，现在我们的目标是找到一个$x^*$，使得输出的值$y_i$最大</p>
-<p>我们可以加入一些噪声，加上噪声后人并不能识别出来，但机器可以识别出来，看出来下图中的噪声是0 1 2 3 4 5 6 7 8</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611221428166.png" alt="image-20200611221428166" style="zoom:50%;"></p>
-<p>之前我们的目标是找到一个image，使得输出的y达到最大值；现在我们的目标不仅是找到x使输出y达到最大值，还需要把image变得更像是一个digit，不像左边那个图，几乎全部的像素点都是白色，右边的图只有和输出的digit相关的pixel才是白色</p>
-<p>这里我们通过加入了一个新的限制$R(x)$来实现，可以表示图像和digit的相似度</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200611223152859.png" alt="image-20200611223152859" style="zoom:50%;"></p>
-<h5 id="Constraint-from-Generator"><a href="#Constraint-from-Generator" class="headerlink" title="Constraint from Generator"></a>Constraint from Generator</h5><p>如下图所示，我们输入一个低维的vector z到generator里面，输出Image x；</p>
-<p>现在我们将生成的Image x再输入Image classifier，输出分类结果$y_i$，那么我们现在的目标就是找到$z^*$，使得属于那个类别的可能性$y_i$最大</p>
-<script type="math/tex; mode=display">
-z^*=arg \ max y_i</script><p>找到最好的$z^<em>$，再输入Generator，根据$x^</em>=G(z^<em>)$得出$x^</em>$，产生一个好的Image</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612105833703.png" alt="image-20200612105833703" style="zoom:50%;"></p>
-<p>结果展示。现在你问机器蚂蚁长什么样子呢？机器就会给你画一堆蚂蚁的图片出来，再放到classifier里面，得出分类结果到底是火山还是蚂蚁</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612113355921.png" alt="image-20200612113355921" style="zoom:50%;"></p>
-<h4 id="Using-a-model-to-explain-another"><a href="#Using-a-model-to-explain-another" class="headerlink" title="Using a model to explain another"></a>Using a model to explain another</h4><p>现在我们使用一个interpretable model来模仿另外一个uninterpretable model；下图中的Black Box为uninterpretable model，比如Neural Network，蓝色方框是一个interpretable model，比如Linear model；现在我们的目标是使用相同的输入$x^1,x^2,…,x^N$，使linear model和Neural Network有相近的输出</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612155736839.png" alt="image-20200612155736839" style="zoom:50%;"></p>
-<p>实际上并不能使用linear model来模拟整个neural network，但可以用来模拟其中一个local region</p>
-<h5 id="Local-Interpretable-Model-Agnostic-Explanations-LIME"><a href="#Local-Interpretable-Model-Agnostic-Explanations-LIME" class="headerlink" title="Local Interpretable Model-Agnostic Explanations (LIME)"></a>Local Interpretable Model-Agnostic Explanations (LIME)</h5><p><strong>General</strong></p>
-<p>下图中input为x，output为y，都是一维的，表示Black Box中x和y的关系，由于我们并不能用linear model来模拟整个neural network，但可以用来模拟其中一个local region</p>
-<ol>
-<li><p>首先给出要explain的point，代入black box里面</p>
-</li>
-<li><p>在第三个蓝色point（我们想要模拟的区域）周围sample附近的point，nearby的区域不同，结果也会不同</p>
-</li>
-<li><p>使用linear model来模拟neural network在这个区域的行为</p>
-</li>
-<li><p>得知了该区域的linear model之后，我们就可以知道在该区域x和y的关系，即x越大，y越小，也就interpret了原来的neural network在这部分区域的行为</p>
-</li>
-</ol>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612161607923.png" alt="image-20200612161607923" style="zoom:50%;"></p>
-<p>那么到底什么算是nearby呢？<u>用不同的方法进行sample，结果不太一样。</u>对于下图中的region，可以看到离第三个蓝色point的距离很远，取得的效果就非常不好了</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612163829515.png" alt="image-20200612163829515" style="zoom:50%;"></p>
-<p><strong>LIME-Image</strong></p>
-<p>刚才说了general的情况，下面我们讲解LIME应用于image的情况</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612164116470.png" alt="image-20200612164116470" style="zoom:50%;"></p>
-<ol>
-<li>首先需要一张需要解释的image；为什么这张图片可以被classify为树蛙？</li>
-<li>sample at the nearby：首先把image分成多个segment，再随机去掉图中的一些segment，就得到了不同的新图片，这些新的图片就是sample的结果；再把这些新生成的图片输入black box，得到新图片是frog的可能性；</li>
-<li>fit with linear model：即找到一个linear model来fit第3步输出的结果；先extract生成的新图片的特征，再把这些特征输入linear model；</li>
-</ol>
-<p>Q：那么如何将image转化为一个vector呢？</p>
-<p>A：这里我们将image中的每个segment使用$x_i$来表示，其中$i=1,…,m,…,M$，M为segment的数量；$x_i$为1，表示当前segment被deleted，如果为0，表示exist；</p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612165520599.png" alt="image-20200612165520599" style="zoom:50%;"></p>
-<p>4.$\ $Interpret the model：对于学习出来的linear model，我们就可以对其进行interpret；首先需要将$x_i$和y的关系用一个公式表示出来，即</p>
-<script type="math/tex; mode=display">
-y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情况：</p>
-<ul>
-<li>$w_m\approx 0$，segment $x_m$被认为对分类为frog没有影响；</li>
-<li>$w_m&gt; 0$， $x_m$对图片分类为frog是有正面的影响的；</li>
-<li>$w_m&lt;0$， 看到这个segment，反而会让机器认为图片不是frog</li>
-</ul>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612170336857.png" alt="image-20200612170336857" style="zoom:50%;"></p>
-<h5 id="Decision-Tree"><a href="#Decision-Tree" class="headerlink" title="Decision Tree"></a>Decision Tree</h5><p>如果我们用不限制深度的decision tree，那么我们就可以使用decision tree来模拟black box（neural network），使两者的输出相近</p>
-<p>但decision tree的深度不可能是没有限制的。这里我们设neural network的参数为$\theta$，decision tree的参数为$T_\theta$，使用$O(T_\theta)$来表示$T_\theta$的复杂度，复杂度可以用$T_\theta$的深度来表示，也可以用neural的个数来表示；<u>现在我们的目标不仅是使两者输出相近，还需要使$O(T_\theta)$的值最小化</u></p>
-<p><img src="/2020/06/12/Explainable-AI/image-20200612171916382.png" alt="image-20200612171916382" style="zoom:50%;"></p>
-<p>那么我们如何来实现使$O(T_\theta)$越小越好呢？</p>
-<p>如下图所示，我们首先训练一个network，这个network可以很容易地被decision tree解释，使decision tree的复杂度没有那么高；这里我们加入了一个正则项$\lambda O(T_\theta)$，在训练network的同时，不仅要最小化loss function，还需要使$O(T_\theta)$的值尽量小，这时需要找到的network参数为$\theta^*$，</p>
-<script type="math/tex; mode=display">
-\theta^*=arg\ {\rm min}\ L(\theta) + \lambda O(T_\theta)</script><p><img src="/2020/06/12/Explainable-AI/image-20200612172838929.png" alt="image-20200612172838929" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>explainable machine learning</tag>
-        <tag>LIME</tag>
       </tags>
   </entry>
   <entry>
@@ -648,6 +553,181 @@ L2:\ w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><ul>
       </tags>
   </entry>
   <entry>
+    <title>Explainable Machine Learning</title>
+    <url>/2020/06/12/Explainable-AI/</url>
+    <content><![CDATA[<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p>机器不仅要告诉我们结果cat，还要告诉我们为什么 </p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611112308714.png" alt="image-20200611112308714" style="zoom:50%;"></p>
+<h5 id="Why-we-need-Explainable-ML"><a href="#Why-we-need-Explainable-ML" class="headerlink" title="Why we need Explainable ML?"></a>Why we need Explainable ML?</h5><p><u>我们不仅需要机器结果的精确度，还需要进行模型诊断，看机器学习得怎么样；有的任务精确度很高，但实际上机器什么都没学到</u></p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611112911240.png" alt="image-20200611112911240" style="zoom:50%;"></p>
+<p>有模型诊断后，我们就可以根据模型诊断的结果再来调整我们的模型</p>
+<h5 id="Interpretable-v-s-Powerful"><a href="#Interpretable-v-s-Powerful" class="headerlink" title="Interpretable v.s. Powerful"></a>Interpretable v.s. Powerful</h5><p><img src="/2020/06/12/Explainable-AI/image-20200611195115774.png" alt="image-20200611195115774" style="zoom:50%;"></p>
+<p>那么有没有model是Interpretable，也是powerful的呢 ？</p>
+<p>决策树可以interpretable，也是比较powerful的；对于第一个分支节点，“这些动物呼吸空气吗？”，就包含了interpretable的信息</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611195220007.png" alt="image-20200611195220007" style="zoom:50%;"></p>
+<p>当分支特别多的时候，决策树的表现也会很差</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611195426930.png" alt="image-20200611195426930" style="zoom:50%;"></p>
+<h4 id="Local-Explanation"><a href="#Local-Explanation" class="headerlink" title="Local Explanation"></a>Local Explanation</h4><h5 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h5><p>对于输入的x，我们将其分成components $\{x_1,…,x_n,…x_N\}$，每个component由一个像素，或者一小块组成</p>
+<p>我们现在的目标是知道每个component对making the decision的重要性有多少，那么我们可以通过remove或者modify其中一个component的值，看此时的decision会有什么变化</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611200230303.png" alt="image-20200611200230303" style="zoom:50%;"></p>
+<p>把灰色方块放到图像中，覆盖图像的一小部分；如果我们把灰色方块放到下图中的红色区域，那么对解释的结果影响不大，第一幅图还是一只狗</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611200829405.png" alt="image-20200611200829405" style="zoom:50%;"></p>
+<p>还有另一种方法</p>
+<p>对于输入的$\{x_1,…,x_n,..,x_N\}$，对于其中的某个关键的pixel $x_n$加上$\Delta x$，这个pixel对我们识别这是不是一只狗具有很重要的作用</p>
+<p>那么我们就可以用$\frac{\Delta y}{\Delta x}$来表示这个小小的扰动对y的影响，可以通过$\frac{\partial y_k}{\partial x_n}$来进行计算，表示$y_k$对$x_n$的偏微分，最后取绝对值，表示某一个pixel对现在y影响的大小</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611214135944.png" alt="image-20200611214135944" style="zoom:50%;"></p>
+<p>在上图中，下半部分由3幅图saliency map，亮度越大，绝对值就越大，亮度越大的地方就表示该pixel对结果的影响越大</p>
+<h5 id="Limitation-of-Gradient-based-Approaches"><a href="#Limitation-of-Gradient-based-Approaches" class="headerlink" title="Limitation of Gradient based Approaches"></a>Limitation of Gradient based Approaches</h5><p><img src="/2020/06/12/Explainable-AI/image-20200611220206992.png" alt="image-20200611220206992" style="zoom:50%;"></p>
+<h5 id="Attack-Interpretation"><a href="#Attack-Interpretation" class="headerlink" title="Attack Interpretation"></a>Attack Interpretation</h5><p><img src="/2020/06/12/Explainable-AI/image-20200611221032938.png" alt="image-20200611221032938" style="zoom:50%;"></p>
+<h4 id="Global-Explanation"><a href="#Global-Explanation" class="headerlink" title="Global Explanation"></a>Global Explanation</h4><p>Interprete the whole Model</p>
+<h5 id="Activation-Minimization-review"><a href="#Activation-Minimization-review" class="headerlink" title="Activation Minimization (review)"></a><strong>Activation Minimization</strong> (review)</h5><p>让我们先review一下activation minimization，现在我们的目标是找到一个$x^*$，使得输出的值$y_i$最大</p>
+<p>我们可以加入一些噪声，加上噪声后人并不能识别出来，但机器可以识别出来，看出来下图中的噪声是0 1 2 3 4 5 6 7 8</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611221428166.png" alt="image-20200611221428166" style="zoom:50%;"></p>
+<p>之前我们的目标是找到一个image，使得输出的y达到最大值；现在我们的目标不仅是找到x使输出y达到最大值，还需要把image变得更像是一个digit，不像左边那个图，几乎全部的像素点都是白色，右边的图只有和输出的digit相关的pixel才是白色</p>
+<p>这里我们通过加入了一个新的限制$R(x)$来实现，可以表示图像和digit的相似度</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200611223152859.png" alt="image-20200611223152859" style="zoom:50%;"></p>
+<h5 id="Constraint-from-Generator"><a href="#Constraint-from-Generator" class="headerlink" title="Constraint from Generator"></a>Constraint from Generator</h5><p>如下图所示，我们输入一个低维的vector z到generator里面，输出Image x；</p>
+<p>现在我们将生成的Image x再输入Image classifier，输出分类结果$y_i$，那么我们现在的目标就是找到$z^*$，使得属于那个类别的可能性$y_i$最大</p>
+<script type="math/tex; mode=display">
+z^*=arg \ max y_i</script><p>找到最好的$z^<em>$，再输入Generator，根据$x^</em>=G(z^<em>)$得出$x^</em>$，产生一个好的Image</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612105833703.png" alt="image-20200612105833703" style="zoom:50%;"></p>
+<p>结果展示。现在你问机器蚂蚁长什么样子呢？机器就会给你画一堆蚂蚁的图片出来，再放到classifier里面，得出分类结果到底是火山还是蚂蚁</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612113355921.png" alt="image-20200612113355921" style="zoom:50%;"></p>
+<h4 id="Using-a-model-to-explain-another"><a href="#Using-a-model-to-explain-another" class="headerlink" title="Using a model to explain another"></a>Using a model to explain another</h4><p>现在我们使用一个interpretable model来模仿另外一个uninterpretable model；下图中的Black Box为uninterpretable model，比如Neural Network，蓝色方框是一个interpretable model，比如Linear model；现在我们的目标是使用相同的输入$x^1,x^2,…,x^N$，使linear model和Neural Network有相近的输出</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612155736839.png" alt="image-20200612155736839" style="zoom:50%;"></p>
+<p>实际上并不能使用linear model来模拟整个neural network，但可以用来模拟其中一个local region</p>
+<h5 id="Local-Interpretable-Model-Agnostic-Explanations-LIME"><a href="#Local-Interpretable-Model-Agnostic-Explanations-LIME" class="headerlink" title="Local Interpretable Model-Agnostic Explanations (LIME)"></a>Local Interpretable Model-Agnostic Explanations (LIME)</h5><p><strong>General</strong></p>
+<p>下图中input为x，output为y，都是一维的，表示Black Box中x和y的关系，由于我们并不能用linear model来模拟整个neural network，但可以用来模拟其中一个local region</p>
+<ol>
+<li><p>首先给出要explain的point，代入black box里面</p>
+</li>
+<li><p>在第三个蓝色point（我们想要模拟的区域）周围sample附近的point，nearby的区域不同，结果也会不同</p>
+</li>
+<li><p>使用linear model来模拟neural network在这个区域的行为</p>
+</li>
+<li><p>得知了该区域的linear model之后，我们就可以知道在该区域x和y的关系，即x越大，y越小，也就interpret了原来的neural network在这部分区域的行为</p>
+</li>
+</ol>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612161607923.png" alt="image-20200612161607923" style="zoom:50%;"></p>
+<p>那么到底什么算是nearby呢？<u>用不同的方法进行sample，结果不太一样。</u>对于下图中的region，可以看到离第三个蓝色point的距离很远，取得的效果就非常不好了</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612163829515.png" alt="image-20200612163829515" style="zoom:50%;"></p>
+<p><strong>LIME-Image</strong></p>
+<p>刚才说了general的情况，下面我们讲解LIME应用于image的情况</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612164116470.png" alt="image-20200612164116470" style="zoom:50%;"></p>
+<ol>
+<li>首先需要一张需要解释的image；为什么这张图片可以被classify为树蛙？</li>
+<li>sample at the nearby：首先把image分成多个segment，再随机去掉图中的一些segment，就得到了不同的新图片，这些新的图片就是sample的结果；再把这些新生成的图片输入black box，得到新图片是frog的可能性；</li>
+<li>fit with linear model：即找到一个linear model来fit第3步输出的结果；先extract生成的新图片的特征，再把这些特征输入linear model；</li>
+</ol>
+<p>Q：那么如何将image转化为一个vector呢？</p>
+<p>A：这里我们将image中的每个segment使用$x_i$来表示，其中$i=1,…,m,…,M$，M为segment的数量；$x_i$为1，表示当前segment被deleted，如果为0，表示exist；</p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612165520599.png" alt="image-20200612165520599" style="zoom:50%;"></p>
+<p>4.$\ $Interpret the model：对于学习出来的linear model，我们就可以对其进行interpret；首先需要将$x_i$和y的关系用一个公式表示出来，即</p>
+<script type="math/tex; mode=display">
+y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情况：</p>
+<ul>
+<li>$w_m\approx 0$，segment $x_m$被认为对分类为frog没有影响；</li>
+<li>$w_m&gt; 0$， $x_m$对图片分类为frog是有正面的影响的；</li>
+<li>$w_m&lt;0$， 看到这个segment，反而会让机器认为图片不是frog</li>
+</ul>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612170336857.png" alt="image-20200612170336857" style="zoom:50%;"></p>
+<h5 id="Decision-Tree"><a href="#Decision-Tree" class="headerlink" title="Decision Tree"></a>Decision Tree</h5><p>如果我们用不限制深度的decision tree，那么我们就可以使用decision tree来模拟black box（neural network），使两者的输出相近</p>
+<p>但decision tree的深度不可能是没有限制的。这里我们设neural network的参数为$\theta$，decision tree的参数为$T_\theta$，使用$O(T_\theta)$来表示$T_\theta$的复杂度，复杂度可以用$T_\theta$的深度来表示，也可以用neural的个数来表示；<u>现在我们的目标不仅是使两者输出相近，还需要使$O(T_\theta)$的值最小化</u></p>
+<p><img src="/2020/06/12/Explainable-AI/image-20200612171916382.png" alt="image-20200612171916382" style="zoom:50%;"></p>
+<p>那么我们如何来实现使$O(T_\theta)$越小越好呢？</p>
+<p>如下图所示，我们首先训练一个network，这个network可以很容易地被decision tree解释，使decision tree的复杂度没有那么高；这里我们加入了一个正则项$\lambda O(T_\theta)$，在训练network的同时，不仅要最小化loss function，还需要使$O(T_\theta)$的值尽量小，这时需要找到的network参数为$\theta^*$，</p>
+<script type="math/tex; mode=display">
+\theta^*=arg\ {\rm min}\ L(\theta) + \lambda O(T_\theta)</script><p><img src="/2020/06/12/Explainable-AI/image-20200612172838929.png" alt="image-20200612172838929" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>explainable machine learning</tag>
+        <tag>LIME</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Logistic Regression</title>
+    <url>/2020/06/06/Logistic-Regression/</url>
+    <content><![CDATA[<h4 id="Review"><a href="#Review" class="headerlink" title="Review"></a>Review</h4><p>我们可以得出z的简易表达式$z=w\cdot x + b$，可得出</p>
+<script type="math/tex; mode=display">
+P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)</script><p>当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
+<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><h5 id="Step1-Function-Set"><a href="#Step1-Function-Set" class="headerlink" title="Step1: Function Set"></a>Step1: Function Set</h5><p>把所有的w和b都要包括进来，这里使用的function set就是sigmoid函数，</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606111122013.png" alt="image-20200606111122013" style="zoom:50%;"></p>
+<h5 id="Step2-Goodness-of-a-Function"><a href="#Step2-Goodness-of-a-Function" class="headerlink" title="Step2: Goodness of a Function"></a>Step2: Goodness of a Function</h5><p>对于给定的一组w和b，得出似然函数L(w,b)的表达式，对于一个二分类问题，类别C1的概率为$f_{w,b}(x^i),\ i=1,2,4,…N$，而类别C2的概率则为$1-f_{w,b}(x^3)$。找出相对应的$w^{<em>},b^{</em>}$，使得L取得最大值。</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606111627142.png" alt="image-20200606111627142" style="zoom:50%;"></p>
+<p>对于训练数据集，我们设C1的$\hat y=1$，C2的$\hat y =0$，服从Bernoulli distribution。在函数前面加-号就可以使原来的最大化函数，转化为对目标的最小化。</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606112102628.png" alt="image-20200606112102628" style="zoom:50%;"></p>
+<p>这时原来的似然函数L转化为了一个新形式，把原来的乘法变成了ln项相加，可以方便后边对w的求导</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606112315406.png" alt="image-20200606112315406" style="zoom:50%;"></p>
+<p>现在我们的目标就转化为了找出$w^<em>,b^</em>=argmin-lnL(w,b)$，交叉熵的形式为</p>
+<script type="math/tex; mode=display">
+-lnL(w,b)=\sum_n -[\hat y^nlnf_{w,b}(x^n)+(1-\hat y^n)ln(1-f_{w,b}(x^n))</script><h5 id="Step3-Find-the-best-function"><a href="#Step3-Find-the-best-function" class="headerlink" title="Step3: Find the best function"></a>Step3: Find the best function</h5><p>为了找出那组使得$-lnL(w,b)$最小化的参数$w^<em>,b^</em>$，这里我们使用了Gradient Descent方法</p>
+<script type="math/tex; mode=display">
+f_{w,b}(x)=\sigma (x)=\frac{1}{1+e^{-z}},\quad z=w\cdot x+b=\sum_i w_ix_i+b</script><p>对wi求导，</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606113919943.png" alt="image-20200606113919943" style="zoom:50%;"></p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606113959065.png" alt="image-20200606113959065" style="zoom:50%;"></p>
+<p>分别得出$\frac{\partial lnf_{w,b}(x)}{\partial w_i},\frac{\partial ln(1-f_{w,b}(x))}{\partial w_i}$，代入原式子，化简可得</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606114230182.png" alt="image-20200606114230182" style="zoom:50%;"></p>
+<p>得出梯度$\frac{\partial (-ln L(w,b))}{\partial w_i}=\sum_n -\left(\hat y^n-f_{w,b}(x^n)\right)x_i^n$，代入每次的梯度更新公式，</p>
+<script type="math/tex; mode=display">
+w_i\leftarrow w_i -\eta \frac{\partial (-ln L(w,b))}{\partial w_i}=w_i -\eta \sum_n -\left(\hat y^n-f_{w,b}(x^n)\right)x_i^n</script><h5 id="Logistic-Regression-Square-error是否可行"><a href="#Logistic-Regression-Square-error是否可行" class="headerlink" title="Logistic Regression + Square error是否可行"></a>Logistic Regression + Square error是否可行</h5><p>按照之前的步骤，先得出$f_{w,b}(x),L(f)$的表达式，第三步再求导，可以发现一个问题，代入训练数据集的$\hat y$后，梯度总是为0，模型最后无法训练，所以这样的结合是不可行的。</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606115052273.png" alt="image-20200606115052273" style="zoom:50%;"></p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606115706601.png" alt="image-20200606115706601" style="zoom:50%;"></p>
+<h5 id="Cross-Entropy-v-s-Square-Error"><a href="#Cross-Entropy-v-s-Square-Error" class="headerlink" title="Cross Entropy v.s. Square Error"></a>Cross Entropy v.s. Square Error</h5><p>下图我们将Cross entropy和square error进行了对比，黑色网格线表示cross entropy，红色表示square error</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606115544160.png" alt="image-20200606115544160" style="zoom:50%;"></p>
+<p>对于cross entropy，loss变化较大，曲线比较sharp，相应的微分也较大，每次跨越的步长也较长</p>
+<p>对于square error，loss曲线变化比较平缓，微分值很小，每次跨越的步长也小，当gradient接近于0的时候，参数就很有可能不再更新，训练也会停下来。就算将gradient设置为很小的值，使训练不那么容易停下来，但由于每次跨越的步长很小很小，也会出现训练非常缓慢的问题</p>
+<h4 id="Logistic-vs-Linear-Regression"><a href="#Logistic-vs-Linear-Regression" class="headerlink" title="Logistic vs Linear Regression"></a>Logistic vs Linear Regression</h4><p><img src="/2020/06/06/Logistic-Regression/image-20200606121346151.png" alt="image-20200606121346151" style="zoom:50%;"></p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606121324734.png" alt="image-20200606121324734" style="zoom:50%;"></p>
+<h4 id="Discriminative-v-s-Generative"><a href="#Discriminative-v-s-Generative" class="headerlink" title="Discriminative v.s. Generative"></a>Discriminative v.s. Generative</h4><p>logistic regression我们称之为Discriminative方法；而我们将gaussian来描述posterior probability，称之为Generative方法。虽然都使用了相同的函数表达式，但需要找到的参数却是不同的。</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606122040582.png" alt="image-20200606122040582" style="zoom:50%;"></p>
+<p>logistic regression<strong>没有实质性的假设</strong>，要求直接找出对应的w和b。但generative model<strong>做出了假设</strong>，假设输入的数据是服从Gaussian分布的，需要先找出$\mu^1,\mu^2,\sum^{-1}$，再根据这些值得出相对应的w和b。</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606143847987.png" alt="image-20200606143847987" style="zoom:50%;"></p>
+<h5 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h5><p><img src="/2020/06/06/Logistic-Regression/image-20200606143950210.png" alt="image-20200606143950210" style="zoom:50%;"></p>
+<p>对于包含13个example 的训练数据，对于图中所示的测试数据，我们可以明显看出测试example属于Class1，那么通过Naive Bayes（朴素贝叶斯）计算的结果也是这样吗？下面我们将开始验证，</p>
+<script type="math/tex; mode=display">
+P(x|C1)=P(x_1=1|C_1)\times P(x_2=1|C_1)=1\times1\\
+P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p><img src="/2020/06/06/Logistic-Regression/image-20200606144006375.png" alt="image-20200606144006375" style="zoom:50%;"></p>
+<p>根据这个计算结果可知，属于Class1的概率是小于0.5的，因此可以看出根据朴素贝叶斯算法算出，测试的example是属于Class2，和我们的直觉是相反的。==这是由于训练数据集中属于Class1的数量太少了，==比例只有1/13。在实际生活中的模型训练中，我们也必须要避免数据集的差异对实验结果造成的影响，数据集中每个类别所占的比例应该是差别不大的。</p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Logistic Regression</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mac安装Pytorch</title>
+    <url>/2020/03/29/Mac%E5%AE%89%E8%A3%85Pytorch/</url>
+    <content><![CDATA[<p>先创建一个名为<code>pytorch</code>的虚拟环境，</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda create -n pytorch python=3.7 numpy matplotlib pandas jupyter notebook</div></pre></td></tr></table></figure>
+<p>激活虚拟环境</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda activate pytorch</div></pre></td></tr></table></figure>
+<p>去官网选择合适的pytorch版本的安装命令<a href="https://pytorch.org/get-started/locally/" target="_blank" rel="external">https://pytorch.org/get-started/locally/</a></p>
+<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329101220290.png" alt="image-20200329101220290"></p>
+<p>复制到命令行下，回车运行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda install pytorch torchvision -c pytorch</div></pre></td></tr></table></figure>
+<p>会出现以下报错信息：</p>
+<p><strong>CondaHTTPError: HTTP 000 CONNECTION FAILED for url</strong></p>
+<p><strong>解决方法：添加镜像站到Anaconda</strong></p>
+ <figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</div><div class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</div><div class="line">conda config --set show_channel_urls yes</div><div class="line"></div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/</div></pre></td></tr></table></figure>
+<p>再把官网安装命令的<code>-c pytorch</code>去掉，运行以下命令</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda install pytorch torchvision</div></pre></td></tr></table></figure>
+<p>检测pytorch是否安装成功，命令行运行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">jupyter notebook</div></pre></td></tr></table></figure>
+<p>运行测试代码，出现以下结果，则说明安装成功</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> torch</div><div class="line">torch.FloatTensor([<span class="number">5</span>, <span class="number">3</span>, <span class="number">5</span>])</div></pre></td></tr></table></figure>
+<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329102655979.png" alt="image-20200329102655979"></p>
+]]></content>
+      <tags>
+        <tag>Pytorch</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Introduction of Generative Adversarial Network (GAN)</title>
     <url>/2020/07/04/GAN-intro/</url>
     <content><![CDATA[<p>有很多种不同类型GAN，可以在这里查看<a href="https://github.com/hindupuravinash/the-gan-zoo" target="_blank" rel="external">https://github.com/hindupuravinash/the-gan-zoo</a></p>
@@ -722,11 +802,11 @@ L2:\ w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><ul>
 <p>但使用auto-encoder也会产生一些问题，如果输入vector为a，那么会产生1的图像，如果输入vector为b，会产生斜着的1；</p>
 <p>Q：那么0.5a+0.5b的vector会产生什么样的结果呢？</p>
 <p>A：由于NN Generator是network，不是线性的，很可能产生不是数字的图像。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704163846888.png" alt="image-20200704163846888" style="zoom:50%;"><img src="/2020/07/04/GAN-intro/image-20200704164150666.png" alt="image-20200704164150666"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704163846888.png" alt="image-20200704163846888" style="zoom:50%;"></p>
 <h5 id="VAE（Variational-Auto-encoder）"><a href="#VAE（Variational-Auto-encoder）" class="headerlink" title="VAE（Variational Auto-encoder）"></a>VAE（<strong>Variational Auto-encoder</strong>）</h5><p>我们可以用VAE来解决这个问题，输入vector a之后，generator不仅产生code m，还会产生每一维的方差$\sigma$，还有一个额外的vector e（noise），最后根据$c_i=exp(\sigma_i)\times e_i+m_i$得出需要的code；decoder需要根据这个带有noise的code，来还原出和input类似的图像。</p>
 <p>那么现在machine不仅看到vector a会产生数字，看到vector b也会产生数字；看到vector a+noise也会产生数字，看到vector b+noise也会产生数字。</p>
 <p>因此，<span style="color: red">对于现在的generator，如果input是在训练的时候从来没见过的vector，也可能output出合理的object。</span></p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704164316549.png" alt="image-20200704164316549" style="zoom:50%;"><img src="/2020/07/04/GAN-intro/image-20200704165311165.png" alt="image-20200704165311165"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704164316549.png" alt="image-20200704164316549" style="zoom:50%;"></p>
 <h5 id="What-do-we-miss"><a href="#What-do-we-miss" class="headerlink" title="What do we miss?"></a>What do we miss?</h5><p>现在有一张真实图像Target，通过generator生成的图像为generated image，目标是使这两者之间的差距越小越好。通常这两者之间的差距，可以通过每个像素点之间的差值来进行计算，比如可以将两张图像都表示成一个vector，再通过L1/L2计算两者之间的distance。</p>
 <p><img src="/2020/07/04/GAN-intro/image-20200704165316903.png" alt="image-20200704165316903" style="zoom:50%;"></p>
 <p>在一种理想的条件下，generator可以生成和Target完全一样的图像。但实际上，generator通常会犯一些错误，在生成的时候会有一些取舍，在一些地方会不得不做出妥协，选择在什么地方做妥协，对结果也会产生至关重要的影响。</p>
@@ -860,86 +940,6 @@ L2:\ w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><ul>
         <tag>Unsupervised Learning</tag>
         <tag>Deep Autoencoder</tag>
         <tag>Autoencoder</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Logistic Regression</title>
-    <url>/2020/06/06/Logistic-Regression/</url>
-    <content><![CDATA[<h4 id="Review"><a href="#Review" class="headerlink" title="Review"></a>Review</h4><p>我们可以得出z的简易表达式$z=w\cdot x + b$，可得出</p>
-<script type="math/tex; mode=display">
-P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)</script><p>当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
-<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><h5 id="Step1-Function-Set"><a href="#Step1-Function-Set" class="headerlink" title="Step1: Function Set"></a>Step1: Function Set</h5><p>把所有的w和b都要包括进来，这里使用的function set就是sigmoid函数，</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606111122013.png" alt="image-20200606111122013" style="zoom:50%;"></p>
-<h5 id="Step2-Goodness-of-a-Function"><a href="#Step2-Goodness-of-a-Function" class="headerlink" title="Step2: Goodness of a Function"></a>Step2: Goodness of a Function</h5><p>对于给定的一组w和b，得出似然函数L(w,b)的表达式，对于一个二分类问题，类别C1的概率为$f_{w,b}(x^i),\ i=1,2,4,…N$，而类别C2的概率则为$1-f_{w,b}(x^3)$。找出相对应的$w^{<em>},b^{</em>}$，使得L取得最大值。</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606111627142.png" alt="image-20200606111627142" style="zoom:50%;"></p>
-<p>对于训练数据集，我们设C1的$\hat y=1$，C2的$\hat y =0$，服从Bernoulli distribution。在函数前面加-号就可以使原来的最大化函数，转化为对目标的最小化。</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606112102628.png" alt="image-20200606112102628" style="zoom:50%;"></p>
-<p>这时原来的似然函数L转化为了一个新形式，把原来的乘法变成了ln项相加，可以方便后边对w的求导</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606112315406.png" alt="image-20200606112315406" style="zoom:50%;"></p>
-<p>现在我们的目标就转化为了找出$w^<em>,b^</em>=argmin-lnL(w,b)$，交叉熵的形式为</p>
-<script type="math/tex; mode=display">
--lnL(w,b)=\sum_n -[\hat y^nlnf_{w,b}(x^n)+(1-\hat y^n)ln(1-f_{w,b}(x^n))</script><h5 id="Step3-Find-the-best-function"><a href="#Step3-Find-the-best-function" class="headerlink" title="Step3: Find the best function"></a>Step3: Find the best function</h5><p>为了找出那组使得$-lnL(w,b)$最小化的参数$w^<em>,b^</em>$，这里我们使用了Gradient Descent方法</p>
-<script type="math/tex; mode=display">
-f_{w,b}(x)=\sigma (x)=\frac{1}{1+e^{-z}},\quad z=w\cdot x+b=\sum_i w_ix_i+b</script><p>对wi求导，</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606113919943.png" alt="image-20200606113919943" style="zoom:50%;"></p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606113959065.png" alt="image-20200606113959065" style="zoom:50%;"></p>
-<p>分别得出$\frac{\partial lnf_{w,b}(x)}{\partial w_i},\frac{\partial ln(1-f_{w,b}(x))}{\partial w_i}$，代入原式子，化简可得</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606114230182.png" alt="image-20200606114230182" style="zoom:50%;"></p>
-<p>得出梯度$\frac{\partial (-ln L(w,b))}{\partial w_i}=\sum_n -\left(\hat y^n-f_{w,b}(x^n)\right)x_i^n$，代入每次的梯度更新公式，</p>
-<script type="math/tex; mode=display">
-w_i\leftarrow w_i -\eta \frac{\partial (-ln L(w,b))}{\partial w_i}=w_i -\eta \sum_n -\left(\hat y^n-f_{w,b}(x^n)\right)x_i^n</script><h5 id="Logistic-Regression-Square-error是否可行"><a href="#Logistic-Regression-Square-error是否可行" class="headerlink" title="Logistic Regression + Square error是否可行"></a>Logistic Regression + Square error是否可行</h5><p>按照之前的步骤，先得出$f_{w,b}(x),L(f)$的表达式，第三步再求导，可以发现一个问题，代入训练数据集的$\hat y$后，梯度总是为0，模型最后无法训练，所以这样的结合是不可行的。</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606115052273.png" alt="image-20200606115052273" style="zoom:50%;"></p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606115706601.png" alt="image-20200606115706601" style="zoom:50%;"></p>
-<h5 id="Cross-Entropy-v-s-Square-Error"><a href="#Cross-Entropy-v-s-Square-Error" class="headerlink" title="Cross Entropy v.s. Square Error"></a>Cross Entropy v.s. Square Error</h5><p>下图我们将Cross entropy和square error进行了对比，黑色网格线表示cross entropy，红色表示square error</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606115544160.png" alt="image-20200606115544160" style="zoom:50%;"></p>
-<p>对于cross entropy，loss变化较大，曲线比较sharp，相应的微分也较大，每次跨越的步长也较长</p>
-<p>对于square error，loss曲线变化比较平缓，微分值很小，每次跨越的步长也小，当gradient接近于0的时候，参数就很有可能不再更新，训练也会停下来。就算将gradient设置为很小的值，使训练不那么容易停下来，但由于每次跨越的步长很小很小，也会出现训练非常缓慢的问题</p>
-<h4 id="Logistic-vs-Linear-Regression"><a href="#Logistic-vs-Linear-Regression" class="headerlink" title="Logistic vs Linear Regression"></a>Logistic vs Linear Regression</h4><p><img src="/2020/06/06/Logistic-Regression/image-20200606121346151.png" alt="image-20200606121346151" style="zoom:50%;"></p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606121324734.png" alt="image-20200606121324734" style="zoom:50%;"></p>
-<h4 id="Discriminative-v-s-Generative"><a href="#Discriminative-v-s-Generative" class="headerlink" title="Discriminative v.s. Generative"></a>Discriminative v.s. Generative</h4><p>logistic regression我们称之为Discriminative方法；而我们将gaussian来描述posterior probability，称之为Generative方法。虽然都使用了相同的函数表达式，但需要找到的参数却是不同的。</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606122040582.png" alt="image-20200606122040582" style="zoom:50%;"></p>
-<p>logistic regression<strong>没有实质性的假设</strong>，要求直接找出对应的w和b。但generative model<strong>做出了假设</strong>，假设输入的数据是服从Gaussian分布的，需要先找出$\mu^1,\mu^2,\sum^{-1}$，再根据这些值得出相对应的w和b。</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606143847987.png" alt="image-20200606143847987" style="zoom:50%;"></p>
-<h5 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h5><p><img src="/2020/06/06/Logistic-Regression/image-20200606143950210.png" alt="image-20200606143950210" style="zoom:50%;"></p>
-<p>对于包含13个example 的训练数据，对于图中所示的测试数据，我们可以明显看出测试example属于Class1，那么通过Naive Bayes（朴素贝叶斯）计算的结果也是这样吗？下面我们将开始验证，</p>
-<script type="math/tex; mode=display">
-P(x|C1)=P(x_1=1|C_1)\times P(x_2=1|C_1)=1\times1\\
-P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p><img src="/2020/06/06/Logistic-Regression/image-20200606144006375.png" alt="image-20200606144006375" style="zoom:50%;"></p>
-<p>根据这个计算结果可知，属于Class1的概率是小于0.5的，因此可以看出根据朴素贝叶斯算法算出，测试的example是属于Class2，和我们的直觉是相反的。==这是由于训练数据集中属于Class1的数量太少了，==比例只有1/13。在实际生活中的模型训练中，我们也必须要避免数据集的差异对实验结果造成的影响，数据集中每个类别所占的比例应该是差别不大的。</p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Logistic Regression</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Mac安装Pytorch</title>
-    <url>/2020/03/29/Mac%E5%AE%89%E8%A3%85Pytorch/</url>
-    <content><![CDATA[<p>先创建一个名为<code>pytorch</code>的虚拟环境，</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda create -n pytorch python=3.7 numpy matplotlib pandas jupyter notebook</div></pre></td></tr></table></figure>
-<p>激活虚拟环境</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda activate pytorch</div></pre></td></tr></table></figure>
-<p>去官网选择合适的pytorch版本的安装命令<a href="https://pytorch.org/get-started/locally/" target="_blank" rel="external">https://pytorch.org/get-started/locally/</a></p>
-<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329101220290.png" alt="image-20200329101220290"></p>
-<p>复制到命令行下，回车运行</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda install pytorch torchvision -c pytorch</div></pre></td></tr></table></figure>
-<p>会出现以下报错信息：</p>
-<p><strong>CondaHTTPError: HTTP 000 CONNECTION FAILED for url</strong></p>
-<p><strong>解决方法：添加镜像站到Anaconda</strong></p>
- <figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</div><div class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</div><div class="line">conda config --set show_channel_urls yes</div><div class="line"></div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/ </div><div class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/</div></pre></td></tr></table></figure>
-<p>再把官网安装命令的<code>-c pytorch</code>去掉，运行以下命令</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">conda install pytorch torchvision</div></pre></td></tr></table></figure>
-<p>检测pytorch是否安装成功，命令行运行</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><div class="line">jupyter notebook</div></pre></td></tr></table></figure>
-<p>运行测试代码，出现以下结果，则说明安装成功</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><div class="line"><span class="keyword">import</span> torch</div><div class="line">torch.FloatTensor([<span class="number">5</span>, <span class="number">3</span>, <span class="number">5</span>])</div></pre></td></tr></table></figure>
-<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329102655979.png" alt="image-20200329102655979"></p>
-]]></content>
-      <tags>
-        <tag>Pytorch</tag>
       </tags>
   </entry>
   <entry>
@@ -1106,6 +1106,185 @@ a=h(c')f(z_0)=7</script><p><img src="/2020/06/10/RNN/image-20200609225546396.png
       </tags>
   </entry>
   <entry>
+    <title>Generative Models</title>
+    <url>/2020/06/29/generative-models/</url>
+    <content><![CDATA[<blockquote>
+<p>本文主要叙述了集中generative models，包括PixelRNN、VAE，GAN（生成对抗网络）；还叙述了auto-encoder和VAE的区别，以及VAE进行改进的地方，通过高斯混合模型来对VAE的原理进行了详细介绍。</p>
+</blockquote>
+<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>Generative Models可以分为三大类：pixelRNN、autoencoder、GAN；</p>
+<p>现在machine可以对猫狗进行分类，在将来machine就可以通过自己的学习画出一只猫来。</p>
+<p><img src="/2020/06/29/generative-models/image-20200629141407487.png" alt="image-20200629141407487" style="zoom: 67%;"></p>
+<h4 id="PixelRNN"><a href="#PixelRNN" class="headerlink" title="PixelRNN"></a>PixelRNN</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>如果要生成一张图像，我们可以先生成这张图像的第一个红色pixel，再根据这个pixel生成下一个蓝色pixel，每个pixel可以用一个三维的vector来进行表示</p>
+<p><img src="/2020/06/29/generative-models/image-20200629141521860.png" alt="image-20200629141521860" style="zoom: 67%;"></p>
+<p>这是一个无监督学习的过程，并不需要对data进行标注</p>
+<p>如果我们现在把下图中的狗下半身遮住，可以让machine学习出下半身的图片</p>
+<p><img src="/2020/06/29/generative-models/image-20200629141945697.png" alt="image-20200629141945697" style="zoom: 67%;"></p>
+<p>也可以用到声讯号</p>
+<p><img src="/2020/06/29/generative-models/image-20200629142331286.png" alt="image-20200629142331286" style="zoom:50%;"></p>
+<p><img src="/2020/06/29/generative-models/image-20200629142353897.png" alt="image-20200629142353897" style="zoom:50%;"></p>
+<h5 id="Practicing-Generation-Models-Pokemon-Creation"><a href="#Practicing-Generation-Models-Pokemon-Creation" class="headerlink" title="Practicing Generation Models: Pokémon Creation"></a>Practicing Generation Models: Pokémon Creation</h5><p><img src="/2020/06/29/generative-models/image-20200629142516414.png" alt="image-20200629142516414" style="zoom: 67%;"></p>
+<p>做这个实验时，有一些tips；</p>
+<p>由于每个pixel都使用三维的vector来表示（RGB），只有三个channel的值相差特别大时，才会有颜色特别鲜明的图片，但学习结果并不能保证这一点，因此图片会会比较灰蒙蒙的，最后得出来的结果会不太好；</p>
+<p>因此，每个pixel最好使用1-of-N encoding来表示，输入一个绿色的方块，vector中只有绿色方块对应的dimensions为1，其他都是0；但有$256\times256$种颜色，颜色种类非常繁多，可以先对类似的颜色做一个<strong>clustering</strong>，类似的颜色都用同一种颜色来表示，可以把颜色数量缩小到167种</p>
+<p><img src="/2020/06/29/generative-models/image-20200629142535096.png" alt="image-20200629142535096" style="zoom: 67%;"></p>
+<p>下面开始正式做实验</p>
+<p><img src="/2020/06/29/generative-models/image-20200629143804656.png" alt="image-20200629143804656" style="zoom: 67%;"></p>
+<p><img src="/2020/06/29/generative-models/image-20200629143843226.png" alt="image-20200629143843226" style="zoom: 33%;"></p>
+<h4 id="VAE"><a href="#VAE" class="headerlink" title="VAE"></a>VAE</h4><h5 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h5><p><img src="/2020/06/29/generative-models/image-20200629144022672.png" alt="image-20200629144022672" style="zoom: 67%;"></p>
+<h5 id="VAE-1"><a href="#VAE-1" class="headerlink" title="VAE"></a>VAE</h5><p>VAE不像autoencoder那样，直接得出code，经过了一些变换，即$c_i=exp(\sigma_i)\times e_i+m_i$，也是来最小化reconstruction error</p>
+<p><img src="/2020/06/29/generative-models/image-20200629144250780.png" alt="image-20200629144250780" style="zoom: 67%;"></p>
+<p>minimize的目标还有</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><h5 id="Pokemon-Creation"><a href="#Pokemon-Creation" class="headerlink" title="Pokémon Creation"></a>Pokémon Creation</h5><p>input一个宝可梦图像，进行encoder、decoder，得到reconstruct之后的图像，其中code是10-dim的；</p>
+<p>现在我们只选择其中的2个纬度出来，其他纬度的值都固定不变，对这个二维的坐标轴，放入不同的点，再输入对应的Decoder，观察其合成出来的image；如果使用不同维度的点，就可以观察到不同维度生成的image；根据不同的维度，我们就可以根据自己的需要，调整这些维度的值，从而得出我们想要的结果</p>
+<p><img src="/2020/06/29/generative-models/image-20200629150656140.png" alt="image-20200629150656140" style="zoom: 50%;"></p>
+<p>部分结果展示</p>
+<p><img src="/2020/06/29/generative-models/image-20200629151406932.png" alt="image-20200629151406932" style="zoom:50%;"></p>
+<h5 id="Why-VAE"><a href="#Why-VAE" class="headerlink" title="Why VAE?"></a>Why VAE?</h5><p>对于一张满月的图像，先进行encode，再进行decode，使得input和output之间的差值最小化；对半月的图像输入也如此</p>
+<p><img src="/2020/06/29/generative-models/image-20200629152107223.png" alt="image-20200629152107223" style="zoom: 67%;"></p>
+<p>对于encoder的其中一个输出$\sigma_i$，表示noise的variance，需要再输入exp函数进行计算，保证其值是大于0的，是machine自己学习的</p>
+<p><img src="/2020/06/29/generative-models/image-20200629153400892.png" alt="image-20200629153400892" style="zoom: 67%;"></p>
+<p>但只有noise是不够的，还需要加一些限制</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>在下图中，蓝色的线表示$exp(\sigma_i)$，红色的线表示$(1+\sigma_i)$，绿色的线表示两者的差值，可以发现在原点处差值是最小的，$\sigma _i$的值接近1，variance的值接近1</p>
+<p><img src="/2020/06/29/generative-models/image-20200629153918937.png" alt="image-20200629153918937" style="zoom:50%;"></p>
+<p>$(m_i)^2$为正则项regularization term，让结果不那么overfiting</p>
+<p>在下图中，为一个高维的坐标（用一维进行了展示），曲线表示image是宝可梦的概率，可以在图中看到，对于一些很像宝可梦的image，$P(x)$值很高，但对于一些比较模棱两可的image，$P(x)$值就很低</p>
+<p><img src="/2020/06/29/generative-models/image-20200629154606838.png" alt="image-20200629154606838" style="zoom: 33%;"></p>
+<p>那么我们到底要怎么来评估这个probability distribution呢？答案是高斯混合模型</p>
+<h5 id="Gaussian-Mixture-Model"><a href="#Gaussian-Mixture-Model" class="headerlink" title="Gaussian Mixture Model"></a>Gaussian Mixture Model</h5><p>对于下图中的曲线图，蓝色表示多个高斯模型，黑色曲线表示这些模型通过一定的weight进行叠加之后的结果</p>
+<p>现在有很多个gaussian model（1，2，3，4，5…），且都对应了自己的weight $P(m)$（蓝色方块），<span style="color: red">要先根据weight选对应的gaussian，再决定到底要从gaussian中sample哪些data</span> ;我们使用$P(m)$表示每个gaussian的weight，$P(x|m)$表示从对应的gaussian中选出data x的概率</p>
+<p>x并不是代表着某个类别，而是用一个vector来进行表示，每个维度表示不同的特征，即 <u>Distributed representation is better than cluster</u></p>
+<p><img src="/2020/06/29/generative-models/image-20200629155005437.png" alt="image-20200629155005437" style="zoom: 67%;"></p>
+<p>我们现在从正态分布中sample一个data z，z的每个dimension就表示某种attribute；</p>
+<p>根据z我们就可以得出高斯分布mean和variance，即$\mu (z),\sigma(z)$，z有无穷多个可能，mean和variance也有无穷多个可能</p>
+<p><img src="/2020/06/29/generative-models/image-20200629160314318.png" alt="image-20200629160314318" style="zoom: 67%;"></p>
+<p>在最下方的图中，我们可以认为最中间的圆点被sample到的几率最大，其他圆点被sample到的几率就相对较小；<span style="color: red">每个z被sample到之后，根据某个function，计算出对应的mean和variance，都对应着不同的gaussian model</span></p>
+<p>这个function可以是一个neural network，input为z，output为$\mu(z),\sigma(z)$</p>
+<p>由于现在是连续的z，$P(z)$的形式也发生了变化，</p>
+<script type="math/tex; mode=display">
+P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><h5 id="Maximizing-Likelihood"><a href="#Maximizing-Likelihood" class="headerlink" title="Maximizing Likelihood"></a><strong>Maximizing Likelihood</strong></h5><p>现在我们需要找到z和$\mu(z),\sigma(z)$之间的关系，用network来进行计算的时候也需要一个评估手段，这里我们采用的是最大化$L=\sum_xlogP(x)$，即最大化我们已经看到的image x的likelihood；</p>
+<p>那么我们现在就有一个NN的参数需要调整，来最大化likelihood L；</p>
+<p><img src="/2020/06/29/generative-models/image-20200629162138964.png" alt="image-20200629162138964" style="zoom: 67%;"></p>
+<p>现在我们还有另外一个distribution $q(z|x)$，和前一个是相反的，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，其mean和variance，即$\mu’(x),\sigma’(x)$</p>
+<p>$P(x|z)$表示z决定了x的distribution，$q(z|x)$表示x决定了z的distribution</p>
+<p><img src="/2020/06/29/generative-models/image-20200629163947560.png" alt="image-20200629163947560" style="zoom:45%;"></p>
+<p>其中$P(z,x)=P(x)P(z|x)$</p>
+<p><img src="/2020/06/29/generative-models/image-20200629165559403.png" alt="image-20200629165559403" style="zoom:50%;"></p>
+<p>我们本来需要调整的参数是$P(x|z)$，使得$P(x)$取得最大值，从而使likelihood取得最大值；但现在的lower bound为$L_b$，是$log(P(x))$的最小值，其中$P(z)$是已知的，不知道的参数是$P(x|z),q(z|x)$，两项都需要调整</p>
+<p>Q：这里为什么突然多了一项需要调整的参数？</p>
+<p>A：这里并不知道lower bound和likelihood之间的关系到底是怎样的，有可能升高了lower bound，但likelihood反而下降了；引入q就可以解决这个问题</p>
+<p>根据原式子，即$P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z$，只和$P(x|z)$有关，与$q(z|x)$是无关的，即下图中<span style="color: purple">方框</span>部分是不变的，</p>
+<p><img src="/2020/06/29/generative-models/image-20200629170614939.png" alt="image-20200629170614939" style="zoom: 67%;"></p>
+<p><strong>如果我们现在固定$P(x|z)$，想通过$q(z|x)$来使$L_b$ 最大化，那么对应的KL divergence就会最小化，到一种很极端的情况，KL divergence会变为0；如果$L_b$继续上升，那么肯定会超出该区域，因此对应的$logP(x)$也会继续上升；KL divergence不断变小的过程，$q(z|x),P(z|x)$之间的差距也会不断缩小</strong></p>
+<p>因此，这个过程不仅让likelihood变得越来越大，也会找到和$P(x|z)$接近的$q(z|x)$</p>
+<p><img src="/2020/06/29/generative-models/image-20200629171631388.png" alt="image-20200629171631388" style="zoom:50%;"></p>
+<p>对于$q(z|x)$，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，就可以知道z是从什么样的gaussian distribution得出来的</p>
+<h5 id="Connection-with-Network"><a href="#Connection-with-Network" class="headerlink" title="Connection with Network"></a><strong>Connection with Network</strong></h5><p>现在我们的目标就是最小化$q(z|x),P(z)$之间的KL divergence，即使$q(z|x)$和normal distribution $P(z)$越接近越好，即minimize</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>还需要maximizing</p>
+<script type="math/tex; mode=display">
+P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><p><img src="/2020/06/29/generative-models/image-20200629172034668.png" alt="image-20200629172034668" style="zoom:50%;"></p>
+<p>对于input的x，我们先输入网络$NN’$，得到获取z的gaussian distribution；sample得到z之后，再输入网络$NN$，得到获取x的gaussian distribution，使得新分布的mean和x越接近越好</p>
+<h5 id="KL散度"><a href="#KL散度" class="headerlink" title="KL散度"></a>KL散度</h5><blockquote>
+<p>所谓KL散度，是指当某分布q(x)被用于近似p(x)时的信息损失。</p>
+</blockquote>
+<p>计算公式为</p>
+<script type="math/tex; mode=display">
+KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href="#Problems-of-VAE" class="headerlink" title="Problems of VAE"></a>Problems of VAE</h5><p><img src="/2020/06/29/generative-models/image-20200629174600157.png" alt="image-20200629174600157" style="zoom:50%;"></p>
+<h4 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h4><h5 id="The-evolution-of-generation"><a href="#The-evolution-of-generation" class="headerlink" title="The evolution of generation"></a>The evolution of generation</h5><p>v1：会generate一些奇怪的图片，然后会有一个第一代的discriminator，来辨别到底哪一个是real image；</p>
+<p>V2： generater会根据上一次discriminater的结果进行调整，第二代生成的image就和真实的image更像了，再把image输入第二代discriminator，再进行比较；</p>
+<p>…….</p>
+<p><img src="/2020/06/29/generative-models/image-20200629175524852.png" alt="image-20200629175524852" style="zoom:50%;"></p>
+<h5 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h5><p>对于generator，可以看作是VAE里面的decoder，我们通常选择从某个distributionsample出来的vector，输入到第一代的generator，再生成相对应的image，有多少个vector，就生成多少个image；</p>
+<p>把真实的image输入discriminator，与generator生成的image进行比较；并对这些data进行标注，real image标注为1，其余标注为0</p>
+<p><img src="/2020/06/29/generative-models/image-20200629201306815.png" alt="image-20200629201306815" style="zoom:50%;"></p>
+<h5 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h5><p>首先随机sample一个vector，作为Generator的输入，generator会生成对应的image，再把这个image输入discriminator，输出是real image的概率，对于第一代（v1），generator还不成熟，因此概率只有0.87；generator接下来会调整自己的参数，使discriminator认为其生成的image是real image；</p>
+<p>这generator+discriminator就相当于一个network，整体目标是使discriminator认为generator生成的image是real image，就可以根据这个指标来使用梯度下降算法，进行back propagation，来不断调整generator的参数；</p>
+<p><span style="color: red">注：在训练过程中应该固定discriminator的参数，来调整generator的参数</span></p>
+<p><img src="/2020/06/29/generative-models/image-20200629201707553.png" alt="image-20200629201707553" style="zoom:50%;"></p>
+<h5 id="Why-GAN-is-hard-to-train"><a href="#Why-GAN-is-hard-to-train" class="headerlink" title="Why GAN is hard to train?"></a>Why GAN is hard to train?</h5><p><img src="/2020/06/29/generative-models/image-20200629202903543.png" alt="image-20200629202903543" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>VAE</tag>
+        <tag>GAN</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Autoencoder</tag>
+        <tag>PixelRNN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Network Compression</title>
+    <url>/2020/06/27/network-conpression/</url>
+    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
+<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="/2020/06/27/network-conpression/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
+<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="/2020/06/27/network-conpression/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
+<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
+<ul>
+<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
+<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
+</ul>
+<p><img src="/2020/06/27/network-conpression/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
+<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
+<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
+<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
+<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="external">大的network更容易optimize</a></p>
+<p><strong>Lottery Ticket Hypothesis</strong></p>
+<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
+<ul>
+<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
+</li>
+<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
+</li>
+</ul>
+<p><img src="/2020/06/27/network-conpression/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
+<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
+<p><strong>Rethinking the Value of Network Pruning</strong></p>
+<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
+<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
+<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
+<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
+<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
+<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
+<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
+<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
+<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
+<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="/2020/06/27/network-conpression/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
+<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="/2020/06/27/network-conpression/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
+<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
+<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
+<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
+<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
+<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
+<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="/2020/06/27/network-conpression/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
+<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
+<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="/2020/06/27/network-conpression/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
+<p><img src="/2020/06/27/network-conpression/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>network compression</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Word Embedding</title>
     <url>/2020/06/11/Word-Embedding/</url>
     <content><![CDATA[<h4 id="Word-Embedding"><a href="#Word-Embedding" class="headerlink" title="Word Embedding"></a>Word Embedding</h4><p>如果使用1-of-N encoding，每个单词用一个vector表示，那么5个单词就需要5个vector；如果我们把同一个类别的单词都放到那个类里，即属于class1的单词有dog、cat、bird，属于动物类的单词，同理可以得出class2，class3；</p>
@@ -1261,73 +1440,6 @@ W=\begin{pmatrix}
         <tag>Unsupervised Learning</tag>
         <tag>Dimension Reduction</tag>
         <tag>PCA</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Network Compression</title>
-    <url>/2020/06/27/network-conpression/</url>
-    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
-<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="/2020/06/27/network-conpression/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
-<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="/2020/06/27/network-conpression/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
-<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
-<ul>
-<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
-<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
-</ul>
-<p><img src="/2020/06/27/network-conpression/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
-<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
-<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
-<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
-<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="external">大的network更容易optimize</a></p>
-<p><strong>Lottery Ticket Hypothesis</strong></p>
-<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
-<ul>
-<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
-</li>
-<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
-</li>
-</ul>
-<p><img src="/2020/06/27/network-conpression/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
-<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
-<p><strong>Rethinking the Value of Network Pruning</strong></p>
-<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
-<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
-<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
-<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
-<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
-<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
-<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
-<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
-<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
-<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="/2020/06/27/network-conpression/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
-<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="/2020/06/27/network-conpression/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
-<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
-<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
-<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
-<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
-<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
-<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="/2020/06/27/network-conpression/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
-<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
-<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="/2020/06/27/network-conpression/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
-<p><img src="/2020/06/27/network-conpression/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>network compression</tag>
       </tags>
   </entry>
   <entry>
@@ -1546,118 +1658,6 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
       </tags>
   </entry>
   <entry>
-    <title>Generative Models</title>
-    <url>/2020/06/29/generative-models/</url>
-    <content><![CDATA[<blockquote>
-<p>本文主要叙述了集中generative models，包括PixelRNN、VAE，GAN（生成对抗网络）；还叙述了auto-encoder和VAE的区别，以及VAE进行改进的地方，通过高斯混合模型来对VAE的原理进行了详细介绍。</p>
-</blockquote>
-<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>Generative Models可以分为三大类：pixelRNN、autoencoder、GAN；</p>
-<p>现在machine可以对猫狗进行分类，在将来machine就可以通过自己的学习画出一只猫来。</p>
-<p><img src="/2020/06/29/generative-models/image-20200629141407487.png" alt="image-20200629141407487" style="zoom: 67%;"></p>
-<h4 id="PixelRNN"><a href="#PixelRNN" class="headerlink" title="PixelRNN"></a>PixelRNN</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>如果要生成一张图像，我们可以先生成这张图像的第一个红色pixel，再根据这个pixel生成下一个蓝色pixel，每个pixel可以用一个三维的vector来进行表示</p>
-<p><img src="/2020/06/29/generative-models/image-20200629141521860.png" alt="image-20200629141521860" style="zoom: 67%;"></p>
-<p>这是一个无监督学习的过程，并不需要对data进行标注</p>
-<p>如果我们现在把下图中的狗下半身遮住，可以让machine学习出下半身的图片</p>
-<p><img src="/2020/06/29/generative-models/image-20200629141945697.png" alt="image-20200629141945697" style="zoom: 67%;"></p>
-<p>也可以用到声讯号</p>
-<p><img src="/2020/06/29/generative-models/image-20200629142331286.png" alt="image-20200629142331286" style="zoom:50%;"></p>
-<p><img src="/2020/06/29/generative-models/image-20200629142353897.png" alt="image-20200629142353897" style="zoom:50%;"></p>
-<h5 id="Practicing-Generation-Models-Pokemon-Creation"><a href="#Practicing-Generation-Models-Pokemon-Creation" class="headerlink" title="Practicing Generation Models: Pokémon Creation"></a>Practicing Generation Models: Pokémon Creation</h5><p><img src="/2020/06/29/generative-models/image-20200629142516414.png" alt="image-20200629142516414" style="zoom: 67%;"></p>
-<p>做这个实验时，有一些tips；</p>
-<p>由于每个pixel都使用三维的vector来表示（RGB），只有三个channel的值相差特别大时，才会有颜色特别鲜明的图片，但学习结果并不能保证这一点，因此图片会会比较灰蒙蒙的，最后得出来的结果会不太好；</p>
-<p>因此，每个pixel最好使用1-of-N encoding来表示，输入一个绿色的方块，vector中只有绿色方块对应的dimensions为1，其他都是0；但有$256\times256$种颜色，颜色种类非常繁多，可以先对类似的颜色做一个<strong>clustering</strong>，类似的颜色都用同一种颜色来表示，可以把颜色数量缩小到167种</p>
-<p><img src="/2020/06/29/generative-models/image-20200629142535096.png" alt="image-20200629142535096" style="zoom: 67%;"></p>
-<p>下面开始正式做实验</p>
-<p><img src="/2020/06/29/generative-models/image-20200629143804656.png" alt="image-20200629143804656" style="zoom: 67%;"></p>
-<p><img src="/2020/06/29/generative-models/image-20200629143843226.png" alt="image-20200629143843226" style="zoom: 33%;"></p>
-<h4 id="VAE"><a href="#VAE" class="headerlink" title="VAE"></a>VAE</h4><h5 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h5><p><img src="/2020/06/29/generative-models/image-20200629144022672.png" alt="image-20200629144022672" style="zoom: 67%;"></p>
-<h5 id="VAE-1"><a href="#VAE-1" class="headerlink" title="VAE"></a>VAE</h5><p>VAE不像autoencoder那样，直接得出code，经过了一些变换，即$c_i=exp(\sigma_i)\times e_i+m_i$，也是来最小化reconstruction error</p>
-<p><img src="/2020/06/29/generative-models/image-20200629144250780.png" alt="image-20200629144250780" style="zoom: 67%;"></p>
-<p>minimize的目标还有</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><h5 id="Pokemon-Creation"><a href="#Pokemon-Creation" class="headerlink" title="Pokémon Creation"></a>Pokémon Creation</h5><p>input一个宝可梦图像，进行encoder、decoder，得到reconstruct之后的图像，其中code是10-dim的；</p>
-<p>现在我们只选择其中的2个纬度出来，其他纬度的值都固定不变，对这个二维的坐标轴，放入不同的点，再输入对应的Decoder，观察其合成出来的image；如果使用不同维度的点，就可以观察到不同维度生成的image；根据不同的维度，我们就可以根据自己的需要，调整这些维度的值，从而得出我们想要的结果</p>
-<p><img src="/2020/06/29/generative-models/image-20200629150656140.png" alt="image-20200629150656140" style="zoom: 50%;"></p>
-<p>部分结果展示</p>
-<p><img src="/2020/06/29/generative-models/image-20200629151406932.png" alt="image-20200629151406932" style="zoom:50%;"></p>
-<h5 id="Why-VAE"><a href="#Why-VAE" class="headerlink" title="Why VAE?"></a>Why VAE?</h5><p>对于一张满月的图像，先进行encode，再进行decode，使得input和output之间的差值最小化；对半月的图像输入也如此</p>
-<p><img src="/2020/06/29/generative-models/image-20200629152107223.png" alt="image-20200629152107223" style="zoom: 67%;"></p>
-<p>对于encoder的其中一个输出$\sigma_i$，表示noise的variance，需要再输入exp函数进行计算，保证其值是大于0的，是machine自己学习的</p>
-<p><img src="/2020/06/29/generative-models/image-20200629153400892.png" alt="image-20200629153400892" style="zoom: 67%;"></p>
-<p>但只有noise是不够的，还需要加一些限制</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>在下图中，蓝色的线表示$exp(\sigma_i)$，红色的线表示$(1+\sigma_i)$，绿色的线表示两者的差值，可以发现在原点处差值是最小的，$\sigma _i$的值接近1，variance的值接近1</p>
-<p><img src="/2020/06/29/generative-models/image-20200629153918937.png" alt="image-20200629153918937" style="zoom:50%;"></p>
-<p>$(m_i)^2$为正则项regularization term，让结果不那么overfiting</p>
-<p>在下图中，为一个高维的坐标（用一维进行了展示），曲线表示image是宝可梦的概率，可以在图中看到，对于一些很像宝可梦的image，$P(x)$值很高，但对于一些比较模棱两可的image，$P(x)$值就很低</p>
-<p><img src="/2020/06/29/generative-models/image-20200629154606838.png" alt="image-20200629154606838" style="zoom: 33%;"></p>
-<p>那么我们到底要怎么来评估这个probability distribution呢？答案是高斯混合模型</p>
-<h5 id="Gaussian-Mixture-Model"><a href="#Gaussian-Mixture-Model" class="headerlink" title="Gaussian Mixture Model"></a>Gaussian Mixture Model</h5><p>对于下图中的曲线图，蓝色表示多个高斯模型，黑色曲线表示这些模型通过一定的weight进行叠加之后的结果</p>
-<p>现在有很多个gaussian model（1，2，3，4，5…），且都对应了自己的weight $P(m)$（蓝色方块），<span style="color: red">要先根据weight选对应的gaussian，再决定到底要从gaussian中sample哪些data</span> ;我们使用$P(m)$表示每个gaussian的weight，$P(x|m)$表示从对应的gaussian中选出data x的概率</p>
-<p>x并不是代表着某个类别，而是用一个vector来进行表示，每个维度表示不同的特征，即 <u>Distributed representation is better than cluster</u></p>
-<p><img src="/2020/06/29/generative-models/image-20200629155005437.png" alt="image-20200629155005437" style="zoom: 67%;"></p>
-<p>我们现在从正态分布中sample一个data z，z的每个dimension就表示某种attribute；</p>
-<p>根据z我们就可以得出高斯分布mean和variance，即$\mu (z),\sigma(z)$，z有无穷多个可能，mean和variance也有无穷多个可能</p>
-<p><img src="/2020/06/29/generative-models/image-20200629160314318.png" alt="image-20200629160314318" style="zoom: 67%;"></p>
-<p>在最下方的图中，我们可以认为最中间的圆点被sample到的几率最大，其他圆点被sample到的几率就相对较小；<span style="color: red">每个z被sample到之后，根据某个function，计算出对应的mean和variance，都对应着不同的gaussian model</span></p>
-<p>这个function可以是一个neural network，input为z，output为$\mu(z),\sigma(z)$</p>
-<p>由于现在是连续的z，$P(z)$的形式也发生了变化，</p>
-<script type="math/tex; mode=display">
-P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><h5 id="Maximizing-Likelihood"><a href="#Maximizing-Likelihood" class="headerlink" title="Maximizing Likelihood"></a><strong>Maximizing Likelihood</strong></h5><p>现在我们需要找到z和$\mu(z),\sigma(z)$之间的关系，用network来进行计算的时候也需要一个评估手段，这里我们采用的是最大化$L=\sum_xlogP(x)$，即最大化我们已经看到的image x的likelihood；</p>
-<p>那么我们现在就有一个NN的参数需要调整，来最大化likelihood L；</p>
-<p><img src="/2020/06/29/generative-models/image-20200629162138964.png" alt="image-20200629162138964" style="zoom: 67%;"></p>
-<p>现在我们还有另外一个distribution $q(z|x)$，和前一个是相反的，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，其mean和variance，即$\mu’(x),\sigma’(x)$</p>
-<p>$P(x|z)$表示z决定了x的distribution，$q(z|x)$表示x决定了z的distribution</p>
-<p><img src="/2020/06/29/generative-models/image-20200629163947560.png" alt="image-20200629163947560" style="zoom:45%;"></p>
-<p>其中$P(z,x)=P(x)P(z|x)$</p>
-<p><img src="/2020/06/29/generative-models/image-20200629165559403.png" alt="image-20200629165559403" style="zoom:50%;"></p>
-<p>我们本来需要调整的参数是$P(x|z)$，使得$P(x)$取得最大值，从而使likelihood取得最大值；但现在的lower bound为$L_b$，是$log(P(x))$的最小值，其中$P(z)$是已知的，不知道的参数是$P(x|z),q(z|x)$，两项都需要调整</p>
-<p>Q：这里为什么突然多了一项需要调整的参数？</p>
-<p>A：这里并不知道lower bound和likelihood之间的关系到底是怎样的，有可能升高了lower bound，但likelihood反而下降了；引入q就可以解决这个问题</p>
-<p>根据原式子，即$P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z$，只和$P(x|z)$有关，与$q(z|x)$是无关的，即下图中<span style="color: purple">方框</span>部分是不变的，</p>
-<p><img src="/2020/06/29/generative-models/image-20200629170614939.png" alt="image-20200629170614939" style="zoom: 67%;"></p>
-<p><strong>如果我们现在固定$P(x|z)$，想通过$q(z|x)$来使$L_b$ 最大化，那么对应的KL divergence就会最小化，到一种很极端的情况，KL divergence会变为0；如果$L_b$继续上升，那么肯定会超出该区域，因此对应的$logP(x)$也会继续上升；KL divergence不断变小的过程，$q(z|x),P(z|x)$之间的差距也会不断缩小</strong></p>
-<p>因此，这个过程不仅让likelihood变得越来越大，也会找到和$P(x|z)$接近的$q(z|x)$</p>
-<p><img src="/2020/06/29/generative-models/image-20200629171631388.png" alt="image-20200629171631388" style="zoom:50%;"></p>
-<p>对于$q(z|x)$，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，就可以知道z是从什么样的gaussian distribution得出来的</p>
-<h5 id="Connection-with-Network"><a href="#Connection-with-Network" class="headerlink" title="Connection with Network"></a><strong>Connection with Network</strong></h5><p>现在我们的目标就是最小化$q(z|x),P(z)$之间的KL divergence，即使$q(z|x)$和normal distribution $P(z)$越接近越好，即minimize</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>还需要maximizing</p>
-<script type="math/tex; mode=display">
-P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><p><img src="/2020/06/29/generative-models/image-20200629172034668.png" alt="image-20200629172034668" style="zoom:50%;"></p>
-<p>对于input的x，我们先输入网络$NN’$，得到获取z的gaussian distribution；sample得到z之后，再输入网络$NN$，得到获取x的gaussian distribution，使得新分布的mean和x越接近越好</p>
-<h5 id="KL散度"><a href="#KL散度" class="headerlink" title="KL散度"></a>KL散度</h5><blockquote>
-<p>所谓KL散度，是指当某分布q(x)被用于近似p(x)时的信息损失。</p>
-</blockquote>
-<p>计算公式为</p>
-<script type="math/tex; mode=display">
-KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href="#Problems-of-VAE" class="headerlink" title="Problems of VAE"></a>Problems of VAE</h5><p><img src="/2020/06/29/generative-models/image-20200629174600157.png" alt="image-20200629174600157" style="zoom:50%;"></p>
-<h4 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h4><h5 id="The-evolution-of-generation"><a href="#The-evolution-of-generation" class="headerlink" title="The evolution of generation"></a>The evolution of generation</h5><p>v1：会generate一些奇怪的图片，然后会有一个第一代的discriminator，来辨别到底哪一个是real image；</p>
-<p>V2： generater会根据上一次discriminater的结果进行调整，第二代生成的image就和真实的image更像了，再把image输入第二代discriminator，再进行比较；</p>
-<p>…….</p>
-<p><img src="/2020/06/29/generative-models/image-20200629175524852.png" alt="image-20200629175524852" style="zoom:50%;"></p>
-<h5 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h5><p>对于generator，可以看作是VAE里面的decoder，我们通常选择从某个distributionsample出来的vector，输入到第一代的generator，再生成相对应的image，有多少个vector，就生成多少个image；</p>
-<p>把真实的image输入discriminator，与generator生成的image进行比较；并对这些data进行标注，real image标注为1，其余标注为0</p>
-<p><img src="/2020/06/29/generative-models/image-20200629201306815.png" alt="image-20200629201306815" style="zoom:50%;"></p>
-<h5 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h5><p>首先随机sample一个vector，作为Generator的输入，generator会生成对应的image，再把这个image输入discriminator，输出是real image的概率，对于第一代（v1），generator还不成熟，因此概率只有0.87；generator接下来会调整自己的参数，使discriminator认为其生成的image是real image；</p>
-<p>这generator+discriminator就相当于一个network，整体目标是使discriminator认为generator生成的image是real image，就可以根据这个指标来使用梯度下降算法，进行back propagation，来不断调整generator的参数；</p>
-<p><span style="color: red">注：在训练过程中应该固定discriminator的参数，来调整generator的参数</span></p>
-<p><img src="/2020/06/29/generative-models/image-20200629201707553.png" alt="image-20200629201707553" style="zoom:50%;"></p>
-<h5 id="Why-GAN-is-hard-to-train"><a href="#Why-GAN-is-hard-to-train" class="headerlink" title="Why GAN is hard to train?"></a>Why GAN is hard to train?</h5><p><img src="/2020/06/29/generative-models/image-20200629202903543.png" alt="image-20200629202903543" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>VAE</tag>
-        <tag>GAN</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Autoencoder</tag>
-        <tag>PixelRNN</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
     <url>/2020/06/28/t-SNE/</url>
     <content><![CDATA[<blockquote>
@@ -1704,6 +1704,151 @@ KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href=
         <tag>Dimension Reduction</tag>
         <tag>LLE</tag>
         <tag>t-SNE</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>基于知识图谱和GCN的应用和开发</title>
+    <url>/2020/07/03/%E5%9F%BA%E4%BA%8E%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E5%92%8C%E5%9B%BE%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E5%BC%80%E5%8F%91/</url>
+    <content><![CDATA[<h4 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h4><p>深度学习的主要思想有三个：</p>
+<ul>
+<li><p>权重分配；</p>
+</li>
+<li><p>层级结构：每一层训练的结果都依赖于上一层；</p>
+</li>
+<li><p>欧几里得空间数据：比如图像数据，可以通过二维坐标(x,y)进行表示，语音信号是一个一维的数据，围棋的话也是一个二维数据，目前的大多数数据都是可以用欧几里得空间数据进行表示的，即可以投影到坐标轴上</p>
+</li>
+</ul>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702101528758.png" alt="image-20200702101528758"></p>
+<p>但在实际生活中，有很多数据并不能用欧几里得数据来进行表示，比如在微信上，每个人都相当于一个节点，朋友之间的关系相当于是一条边，相当于图，没有任何的空间信息，是<u>非欧几里得的空间结构</u>（eg. 社交网络、科学网络等） </p>
+<p>那要怎么对这类信息进行训练呢？传统的深度学习方法（CNN和RNN等）并没有办法训练这类数据，因此就产生了图卷积（GCN）</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702103428339.png" alt="image-20200702103428339"></p>
+<h4 id="图卷积背景和基本框架"><a href="#图卷积背景和基本框架" class="headerlink" title="图卷积背景和基本框架"></a>图卷积背景和基本框架</h4><h5 id="图卷积发展历史"><a href="#图卷积发展历史" class="headerlink" title="图卷积发展历史"></a>图卷积发展历史</h5><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104325966.png" alt="image-20200702104325966"></p>
+<h5 id="邻接矩阵"><a href="#邻接矩阵" class="headerlink" title="邻接矩阵"></a>邻接矩阵</h5><p>无向图的邻接矩阵是对角矩阵</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104743073.png" alt="image-20200702104743073"></p>
+<h5 id="图卷积基本框架"><a href="#图卷积基本框架" class="headerlink" title="图卷积基本框架"></a>图卷积基本框架</h5><p>在下图中，A为邻接矩阵，H为特征矩阵（$N\times F$），，N为节点个数，F表示每个节点的特征数；比如我们每个人在社交网络中都是一个节点，也有一些对应的特征，名字、年龄、出生日期，这些特征就构成了这个特征矩阵$N\times F$；</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104938456.png" alt="image-20200702104938456"></p>
+<p>在这个基本框架中，input为邻接矩阵A，第一个hidden layer把特征矩阵点乘到每一个节点上进行训练，再进入下一层，再进行点乘，…，一直不断重复这个过程。每次训练更新的参数是特征矩阵，最后的output和input是一样的，图结构没有发生变化，但特征矩阵达到了收敛（基本上不会发生变化），最后再对图中的每个节点进行分类；</p>
+<p><span style="color: red">把节点和特征矩阵进行点乘，就实现了信息在节点和社区间进行传递</span></p>
+<h4 id="图卷积"><a href="#图卷积" class="headerlink" title="图卷积"></a>图卷积</h4><p>那么下面我们将具体介绍节点和特征矩阵是怎样进行点乘的，怎样一步步进行训练。</p>
+<h5 id="回顾CNN"><a href="#回顾CNN" class="headerlink" title="回顾CNN"></a>回顾CNN</h5><p>我们先回顾一下CNN是如何做卷积操作的，如下图所示，</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702110939157.png" alt="image-20200702110939157"></p>
+<h5 id="图卷积-1"><a href="#图卷积-1" class="headerlink" title="图卷积"></a>图卷积</h5><p>这是卷积操作的参数更新公式，</p>
+<script type="math/tex; mode=display">
+h_i^{l+1}=\sigma(W_0^{(l)}h_0^{(l)}+W_1^{(l)}h_1^{(l)}+\cdot\cdot\cdot+W_8^{(l)}h_8^{(l)})</script><p>图卷积相比较于卷积，在$h_0^{(l)}W_0^{(l)}$的基础上，多了邻接矩阵的信息$\frac{1}{c_{ij}}h_j^{(l)}$，<span style="color: red">权重矩阵W也没有卷积操作那么重要</span>，其参数更新公式为，</p>
+<script type="math/tex; mode=display">
+h_i^{l+1}=\sigma(h_0^{(l)}W_0^{(l)} + 
+\sum_{j\in N_i} \frac{1}{c_{ij}}h_j^{(l)}W_1^{(l)})</script><p>更新参数的时候，通过周围的节点来更新该节点（下图中红色节点），与该节点不直接相连的节点无关</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702111915112.png" alt="image-20200702111915112"></p>
+<p>那么我们就可以通过以下公式来更新特征矩阵，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde AH^{(l)}W^{(l)})</script><p>其中A为邻接矩阵，H为特征矩阵，W为权重矩阵，本次的特征矩阵$H^{(l+1)}$根据上一次的特征矩阵$H^{(l)}$生成；</p>
+<p>如果只根据邻接矩阵来更新H，会出现一些问题：</p>
+<ul>
+<li>无法提取自身信息，邻接矩阵对角线上的元素始终是0（如果没有自环），自身的信息在训练过程中是无法考虑进去的；</li>
+<li>$\tilde A$没有归一化</li>
+</ul>
+<p>我们需要把参数更新公式进行一些变化，首先解决邻接矩阵对角线元素为0的问题，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma((\tilde D-\tilde A)H^{(l)}W^{(l)})</script><p><span style="color: red">其中</span>矩阵$\tilde D$是一个对角矩阵（degree matrix），对角线上的数值表示了每个节点所相连的边数。</p>
+<p>归一化处理主要列出两种方式，要根据不同的输入数据来进行选择，其中第一种归一化方式比较常用</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)\\
+H^{(l+1)}=\sigma(\tilde D^{-1}(\tilde D-\tilde A)\tilde H^{(l)}W^{(l)})</script><h5 id="图卷积的计算"><a href="#图卷积的计算" class="headerlink" title="图卷积的计算"></a>图卷积的计算</h5><p>下面我们将一个具体的例子来讲述公式(1),</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702114057283.png" alt="image-20200702114057283"></p>
+<p>在上图中，degree matrix表示了每个节点所相连的边数，比如2表示1号节点相连的边有2条，该对角矩阵也就是前文提到的$\tilde D$，$(\tilde D-\tilde A)$就是laplacian matrix；</p>
+<p>我们将特征矩阵$H_0$和权重矩阵W进行随机初始化，再代入公式(1)，即可得出训练完成的结果$H_N$，再求出每一列的最大值，即MaxValue$(H(i))=[1,1,4,1,1,4]$，即分类结果，其中第1，2，4，5个节点分类为1，第3，6个节点分类为4，把整个图的节点分成了两类；</p>
+<p>那么为什么可以这样分类呢？我们可以回到原图labeled graph中，节点1，2，5相当于是一个全连接图，可以当作一个类别，而节点4，5都和三个节点相连，有三条边，也可以当作是一个类别；节点3，6就没有前几个节点那样关系比较紧密，因此被分成了第二个类别</p>
+<p>我们可以得出以下两点：</p>
+<ul>
+<li>对于随机产生的特征矩阵，依靠图自身的结构，就可以得到一个很好的分类效果；</li>
+<li>在这个例子中，进行10次运算，特征矩阵就收敛了，收敛速度非常快</li>
+</ul>
+<p>再来回顾下这个核心公式，所有的图卷积的变化和应用都离不开这个公式。W不那么重要，特征矩阵$H^{(l)}$表示每个人根据自己的实际特征来进行特征提取；邻接矩阵$\tilde A$表示每个人（节点）之间的关系，关系不一样就会构建出不同的图</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)</script><p><span style="color: red">那么我们要在图卷积进行创新的话，就只有改变邻接矩阵A和特征矩阵H，即如何新建这个图、如何提取这个特征；由于机器学习和深度学习技术的不断发展，特征提取的方法已经非常成熟，<u>关键的创新点还是如何新建这个图</u></span></p>
+<h5 id="边信息嵌入"><a href="#边信息嵌入" class="headerlink" title="边信息嵌入"></a>边信息嵌入</h5><p>图中的边信息有时候是包含权重的，我们也应该把边的信息值也考虑进去，即把原图转化为一个线图；在下图中，原图中节点为i，j，m，边为a，b，c，转化为线图后，节点变成a，b，c，边为i，j，m，把边变成了点，把点变成了边</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702122014466.png" alt="image-20200702122014466"></p>
+<p>经过两次不同的输入$h_{(i,j)}^l,h_j^{l+1}$，分别对应原图和线图，这样训练就可以把边的信息也整合进去</p>
+<h5 id="Example-1-半监督图分类"><a href="#Example-1-半监督图分类" class="headerlink" title="Example 1: 半监督图分类"></a>Example 1: 半监督图分类</h5><p>在下图中，黑色圈点表示已经知道了分类的类别，其他的没有被黑色线条包围的点表示没有进行分类，目标是预测未分类的节点的类别，这里我们还定义了一个损失函数L，Z表示GCN的输出结果（上文的公式(1)）</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702123720321.png" alt="image-20200702123720321"></p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124159182.png" alt="image-20200702124159182"></p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124253302.png" alt="image-20200702124253302"></p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124330022.png" alt="image-20200702124330022"></p>
+<p>得到实验结果，</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124418966.png" alt="image-20200702124418966"></p>
+<h5 id="Example-2-科学家网络"><a href="#Example-2-科学家网络" class="headerlink" title="Example 2: 科学家网络"></a>Example 2: 科学家网络</h5><p>每篇论文都会有一个题目，互相引用这篇论文则会形成一个关系，我们的任务是根据论文的题目来预测论文的类别（统计、物理、数学）</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124600168.png" alt="image-20200702124600168"></p>
+<p>这个例子只用了2层的GCN，其中$\hat AXW^{(0)}$表示第一层，$\hat A \ {\rm ReLU}(\hat AXW^{(0)})W^{(1)}$表示第二层，再输入softmax函数，整个训练过程更新的参数是X，从表格中的数据也可以看出，GCN取得了非常不错的效果</p>
+<h4 id="基于知识图谱的图卷积"><a href="#基于知识图谱的图卷积" class="headerlink" title="基于知识图谱的图卷积"></a>基于知识图谱的图卷积</h4><h5 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h5><blockquote>
+<p>知识图谱是Google用于增强其搜索引擎功能的知识库。本质上, 知识图谱旨在描述真实世界中存在的各种实体或概念及其关系,其构成一张巨大的语义网络图，节点表示实体或概念，边则由属性或关系构成。现在的知识图谱已被用来泛指各种大规模的知识库。 </p>
+</blockquote>
+<p>如果你输入搜索引擎中国这个词，相应的会出来中国的一些特征，比如中国的城市、国土面积、人口等；中国和国家都可以看作是图中的一个节点，中国和国家的关系就可以看作是一条边</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702145803375.png" alt="image-20200702145803375"></p>
+<h5 id="图卷积：知识图谱"><a href="#图卷积：知识图谱" class="headerlink" title="图卷积：知识图谱"></a>图卷积：知识图谱</h5><p>先把数据用图表示出来，用户为U，实体为V，$y_{uv}=1$则表示用户u和实体v之间有联系，比如我对电影很感兴趣；每个实体u之间会有关系r，比如电影和教父；</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702150629999.png" alt="image-20200702150629999"></p>
+<p>将图卷积应用到知识图谱，可以用以下公式来进行更新，不断更新特征矩阵H直至其收敛即可，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D_u^{-\frac{1}{2}}\tilde A_u\tilde D_u^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad</script><p>那么我们怎么把实体推荐给用户呢？我们又怎么知道用户是不是对这个实体感兴趣呢？</p>
+<p>（1）我们可以针对每个用户再新建一个图，先引入一个函数$S_u(\cdot)$，表示这条边（关系）对用户的重要性；</p>
+<p>（2）再把原来的实体矩阵变成一个有权重的矩阵，比如边$r_1$输入函数$S_u(\cdot)$，得到$S_u(r_1)$，就是新的关系值。<u>每个用户都有一个邻接矩阵，再对每个用户的邻接矩阵进行训练，就可以得出用户到底对哪个电影感兴趣</u>；</p>
+<p>（3）图卷积；</p>
+<p>（4）<strong>标签顺滑</strong>，比如对于一个动物，机器可以很自信地确定这个动物到底是猫还是狗，输出值只有0或者1；由于机器过于自信，可能会导致很多额外的误差，我们现在就可以把这个值改成0.1或者0.9，就可以得到更好的结果。</p>
+<p>总结：先新建一个图（knowledge graph，KG），再把用户对感兴趣的实体新建一个权重矩阵，再进行图卷积和标签顺滑。那么现在我们的损失函数就有了一些小变化，结合了图卷积和标签顺滑，即</p>
+<script type="math/tex; mode=display">
+L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702153035542.png" alt="image-20200702153035542"></p>
+<p>下面我们将简要叙述这个训练的过程，图中的水平虚线表示decision boundary：</p>
+<p>（a）其中蓝色的点表示用户感兴趣的点（observed）；在其下方有一些其他的点（unobserved），我们希望把黄色的点（被黄色方框围住）就推荐给用户，让用户去选择，而剩下蓝色的点，则是用户不感兴趣的，不推荐给用户；</p>
+<p>（b）一共要进行两层的训练，对于第一层的训练结果，我们现在把其中两个黄色的点就推荐给用户了；</p>
+<p>（c）对于第二层的训练结果，就把其中的三个点推荐给用户了，但最左端的点也在decision boundary之上，也会被推荐给用户，模型在训练过程中会存在一定的误差，</p>
+<p>（d）这里就开始对第二个用户的模型进行训练；</p>
+<p>（e）这是加入了标签顺滑（label smoothing）的结果，推荐会更加精准，在图中，我们可以看到用户不感兴趣的点进行下移，用户感兴趣的点（a图中的黄色方框部分）则上移，尽量移到decision boundary之上</p>
+<h5 id="Label-Smoothing-Regularization"><a href="#Label-Smoothing-Regularization" class="headerlink" title="Label Smoothing Regularization"></a>Label Smoothing Regularization</h5><p>（1）在下图的能量方程中，$l_u(e_i)$表示用户u是否对实体$e_i$感兴趣（值为0或1），能量方程可以把相同的label保存下来，把不同的label就去掉了；（2）再找到使得能量方程取得最小值的$l_u^<em>$；（3）再通过KL距离函数求得$y_{uv}$和$\hat l_u^</em>(v)$之间的相似度，也是求最小值，可得$R(A)$，再代入损失函数</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702155919603.png" alt="image-20200702155919603"></p>
+<p>$\lambda$可以不断做调整，来找到损失函数的最小值</p>
+<h5 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h5><p>输入为知识图谱G，新建一个邻接矩阵M后；（2）再把用户对感兴趣的实体新建一个权重矩阵（输入mapping函数S），再进行图卷积更新特征矩阵，即$e_u^{(i)}\leftarrow \sigma (\cdot)$；（3）标签顺滑，更新$l_u^{(i)}(e)$，再代入损失函数中的 J；不断地进行这个过程，只到损失函数收敛为止</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702162309077.png" alt="image-20200702162309077"></p>
+<h5 id="结果演示"><a href="#结果演示" class="headerlink" title="结果演示"></a>结果演示</h5><p>下图是几种推荐算法的比较，推荐给用户Top-K的实体，看最后的准确率如何，可以发现GCN的结构取得了非常不错的效果。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702163653325.png" alt="image-20200702163653325"></p>
+<p>下面是一些可视化的对比，图1是推荐食物，可以看到GCN的结构取得了很好的效果；图2表示取不同的$\lambda$，得到的$R(A_u)$的值；图三对比了不同算法的运行速度，可以看到KGCN用时最少，速度最快</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702163938245.png" alt="image-20200702163938245"></p>
+<h4 id="研究方向"><a href="#研究方向" class="headerlink" title="研究方向"></a>研究方向</h4><h5 id="人体姿势识别"><a href="#人体姿势识别" class="headerlink" title="人体姿势识别"></a>人体姿势识别</h5><p> 人体的关节就可以看作是一个节点，关节之间的骨骼就可以看作是边，结合起来就是一张图；</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702165243019.png" alt="image-20200702165243019"></p>
+<p>核心框架：输入为一个视频，视频的每个时间序列都是一张图像，每一帧的视频取出来就是一张图像；把每一帧的图像先构建成一个骨骼和关节点图，再通过时间的顺序把每一帧对应的关节点都连接起来，形成一张大图，再输入GCN进行训练，通过分类器识别出这是一个跑步的动作。</p>
+<p>在上图中的左下角中，横轴表示每一帧的骨骼图，纵轴表示时间，把相应的骨骼节点连接起来，变成一张大图，再输入GCN进行训练。</p>
+<p>下图为实验结果，</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702170313601.png" alt="image-20200702170313601"></p>
+<h5 id="超图"><a href="#超图" class="headerlink" title="超图"></a>超图</h5><p>超图是图的一个基本概念，下图中的图有8个点，选择不同的点，可以有多种排列组合。如果选一个点，一共有个点可以选择，那么就有8种（$C_n^1$）组合。如果我选两个点，比如$n_3,n_8$，这两个点构成一个子图，就有6种（$C_n^2$）组合。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702170734267.png" alt="image-20200702170734267"></p>
+<p>选出不同的点后，得到不同的邻接矩阵，再进行训练。每一层选出不同组合的邻接矩阵再输入GCN进行图卷积。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093426889.png" alt="image-20200703093426889"></p>
+<p>超图卷积的核心公式就是下图中的公式(11)</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093638629.png" alt="image-20200703093638629"></p>
+<h5 id="图构建"><a href="#图构建" class="headerlink" title="图构建"></a>图构建</h5><p>对于给定的数据，新建图之后再输入GCN进行分类，我们要怎么画成一张图呢？</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093921828.png" alt="image-20200703093921828"></p>
+<p>在上图中，observed dynamics表示5个分子的运动轨迹图，我们的目标是构建新图，并预测分子的下一步轨迹；对于人体的动作，我们也得通过学习才能知道，到底是以左手还是右手为重心。</p>
+<p>在下图中，展示了图构建的大概过程，编码器和解码器都是GCNs。对于编码器部分，先进行了从边到节点($v\rightarrow e$)的过程，再从节点到边($e\rightarrow v$)，再从边到节点($v\rightarrow e$)；对于解码器，先从边到点，再从点到边，进行图卷积，最后再进行分类，得到下一步的运动轨迹。</p>
+<p>其中x表示节点，z表示x这个点与i、j相连的概率，z是一个概率分布。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703095234400.png" alt="image-20200703095234400"></p>
+<p>预测下一步运动轨迹：在下图中，我们可以看出预测图和真实值之间差距并不大，</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703100157533.png" alt="image-20200703100157533"></p>
+<h5 id="子图嵌入"><a href="#子图嵌入" class="headerlink" title="子图嵌入"></a>子图嵌入</h5><p>在原来的GCN中，我们每次只会考虑一个点；如果我们现在把多个点（关联性很大的点）表示成一个点，再输入GCN，效果会不会更好呢？这也是一个很火的研究方向。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703101250920.png" alt="image-20200703101250920"></p>
+<h4 id="场景应用"><a href="#场景应用" class="headerlink" title="场景应用"></a>场景应用</h4><h5 id="用户推荐系统"><a href="#用户推荐系统" class="headerlink" title="用户推荐系统"></a>用户推荐系统</h5><p>在搜索中推荐相关联的朋友给你。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102812106.png" alt="image-20200703102812106"></p>
+<h5 id="舆情监控和控制"><a href="#舆情监控和控制" class="headerlink" title="舆情监控和控制"></a>舆情监控和控制</h5><p>每个国家都需要舆情监控，比如关于假消息和真消息的分类或者监控，在网络传播过程中找到假消息源，进行封锁等，用GCN都可以起到很好的作用。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102736481.png" alt="image-20200703102736481"></p>
+<h5 id="自动驾驶"><a href="#自动驾驶" class="headerlink" title="自动驾驶"></a>自动驾驶</h5><p>所有的车都有一个车载系统，每个车载系统之间进行联网，就可以构成非常大的图。</p>
+<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102850234.png" alt="image-20200703102850234"></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703103300945.png" alt="image-20200703103300945"></p>
+<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><p>本文是观看杨栋老师在B上讲解的直播课程《基于知识图谱和图卷积神经网络的应用和开发》的笔记，直播地址：<a href="https://live.bilibili.com/11869202" target="_blank" rel="external">https://live.bilibili.com/11869202</a> ，贪心科技官网录播回放：<a href="https://www.greedyai.com/course/139" target="_blank" rel="external">https://www.greedyai.com/course/139</a></p>
+]]></content>
+      <categories>
+        <category>知识图谱</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>知识图谱</tag>
+        <tag>GCN</tag>
       </tags>
   </entry>
   <entry>
@@ -1867,231 +2012,6 @@ S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（M
       </tags>
   </entry>
   <entry>
-    <title>基于知识图谱和GCN的应用和开发</title>
-    <url>/2020/07/03/%E5%9F%BA%E4%BA%8E%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E5%92%8C%E5%9B%BE%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E5%BC%80%E5%8F%91/</url>
-    <content><![CDATA[<h4 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h4><p>深度学习的主要思想有三个：</p>
-<ul>
-<li><p>权重分配；</p>
-</li>
-<li><p>层级结构：每一层训练的结果都依赖于上一层；</p>
-</li>
-<li><p>欧几里得空间数据：比如图像数据，可以通过二维坐标(x,y)进行表示，语音信号是一个一维的数据，围棋的话也是一个二维数据，目前的大多数数据都是可以用欧几里得空间数据进行表示的，即可以投影到坐标轴上</p>
-</li>
-</ul>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702101528758.png" alt="image-20200702101528758"></p>
-<p>但在实际生活中，有很多数据并不能用欧几里得数据来进行表示，比如在微信上，每个人都相当于一个节点，朋友之间的关系相当于是一条边，相当于图，没有任何的空间信息，是<u>非欧几里得的空间结构</u>（eg. 社交网络、科学网络等） </p>
-<p>那要怎么对这类信息进行训练呢？传统的深度学习方法（CNN和RNN等）并没有办法训练这类数据，因此就产生了图卷积（GCN）</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702103428339.png" alt="image-20200702103428339"></p>
-<h4 id="图卷积背景和基本框架"><a href="#图卷积背景和基本框架" class="headerlink" title="图卷积背景和基本框架"></a>图卷积背景和基本框架</h4><h5 id="图卷积发展历史"><a href="#图卷积发展历史" class="headerlink" title="图卷积发展历史"></a>图卷积发展历史</h5><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104325966.png" alt="image-20200702104325966"></p>
-<h5 id="邻接矩阵"><a href="#邻接矩阵" class="headerlink" title="邻接矩阵"></a>邻接矩阵</h5><p>无向图的邻接矩阵是对角矩阵</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104743073.png" alt="image-20200702104743073"></p>
-<h5 id="图卷积基本框架"><a href="#图卷积基本框架" class="headerlink" title="图卷积基本框架"></a>图卷积基本框架</h5><p>在下图中，A为邻接矩阵，H为特征矩阵（$N\times F$），，N为节点个数，F表示每个节点的特征数；比如我们每个人在社交网络中都是一个节点，也有一些对应的特征，名字、年龄、出生日期，这些特征就构成了这个特征矩阵$N\times F$；</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104938456.png" alt="image-20200702104938456"></p>
-<p>在这个基本框架中，input为邻接矩阵A，第一个hidden layer把特征矩阵点乘到每一个节点上进行训练，再进入下一层，再进行点乘，…，一直不断重复这个过程。每次训练更新的参数是特征矩阵，最后的output和input是一样的，图结构没有发生变化，但特征矩阵达到了收敛（基本上不会发生变化），最后再对图中的每个节点进行分类；</p>
-<p><span style="color: red">把节点和特征矩阵进行点乘，就实现了信息在节点和社区间进行传递</span></p>
-<h4 id="图卷积"><a href="#图卷积" class="headerlink" title="图卷积"></a>图卷积</h4><p>那么下面我们将具体介绍节点和特征矩阵是怎样进行点乘的，怎样一步步进行训练。</p>
-<h5 id="回顾CNN"><a href="#回顾CNN" class="headerlink" title="回顾CNN"></a>回顾CNN</h5><p>我们先回顾一下CNN是如何做卷积操作的，如下图所示，</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702110939157.png" alt="image-20200702110939157"></p>
-<h5 id="图卷积-1"><a href="#图卷积-1" class="headerlink" title="图卷积"></a>图卷积</h5><p>这是卷积操作的参数更新公式，</p>
-<script type="math/tex; mode=display">
-h_i^{l+1}=\sigma(W_0^{(l)}h_0^{(l)}+W_1^{(l)}h_1^{(l)}+\cdot\cdot\cdot+W_8^{(l)}h_8^{(l)})</script><p>图卷积相比较于卷积，在$h_0^{(l)}W_0^{(l)}$的基础上，多了邻接矩阵的信息$\frac{1}{c_{ij}}h_j^{(l)}$，<span style="color: red">权重矩阵W也没有卷积操作那么重要</span>，其参数更新公式为，</p>
-<script type="math/tex; mode=display">
-h_i^{l+1}=\sigma(h_0^{(l)}W_0^{(l)} + 
-\sum_{j\in N_i} \frac{1}{c_{ij}}h_j^{(l)}W_1^{(l)})</script><p>更新参数的时候，通过周围的节点来更新该节点（下图中红色节点），与该节点不直接相连的节点无关</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702111915112.png" alt="image-20200702111915112"></p>
-<p>那么我们就可以通过以下公式来更新特征矩阵，</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde AH^{(l)}W^{(l)})</script><p>其中A为邻接矩阵，H为特征矩阵，W为权重矩阵，本次的特征矩阵$H^{(l+1)}$根据上一次的特征矩阵$H^{(l)}$生成；</p>
-<p>如果只根据邻接矩阵来更新H，会出现一些问题：</p>
-<ul>
-<li>无法提取自身信息，邻接矩阵对角线上的元素始终是0（如果没有自环），自身的信息在训练过程中是无法考虑进去的；</li>
-<li>$\tilde A$没有归一化</li>
-</ul>
-<p>我们需要把参数更新公式进行一些变化，首先解决邻接矩阵对角线元素为0的问题，</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma((\tilde D-\tilde A)H^{(l)}W^{(l)})</script><p><span style="color: red">其中</span>矩阵$\tilde D$是一个对角矩阵（degree matrix），对角线上的数值表示了每个节点所相连的边数。</p>
-<p>归一化处理主要列出两种方式，要根据不同的输入数据来进行选择，其中第一种归一化方式比较常用</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)\\
-H^{(l+1)}=\sigma(\tilde D^{-1}(\tilde D-\tilde A)\tilde H^{(l)}W^{(l)})</script><h5 id="图卷积的计算"><a href="#图卷积的计算" class="headerlink" title="图卷积的计算"></a>图卷积的计算</h5><p>下面我们将一个具体的例子来讲述公式(1),</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702114057283.png" alt="image-20200702114057283"></p>
-<p>在上图中，degree matrix表示了每个节点所相连的边数，比如2表示1号节点相连的边有2条，该对角矩阵也就是前文提到的$\tilde D$，$(\tilde D-\tilde A)$就是laplacian matrix；</p>
-<p>我们将特征矩阵$H_0$和权重矩阵W进行随机初始化，再代入公式(1)，即可得出训练完成的结果$H_N$，再求出每一列的最大值，即MaxValue$(H(i))=[1,1,4,1,1,4]$，即分类结果，其中第1，2，4，5个节点分类为1，第3，6个节点分类为4，把整个图的节点分成了两类；</p>
-<p>那么为什么可以这样分类呢？我们可以回到原图labeled graph中，节点1，2，5相当于是一个全连接图，可以当作一个类别，而节点4，5都和三个节点相连，有三条边，也可以当作是一个类别；节点3，6就没有前几个节点那样关系比较紧密，因此被分成了第二个类别</p>
-<p>我们可以得出以下两点：</p>
-<ul>
-<li>对于随机产生的特征矩阵，依靠图自身的结构，就可以得到一个很好的分类效果；</li>
-<li>在这个例子中，进行10次运算，特征矩阵就收敛了，收敛速度非常快</li>
-</ul>
-<p>再来回顾下这个核心公式，所有的图卷积的变化和应用都离不开这个公式。W不那么重要，特征矩阵$H^{(l)}$表示每个人根据自己的实际特征来进行特征提取；邻接矩阵$\tilde A$表示每个人（节点）之间的关系，关系不一样就会构建出不同的图</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)</script><p><span style="color: red">那么我们要在图卷积进行创新的话，就只有改变邻接矩阵A和特征矩阵H，即如何新建这个图、如何提取这个特征；由于机器学习和深度学习技术的不断发展，特征提取的方法已经非常成熟，<u>关键的创新点还是如何新建这个图</u></span></p>
-<h5 id="边信息嵌入"><a href="#边信息嵌入" class="headerlink" title="边信息嵌入"></a>边信息嵌入</h5><p>图中的边信息有时候是包含权重的，我们也应该把边的信息值也考虑进去，即把原图转化为一个线图；在下图中，原图中节点为i，j，m，边为a，b，c，转化为线图后，节点变成a，b，c，边为i，j，m，把边变成了点，把点变成了边</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702122014466.png" alt="image-20200702122014466"></p>
-<p>经过两次不同的输入$h_{(i,j)}^l,h_j^{l+1}$，分别对应原图和线图，这样训练就可以把边的信息也整合进去</p>
-<h5 id="Example-1-半监督图分类"><a href="#Example-1-半监督图分类" class="headerlink" title="Example 1: 半监督图分类"></a>Example 1: 半监督图分类</h5><p>在下图中，黑色圈点表示已经知道了分类的类别，其他的没有被黑色线条包围的点表示没有进行分类，目标是预测未分类的节点的类别，这里我们还定义了一个损失函数L，Z表示GCN的输出结果（上文的公式(1)）</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702123720321.png" alt="image-20200702123720321"></p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124159182.png" alt="image-20200702124159182"></p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124253302.png" alt="image-20200702124253302"></p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124330022.png" alt="image-20200702124330022"></p>
-<p>得到实验结果，</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124418966.png" alt="image-20200702124418966"></p>
-<h5 id="Example-2-科学家网络"><a href="#Example-2-科学家网络" class="headerlink" title="Example 2: 科学家网络"></a>Example 2: 科学家网络</h5><p>每篇论文都会有一个题目，互相引用这篇论文则会形成一个关系，我们的任务是根据论文的题目来预测论文的类别（统计、物理、数学）</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124600168.png" alt="image-20200702124600168"></p>
-<p>这个例子只用了2层的GCN，其中$\hat AXW^{(0)}$表示第一层，$\hat A \ {\rm ReLU}(\hat AXW^{(0)})W^{(1)}$表示第二层，再输入softmax函数，整个训练过程更新的参数是X，从表格中的数据也可以看出，GCN取得了非常不错的效果</p>
-<h4 id="基于知识图谱的图卷积"><a href="#基于知识图谱的图卷积" class="headerlink" title="基于知识图谱的图卷积"></a>基于知识图谱的图卷积</h4><h5 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h5><blockquote>
-<p>知识图谱是Google用于增强其搜索引擎功能的知识库。本质上, 知识图谱旨在描述真实世界中存在的各种实体或概念及其关系,其构成一张巨大的语义网络图，节点表示实体或概念，边则由属性或关系构成。现在的知识图谱已被用来泛指各种大规模的知识库。 </p>
-</blockquote>
-<p>如果你输入搜索引擎中国这个词，相应的会出来中国的一些特征，比如中国的城市、国土面积、人口等；中国和国家都可以看作是图中的一个节点，中国和国家的关系就可以看作是一条边</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702145803375.png" alt="image-20200702145803375"></p>
-<h5 id="图卷积：知识图谱"><a href="#图卷积：知识图谱" class="headerlink" title="图卷积：知识图谱"></a>图卷积：知识图谱</h5><p>先把数据用图表示出来，用户为U，实体为V，$y_{uv}=1$则表示用户u和实体v之间有联系，比如我对电影很感兴趣；每个实体u之间会有关系r，比如电影和教父；</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702150629999.png" alt="image-20200702150629999"></p>
-<p>将图卷积应用到知识图谱，可以用以下公式来进行更新，不断更新特征矩阵H直至其收敛即可，</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde D_u^{-\frac{1}{2}}\tilde A_u\tilde D_u^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad</script><p>那么我们怎么把实体推荐给用户呢？我们又怎么知道用户是不是对这个实体感兴趣呢？</p>
-<p>（1）我们可以针对每个用户再新建一个图，先引入一个函数$S_u(\cdot)$，表示这条边（关系）对用户的重要性；</p>
-<p>（2）再把原来的实体矩阵变成一个有权重的矩阵，比如边$r_1$输入函数$S_u(\cdot)$，得到$S_u(r_1)$，就是新的关系值。<u>每个用户都有一个邻接矩阵，再对每个用户的邻接矩阵进行训练，就可以得出用户到底对哪个电影感兴趣</u>；</p>
-<p>（3）图卷积；</p>
-<p>（4）<strong>标签顺滑</strong>，比如对于一个动物，机器可以很自信地确定这个动物到底是猫还是狗，输出值只有0或者1；由于机器过于自信，可能会导致很多额外的误差，我们现在就可以把这个值改成0.1或者0.9，就可以得到更好的结果。</p>
-<p>总结：先新建一个图（knowledge graph，KG），再把用户对感兴趣的实体新建一个权重矩阵，再进行图卷积和标签顺滑。那么现在我们的损失函数就有了一些小变化，结合了图卷积和标签顺滑，即</p>
-<script type="math/tex; mode=display">
-L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702153035542.png" alt="image-20200702153035542"></p>
-<p>下面我们将简要叙述这个训练的过程，图中的水平虚线表示decision boundary：</p>
-<p>（a）其中蓝色的点表示用户感兴趣的点（observed）；在其下方有一些其他的点（unobserved），我们希望把黄色的点（被黄色方框围住）就推荐给用户，让用户去选择，而剩下蓝色的点，则是用户不感兴趣的，不推荐给用户；</p>
-<p>（b）一共要进行两层的训练，对于第一层的训练结果，我们现在把其中两个黄色的点就推荐给用户了；</p>
-<p>（c）对于第二层的训练结果，就把其中的三个点推荐给用户了，但最左端的点也在decision boundary之上，也会被推荐给用户，模型在训练过程中会存在一定的误差，</p>
-<p>（d）这里就开始对第二个用户的模型进行训练；</p>
-<p>（e）这是加入了标签顺滑（label smoothing）的结果，推荐会更加精准，在图中，我们可以看到用户不感兴趣的点进行下移，用户感兴趣的点（a图中的黄色方框部分）则上移，尽量移到decision boundary之上</p>
-<h5 id="Label-Smoothing-Regularization"><a href="#Label-Smoothing-Regularization" class="headerlink" title="Label Smoothing Regularization"></a>Label Smoothing Regularization</h5><p>（1）在下图的能量方程中，$l_u(e_i)$表示用户u是否对实体$e_i$感兴趣（值为0或1），能量方程可以把相同的label保存下来，把不同的label就去掉了；（2）再找到使得能量方程取得最小值的$l_u^<em>$；（3）再通过KL距离函数求得$y_{uv}$和$\hat l_u^</em>(v)$之间的相似度，也是求最小值，可得$R(A)$，再代入损失函数</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702155919603.png" alt="image-20200702155919603"></p>
-<p>$\lambda$可以不断做调整，来找到损失函数的最小值</p>
-<h5 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h5><p>输入为知识图谱G，新建一个邻接矩阵M后；（2）再把用户对感兴趣的实体新建一个权重矩阵（输入mapping函数S），再进行图卷积更新特征矩阵，即$e_u^{(i)}\leftarrow \sigma (\cdot)$；（3）标签顺滑，更新$l_u^{(i)}(e)$，再代入损失函数中的 J；不断地进行这个过程，只到损失函数收敛为止</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702162309077.png" alt="image-20200702162309077"></p>
-<h5 id="结果演示"><a href="#结果演示" class="headerlink" title="结果演示"></a>结果演示</h5><p>下图是几种推荐算法的比较，推荐给用户Top-K的实体，看最后的准确率如何，可以发现GCN的结构取得了非常不错的效果。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702163653325.png" alt="image-20200702163653325"></p>
-<p>下面是一些可视化的对比，图1是推荐食物，可以看到GCN的结构取得了很好的效果；图2表示取不同的$\lambda$，得到的$R(A_u)$的值；图三对比了不同算法的运行速度，可以看到KGCN用时最少，速度最快</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702163938245.png" alt="image-20200702163938245"></p>
-<h4 id="研究方向"><a href="#研究方向" class="headerlink" title="研究方向"></a>研究方向</h4><h5 id="人体姿势识别"><a href="#人体姿势识别" class="headerlink" title="人体姿势识别"></a>人体姿势识别</h5><p> 人体的关节就可以看作是一个节点，关节之间的骨骼就可以看作是边，结合起来就是一张图；</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702165243019.png" alt="image-20200702165243019"></p>
-<p>核心框架：输入为一个视频，视频的每个时间序列都是一张图像，每一帧的视频取出来就是一张图像；把每一帧的图像先构建成一个骨骼和关节点图，再通过时间的顺序把每一帧对应的关节点都连接起来，形成一张大图，再输入GCN进行训练，通过分类器识别出这是一个跑步的动作。</p>
-<p>在上图中的左下角中，横轴表示每一帧的骨骼图，纵轴表示时间，把相应的骨骼节点连接起来，变成一张大图，再输入GCN进行训练。</p>
-<p>下图为实验结果，</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702170313601.png" alt="image-20200702170313601"></p>
-<h5 id="超图"><a href="#超图" class="headerlink" title="超图"></a>超图</h5><p>超图是图的一个基本概念，下图中的图有8个点，选择不同的点，可以有多种排列组合。如果选一个点，一共有个点可以选择，那么就有8种（$C_n^1$）组合。如果我选两个点，比如$n_3,n_8$，这两个点构成一个子图，就有6种（$C_n^2$）组合。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702170734267.png" alt="image-20200702170734267"></p>
-<p>选出不同的点后，得到不同的邻接矩阵，再进行训练。每一层选出不同组合的邻接矩阵再输入GCN进行图卷积。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093426889.png" alt="image-20200703093426889"></p>
-<p>超图卷积的核心公式就是下图中的公式(11)</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093638629.png" alt="image-20200703093638629"></p>
-<h5 id="图构建"><a href="#图构建" class="headerlink" title="图构建"></a>图构建</h5><p>对于给定的数据，新建图之后再输入GCN进行分类，我们要怎么画成一张图呢？</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093921828.png" alt="image-20200703093921828"></p>
-<p>在上图中，observed dynamics表示5个分子的运动轨迹图，我们的目标是构建新图，并预测分子的下一步轨迹；对于人体的动作，我们也得通过学习才能知道，到底是以左手还是右手为重心。</p>
-<p>在下图中，展示了图构建的大概过程，编码器和解码器都是GCNs。对于编码器部分，先进行了从边到节点($v\rightarrow e$)的过程，再从节点到边($e\rightarrow v$)，再从边到节点($v\rightarrow e$)；对于解码器，先从边到点，再从点到边，进行图卷积，最后再进行分类，得到下一步的运动轨迹。</p>
-<p>其中x表示节点，z表示x这个点与i、j相连的概率，z是一个概率分布。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703095234400.png" alt="image-20200703095234400"></p>
-<p>预测下一步运动轨迹：在下图中，我们可以看出预测图和真实值之间差距并不大，</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703100157533.png" alt="image-20200703100157533"></p>
-<h5 id="子图嵌入"><a href="#子图嵌入" class="headerlink" title="子图嵌入"></a>子图嵌入</h5><p>在原来的GCN中，我们每次只会考虑一个点；如果我们现在把多个点（关联性很大的点）表示成一个点，再输入GCN，效果会不会更好呢？这也是一个很火的研究方向。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703101250920.png" alt="image-20200703101250920"></p>
-<h4 id="场景应用"><a href="#场景应用" class="headerlink" title="场景应用"></a>场景应用</h4><h5 id="用户推荐系统"><a href="#用户推荐系统" class="headerlink" title="用户推荐系统"></a>用户推荐系统</h5><p>在搜索中推荐相关联的朋友给你。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102812106.png" alt="image-20200703102812106"></p>
-<h5 id="舆情监控和控制"><a href="#舆情监控和控制" class="headerlink" title="舆情监控和控制"></a>舆情监控和控制</h5><p>每个国家都需要舆情监控，比如关于假消息和真消息的分类或者监控，在网络传播过程中找到假消息源，进行封锁等，用GCN都可以起到很好的作用。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102736481.png" alt="image-20200703102736481"></p>
-<h5 id="自动驾驶"><a href="#自动驾驶" class="headerlink" title="自动驾驶"></a>自动驾驶</h5><p>所有的车都有一个车载系统，每个车载系统之间进行联网，就可以构成非常大的图。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102850234.png" alt="image-20200703102850234"></p>
-<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703103300945.png" alt="image-20200703103300945"></p>
-<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><p>本文是观看杨栋老师在B上讲解的直播课程《基于知识图谱和图卷积神经网络的应用和开发》的笔记，直播地址：<a href="https://live.bilibili.com/11869202" target="_blank" rel="external">https://live.bilibili.com/11869202</a> ，贪心科技官网录播回放：<a href="https://www.greedyai.com/course/139" target="_blank" rel="external">https://www.greedyai.com/course/139</a></p>
-]]></content>
-      <categories>
-        <category>知识图谱</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>知识图谱</tag>
-        <tag>GCN</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>流水线</title>
-    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
-    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
-<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
-<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
-<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
-<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
-<li>需要有<u>通过时间与排空时间</u></li>
-</ul>
-<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
-<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
-<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
-<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
-<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
-<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
-<ul>
-<li><p>从前调度</p>
-</li>
-<li><p>从目标处调度</p>
-</li>
-<li><p>从失败出调度</p>
-</li>
-</ul>
-<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
-<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
-<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
-<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>软件工程</category>
-      </categories>
-      <tags>
-        <tag>流水线</tag>
-        <tag>吞吐率</tag>
-        <tag>加速比</tag>
-        <tag>效率</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>测试</title>
-    <url>/2020/03/12/%E6%B5%8B%E8%AF%95/</url>
-    <content><![CDATA[<h5 id="测试步骤"><a href="#测试步骤" class="headerlink" title="测试步骤"></a>测试步骤</h5><ul>
-<li>模块（单元）测试</li>
-<li>子系统测试</li>
-<li>系统（集成）测试</li>
-<li>验收（确认）测试</li>
-<li>平行运行</li>
-</ul>
-<h5 id="单元测试"><a href="#单元测试" class="headerlink" title="单元测试"></a>单元测试</h5><p>主要使用白盒测试技术。集中检测软件设计的最小单元-模块，对重要的执行通路进行测试，可以发现模块内部的错误。可以用代码审查和计算机测试，来完成单元测试工作。测试重点为：</p>
-<ul>
-<li>模块接口</li>
-<li>局部数据结构</li>
-<li>重要的执行通路</li>
-<li>出错处理通路</li>
-<li>边界条件</li>
-</ul>
-<h5 id="集成测试"><a href="#集成测试" class="headerlink" title="集成测试"></a>集成测试</h5><p>是测试和组装软件的系统化技术，把模块组装成程序，在组装的过程进行测试。</p>
-<p>非渐增式：先分别测试所有模块，再把这些模块组合成要求的程序；</p>
-<p>渐增式：把下一个将要测试的模块同已经测试好的那些模块组合到一起进行测试；</p>
-<ul>
-<li>自底向上集成</li>
-<li>自顶向下集成</li>
-</ul>
-<p>模块测试的特点是主要应用白盒测试，对多个模块的测试可以并发进行；集成测试的特点是可以在测试过程发现接口问题。</p>
-<p>回归测试：重新执行已经做过测试的某个测试的子集。</p>
-<p><img src="/2020/03/12/测试/test.png" alt=""></p>
-]]></content>
-      <categories>
-        <category>软件工程</category>
-      </categories>
-      <tags>
-        <tag>软件工程</tag>
-        <tag>单元测试</tag>
-        <tag>集成测试</tag>
-        <tag>白盒测试</tag>
-        <tag>黑盒测试</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Gradient Descent</title>
     <url>/2020/06/04/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/</url>
     <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>梯度下降的目标是使损失函数L最小化，$\theta^* = arg\ min\ L(\theta)$</p>
@@ -2192,6 +2112,86 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
         <tag>gradient descent</tag>
         <tag>adagrad</tag>
         <tag>SGD</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>流水线</title>
+    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
+    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
+<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
+<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
+<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
+<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
+<li>需要有<u>通过时间与排空时间</u></li>
+</ul>
+<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
+<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
+<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
+<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
+<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
+<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
+<ul>
+<li><p>从前调度</p>
+</li>
+<li><p>从目标处调度</p>
+</li>
+<li><p>从失败出调度</p>
+</li>
+</ul>
+<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
+<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
+<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
+<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>软件工程</category>
+      </categories>
+      <tags>
+        <tag>流水线</tag>
+        <tag>吞吐率</tag>
+        <tag>加速比</tag>
+        <tag>效率</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>测试</title>
+    <url>/2020/03/12/%E6%B5%8B%E8%AF%95/</url>
+    <content><![CDATA[<h5 id="测试步骤"><a href="#测试步骤" class="headerlink" title="测试步骤"></a>测试步骤</h5><ul>
+<li>模块（单元）测试</li>
+<li>子系统测试</li>
+<li>系统（集成）测试</li>
+<li>验收（确认）测试</li>
+<li>平行运行</li>
+</ul>
+<h5 id="单元测试"><a href="#单元测试" class="headerlink" title="单元测试"></a>单元测试</h5><p>主要使用白盒测试技术。集中检测软件设计的最小单元-模块，对重要的执行通路进行测试，可以发现模块内部的错误。可以用代码审查和计算机测试，来完成单元测试工作。测试重点为：</p>
+<ul>
+<li>模块接口</li>
+<li>局部数据结构</li>
+<li>重要的执行通路</li>
+<li>出错处理通路</li>
+<li>边界条件</li>
+</ul>
+<h5 id="集成测试"><a href="#集成测试" class="headerlink" title="集成测试"></a>集成测试</h5><p>是测试和组装软件的系统化技术，把模块组装成程序，在组装的过程进行测试。</p>
+<p>非渐增式：先分别测试所有模块，再把这些模块组合成要求的程序；</p>
+<p>渐增式：把下一个将要测试的模块同已经测试好的那些模块组合到一起进行测试；</p>
+<ul>
+<li>自底向上集成</li>
+<li>自顶向下集成</li>
+</ul>
+<p>模块测试的特点是主要应用白盒测试，对多个模块的测试可以并发进行；集成测试的特点是可以在测试过程发现接口问题。</p>
+<p>回归测试：重新执行已经做过测试的某个测试的子集。</p>
+<p><img src="/2020/03/12/测试/test.png" alt=""></p>
+]]></content>
+      <categories>
+        <category>软件工程</category>
+      </categories>
+      <tags>
+        <tag>软件工程</tag>
+        <tag>单元测试</tag>
+        <tag>集成测试</tag>
+        <tag>白盒测试</tag>
+        <tag>黑盒测试</tag>
       </tags>
   </entry>
   <entry>
