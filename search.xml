@@ -104,19 +104,6 @@ L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^
       </tags>
   </entry>
   <entry>
-    <title>CCF-JSON查询</title>
-    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
-    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
-<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>CCF Answer</category>
-      </categories>
-      <tags>
-        <tag>CCF</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Attack and Defense</title>
     <url>/2020/06/26/Attack/</url>
     <content><![CDATA[<h4 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h4><p><img src="/2020/06/26/Attack/image-20200626095005396.png" alt="image-20200626095005396" style="zoom:50%;"></p>
@@ -381,65 +368,16 @@ u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\
       </tags>
   </entry>
   <entry>
-    <title>Deep Autoencoder</title>
-    <url>/2020/06/29/Deep-autoencoder/</url>
-    <content><![CDATA[<h4 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h4><p>对于输入大小为$28\times28$的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简（compact）的特征；</p>
-<p>但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；</p>
-<p>那么我们现在就先来做一个decoder，把code恢复成一张image；</p>
-<p>decoder和encoder单独是没办法训练的，因为是无监督学习，因此现在我们将这两者一起学习</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629094326636.png" alt="image-20200629094326636" style="zoom:50%;"></p>
-<h4 id="Recap-PCA"><a href="#Recap-PCA" class="headerlink" title="Recap: PCA"></a>Recap: PCA</h4><p>这里先回顾一下<a href="https://scarleatt.github.io/2020/06/28/dimension-reduction/" target="_blank" rel="external">PCA</a>，对于输入的图像$x$为$784$维，经过PCA降维，可以降低到324维的图像$\hat x$，在encoder和decoder的学习过程中，应达到的目标是最小化$(x-\hat x)^2$，这个结构可以看成是具有一个hidden layer的network</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629100232021.png" alt="image-20200629100232021" style="zoom:50%;"></p>
-<h4 id="Deep-Auto-encoder"><a href="#Deep-Auto-encoder" class="headerlink" title="Deep Auto-encoder"></a>Deep Auto-encoder</h4><h5 id="Structure"><a href="#Structure" class="headerlink" title="Structure"></a>Structure</h5><p>中间的hidden layer也可以不止一个，也可以是多个的hidden layer，这种结构就称作deep auto-encoder</p>
-<p><span style="color: red">注：encoder和decoder的结构不一定非得是对称的。</span></p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629101531636.png" alt="image-20200629101531636" style="zoom:50%;"></p>
-<h5 id="PCA-vs-Deep-Auto-encoder"><a href="#PCA-vs-Deep-Auto-encoder" class="headerlink" title="PCA. vs Deep Auto-encoder"></a>PCA. vs Deep Auto-encoder</h5><p>对于下图中的图像(0,1,2,3,4)，如果我们使用PCA，只有中间一个hidden layer，先从784维降到30维，再从30维恢复到784维，可以发现图像变得比较模糊；</p>
-<p>如果使用deep auto-encoder，先从784到1000，1000到500，500到250，250到300，再使用类似的encoder恢复图像，可以发现结果图像非常清晰</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629101748853.png" alt="image-20200629101748853" style="zoom:50%;"></p>
-<p>如果我们先使用PCA进行降维，把原图从784降到2维，对二维的数据进行可视化，可以发现不同的digit（不同的颜色代表不同的数字）都叠在一起了；</p>
-<p>如果使用deep autoencoder，可以发现这个数字都是分开的</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629102817764.png" alt="image-20200629102817764" style="zoom:50%;"></p>
-<h4 id="Text-Retrieval"><a href="#Text-Retrieval" class="headerlink" title="Text Retrieval"></a>Text Retrieval</h4><p>下图中蓝色的圆点都表示一个document，我们将输入的query也加入这个document，再计算查询的词汇query和每个document之间的inner product或similarity等，距离最近的document，similarity的值是最大的，因此会retrieval距离红色箭头最近的其他两个蓝色箭头</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629103259176.png" alt="image-20200629103259176" style="zoom:50%;"></p>
-<p>还有另外一种方法，使用一个vector来表示所有的词汇，vector对应的值就是每个character出现的次数；但这种方式没有考虑原来的语义顺序，每个character都是independent的</p>
-<p>在下图中，假设bag里面有2000个词汇，把输入的document或query变成对应的vector，再输入相应的encoder，降维成2维，对这二维的数据进行可视化，如右图所示，不同的颜色代表不同的document；</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629104843900.png" alt="image-20200629104843900" style="zoom:50%;"></p>
-<p>如果我们现在输入一个query，再降维到二维，可以发现和图中对应的document是有关的，我们就可以看到query所属的类别是Energy market</p>
-<p>但用LSA就得不到对应的结果</p>
-<h4 id="Similar-Image-Search"><a href="#Similar-Image-Search" class="headerlink" title="Similar Image Search"></a>Similar Image Search</h4><p>以图找图，如果我们只是做pixel上的相似程度，那么我们可以得到以下的结果，迈克杰克逊和马蹄铁也很像，这显然不符合常理</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110009994.png" alt="image-20200629110009994" style="zoom:50%;"></p>
-<p>我们可以把输入的image经过deep auto-encoder，变成一个code，再去做搜寻；由于auto-encoder是unsupervised learning，收集多少数据都行，不缺数据</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110134069.png" alt="image-20200629110134069" style="zoom:50%;"></p>
-<p>用deep auto-encoder来找类似迈克杰克逊，也可以得到更好的结果（至少全是人脸 ）</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110527622.png" alt="image-20200629110527622" style="zoom:50%;"></p>
-<h4 id="Pre-training-DNN"><a href="#Pre-training-DNN" class="headerlink" title="Pre-training DNN"></a>Pre-training DNN</h4><p>autoencoder也可以用到network的pre-training过程，来初始化所需要的weight；在下图中，如果我们要对第一个hidden layer的weight进行初始化，那么我们可以使用autoencoder，先将784维到1000维，再进行reconstruct，使1000维降到784维，来使$x,\hat x$之间的差值最小</p>
-<p>但这样可能会出现一个问题，由于1000维比784维更高维，autoencoder很可能将input直接embed到1000维里，再进行恢复，这样很可能network什么都没有学到；</p>
-<p>对于这个问题，我们可以把1000维再加上一个regularization，比如L1，这1000维的数据中有某些维必须是为0的，这样就可以避免autoencoder直接将input进行embed</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110742780.png" alt="image-20200629110742780" style="zoom:50%;"></p>
-<p>我们可以学习这样的一个autoencoder，先将input转化成一个1000维的vector，再把这个vector转化为<span style="color: green">1000维的code</span>，再把这个code转化为1000维的vector；使input和output越接近越好，<strong>把$W^2$的值保存下来</strong>，</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629111953318.png" alt="image-20200629111953318" style="zoom:50%;"></p>
-<p>再继续下一个layer，使用第三个autoencoder</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629112400780.png" alt="image-20200629112400780" style="zoom:50%;"></p>
-<p>学习到$W^1,W^2,W^3$之后，就把这个weight作为初始值，$W^4$则进行random init，再使用<span style="color: red">back propagation</span>进行fine-tune</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629112513885.png" alt="image-20200629112513885" style="zoom:50%;"></p>
-<p><span style="color: red">如果我们有大量的unlabeled data，labeled data只有很小一部分，那么我们就可以通过这种无监督学习的方式来初始化weight，再使用剩下的label data来对network进行fine-tune即可</span></p>
-<h4 id="De-noising-auto-encoder"><a href="#De-noising-auto-encoder" class="headerlink" title="De-noising auto-encoder"></a>De-noising auto-encoder</h4><p>对于原来的input x，我们先加入一些noise得到$x’$，进行encode之后再进行decode，使之和最早的input之间的差值最小；encoder现在不仅学习到了encode这件事，还学习到了把noise过滤掉这件事</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629113151447.png" alt="image-20200629113151447" style="zoom:50%;"></p>
-<h4 id="Auto-encoder-for-CNN"><a href="#Auto-encoder-for-CNN" class="headerlink" title="Auto-encoder for CNN"></a>Auto-encoder for CNN</h4><p><img src="/2020/06/29/Deep-autoencoder/image-20200629114519998.png" alt="image-20200629114519998" style="zoom:50%;"></p>
-<h5 id="CNN-Unpooling"><a href="#CNN-Unpooling" class="headerlink" title="CNN -Unpooling"></a>CNN -Unpooling</h5><p>在pooling时，会选择四个方框中的最大值，并记住最大值的location；</p>
-<p>在upooling时，就会用到上面的location</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629114730398.png" alt="image-20200629114730398" style="zoom:50%;"></p>
-<h5 id="Deconvolution"><a href="#Deconvolution" class="headerlink" title="Deconvolution"></a>Deconvolution</h5><p>Deconvolution其实就是在做convolution，</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629114919151.png" alt="image-20200629114919151" style="zoom:50%;"></p>
-]]></content>
+    <title>CCF-JSON查询</title>
+    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
+    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
+<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></div><div class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</div><div class="line">    <span class="keyword">int</span> n, m;</div><div class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</div><div class="line">    getchar();</div><div class="line">    <span class="keyword">while</span> (n--) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        json += temp;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</div><div class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</div><div class="line">    <span class="built_in">string</span> preHost;</div><div class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</div><div class="line">    <span class="built_in">string</span> key, value;</div><div class="line">    <span class="built_in">string</span> now_key;</div><div class="line">    <span class="built_in">string</span> temp_key;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</div><div class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</div><div class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">true</span>;</div><div class="line">            iskey = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</div><div class="line">            isstring = <span class="literal">false</span>;</div><div class="line">            pre.push_back(key);</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</div><div class="line">            &#125;</div><div class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</div><div class="line">            preHost += key;</div><div class="line">            preHost += <span class="string">"."</span>;</div><div class="line">            key = <span class="string">""</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line">            i++;</div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            preHost = <span class="string">""</span>;</div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</div><div class="line">                pre.pop_back();</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</div><div class="line">            isvalue = <span class="literal">false</span>;</div><div class="line">            iskey = <span class="literal">true</span>;</div><div class="line"></div><div class="line">            temp_key = <span class="string">""</span>;</div><div class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</div><div class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</div><div class="line">                    temp_key += pre[j];</div><div class="line">                    temp_key += <span class="string">"."</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            temp_key+=key;</div><div class="line">            all[temp_key] = value;</div><div class="line"></div><div class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</div><div class="line">            isstring = <span class="literal">true</span>;</div><div class="line">            <span class="keyword">continue</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</div><div class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</div><div class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</div><div class="line">        <span class="built_in">string</span> temp;</div><div class="line">        getline(<span class="built_in">cin</span>, temp);</div><div class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>]]></content>
       <categories>
-        <category>ML-notes</category>
+        <category>CCF Answer</category>
       </categories>
       <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Deep Autoencoder</tag>
-        <tag>Autoencoder</tag>
+        <tag>CCF</tag>
       </tags>
   </entry>
   <entry>
@@ -535,59 +473,6 @@ y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情�
         <tag>Deep Learning</tag>
         <tag>explainable machine learning</tag>
         <tag>LIME</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Logistic Regression</title>
-    <url>/2020/06/06/Logistic-Regression/</url>
-    <content><![CDATA[<h4 id="Review"><a href="#Review" class="headerlink" title="Review"></a>Review</h4><p>我们可以得出z的简易表达式$z=w\cdot x + b$，可得出</p>
-<script type="math/tex; mode=display">
-P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)</script><p>当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
-<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><h5 id="Step1-Function-Set"><a href="#Step1-Function-Set" class="headerlink" title="Step1: Function Set"></a>Step1: Function Set</h5><p>把所有的w和b都要包括进来，这里使用的function set就是sigmoid函数，</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606111122013.png" alt="image-20200606111122013" style="zoom:50%;"></p>
-<h5 id="Step2-Goodness-of-a-Function"><a href="#Step2-Goodness-of-a-Function" class="headerlink" title="Step2: Goodness of a Function"></a>Step2: Goodness of a Function</h5><p>对于给定的一组w和b，得出似然函数L(w,b)的表达式，对于一个二分类问题，类别C1的概率为$f_{w,b}(x^i),\ i=1,2,4,…N$，而类别C2的概率则为$1-f_{w,b}(x^3)$。找出相对应的$w^{<em>},b^{</em>}$，使得L取得最大值。</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606111627142.png" alt="image-20200606111627142" style="zoom:50%;"></p>
-<p>对于训练数据集，我们设C1的$\hat y=1$，C2的$\hat y =0$，服从Bernoulli distribution。在函数前面加-号就可以使原来的最大化函数，转化为对目标的最小化。</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606112102628.png" alt="image-20200606112102628" style="zoom:50%;"></p>
-<p>这时原来的似然函数L转化为了一个新形式，把原来的乘法变成了ln项相加，可以方便后边对w的求导</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606112315406.png" alt="image-20200606112315406" style="zoom:50%;"></p>
-<p>现在我们的目标就转化为了找出$w^<em>,b^</em>=argmin-lnL(w,b)$，交叉熵的形式为</p>
-<script type="math/tex; mode=display">
--lnL(w,b)=\sum_n -[\hat y^nlnf_{w,b}(x^n)+(1-\hat y^n)ln(1-f_{w,b}(x^n))</script><h5 id="Step3-Find-the-best-function"><a href="#Step3-Find-the-best-function" class="headerlink" title="Step3: Find the best function"></a>Step3: Find the best function</h5><p>为了找出那组使得$-lnL(w,b)$最小化的参数$w^<em>,b^</em>$，这里我们使用了Gradient Descent方法</p>
-<script type="math/tex; mode=display">
-f_{w,b}(x)=\sigma (x)=\frac{1}{1+e^{-z}},\quad z=w\cdot x+b=\sum_i w_ix_i+b</script><p>对wi求导，</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606113919943.png" alt="image-20200606113919943" style="zoom:50%;"></p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606113959065.png" alt="image-20200606113959065" style="zoom:50%;"></p>
-<p>分别得出$\frac{\partial lnf_{w,b}(x)}{\partial w_i},\frac{\partial ln(1-f_{w,b}(x))}{\partial w_i}$，代入原式子，化简可得</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606114230182.png" alt="image-20200606114230182" style="zoom:50%;"></p>
-<p>得出梯度$\frac{\partial (-ln L(w,b))}{\partial w_i}=\sum_n -\left(\hat y^n-f_{w,b}(x^n)\right)x_i^n$，代入每次的梯度更新公式，</p>
-<script type="math/tex; mode=display">
-w_i\leftarrow w_i -\eta \frac{\partial (-ln L(w,b))}{\partial w_i}=w_i -\eta \sum_n -\left(\hat y^n-f_{w,b}(x^n)\right)x_i^n</script><h5 id="Logistic-Regression-Square-error是否可行"><a href="#Logistic-Regression-Square-error是否可行" class="headerlink" title="Logistic Regression + Square error是否可行"></a>Logistic Regression + Square error是否可行</h5><p>按照之前的步骤，先得出$f_{w,b}(x),L(f)$的表达式，第三步再求导，可以发现一个问题，代入训练数据集的$\hat y$后，梯度总是为0，模型最后无法训练，所以这样的结合是不可行的。</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606115052273.png" alt="image-20200606115052273" style="zoom:50%;"></p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606115706601.png" alt="image-20200606115706601" style="zoom:50%;"></p>
-<h5 id="Cross-Entropy-v-s-Square-Error"><a href="#Cross-Entropy-v-s-Square-Error" class="headerlink" title="Cross Entropy v.s. Square Error"></a>Cross Entropy v.s. Square Error</h5><p>下图我们将Cross entropy和square error进行了对比，黑色网格线表示cross entropy，红色表示square error</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606115544160.png" alt="image-20200606115544160" style="zoom:50%;"></p>
-<p>对于cross entropy，loss变化较大，曲线比较sharp，相应的微分也较大，每次跨越的步长也较长</p>
-<p>对于square error，loss曲线变化比较平缓，微分值很小，每次跨越的步长也小，当gradient接近于0的时候，参数就很有可能不再更新，训练也会停下来。就算将gradient设置为很小的值，使训练不那么容易停下来，但由于每次跨越的步长很小很小，也会出现训练非常缓慢的问题</p>
-<h4 id="Logistic-vs-Linear-Regression"><a href="#Logistic-vs-Linear-Regression" class="headerlink" title="Logistic vs Linear Regression"></a>Logistic vs Linear Regression</h4><p><img src="/2020/06/06/Logistic-Regression/image-20200606121346151.png" alt="image-20200606121346151" style="zoom:50%;"></p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606121324734.png" alt="image-20200606121324734" style="zoom:50%;"></p>
-<h4 id="Discriminative-v-s-Generative"><a href="#Discriminative-v-s-Generative" class="headerlink" title="Discriminative v.s. Generative"></a>Discriminative v.s. Generative</h4><p>logistic regression我们称之为Discriminative方法；而我们将gaussian来描述posterior probability，称之为Generative方法。虽然都使用了相同的函数表达式，但需要找到的参数却是不同的。</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606122040582.png" alt="image-20200606122040582" style="zoom:50%;"></p>
-<p>logistic regression<strong>没有实质性的假设</strong>，要求直接找出对应的w和b。但generative model<strong>做出了假设</strong>，假设输入的数据是服从Gaussian分布的，需要先找出$\mu^1,\mu^2,\sum^{-1}$，再根据这些值得出相对应的w和b。</p>
-<p><img src="/2020/06/06/Logistic-Regression/image-20200606143847987.png" alt="image-20200606143847987" style="zoom:50%;"></p>
-<h5 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h5><p><img src="/2020/06/06/Logistic-Regression/image-20200606143950210.png" alt="image-20200606143950210" style="zoom:50%;"></p>
-<p>对于包含13个example 的训练数据，对于图中所示的测试数据，我们可以明显看出测试example属于Class1，那么通过Naive Bayes（朴素贝叶斯）计算的结果也是这样吗？下面我们将开始验证，</p>
-<script type="math/tex; mode=display">
-P(x|C1)=P(x_1=1|C_1)\times P(x_2=1|C_1)=1\times1\\
-P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p><img src="/2020/06/06/Logistic-Regression/image-20200606144006375.png" alt="image-20200606144006375" style="zoom:50%;"></p>
-<p>根据这个计算结果可知，属于Class1的概率是小于0.5的，因此可以看出根据朴素贝叶斯算法算出，测试的example是属于Class2，和我们的直觉是相反的。==这是由于训练数据集中属于Class1的数量太少了，==比例只有1/13。在实际生活中的模型训练中，我们也必须要避免数据集的差异对实验结果造成的影响，数据集中每个类别所占的比例应该是差别不大的。</p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Logistic Regression</tag>
       </tags>
   </entry>
   <entry>
@@ -760,6 +645,274 @@ L2:\ w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><ul>
         <tag>Momentum</tag>
         <tag>Adam</tag>
         <tag>Regularization</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Introduction of Generative Adversarial Network (GAN)</title>
+    <url>/2020/07/04/GAN-intro/</url>
+    <content><![CDATA[<p>有很多种不同类型GAN，可以在这里查看<a href="https://github.com/hindupuravinash/the-gan-zoo" target="_blank" rel="external">https://github.com/hindupuravinash/the-gan-zoo</a></p>
+<h4 id="Generation"><a href="#Generation" class="headerlink" title="Generation"></a>Generation</h4><p>对于Image generation，要实现的是输入一个vector，输出一个image；而对于Sentence generation，则实现的是输入一个vector，输出为一个sentence。那么GAN就是用来实现这个中间的NN Generator。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704140831850.png" alt="image-20200704140831850" style="zoom:50%;"></p>
+<h4 id="Basic-Idea-of-GAN"><a href="#Basic-Idea-of-GAN" class="headerlink" title="Basic Idea of GAN"></a>Basic Idea of GAN</h4><h5 id="Generator-vs-Discriminator"><a href="#Generator-vs-Discriminator" class="headerlink" title="Generator vs Discriminator"></a>Generator vs Discriminator</h5><p>这个generator可以是一个神经网络，也可以是一个函数f。</p>
+<p>输入的vector表示我们要generate图像的某种特征，比如vector的第一维如果代表头发的长度，我们现在把这个值设得很大，那么就会generate一张头发很长的图像；如果我们改变了vector倒数第二维（头发为蓝色）的值，可以发现generate的新图头发变蓝了，由于此时只改变了头发的颜色，其他特征都是类似的，所以只有头发的颜色发生了变化。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704141328771.png" alt="image-20200704141328771" style="zoom:50%;"></p>
+<p>Discriminator可以是一个神经网络，也可以是一个函数f。输入是一张image，输出为scalar，数值越大，表示这个image越接近真实图像。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704141804394.png" alt="image-20200704141804394" style="zoom:50%;"></p>
+<p>在大自然中，某种鸟类以枯叶蝶为食。枯叶蝶必须不断地进化，使其看起来越来越像一个枯叶；它的天敌也在不断地进化，如果枯叶蝶看起来并不像叶子，那么它就会被捕食。其中枯叶蝶就相当于一个generator，天敌就相当于discriminator。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704142147503.png" alt="image-20200704142147503" style="zoom:50%;"></p>
+<p>第一代的generator不知道怎样产生二次元的头像，所以会产生一些看起来很像是杂讯的图像，再把这个图像输入discriminator，来判断这是不是一张真实的图像，第一代的discriminator可以根据图像是否有颜色，来正确分辨真实图像和生成的图像；</p>
+<p>那么第二代的generator的目标就是想办法骗过第一代的discriminator，生成了有颜色的图像，随之discriminator也会发生进化，学习了真实图像和生成图像之间的差异（真实图像是有嘴的）；</p>
+<p>第三代的generator生成的图像可以骗过第二代的discriminator，然后discriminator也会继续进化，……</p>
+<p>generator和discriminator都会不断地进化，因此generator会产生越来越像真实图片的图像。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704142643957.png" alt="image-20200704142643957" style="zoom:50%;"></p>
+<p>这个过程可以看作是一个对抗的过程，也看一用另外一个和平的比喻来进行解释。generator相当于一个学生，discriminator相当于一个老师，学生并不知道真实的图像长什么样，但老师看过很多真实的图像，就知道真实的图像应该长什么样子。</p>
+<p>第一代的generator相当于一年级的学生，重复着上述的过程。学生会画得越来越好，老师会越来越严格，那么学生最后就可以画出很想二次元人物的图像了。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704145218224.png" alt="image-20200704145218224" style="zoom:50%;"></p>
+<h5 id="Algorithm"><a href="#Algorithm" class="headerlink" title="Algorithm"></a>Algorithm</h5><p>首先需要随机初始化G和D的参数，</p>
+<p>Step 1：我们需要先调整D的参数，就必须先把G的参数固定。首先把随机产生的vector输入G（fix），生成新的图像之后与从database中sampled出来的图像进行比较。要实现D如果输入真实图像，就会得高分，与1越接近越好，如果输入生成的图像，就会得低分，与0越接近越好。有了这个标准，我们就可以来训练这个discriminator D；</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704145820900.png" alt="image-20200704145820900" style="zoom:50%;"></p>
+<p>Step2：训练好discriminator D之后，我们就可以fix D，来调整generator G。一个vector输入第一代G之后，会生成一张图像，再输入D（fix），就可以得到一个很低的分数（0.13）。那么G训练的目标就是使生成的图片可以“骗”过D，即生成的图片使D给出一个比较高的分数。由于D看过真实的图像，如果给出了很高的分数，就可以说明G生成的图像和真实图像是很接近的。</p>
+<p>在真实的代码实现中，我们通常会把generator和discriminator当成是一个大的network，其中generator的输出就可以看作是一个hidden layer，discriminator所在的层参数是fix的，不用调整，只需要根据整个网络的输出来调整generator的参数。</p>
+<p>由于我们希望使discriminator的输出分数值越大越好，因此这里使用了梯度上升算法 <strong>Gradient Ascent</strong>，也就是梯度下降算法前面多乘了一个负号。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704150612063.png" alt="image-20200704150612063" style="zoom:50%;"></p>
+<p>现在来叙述一下总的算法流程，$\theta_d,\theta_g$分别表示discriminator和generator的参数。</p>
+<p>Learning D：首先从数据库中取出m个真实图片，再根据一个分布随机产生m个vector作为输入$\{z^1,z^2,..,z^m\}$，此时fix G的参数，得到G生成的图像$\{\tilde x^1,\tilde x^2,..,\tilde x^m\}$，再输入discriminator D，不断调整$\theta_d$，使得得到的分数越大越好，</p>
+<script type="math/tex; mode=display">
+\tilde V =\frac{1}{m}\sum_{i=1}^m logD(x^i)+\frac{1}{m}\sum_{i=1}^mlog(1-D(\tilde x^i))</script><p>其中$D(x^i)$表示真实图像所得到的分数，D的目标就是使真实图像获得的分数越大越好；而$D(\tilde x^i)$表示G生成的图像所得到的分数，应该越小越好，所以前面加了负号。为了方便求梯度，在式子前面介入了log，求出梯度$\Delta \tilde V(\theta_d)$，再更新$\theta_d$的值，</p>
+<script type="math/tex; mode=display">
+\theta_d\leftarrow \theta_d+\eta\Delta \tilde V(\theta_d)</script><p><img src="/2020/07/04/GAN-intro/image-20200704152035892.png" alt="image-20200704152035892" style="zoom: 67%;"></p>
+<p>Learning G：把D训练好之后，我们就可以fix D，来训练generator G的参数。首先也需要从分布中随机生成一些噪声z，再输入G，$G(z^i)$再输入D，得到相对应的分数，G的目标是想办法骗过D，不断调整参数$\theta_g$，使生成的图像所得到的分数越高越好，</p>
+<script type="math/tex; mode=display">
+\tilde V =\frac{1}{m}\sum_{i=1}^m logD(G(z^i))</script><p>求出梯度$\Delta \tilde V(\theta_g)$，再更新$\theta_g$的值，</p>
+<script type="math/tex; mode=display">
+\theta_g\leftarrow \theta_g+\eta\Delta \tilde V(\theta_g)</script><p>在每个iteration里，都会进行这个步骤，先训练discriminator，再训练generator；这两个步骤会反复进行。</p>
+<h5 id="Anime-Face-Generation"><a href="#Anime-Face-Generation" class="headerlink" title="Anime Face Generation"></a>Anime Face Generation</h5><p>结果展示</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704154439615.png" alt="image-20200704154439615" style="zoom:50%;"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704154503164.png" alt="image-20200704154503164" style="zoom:50%;"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704154528242.png" alt="image-20200704154528242" style="zoom:50%;"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704154544426.png" alt="image-20200704154544426" style="zoom:50%;"></p>
+<h4 id="GAN-as-structured-learning"><a href="#GAN-as-structured-learning" class="headerlink" title="GAN as structured learning"></a>GAN as structured learning</h4><h5 id="Structed-learning"><a href="#Structed-learning" class="headerlink" title="Structed learning"></a>Structed learning</h5><p><img src="/2020/07/04/GAN-intro/image-20200704155106998.png" alt="image-20200704155106998" style="zoom:50%;"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704155202016.png" alt="image-20200704155202016" style="zoom:50%;"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704155216943.png" alt="image-20200704155216943" style="zoom:50%;"></p>
+<h5 id="Why-Structured-Learning-Challenging"><a href="#Why-Structured-Learning-Challenging" class="headerlink" title="Why Structured Learning Challenging?"></a>Why Structured Learning Challenging?</h5><p>One-shot/Zero-shot Learning，如果有的类别都没有范例，或者只有很少一部分的范例。</p>
+<p>而structured learning是一种极端的One-shot learning，由于output为一个structure，比如一个句子，可能这些句子在training data中从来没出现过，那么如何学习去输出一个从来没看到的structure，machine必须学会去创造。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704155430757.png" alt="image-20200704155430757" style="zoom:50%;"></p>
+<p>machine还必须学会如何去planing，有全局观；比如sentence generation中，如果只看第一句话，会认为是负面的，但如果你把整句话都看完，就会发现这整句话在表达一个正面的意思。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704160320919.png" alt="image-20200704160320919" style="zoom:50%;"></p>
+<h5 id="Structured-Learning-Approach"><a href="#Structured-Learning-Approach" class="headerlink" title="Structured Learning Approach"></a>Structured Learning Approach</h5><p>structured learning有两套方法：</p>
+<ul>
+<li>Bottom up，机器在生成一个部件时，会先生成多个component，这种方法一个很大的问题就是容易失去大局观；</li>
+<li>Top down，产生一个完整的物件之后，再去从整体上看产生物件好不好。</li>
+</ul>
+<p><img src="/2020/07/04/GAN-intro/image-20200704160908741.png" alt="image-20200704160908741" style="zoom:50%;"></p>
+<p>把这两种方法结合起来就是Generator。</p>
+<h4 id="Can-Generator-learn-by-itself"><a href="#Can-Generator-learn-by-itself" class="headerlink" title="Can Generator learn by itself?"></a>Can Generator learn by itself?</h4><h5 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h5><p>对于Generator，首先输入不同的vector，就可以输出不同的图片。如果我们现在输入1对应的vetor，generator会生成一张image，目标是使image和真实的图像越接近越好，这个真实图像现在generator能看到，那么这不就和一般的supervised learning一摸一样了吗？</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704161403974.png" alt="image-20200704161403974" style="zoom:50%;"></p>
+<p>那么我们怎么知道输入的那些vector的数值呢？</p>
+<p>我们可以用一个Encoder来表示，把image输入这个NN Encoder，就会输出对应的特征，把图像的特征用vector来表示即可。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704162515395.png" alt="image-20200704162515395" style="zoom:50%;"></p>
+<h5 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h5><p>Auto-encoder分为encoder和decoder。对于输入的$28\times 28$图像，先用encoder使得输入的图像变成code，decoder把这个code再恢复成原来的图像，这两者会一起进行学习。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704162914235.png" alt="image-20200704162914235" style="zoom:50%;"></p>
+<p>目标是使得input和output越接近越好。这里的decoder就相当于一个generator，我们可以随机输入一个vector，使decoder（generator）生成一张对应的图像。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704163120815.png" alt="image-20200704163120815" style="zoom:50%;"></p>
+<p>这里的code可以训练成二维的。如果code是$(-1.5\ \ 0)^T$，输入decoder会生成对应的图像，即图中的0；如果code是$(1.5\ \ 0)^T$，输入decoder会生成对应的图像，即图中的1.</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704163400098.png" alt="image-20200704163400098" style="zoom:50%;"></p>
+<p>如果我们在这个范围内等距地sample，就有以下结果，</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704163657239.png" alt="image-20200704163657239" style="zoom:50%;"></p>
+<p>但使用auto-encoder也会产生一些问题，如果输入vector为a，那么会产生1的图像，如果输入vector为b，会产生斜着的1；</p>
+<p>Q：那么0.5a+0.5b的vector会产生什么样的结果呢？</p>
+<p>A：由于NN Generator是network，不是线性的，很可能产生不是数字的图像。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704163846888.png" alt="image-20200704163846888" style="zoom:50%;"><img src="/2020/07/04/GAN-intro/image-20200704164150666.png" alt="image-20200704164150666"></p>
+<h5 id="VAE（Variational-Auto-encoder）"><a href="#VAE（Variational-Auto-encoder）" class="headerlink" title="VAE（Variational Auto-encoder）"></a>VAE（<strong>Variational Auto-encoder</strong>）</h5><p>我们可以用VAE来解决这个问题，输入vector a之后，generator不仅产生code m，还会产生每一维的方差$\sigma$，还有一个额外的vector e（noise），最后根据$c_i=exp(\sigma_i)\times e_i+m_i$得出需要的code；decoder需要根据这个带有noise的code，来还原出和input类似的图像。</p>
+<p>那么现在machine不仅看到vector a会产生数字，看到vector b也会产生数字；看到vector a+noise也会产生数字，看到vector b+noise也会产生数字。</p>
+<p>因此，<span style="color: red">对于现在的generator，如果input是在训练的时候从来没见过的vector，也可能output出合理的object。</span></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704164316549.png" alt="image-20200704164316549" style="zoom:50%;"><img src="/2020/07/04/GAN-intro/image-20200704165311165.png" alt="image-20200704165311165"></p>
+<h5 id="What-do-we-miss"><a href="#What-do-we-miss" class="headerlink" title="What do we miss?"></a>What do we miss?</h5><p>现在有一张真实图像Target，通过generator生成的图像为generated image，目标是使这两者之间的差距越小越好。通常这两者之间的差距，可以通过每个像素点之间的差值来进行计算，比如可以将两张图像都表示成一个vector，再通过L1/L2计算两者之间的distance。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704165316903.png" alt="image-20200704165316903" style="zoom:50%;"></p>
+<p>在一种理想的条件下，generator可以生成和Target完全一样的图像。但实际上，generator通常会犯一些错误，在生成的时候会有一些取舍，在一些地方会不得不做出妥协，选择在什么地方做妥协，对结果也会产生至关重要的影响。</p>
+<p>在下图中，有一个Target，和4个Generated image。上面两张图像和target之间的差距只有一个pixel，下面两张图像和target之间的差距有6个pixel。但如果根据我们自己的观点，前两张图效果并不好，看起来并不像人写的数字，后两张图效果要好很多，因为后两张图只是对其中的一些笔画进行了延长。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704171245512.png" alt="image-20200704171245512" style="zoom:50%;"></p>
+<p>因此，<span style="color: red">我们并不能单纯地只是让我们的output和target越像越好，否则就会产生上述的生成效果。</span></p>
+<p>Structure  learning的输出是一个structure，由多个component组成，每个component之间的关系是非常重要的。对于下图中生成的数字图像，左边的图像有个pixel所在的位置很奇怪，不像是人手写的；但在右图中，我们添加了一些深色的pixel（和原来的pixel相邻）进去，就看起来很像是人手写的了。</p>
+<p>但在neural network中，我们很难把component之间的关系放进去。在下图的网络结构中，layer L是output，表示颜色的深浅。如果layer L-1是给定的，那么输出的neural之间其实是independent的，值不会互相影响，也不会互相配合来产生一个相同的颜色。<span style="color: red">为了把不同component之间的关系也考虑进去，我们可以加入多个hidden layer</span>。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704172041505.png" alt="image-20200704172041505" style="zoom:50%;"></p>
+<h5 id="GAN-vs-VAE"><a href="#GAN-vs-VAE" class="headerlink" title="GAN vs VAE"></a>GAN vs VAE</h5><p><span style="color: red">如果现在有相同的network，我们用GAN和VAE都可以用来生成图像，但VAE需要用更大的network（更多的hidden layer）才能达到和GAN接近的结果。</span></p>
+<p>蓝色的点为实验结果，绿色的点表示target，VAE最好能训练的结果也就是图中的蓝色分布了，因为VAE很难考虑不同的dimension之间的关系。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704174238271.png" alt="image-20200704174238271" style="zoom:50%;"></p>
+<h4 id="Can-Discriminator-generate"><a href="#Can-Discriminator-generate" class="headerlink" title="Can Discriminator generate?"></a>Can Discriminator generate?</h4><h5 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h5><p>我们再来回顾一下discriminator的概念，input为一张图像x，output为分数$D(X)$，数值越大，表示这个image越接近真实图像。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704174542805.png" alt="image-20200704174542805" style="zoom:50%;"></p>
+<p>我们也可以用discriminator来生成图像。</p>
+<p>我们之前提到用generator也可以用来生成图像，但考虑每个component之间的关系是非常困难的。对于discriminator，考虑每个component之间的关系，就相对而言比较容易了。</p>
+<p>Q：为什么使用discriminator来生成图像就有优势？</p>
+<p>A：<u>在生成的时候，来考虑每个component之间的关系是很麻烦的；但在整个图片都生成完的时候，再来判断图像每个component之间的关系就很容易了。</u></p>
+<p>在下图中，如果用discriminator来生成图像，就可以根据分数来判断生成的图像到底好不好，比如左边的数字2，就可以给一个很低的分数，右边的数字2，就可以给一个很高的分数。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704174830772.png" alt="image-20200704174830772" style="zoom:50%;"></p>
+<p>Q：那么我们怎么来实际来判断分数呢？</p>
+<p>A：discriminator很可能是convolution neural network，对于其中的一个CNN filter（上图所示），可以来判断某个pixel周围是不是都是empty的，如果是的话，就给他低分。</p>
+<p>如果我们现在有一个discriminator，我们可以通过以下方式来生成图像：穷举所有可能的输入x，看哪一个输入可以得到最高的分数。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704175856938.png" alt="image-20200704175856938" style="zoom:50%;"></p>
+<h5 id="Discriminator-Training"><a href="#Discriminator-Training" class="headerlink" title="Discriminator - Training"></a>Discriminator - Training</h5><p>Discriminator的训练不仅需要真实的图像，也需要一些negative example。如果只有真实的图像，从来没有看过negative example，也不知道negative example长什么样子，D就有可能对所有的输入都输出一个很好的分数1.</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704180319560.png" alt="image-20200704180319560" style="zoom:50%;"></p>
+<p>如何选择negative example也至关重要。在下图中，（左）如果negative example可以让机器很容易就分别出来（0，fake），那么如果我们输入一个相对比较清晰的图像，D就会得出一个很好的分数0.9，其实这个图像是fake的，这并不是我们想看到的结果；（右）如果输入的是非常真实的negative example，D才可以很好地鉴别real or fake image。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704180657495.png" alt="image-20200704180657495" style="zoom:50%;"></p>
+<p>我们可以通过以下步骤来生成realistic negative examples，首先给出positive和negative examples。再进行不断地循环。</p>
+<p>在循环中，D要给positive example很高的分数，给negative example很低的分数；学习出这个discriminator D之后，再用D来做generation（比如穷举找出$\tilde x$，使得分数取得最大值）；</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704181511902.png" alt="image-20200704181511902" style="zoom:50%;"></p>
+<p>找出这些D觉得还不错的图像$\tilde x$之后，进入下一次循环，将$\tilde x$与positive examples进行比较，学习出新的discriminator，……</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704181540562.png" alt="image-20200704181540562" style="zoom:50%;"></p>
+<p>我们现在假设object分布在一维空间中，把object输入D，得到分数$D(x)$。在下图中，$D(x)$再real example区域取得了很不错的分数，在其他区域则分数相对较低。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704182329306.png" alt="image-20200704182329306" style="zoom:50%;"></p>
+<p>但实际上，x所在的空间是非常高维的，</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704183029426.png" alt="image-20200704183029426" style="zoom:50%;"></p>
+<h5 id="Generator-v-s-Discriminator"><a href="#Generator-v-s-Discriminator" class="headerlink" title="Generator v.s. Discriminator"></a>Generator v.s. Discriminator</h5><p>Generator：</p>
+<ul>
+<li>优点：很容易做生成；</li>
+<li>缺点：不容易考虑component之间的关系。</li>
+</ul>
+<p>Discriminator：</p>
+<ul>
+<li>优点：可以很容易考虑每个component之间的关系；</li>
+<li>缺点：生成很慢。</li>
+</ul>
+<p><img src="/2020/07/04/GAN-intro/image-20200704205720871.png" alt="image-20200704205720871" style="zoom:50%;"></p>
+<h5 id="Generator-Discriminator"><a href="#Generator-Discriminator" class="headerlink" title="Generator + Discriminator"></a>Generator + Discriminator</h5><p>现在我们将Generator和Discriminator结合起来，使用G来生成negative examples，现在D就不用那么费力去寻找对应的negative examples了。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704212740716.png" alt="image-20200704212740716" style="zoom:50%;"></p>
+<h5 id="Benefit-of-GAN"><a href="#Benefit-of-GAN" class="headerlink" title="Benefit of GAN"></a>Benefit of GAN</h5><ol>
+<li>从Discriminator的角度来看，现在我们只需要使用generator来生成negative examples，相比于之前的方法，可以更加高效；</li>
+<li>从Generator的角度来看，虽然还是生成component-by-component的object，但此时G得到的feedback不再是L1或者L2 loss了，不用再去计算pixel之间的相似度，而是更具有全局观的discriminator给出的分数评价。</li>
+</ol>
+<p><img src="/2020/07/04/GAN-intro/image-20200704213005168.png" alt="image-20200704213005168" style="zoom:50%;"></p>
+<h5 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h5><p>这里的数据还使用的上文VAE的数据，只是训练方法调整为了GAN。蓝色点点是generator要学习的目标，前文的VAE没有discriminator，可以发现现在GAN比VAE的效果要好很多。在真实的环境中，VAE产生的人脸会比较模糊，GAN生成的人脸就没那么模糊。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704213601037.png" alt="image-20200704213601037" style="zoom:50%;"></p>
+<h4 id="A-little-bit-theory"><a href="#A-little-bit-theory" class="headerlink" title="A little bit theory"></a>A little bit theory</h4><p><img src="/2020/07/04/GAN-intro/image-20200704220645444.png" alt="image-20200704220645444"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704220652727.png" alt="image-20200704220652727"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704220700604.png" alt="image-20200704220700604"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704220709098.png" alt="image-20200704220709098"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704220719432.png" alt="image-20200704220719432"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Auto-Encoder</tag>
+        <tag>VAE</tag>
+        <tag>GAN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Deep Autoencoder</title>
+    <url>/2020/06/29/Deep-autoencoder/</url>
+    <content><![CDATA[<h4 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h4><p>对于输入大小为$28\times28$的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简（compact）的特征；</p>
+<p>但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；</p>
+<p>那么我们现在就先来做一个decoder，把code恢复成一张image；</p>
+<p>decoder和encoder单独是没办法训练的，因为是无监督学习，因此现在我们将这两者一起学习</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629094326636.png" alt="image-20200629094326636" style="zoom:50%;"></p>
+<h4 id="Recap-PCA"><a href="#Recap-PCA" class="headerlink" title="Recap: PCA"></a>Recap: PCA</h4><p>这里先回顾一下<a href="https://scarleatt.github.io/2020/06/28/dimension-reduction/" target="_blank" rel="external">PCA</a>，对于输入的图像$x$为$784$维，经过PCA降维，可以降低到324维的图像$\hat x$，在encoder和decoder的学习过程中，应达到的目标是最小化$(x-\hat x)^2$，这个结构可以看成是具有一个hidden layer的network</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629100232021.png" alt="image-20200629100232021" style="zoom:50%;"></p>
+<h4 id="Deep-Auto-encoder"><a href="#Deep-Auto-encoder" class="headerlink" title="Deep Auto-encoder"></a>Deep Auto-encoder</h4><h5 id="Structure"><a href="#Structure" class="headerlink" title="Structure"></a>Structure</h5><p>中间的hidden layer也可以不止一个，也可以是多个的hidden layer，这种结构就称作deep auto-encoder</p>
+<p><span style="color: red">注：encoder和decoder的结构不一定非得是对称的。</span></p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629101531636.png" alt="image-20200629101531636" style="zoom:50%;"></p>
+<h5 id="PCA-vs-Deep-Auto-encoder"><a href="#PCA-vs-Deep-Auto-encoder" class="headerlink" title="PCA. vs Deep Auto-encoder"></a>PCA. vs Deep Auto-encoder</h5><p>对于下图中的图像(0,1,2,3,4)，如果我们使用PCA，只有中间一个hidden layer，先从784维降到30维，再从30维恢复到784维，可以发现图像变得比较模糊；</p>
+<p>如果使用deep auto-encoder，先从784到1000，1000到500，500到250，250到300，再使用类似的encoder恢复图像，可以发现结果图像非常清晰</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629101748853.png" alt="image-20200629101748853" style="zoom:50%;"></p>
+<p>如果我们先使用PCA进行降维，把原图从784降到2维，对二维的数据进行可视化，可以发现不同的digit（不同的颜色代表不同的数字）都叠在一起了；</p>
+<p>如果使用deep autoencoder，可以发现这个数字都是分开的</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629102817764.png" alt="image-20200629102817764" style="zoom:50%;"></p>
+<h4 id="Text-Retrieval"><a href="#Text-Retrieval" class="headerlink" title="Text Retrieval"></a>Text Retrieval</h4><p>下图中蓝色的圆点都表示一个document，我们将输入的query也加入这个document，再计算查询的词汇query和每个document之间的inner product或similarity等，距离最近的document，similarity的值是最大的，因此会retrieval距离红色箭头最近的其他两个蓝色箭头</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629103259176.png" alt="image-20200629103259176" style="zoom:50%;"></p>
+<p>还有另外一种方法，使用一个vector来表示所有的词汇，vector对应的值就是每个character出现的次数；但这种方式没有考虑原来的语义顺序，每个character都是independent的</p>
+<p>在下图中，假设bag里面有2000个词汇，把输入的document或query变成对应的vector，再输入相应的encoder，降维成2维，对这二维的数据进行可视化，如右图所示，不同的颜色代表不同的document；</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629104843900.png" alt="image-20200629104843900" style="zoom:50%;"></p>
+<p>如果我们现在输入一个query，再降维到二维，可以发现和图中对应的document是有关的，我们就可以看到query所属的类别是Energy market</p>
+<p>但用LSA就得不到对应的结果</p>
+<h4 id="Similar-Image-Search"><a href="#Similar-Image-Search" class="headerlink" title="Similar Image Search"></a>Similar Image Search</h4><p>以图找图，如果我们只是做pixel上的相似程度，那么我们可以得到以下的结果，迈克杰克逊和马蹄铁也很像，这显然不符合常理</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110009994.png" alt="image-20200629110009994" style="zoom:50%;"></p>
+<p>我们可以把输入的image经过deep auto-encoder，变成一个code，再去做搜寻；由于auto-encoder是unsupervised learning，收集多少数据都行，不缺数据</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110134069.png" alt="image-20200629110134069" style="zoom:50%;"></p>
+<p>用deep auto-encoder来找类似迈克杰克逊，也可以得到更好的结果（至少全是人脸 ）</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110527622.png" alt="image-20200629110527622" style="zoom:50%;"></p>
+<h4 id="Pre-training-DNN"><a href="#Pre-training-DNN" class="headerlink" title="Pre-training DNN"></a>Pre-training DNN</h4><p>autoencoder也可以用到network的pre-training过程，来初始化所需要的weight；在下图中，如果我们要对第一个hidden layer的weight进行初始化，那么我们可以使用autoencoder，先将784维到1000维，再进行reconstruct，使1000维降到784维，来使$x,\hat x$之间的差值最小</p>
+<p>但这样可能会出现一个问题，由于1000维比784维更高维，autoencoder很可能将input直接embed到1000维里，再进行恢复，这样很可能network什么都没有学到；</p>
+<p>对于这个问题，我们可以把1000维再加上一个regularization，比如L1，这1000维的数据中有某些维必须是为0的，这样就可以避免autoencoder直接将input进行embed</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110742780.png" alt="image-20200629110742780" style="zoom:50%;"></p>
+<p>我们可以学习这样的一个autoencoder，先将input转化成一个1000维的vector，再把这个vector转化为<span style="color: green">1000维的code</span>，再把这个code转化为1000维的vector；使input和output越接近越好，<strong>把$W^2$的值保存下来</strong>，</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629111953318.png" alt="image-20200629111953318" style="zoom:50%;"></p>
+<p>再继续下一个layer，使用第三个autoencoder</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629112400780.png" alt="image-20200629112400780" style="zoom:50%;"></p>
+<p>学习到$W^1,W^2,W^3$之后，就把这个weight作为初始值，$W^4$则进行random init，再使用<span style="color: red">back propagation</span>进行fine-tune</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629112513885.png" alt="image-20200629112513885" style="zoom:50%;"></p>
+<p><span style="color: red">如果我们有大量的unlabeled data，labeled data只有很小一部分，那么我们就可以通过这种无监督学习的方式来初始化weight，再使用剩下的label data来对network进行fine-tune即可</span></p>
+<h4 id="De-noising-auto-encoder"><a href="#De-noising-auto-encoder" class="headerlink" title="De-noising auto-encoder"></a>De-noising auto-encoder</h4><p>对于原来的input x，我们先加入一些noise得到$x’$，进行encode之后再进行decode，使之和最早的input之间的差值最小；encoder现在不仅学习到了encode这件事，还学习到了把noise过滤掉这件事</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629113151447.png" alt="image-20200629113151447" style="zoom:50%;"></p>
+<h4 id="Auto-encoder-for-CNN"><a href="#Auto-encoder-for-CNN" class="headerlink" title="Auto-encoder for CNN"></a>Auto-encoder for CNN</h4><p><img src="/2020/06/29/Deep-autoencoder/image-20200629114519998.png" alt="image-20200629114519998" style="zoom:50%;"></p>
+<h5 id="CNN-Unpooling"><a href="#CNN-Unpooling" class="headerlink" title="CNN -Unpooling"></a>CNN -Unpooling</h5><p>在pooling时，会选择四个方框中的最大值，并记住最大值的location；</p>
+<p>在upooling时，就会用到上面的location</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629114730398.png" alt="image-20200629114730398" style="zoom:50%;"></p>
+<h5 id="Deconvolution"><a href="#Deconvolution" class="headerlink" title="Deconvolution"></a>Deconvolution</h5><p>Deconvolution其实就是在做convolution，</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629114919151.png" alt="image-20200629114919151" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Deep Autoencoder</tag>
+        <tag>Autoencoder</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Logistic Regression</title>
+    <url>/2020/06/06/Logistic-Regression/</url>
+    <content><![CDATA[<h4 id="Review"><a href="#Review" class="headerlink" title="Review"></a>Review</h4><p>我们可以得出z的简易表达式$z=w\cdot x + b$，可得出</p>
+<script type="math/tex; mode=display">
+P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)</script><p>当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
+<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><h5 id="Step1-Function-Set"><a href="#Step1-Function-Set" class="headerlink" title="Step1: Function Set"></a>Step1: Function Set</h5><p>把所有的w和b都要包括进来，这里使用的function set就是sigmoid函数，</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606111122013.png" alt="image-20200606111122013" style="zoom:50%;"></p>
+<h5 id="Step2-Goodness-of-a-Function"><a href="#Step2-Goodness-of-a-Function" class="headerlink" title="Step2: Goodness of a Function"></a>Step2: Goodness of a Function</h5><p>对于给定的一组w和b，得出似然函数L(w,b)的表达式，对于一个二分类问题，类别C1的概率为$f_{w,b}(x^i),\ i=1,2,4,…N$，而类别C2的概率则为$1-f_{w,b}(x^3)$。找出相对应的$w^{<em>},b^{</em>}$，使得L取得最大值。</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606111627142.png" alt="image-20200606111627142" style="zoom:50%;"></p>
+<p>对于训练数据集，我们设C1的$\hat y=1$，C2的$\hat y =0$，服从Bernoulli distribution。在函数前面加-号就可以使原来的最大化函数，转化为对目标的最小化。</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606112102628.png" alt="image-20200606112102628" style="zoom:50%;"></p>
+<p>这时原来的似然函数L转化为了一个新形式，把原来的乘法变成了ln项相加，可以方便后边对w的求导</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606112315406.png" alt="image-20200606112315406" style="zoom:50%;"></p>
+<p>现在我们的目标就转化为了找出$w^<em>,b^</em>=argmin-lnL(w,b)$，交叉熵的形式为</p>
+<script type="math/tex; mode=display">
+-lnL(w,b)=\sum_n -[\hat y^nlnf_{w,b}(x^n)+(1-\hat y^n)ln(1-f_{w,b}(x^n))</script><h5 id="Step3-Find-the-best-function"><a href="#Step3-Find-the-best-function" class="headerlink" title="Step3: Find the best function"></a>Step3: Find the best function</h5><p>为了找出那组使得$-lnL(w,b)$最小化的参数$w^<em>,b^</em>$，这里我们使用了Gradient Descent方法</p>
+<script type="math/tex; mode=display">
+f_{w,b}(x)=\sigma (x)=\frac{1}{1+e^{-z}},\quad z=w\cdot x+b=\sum_i w_ix_i+b</script><p>对wi求导，</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606113919943.png" alt="image-20200606113919943" style="zoom:50%;"></p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606113959065.png" alt="image-20200606113959065" style="zoom:50%;"></p>
+<p>分别得出$\frac{\partial lnf_{w,b}(x)}{\partial w_i},\frac{\partial ln(1-f_{w,b}(x))}{\partial w_i}$，代入原式子，化简可得</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606114230182.png" alt="image-20200606114230182" style="zoom:50%;"></p>
+<p>得出梯度$\frac{\partial (-ln L(w,b))}{\partial w_i}=\sum_n -\left(\hat y^n-f_{w,b}(x^n)\right)x_i^n$，代入每次的梯度更新公式，</p>
+<script type="math/tex; mode=display">
+w_i\leftarrow w_i -\eta \frac{\partial (-ln L(w,b))}{\partial w_i}=w_i -\eta \sum_n -\left(\hat y^n-f_{w,b}(x^n)\right)x_i^n</script><h5 id="Logistic-Regression-Square-error是否可行"><a href="#Logistic-Regression-Square-error是否可行" class="headerlink" title="Logistic Regression + Square error是否可行"></a>Logistic Regression + Square error是否可行</h5><p>按照之前的步骤，先得出$f_{w,b}(x),L(f)$的表达式，第三步再求导，可以发现一个问题，代入训练数据集的$\hat y$后，梯度总是为0，模型最后无法训练，所以这样的结合是不可行的。</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606115052273.png" alt="image-20200606115052273" style="zoom:50%;"></p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606115706601.png" alt="image-20200606115706601" style="zoom:50%;"></p>
+<h5 id="Cross-Entropy-v-s-Square-Error"><a href="#Cross-Entropy-v-s-Square-Error" class="headerlink" title="Cross Entropy v.s. Square Error"></a>Cross Entropy v.s. Square Error</h5><p>下图我们将Cross entropy和square error进行了对比，黑色网格线表示cross entropy，红色表示square error</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606115544160.png" alt="image-20200606115544160" style="zoom:50%;"></p>
+<p>对于cross entropy，loss变化较大，曲线比较sharp，相应的微分也较大，每次跨越的步长也较长</p>
+<p>对于square error，loss曲线变化比较平缓，微分值很小，每次跨越的步长也小，当gradient接近于0的时候，参数就很有可能不再更新，训练也会停下来。就算将gradient设置为很小的值，使训练不那么容易停下来，但由于每次跨越的步长很小很小，也会出现训练非常缓慢的问题</p>
+<h4 id="Logistic-vs-Linear-Regression"><a href="#Logistic-vs-Linear-Regression" class="headerlink" title="Logistic vs Linear Regression"></a>Logistic vs Linear Regression</h4><p><img src="/2020/06/06/Logistic-Regression/image-20200606121346151.png" alt="image-20200606121346151" style="zoom:50%;"></p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606121324734.png" alt="image-20200606121324734" style="zoom:50%;"></p>
+<h4 id="Discriminative-v-s-Generative"><a href="#Discriminative-v-s-Generative" class="headerlink" title="Discriminative v.s. Generative"></a>Discriminative v.s. Generative</h4><p>logistic regression我们称之为Discriminative方法；而我们将gaussian来描述posterior probability，称之为Generative方法。虽然都使用了相同的函数表达式，但需要找到的参数却是不同的。</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606122040582.png" alt="image-20200606122040582" style="zoom:50%;"></p>
+<p>logistic regression<strong>没有实质性的假设</strong>，要求直接找出对应的w和b。但generative model<strong>做出了假设</strong>，假设输入的数据是服从Gaussian分布的，需要先找出$\mu^1,\mu^2,\sum^{-1}$，再根据这些值得出相对应的w和b。</p>
+<p><img src="/2020/06/06/Logistic-Regression/image-20200606143847987.png" alt="image-20200606143847987" style="zoom:50%;"></p>
+<h5 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h5><p><img src="/2020/06/06/Logistic-Regression/image-20200606143950210.png" alt="image-20200606143950210" style="zoom:50%;"></p>
+<p>对于包含13个example 的训练数据，对于图中所示的测试数据，我们可以明显看出测试example属于Class1，那么通过Naive Bayes（朴素贝叶斯）计算的结果也是这样吗？下面我们将开始验证，</p>
+<script type="math/tex; mode=display">
+P(x|C1)=P(x_1=1|C_1)\times P(x_2=1|C_1)=1\times1\\
+P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p><img src="/2020/06/06/Logistic-Regression/image-20200606144006375.png" alt="image-20200606144006375" style="zoom:50%;"></p>
+<p>根据这个计算结果可知，属于Class1的概率是小于0.5的，因此可以看出根据朴素贝叶斯算法算出，测试的example是属于Class2，和我们的直觉是相反的。==这是由于训练数据集中属于Class1的数量太少了，==比例只有1/13。在实际生活中的模型训练中，我们也必须要避免数据集的差异对实验结果造成的影响，数据集中每个类别所占的比例应该是差别不大的。</p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Logistic Regression</tag>
       </tags>
   </entry>
   <entry>
@@ -995,118 +1148,6 @@ w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}-\eta \frac{\partial C}{\p
       <tags>
         <tag>Deep Learning</tag>
         <tag>word embedding</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Generative Models</title>
-    <url>/2020/06/29/generative-models/</url>
-    <content><![CDATA[<blockquote>
-<p>本文主要叙述了集中generative models，包括PixelRNN、VAE，GAN（生成对抗网络）；还叙述了auto-encoder和VAE的区别，以及VAE进行改进的地方，通过高斯混合模型来对VAE的原理进行了详细介绍。</p>
-</blockquote>
-<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>Generative Models可以分为三大类：pixelRNN、autoencoder、GAN；</p>
-<p>现在machine可以对猫狗进行分类，在将来machine就可以通过自己的学习画出一只猫来。</p>
-<p><img src="/2020/06/29/generative-models/image-20200629141407487.png" alt="image-20200629141407487" style="zoom: 67%;"></p>
-<h4 id="PixelRNN"><a href="#PixelRNN" class="headerlink" title="PixelRNN"></a>PixelRNN</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>如果要生成一张图像，我们可以先生成这张图像的第一个红色pixel，再根据这个pixel生成下一个蓝色pixel，每个pixel可以用一个三维的vector来进行表示</p>
-<p><img src="/2020/06/29/generative-models/image-20200629141521860.png" alt="image-20200629141521860" style="zoom: 67%;"></p>
-<p>这是一个无监督学习的过程，并不需要对data进行标注</p>
-<p>如果我们现在把下图中的狗下半身遮住，可以让machine学习出下半身的图片</p>
-<p><img src="/2020/06/29/generative-models/image-20200629141945697.png" alt="image-20200629141945697" style="zoom: 67%;"></p>
-<p>也可以用到声讯号</p>
-<p><img src="/2020/06/29/generative-models/image-20200629142331286.png" alt="image-20200629142331286" style="zoom:50%;"></p>
-<p><img src="/2020/06/29/generative-models/image-20200629142353897.png" alt="image-20200629142353897" style="zoom:50%;"></p>
-<h5 id="Practicing-Generation-Models-Pokemon-Creation"><a href="#Practicing-Generation-Models-Pokemon-Creation" class="headerlink" title="Practicing Generation Models: Pokémon Creation"></a>Practicing Generation Models: Pokémon Creation</h5><p><img src="/2020/06/29/generative-models/image-20200629142516414.png" alt="image-20200629142516414" style="zoom: 67%;"></p>
-<p>做这个实验时，有一些tips；</p>
-<p>由于每个pixel都使用三维的vector来表示（RGB），只有三个channel的值相差特别大时，才会有颜色特别鲜明的图片，但学习结果并不能保证这一点，因此图片会会比较灰蒙蒙的，最后得出来的结果会不太好；</p>
-<p>因此，每个pixel最好使用1-of-N encoding来表示，输入一个绿色的方块，vector中只有绿色方块对应的dimensions为1，其他都是0；但有$256\times256$种颜色，颜色种类非常繁多，可以先对类似的颜色做一个<strong>clustering</strong>，类似的颜色都用同一种颜色来表示，可以把颜色数量缩小到167种</p>
-<p><img src="/2020/06/29/generative-models/image-20200629142535096.png" alt="image-20200629142535096" style="zoom: 67%;"></p>
-<p>下面开始正式做实验</p>
-<p><img src="/2020/06/29/generative-models/image-20200629143804656.png" alt="image-20200629143804656" style="zoom: 67%;"></p>
-<p><img src="/2020/06/29/generative-models/image-20200629143843226.png" alt="image-20200629143843226" style="zoom: 33%;"></p>
-<h4 id="VAE"><a href="#VAE" class="headerlink" title="VAE"></a>VAE</h4><h5 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h5><p><img src="/2020/06/29/generative-models/image-20200629144022672.png" alt="image-20200629144022672" style="zoom: 67%;"></p>
-<h5 id="VAE-1"><a href="#VAE-1" class="headerlink" title="VAE"></a>VAE</h5><p>VAE不像autoencoder那样，直接得出code，经过了一些变换，即$c_i=exp(\sigma_i)\times e_i+m_i$，也是来最小化reconstruction error</p>
-<p><img src="/2020/06/29/generative-models/image-20200629144250780.png" alt="image-20200629144250780" style="zoom: 67%;"></p>
-<p>minimize的目标还有</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><h5 id="Pokemon-Creation"><a href="#Pokemon-Creation" class="headerlink" title="Pokémon Creation"></a>Pokémon Creation</h5><p>input一个宝可梦图像，进行encoder、decoder，得到reconstruct之后的图像，其中code是10-dim的；</p>
-<p>现在我们只选择其中的2个纬度出来，其他纬度的值都固定不变，对这个二维的坐标轴，放入不同的点，再输入对应的Decoder，观察其合成出来的image；如果使用不同维度的点，就可以观察到不同维度生成的image；根据不同的维度，我们就可以根据自己的需要，调整这些维度的值，从而得出我们想要的结果</p>
-<p><img src="/2020/06/29/generative-models/image-20200629150656140.png" alt="image-20200629150656140" style="zoom: 50%;"></p>
-<p>部分结果展示</p>
-<p><img src="/2020/06/29/generative-models/image-20200629151406932.png" alt="image-20200629151406932" style="zoom:50%;"></p>
-<h5 id="Why-VAE"><a href="#Why-VAE" class="headerlink" title="Why VAE?"></a>Why VAE?</h5><p>对于一张满月的图像，先进行encode，再进行decode，使得input和output之间的差值最小化；对半月的图像输入也如此</p>
-<p><img src="/2020/06/29/generative-models/image-20200629152107223.png" alt="image-20200629152107223" style="zoom: 67%;"></p>
-<p>对于encoder的其中一个输出$\sigma_i$，表示noise的variance，需要再输入exp函数进行计算，保证其值是大于0的，是machine自己学习的</p>
-<p><img src="/2020/06/29/generative-models/image-20200629153400892.png" alt="image-20200629153400892" style="zoom: 67%;"></p>
-<p>但只有noise是不够的，还需要加一些限制</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>在下图中，蓝色的线表示$exp(\sigma_i)$，红色的线表示$(1+\sigma_i)$，绿色的线表示两者的差值，可以发现在原点处差值是最小的，$\sigma _i$的值接近1，variance的值接近1</p>
-<p><img src="/2020/06/29/generative-models/image-20200629153918937.png" alt="image-20200629153918937" style="zoom:50%;"></p>
-<p>$(m_i)^2$为正则项regularization term，让结果不那么overfiting</p>
-<p>在下图中，为一个高维的坐标（用一维进行了展示），曲线表示image是宝可梦的概率，可以在图中看到，对于一些很像宝可梦的image，$P(x)$值很高，但对于一些比较模棱两可的image，$P(x)$值就很低</p>
-<p><img src="/2020/06/29/generative-models/image-20200629154606838.png" alt="image-20200629154606838" style="zoom: 33%;"></p>
-<p>那么我们到底要怎么来评估这个probability distribution呢？答案是高斯混合模型</p>
-<h5 id="Gaussian-Mixture-Model"><a href="#Gaussian-Mixture-Model" class="headerlink" title="Gaussian Mixture Model"></a>Gaussian Mixture Model</h5><p>对于下图中的曲线图，蓝色表示多个高斯模型，黑色曲线表示这些模型通过一定的weight进行叠加之后的结果</p>
-<p>现在有很多个gaussian model（1，2，3，4，5…），且都对应了自己的weight $P(m)$（蓝色方块），<span style="color: red">要先根据weight选对应的gaussian，再决定到底要从gaussian中sample哪些data</span> ;我们使用$P(m)$表示每个gaussian的weight，$P(x|m)$表示从对应的gaussian中选出data x的概率</p>
-<p>x并不是代表着某个类别，而是用一个vector来进行表示，每个维度表示不同的特征，即 <u>Distributed representation is better than cluster</u></p>
-<p><img src="/2020/06/29/generative-models/image-20200629155005437.png" alt="image-20200629155005437" style="zoom: 67%;"></p>
-<p>我们现在从正态分布中sample一个data z，z的每个dimension就表示某种attribute；</p>
-<p>根据z我们就可以得出高斯分布mean和variance，即$\mu (z),\sigma(z)$，z有无穷多个可能，mean和variance也有无穷多个可能</p>
-<p><img src="/2020/06/29/generative-models/image-20200629160314318.png" alt="image-20200629160314318" style="zoom: 67%;"></p>
-<p>在最下方的图中，我们可以认为最中间的圆点被sample到的几率最大，其他圆点被sample到的几率就相对较小；<span style="color: red">每个z被sample到之后，根据某个function，计算出对应的mean和variance，都对应着不同的gaussian model</span></p>
-<p>这个function可以是一个neural network，input为z，output为$\mu(z),\sigma(z)$</p>
-<p>由于现在是连续的z，$P(z)$的形式也发生了变化，</p>
-<script type="math/tex; mode=display">
-P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><h5 id="Maximizing-Likelihood"><a href="#Maximizing-Likelihood" class="headerlink" title="Maximizing Likelihood"></a><strong>Maximizing Likelihood</strong></h5><p>现在我们需要找到z和$\mu(z),\sigma(z)$之间的关系，用network来进行计算的时候也需要一个评估手段，这里我们采用的是最大化$L=\sum_xlogP(x)$，即最大化我们已经看到的image x的likelihood；</p>
-<p>那么我们现在就有一个NN的参数需要调整，来最大化likelihood L；</p>
-<p><img src="/2020/06/29/generative-models/image-20200629162138964.png" alt="image-20200629162138964" style="zoom: 67%;"></p>
-<p>现在我们还有另外一个distribution $q(z|x)$，和前一个是相反的，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，其mean和variance，即$\mu’(x),\sigma’(x)$</p>
-<p>$P(x|z)$表示z决定了x的distribution，$q(z|x)$表示x决定了z的distribution</p>
-<p><img src="/2020/06/29/generative-models/image-20200629163947560.png" alt="image-20200629163947560" style="zoom:45%;"></p>
-<p>其中$P(z,x)=P(x)P(z|x)$</p>
-<p><img src="/2020/06/29/generative-models/image-20200629165559403.png" alt="image-20200629165559403" style="zoom:50%;"></p>
-<p>我们本来需要调整的参数是$P(x|z)$，使得$P(x)$取得最大值，从而使likelihood取得最大值；但现在的lower bound为$L_b$，是$log(P(x))$的最小值，其中$P(z)$是已知的，不知道的参数是$P(x|z),q(z|x)$，两项都需要调整</p>
-<p>Q：这里为什么突然多了一项需要调整的参数？</p>
-<p>A：这里并不知道lower bound和likelihood之间的关系到底是怎样的，有可能升高了lower bound，但likelihood反而下降了；引入q就可以解决这个问题</p>
-<p>根据原式子，即$P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z$，只和$P(x|z)$有关，与$q(z|x)$是无关的，即下图中<span style="color: purple">方框</span>部分是不变的，</p>
-<p><img src="/2020/06/29/generative-models/image-20200629170614939.png" alt="image-20200629170614939" style="zoom: 67%;"></p>
-<p><strong>如果我们现在固定$P(x|z)$，想通过$q(z|x)$来使$L_b$ 最大化，那么对应的KL divergence就会最小化，到一种很极端的情况，KL divergence会变为0；如果$L_b$继续上升，那么肯定会超出该区域，因此对应的$logP(x)$也会继续上升；KL divergence不断变小的过程，$q(z|x),P(z|x)$之间的差距也会不断缩小</strong></p>
-<p>因此，这个过程不仅让likelihood变得越来越大，也会找到和$P(x|z)$接近的$q(z|x)$</p>
-<p><img src="/2020/06/29/generative-models/image-20200629171631388.png" alt="image-20200629171631388" style="zoom:50%;"></p>
-<p>对于$q(z|x)$，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，就可以知道z是从什么样的gaussian distribution得出来的</p>
-<h5 id="Connection-with-Network"><a href="#Connection-with-Network" class="headerlink" title="Connection with Network"></a><strong>Connection with Network</strong></h5><p>现在我们的目标就是最小化$q(z|x),P(z)$之间的KL divergence，即使$q(z|x)$和normal distribution $P(z)$越接近越好，即minimize</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>还需要maximizing</p>
-<script type="math/tex; mode=display">
-P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><p><img src="/2020/06/29/generative-models/image-20200629172034668.png" alt="image-20200629172034668" style="zoom:50%;"></p>
-<p>对于input的x，我们先输入网络$NN’$，得到获取z的gaussian distribution；sample得到z之后，再输入网络$NN$，得到获取x的gaussian distribution，使得新分布的mean和x越接近越好</p>
-<h5 id="KL散度"><a href="#KL散度" class="headerlink" title="KL散度"></a>KL散度</h5><blockquote>
-<p>所谓KL散度，是指当某分布q(x)被用于近似p(x)时的信息损失。</p>
-</blockquote>
-<p>计算公式为</p>
-<script type="math/tex; mode=display">
-KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href="#Problems-of-VAE" class="headerlink" title="Problems of VAE"></a>Problems of VAE</h5><p><img src="/2020/06/29/generative-models/image-20200629174600157.png" alt="image-20200629174600157" style="zoom:50%;"></p>
-<h4 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h4><h5 id="The-evolution-of-generation"><a href="#The-evolution-of-generation" class="headerlink" title="The evolution of generation"></a>The evolution of generation</h5><p>v1：会generate一些奇怪的图片，然后会有一个第一代的discriminator，来辨别到底哪一个是real image；</p>
-<p>V2： generater会根据上一次discriminater的结果进行调整，第二代生成的image就和真实的image更像了，再把image输入第二代discriminator，再进行比较；</p>
-<p>…….</p>
-<p><img src="/2020/06/29/generative-models/image-20200629175524852.png" alt="image-20200629175524852" style="zoom:50%;"></p>
-<h5 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h5><p>对于generator，可以看作是VAE里面的decoder，我们通常选择从某个distributionsample出来的vector，输入到第一代的generator，再生成相对应的image，有多少个vector，就生成多少个image；</p>
-<p>把真实的image输入discriminator，与generator生成的image进行比较；并对这些data进行标注，real image标注为1，其余标注为0</p>
-<p><img src="/2020/06/29/generative-models/image-20200629201306815.png" alt="image-20200629201306815" style="zoom:50%;"></p>
-<h5 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h5><p>首先随机sample一个vector，作为Generator的输入，generator会生成对应的image，再把这个image输入discriminator，输出是real image的概率，对于第一代（v1），generator还不成熟，因此概率只有0.87；generator接下来会调整自己的参数，使discriminator认为其生成的image是real image；</p>
-<p>这generator+discriminator就相当于一个network，整体目标是使discriminator认为generator生成的image是real image，就可以根据这个指标来使用梯度下降算法，进行back propagation，来不断调整generator的参数；</p>
-<p><span style="color: red">注：在训练过程中应该固定discriminator的参数，来调整generator的参数</span></p>
-<p><img src="/2020/06/29/generative-models/image-20200629201707553.png" alt="image-20200629201707553" style="zoom:50%;"></p>
-<h5 id="Why-GAN-is-hard-to-train"><a href="#Why-GAN-is-hard-to-train" class="headerlink" title="Why GAN is hard to train?"></a>Why GAN is hard to train?</h5><p><img src="/2020/06/29/generative-models/image-20200629202903543.png" alt="image-20200629202903543" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Autoencoder</tag>
-        <tag>VAE</tag>
-        <tag>GAN</tag>
-        <tag>PixelRNN</tag>
       </tags>
   </entry>
   <entry>
@@ -1505,6 +1546,118 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
       </tags>
   </entry>
   <entry>
+    <title>Generative Models</title>
+    <url>/2020/06/29/generative-models/</url>
+    <content><![CDATA[<blockquote>
+<p>本文主要叙述了集中generative models，包括PixelRNN、VAE，GAN（生成对抗网络）；还叙述了auto-encoder和VAE的区别，以及VAE进行改进的地方，通过高斯混合模型来对VAE的原理进行了详细介绍。</p>
+</blockquote>
+<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>Generative Models可以分为三大类：pixelRNN、autoencoder、GAN；</p>
+<p>现在machine可以对猫狗进行分类，在将来machine就可以通过自己的学习画出一只猫来。</p>
+<p><img src="/2020/06/29/generative-models/image-20200629141407487.png" alt="image-20200629141407487" style="zoom: 67%;"></p>
+<h4 id="PixelRNN"><a href="#PixelRNN" class="headerlink" title="PixelRNN"></a>PixelRNN</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>如果要生成一张图像，我们可以先生成这张图像的第一个红色pixel，再根据这个pixel生成下一个蓝色pixel，每个pixel可以用一个三维的vector来进行表示</p>
+<p><img src="/2020/06/29/generative-models/image-20200629141521860.png" alt="image-20200629141521860" style="zoom: 67%;"></p>
+<p>这是一个无监督学习的过程，并不需要对data进行标注</p>
+<p>如果我们现在把下图中的狗下半身遮住，可以让machine学习出下半身的图片</p>
+<p><img src="/2020/06/29/generative-models/image-20200629141945697.png" alt="image-20200629141945697" style="zoom: 67%;"></p>
+<p>也可以用到声讯号</p>
+<p><img src="/2020/06/29/generative-models/image-20200629142331286.png" alt="image-20200629142331286" style="zoom:50%;"></p>
+<p><img src="/2020/06/29/generative-models/image-20200629142353897.png" alt="image-20200629142353897" style="zoom:50%;"></p>
+<h5 id="Practicing-Generation-Models-Pokemon-Creation"><a href="#Practicing-Generation-Models-Pokemon-Creation" class="headerlink" title="Practicing Generation Models: Pokémon Creation"></a>Practicing Generation Models: Pokémon Creation</h5><p><img src="/2020/06/29/generative-models/image-20200629142516414.png" alt="image-20200629142516414" style="zoom: 67%;"></p>
+<p>做这个实验时，有一些tips；</p>
+<p>由于每个pixel都使用三维的vector来表示（RGB），只有三个channel的值相差特别大时，才会有颜色特别鲜明的图片，但学习结果并不能保证这一点，因此图片会会比较灰蒙蒙的，最后得出来的结果会不太好；</p>
+<p>因此，每个pixel最好使用1-of-N encoding来表示，输入一个绿色的方块，vector中只有绿色方块对应的dimensions为1，其他都是0；但有$256\times256$种颜色，颜色种类非常繁多，可以先对类似的颜色做一个<strong>clustering</strong>，类似的颜色都用同一种颜色来表示，可以把颜色数量缩小到167种</p>
+<p><img src="/2020/06/29/generative-models/image-20200629142535096.png" alt="image-20200629142535096" style="zoom: 67%;"></p>
+<p>下面开始正式做实验</p>
+<p><img src="/2020/06/29/generative-models/image-20200629143804656.png" alt="image-20200629143804656" style="zoom: 67%;"></p>
+<p><img src="/2020/06/29/generative-models/image-20200629143843226.png" alt="image-20200629143843226" style="zoom: 33%;"></p>
+<h4 id="VAE"><a href="#VAE" class="headerlink" title="VAE"></a>VAE</h4><h5 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h5><p><img src="/2020/06/29/generative-models/image-20200629144022672.png" alt="image-20200629144022672" style="zoom: 67%;"></p>
+<h5 id="VAE-1"><a href="#VAE-1" class="headerlink" title="VAE"></a>VAE</h5><p>VAE不像autoencoder那样，直接得出code，经过了一些变换，即$c_i=exp(\sigma_i)\times e_i+m_i$，也是来最小化reconstruction error</p>
+<p><img src="/2020/06/29/generative-models/image-20200629144250780.png" alt="image-20200629144250780" style="zoom: 67%;"></p>
+<p>minimize的目标还有</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><h5 id="Pokemon-Creation"><a href="#Pokemon-Creation" class="headerlink" title="Pokémon Creation"></a>Pokémon Creation</h5><p>input一个宝可梦图像，进行encoder、decoder，得到reconstruct之后的图像，其中code是10-dim的；</p>
+<p>现在我们只选择其中的2个纬度出来，其他纬度的值都固定不变，对这个二维的坐标轴，放入不同的点，再输入对应的Decoder，观察其合成出来的image；如果使用不同维度的点，就可以观察到不同维度生成的image；根据不同的维度，我们就可以根据自己的需要，调整这些维度的值，从而得出我们想要的结果</p>
+<p><img src="/2020/06/29/generative-models/image-20200629150656140.png" alt="image-20200629150656140" style="zoom: 50%;"></p>
+<p>部分结果展示</p>
+<p><img src="/2020/06/29/generative-models/image-20200629151406932.png" alt="image-20200629151406932" style="zoom:50%;"></p>
+<h5 id="Why-VAE"><a href="#Why-VAE" class="headerlink" title="Why VAE?"></a>Why VAE?</h5><p>对于一张满月的图像，先进行encode，再进行decode，使得input和output之间的差值最小化；对半月的图像输入也如此</p>
+<p><img src="/2020/06/29/generative-models/image-20200629152107223.png" alt="image-20200629152107223" style="zoom: 67%;"></p>
+<p>对于encoder的其中一个输出$\sigma_i$，表示noise的variance，需要再输入exp函数进行计算，保证其值是大于0的，是machine自己学习的</p>
+<p><img src="/2020/06/29/generative-models/image-20200629153400892.png" alt="image-20200629153400892" style="zoom: 67%;"></p>
+<p>但只有noise是不够的，还需要加一些限制</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>在下图中，蓝色的线表示$exp(\sigma_i)$，红色的线表示$(1+\sigma_i)$，绿色的线表示两者的差值，可以发现在原点处差值是最小的，$\sigma _i$的值接近1，variance的值接近1</p>
+<p><img src="/2020/06/29/generative-models/image-20200629153918937.png" alt="image-20200629153918937" style="zoom:50%;"></p>
+<p>$(m_i)^2$为正则项regularization term，让结果不那么overfiting</p>
+<p>在下图中，为一个高维的坐标（用一维进行了展示），曲线表示image是宝可梦的概率，可以在图中看到，对于一些很像宝可梦的image，$P(x)$值很高，但对于一些比较模棱两可的image，$P(x)$值就很低</p>
+<p><img src="/2020/06/29/generative-models/image-20200629154606838.png" alt="image-20200629154606838" style="zoom: 33%;"></p>
+<p>那么我们到底要怎么来评估这个probability distribution呢？答案是高斯混合模型</p>
+<h5 id="Gaussian-Mixture-Model"><a href="#Gaussian-Mixture-Model" class="headerlink" title="Gaussian Mixture Model"></a>Gaussian Mixture Model</h5><p>对于下图中的曲线图，蓝色表示多个高斯模型，黑色曲线表示这些模型通过一定的weight进行叠加之后的结果</p>
+<p>现在有很多个gaussian model（1，2，3，4，5…），且都对应了自己的weight $P(m)$（蓝色方块），<span style="color: red">要先根据weight选对应的gaussian，再决定到底要从gaussian中sample哪些data</span> ;我们使用$P(m)$表示每个gaussian的weight，$P(x|m)$表示从对应的gaussian中选出data x的概率</p>
+<p>x并不是代表着某个类别，而是用一个vector来进行表示，每个维度表示不同的特征，即 <u>Distributed representation is better than cluster</u></p>
+<p><img src="/2020/06/29/generative-models/image-20200629155005437.png" alt="image-20200629155005437" style="zoom: 67%;"></p>
+<p>我们现在从正态分布中sample一个data z，z的每个dimension就表示某种attribute；</p>
+<p>根据z我们就可以得出高斯分布mean和variance，即$\mu (z),\sigma(z)$，z有无穷多个可能，mean和variance也有无穷多个可能</p>
+<p><img src="/2020/06/29/generative-models/image-20200629160314318.png" alt="image-20200629160314318" style="zoom: 67%;"></p>
+<p>在最下方的图中，我们可以认为最中间的圆点被sample到的几率最大，其他圆点被sample到的几率就相对较小；<span style="color: red">每个z被sample到之后，根据某个function，计算出对应的mean和variance，都对应着不同的gaussian model</span></p>
+<p>这个function可以是一个neural network，input为z，output为$\mu(z),\sigma(z)$</p>
+<p>由于现在是连续的z，$P(z)$的形式也发生了变化，</p>
+<script type="math/tex; mode=display">
+P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><h5 id="Maximizing-Likelihood"><a href="#Maximizing-Likelihood" class="headerlink" title="Maximizing Likelihood"></a><strong>Maximizing Likelihood</strong></h5><p>现在我们需要找到z和$\mu(z),\sigma(z)$之间的关系，用network来进行计算的时候也需要一个评估手段，这里我们采用的是最大化$L=\sum_xlogP(x)$，即最大化我们已经看到的image x的likelihood；</p>
+<p>那么我们现在就有一个NN的参数需要调整，来最大化likelihood L；</p>
+<p><img src="/2020/06/29/generative-models/image-20200629162138964.png" alt="image-20200629162138964" style="zoom: 67%;"></p>
+<p>现在我们还有另外一个distribution $q(z|x)$，和前一个是相反的，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，其mean和variance，即$\mu’(x),\sigma’(x)$</p>
+<p>$P(x|z)$表示z决定了x的distribution，$q(z|x)$表示x决定了z的distribution</p>
+<p><img src="/2020/06/29/generative-models/image-20200629163947560.png" alt="image-20200629163947560" style="zoom:45%;"></p>
+<p>其中$P(z,x)=P(x)P(z|x)$</p>
+<p><img src="/2020/06/29/generative-models/image-20200629165559403.png" alt="image-20200629165559403" style="zoom:50%;"></p>
+<p>我们本来需要调整的参数是$P(x|z)$，使得$P(x)$取得最大值，从而使likelihood取得最大值；但现在的lower bound为$L_b$，是$log(P(x))$的最小值，其中$P(z)$是已知的，不知道的参数是$P(x|z),q(z|x)$，两项都需要调整</p>
+<p>Q：这里为什么突然多了一项需要调整的参数？</p>
+<p>A：这里并不知道lower bound和likelihood之间的关系到底是怎样的，有可能升高了lower bound，但likelihood反而下降了；引入q就可以解决这个问题</p>
+<p>根据原式子，即$P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z$，只和$P(x|z)$有关，与$q(z|x)$是无关的，即下图中<span style="color: purple">方框</span>部分是不变的，</p>
+<p><img src="/2020/06/29/generative-models/image-20200629170614939.png" alt="image-20200629170614939" style="zoom: 67%;"></p>
+<p><strong>如果我们现在固定$P(x|z)$，想通过$q(z|x)$来使$L_b$ 最大化，那么对应的KL divergence就会最小化，到一种很极端的情况，KL divergence会变为0；如果$L_b$继续上升，那么肯定会超出该区域，因此对应的$logP(x)$也会继续上升；KL divergence不断变小的过程，$q(z|x),P(z|x)$之间的差距也会不断缩小</strong></p>
+<p>因此，这个过程不仅让likelihood变得越来越大，也会找到和$P(x|z)$接近的$q(z|x)$</p>
+<p><img src="/2020/06/29/generative-models/image-20200629171631388.png" alt="image-20200629171631388" style="zoom:50%;"></p>
+<p>对于$q(z|x)$，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，就可以知道z是从什么样的gaussian distribution得出来的</p>
+<h5 id="Connection-with-Network"><a href="#Connection-with-Network" class="headerlink" title="Connection with Network"></a><strong>Connection with Network</strong></h5><p>现在我们的目标就是最小化$q(z|x),P(z)$之间的KL divergence，即使$q(z|x)$和normal distribution $P(z)$越接近越好，即minimize</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>还需要maximizing</p>
+<script type="math/tex; mode=display">
+P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><p><img src="/2020/06/29/generative-models/image-20200629172034668.png" alt="image-20200629172034668" style="zoom:50%;"></p>
+<p>对于input的x，我们先输入网络$NN’$，得到获取z的gaussian distribution；sample得到z之后，再输入网络$NN$，得到获取x的gaussian distribution，使得新分布的mean和x越接近越好</p>
+<h5 id="KL散度"><a href="#KL散度" class="headerlink" title="KL散度"></a>KL散度</h5><blockquote>
+<p>所谓KL散度，是指当某分布q(x)被用于近似p(x)时的信息损失。</p>
+</blockquote>
+<p>计算公式为</p>
+<script type="math/tex; mode=display">
+KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href="#Problems-of-VAE" class="headerlink" title="Problems of VAE"></a>Problems of VAE</h5><p><img src="/2020/06/29/generative-models/image-20200629174600157.png" alt="image-20200629174600157" style="zoom:50%;"></p>
+<h4 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h4><h5 id="The-evolution-of-generation"><a href="#The-evolution-of-generation" class="headerlink" title="The evolution of generation"></a>The evolution of generation</h5><p>v1：会generate一些奇怪的图片，然后会有一个第一代的discriminator，来辨别到底哪一个是real image；</p>
+<p>V2： generater会根据上一次discriminater的结果进行调整，第二代生成的image就和真实的image更像了，再把image输入第二代discriminator，再进行比较；</p>
+<p>…….</p>
+<p><img src="/2020/06/29/generative-models/image-20200629175524852.png" alt="image-20200629175524852" style="zoom:50%;"></p>
+<h5 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h5><p>对于generator，可以看作是VAE里面的decoder，我们通常选择从某个distributionsample出来的vector，输入到第一代的generator，再生成相对应的image，有多少个vector，就生成多少个image；</p>
+<p>把真实的image输入discriminator，与generator生成的image进行比较；并对这些data进行标注，real image标注为1，其余标注为0</p>
+<p><img src="/2020/06/29/generative-models/image-20200629201306815.png" alt="image-20200629201306815" style="zoom:50%;"></p>
+<h5 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h5><p>首先随机sample一个vector，作为Generator的输入，generator会生成对应的image，再把这个image输入discriminator，输出是real image的概率，对于第一代（v1），generator还不成熟，因此概率只有0.87；generator接下来会调整自己的参数，使discriminator认为其生成的image是real image；</p>
+<p>这generator+discriminator就相当于一个network，整体目标是使discriminator认为generator生成的image是real image，就可以根据这个指标来使用梯度下降算法，进行back propagation，来不断调整generator的参数；</p>
+<p><span style="color: red">注：在训练过程中应该固定discriminator的参数，来调整generator的参数</span></p>
+<p><img src="/2020/06/29/generative-models/image-20200629201707553.png" alt="image-20200629201707553" style="zoom:50%;"></p>
+<h5 id="Why-GAN-is-hard-to-train"><a href="#Why-GAN-is-hard-to-train" class="headerlink" title="Why GAN is hard to train?"></a>Why GAN is hard to train?</h5><p><img src="/2020/06/29/generative-models/image-20200629202903543.png" alt="image-20200629202903543" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>VAE</tag>
+        <tag>GAN</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Autoencoder</tag>
+        <tag>PixelRNN</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
     <url>/2020/06/28/t-SNE/</url>
     <content><![CDATA[<blockquote>
@@ -1636,6 +1789,81 @@ S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（M
         <tag>SMP</tag>
         <tag>消息传递</tag>
         <tag>共享存储器</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>指令级并行</title>
+    <url>/2020/03/11/%E6%8C%87%E4%BB%A4%E7%BA%A7%E5%B9%B6%E8%A1%8C/</url>
+    <content><![CDATA[<h5 id="指令级并行"><a href="#指令级并行" class="headerlink" title="指令级并行"></a>指令级并行</h5><p>指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：</p>
+<ul>
+<li>资源重复，重复设置多个处理部件；</li>
+<li>采用流水线技术，使指令重叠并行执行。</li>
+</ul>
+<p>指令的<strong>静态调度</strong>：依靠编译器进行静态调度，以减少相关和冲突。它不是在程序执行的过程中，而是在编译期间进行调度和优化。</p>
+<p>指令的<strong>动态调度</strong>：能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。是由硬件在程序执行时进行优化的。</p>
+<p>基本程序块：一串连续的代码除了入口和出口以外，没有其他的分支指令和转入点。</p>
+<p>不精确异常：当执行指令i导致发生异常时，处理机的现场与严格按照程序顺序执行时指令i的现场不同。</p>
+<p>精确异常：发生异常时，处理机的现场与严格按照程序顺序执行指令i的现场相同。</p>
+<h5 id="相关与冲突"><a href="#相关与冲突" class="headerlink" title="相关与冲突"></a>相关与冲突</h5><ul>
+<li>数据相关</li>
+<li>名相关，名指指令所访问的寄存器或存储器单元的名称。<ul>
+<li>反相关</li>
+<li>输出相关</li>
+</ul>
+</li>
+<li>控制相关</li>
+</ul>
+<p>流水线冲突 指由于相关的存在，使得指令流中的下一条指令不能在指定的时钟周期执行。<u>结构冲突</u>是硬件资源冲突引起的，<u>数据冲突</u>是数据相关和名相关引起的，<u>控制冲突</u>是控制相关引起的。</p>
+<p>为了保证程序执行的正确性，必须保证的最关键的两个特性是：</p>
+<ul>
+<li><u>数据流</u></li>
+<li>保持<u>异常行为</u>：无论怎么改变指令的执行顺序，都不能改变程序中异常的发生情况。</li>
+</ul>
+<h4 id="指令的动态调度"><a href="#指令的动态调度" class="headerlink" title="指令的动态调度"></a>指令的动态调度</h4><p>能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。优点：</p>
+<ul>
+<li>能够处理一些<u>编译时情况不明的相关</u>（比如涉及存储器访问的相关），并简化了编译器；</li>
+<li>能够使本来是面向某一流水线优化编译的代码在<u>其他动态调度的流水线上</u>也能执行。</li>
+</ul>
+<h5 id="记分牌"><a href="#记分牌" class="headerlink" title="记分牌"></a>记分牌</h5><p>把流水线中的译码段ID分解成了两个段：流出和读操作数。记录的信息由三部分组成：</p>
+<ul>
+<li>指令状态表</li>
+<li>功能部件状态表</li>
+<li>结果寄存器状态表</li>
+</ul>
+<h5 id="Tomasulo"><a href="#Tomasulo" class="headerlink" title="Tomasulo"></a>Tomasulo</h5><p>核心思想：（1）记录和检测指令相关，操作数一旦就绪就立即执行，把发生RAW冲突的可能性较小到最低；（2）通过寄存器换名来消除WAR冲突和WAW冲突。寄存器换名是通过保留站来实现，它保存正在流出和等待流出指令所需要的操作数。</p>
+<p>基本思想：只要操作数有效，就取其放到保留站中，避免指令流出时才到寄存器取数据，这就使得即将执行的指令从相应的保留站中读取数据，而不用到寄存器中。指令的执行结果也是直接放到等待数据的其它保留站中去。一条指令流出时，存放操作数的寄存器被换名为该寄存器对应的保留站的名称。</p>
+<h4 id="动态分支预测"><a href="#动态分支预测" class="headerlink" title="动态分支预测"></a>动态分支预测</h4><p>用硬件动态地进行分支处理的方法。在程序运行的过程中，根据分支指令过去的表现预测将来的行为。如果分支行为发生了变化，预测结果也跟着变化。</p>
+<h5 id="分支历史表（BHT）"><a href="#分支历史表（BHT）" class="headerlink" title="分支历史表（BHT）"></a>分支历史表（BHT）</h5><p>用来记录相关指令最近一次或几次的执行情况是成功还是失败，并根据此进行预测。</p>
+<h5 id="分支目标缓冲器（BTB）"><a href="#分支目标缓冲器（BTB）" class="headerlink" title="分支目标缓冲器（BTB）"></a>分支目标缓冲器（BTB）</h5><p>是一种动态分支预测技术。将（1）<u>执行过的成功分支指令的目标地址</u>（2）<u>预测的分支目标地址</u> 记录在一张硬件表格中。在每次取指令时，用该指令的地址与BTB表中所有项目的第一个字段进行比较，以便尽早知道指令是否分支成功，尽早知道目标地址，达到减少分支开销的目的。</p>
+<p>BHT方法是在<u>译码ID</u>段，就能获得分支目标地址、顺序下一条指令以及预测的结果。BTB方法在<u>取址IF</u>段就能知道这些信息。</p>
+<h5 id="基于硬件的前瞻执行"><a href="#基于硬件的前瞻执行" class="headerlink" title="基于硬件的前瞻执行"></a>基于硬件的前瞻执行</h5><p>是解决控制相关的方法，它对分支指令的结果进行猜测，然后按照这个猜测继续取址、流出和执行后续的指令。但指令执行的结果不写回寄存器或存储器，而是放到一个称为ROB（再定序列缓冲器）中。等到相应的指令得到“确认”（即确实是应该执行）后，才将结果写入寄存器或存储器中。</p>
+<p>把三种思想结合在了一起：</p>
+<ul>
+<li><u>动态分支预测</u>。用来选择后续执行的指令。</li>
+<li>在控制相关的结果尚未出来之前，<u>前瞻</u>地执行后续指令。</li>
+<li>用<u>动态调度</u>对基本块的各种组合进行<u>跨基本块的组合</u>。</li>
+</ul>
+<h4 id="超标量流水线"><a href="#超标量流水线" class="headerlink" title="超标量流水线"></a>超标量流水线</h4><p>是一种多指令流出技术。它在每个时钟周期流出的指令条数不固定，依代码的具体情况而定，但有个上限。</p>
+<h4 id="超长指令字"><a href="#超长指令字" class="headerlink" title="超长指令字"></a>超长指令字</h4><p>是一种多指令流出技术。在每个时钟周期内流出的指令数都是固定的，这些指令构成一条长指令或者一个指令包，在这个指令包中，指令之间的并行性是通过指令显式地表现出来的。这种处理机的指令调度由编译器静态完成。</p>
+]]></content>
+      <categories>
+        <category>计算机体系结构</category>
+      </categories>
+      <tags>
+        <tag>计算机体系结构</tag>
+        <tag>指令级并行</tag>
+        <tag>指令相关</tag>
+        <tag>指令冲突</tag>
+        <tag>动态调度</tag>
+        <tag>记分牌</tag>
+        <tag>Tomasulo</tag>
+        <tag>BHT</tag>
+        <tag>BTB</tag>
+        <tag>ROB</tag>
+        <tag>前瞻执行</tag>
+        <tag>超标量</tag>
+        <tag>VLIW</tag>
+        <tag>超长指令字</tag>
       </tags>
   </entry>
   <entry>
@@ -1775,7 +2003,7 @@ L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="/2020/07/03/基于知识图
 <h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><p>本文是观看杨栋老师在B上讲解的直播课程《基于知识图谱和图卷积神经网络的应用和开发》的笔记，直播地址：<a href="https://live.bilibili.com/11869202" target="_blank" rel="external">https://live.bilibili.com/11869202</a> ，贪心科技官网录播回放：<a href="https://www.greedyai.com/course/139" target="_blank" rel="external">https://www.greedyai.com/course/139</a></p>
 ]]></content>
       <categories>
-        <category>ML-notes</category>
+        <category>知识图谱</category>
       </categories>
       <tags>
         <tag>Deep Learning</tag>
@@ -1784,78 +2012,83 @@ L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="/2020/07/03/基于知识图
       </tags>
   </entry>
   <entry>
-    <title>指令级并行</title>
-    <url>/2020/03/11/%E6%8C%87%E4%BB%A4%E7%BA%A7%E5%B9%B6%E8%A1%8C/</url>
-    <content><![CDATA[<h5 id="指令级并行"><a href="#指令级并行" class="headerlink" title="指令级并行"></a>指令级并行</h5><p>指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：</p>
+    <title>流水线</title>
+    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
+    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
+<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
+<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
+<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
+<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
+<li>需要有<u>通过时间与排空时间</u></li>
+</ul>
+<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
+<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
+<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
+<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
+<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
+<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
 <ul>
-<li>资源重复，重复设置多个处理部件；</li>
-<li>采用流水线技术，使指令重叠并行执行。</li>
-</ul>
-<p>指令的<strong>静态调度</strong>：依靠编译器进行静态调度，以减少相关和冲突。它不是在程序执行的过程中，而是在编译期间进行调度和优化。</p>
-<p>指令的<strong>动态调度</strong>：能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。是由硬件在程序执行时进行优化的。</p>
-<p>基本程序块：一串连续的代码除了入口和出口以外，没有其他的分支指令和转入点。</p>
-<p>不精确异常：当执行指令i导致发生异常时，处理机的现场与严格按照程序顺序执行时指令i的现场不同。</p>
-<p>精确异常：发生异常时，处理机的现场与严格按照程序顺序执行指令i的现场相同。</p>
-<h5 id="相关与冲突"><a href="#相关与冲突" class="headerlink" title="相关与冲突"></a>相关与冲突</h5><ul>
-<li>数据相关</li>
-<li>名相关，名指指令所访问的寄存器或存储器单元的名称。<ul>
-<li>反相关</li>
-<li>输出相关</li>
-</ul>
+<li><p>从前调度</p>
 </li>
-<li>控制相关</li>
+<li><p>从目标处调度</p>
+</li>
+<li><p>从失败出调度</p>
+</li>
 </ul>
-<p>流水线冲突 指由于相关的存在，使得指令流中的下一条指令不能在指定的时钟周期执行。<u>结构冲突</u>是硬件资源冲突引起的，<u>数据冲突</u>是数据相关和名相关引起的，<u>控制冲突</u>是控制相关引起的。</p>
-<p>为了保证程序执行的正确性，必须保证的最关键的两个特性是：</p>
-<ul>
-<li><u>数据流</u></li>
-<li>保持<u>异常行为</u>：无论怎么改变指令的执行顺序，都不能改变程序中异常的发生情况。</li>
+<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
+<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
+<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
+<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
 </ul>
-<h4 id="指令的动态调度"><a href="#指令的动态调度" class="headerlink" title="指令的动态调度"></a>指令的动态调度</h4><p>能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。优点：</p>
-<ul>
-<li>能够处理一些<u>编译时情况不明的相关</u>（比如涉及存储器访问的相关），并简化了编译器；</li>
-<li>能够使本来是面向某一流水线优化编译的代码在<u>其他动态调度的流水线上</u>也能执行。</li>
-</ul>
-<h5 id="记分牌"><a href="#记分牌" class="headerlink" title="记分牌"></a>记分牌</h5><p>把流水线中的译码段ID分解成了两个段：流出和读操作数。记录的信息由三部分组成：</p>
-<ul>
-<li>指令状态表</li>
-<li>功能部件状态表</li>
-<li>结果寄存器状态表</li>
-</ul>
-<h5 id="Tomasulo"><a href="#Tomasulo" class="headerlink" title="Tomasulo"></a>Tomasulo</h5><p>核心思想：（1）记录和检测指令相关，操作数一旦就绪就立即执行，把发生RAW冲突的可能性较小到最低；（2）通过寄存器换名来消除WAR冲突和WAW冲突。寄存器换名是通过保留站来实现，它保存正在流出和等待流出指令所需要的操作数。</p>
-<p>基本思想：只要操作数有效，就取其放到保留站中，避免指令流出时才到寄存器取数据，这就使得即将执行的指令从相应的保留站中读取数据，而不用到寄存器中。指令的执行结果也是直接放到等待数据的其它保留站中去。一条指令流出时，存放操作数的寄存器被换名为该寄存器对应的保留站的名称。</p>
-<h4 id="动态分支预测"><a href="#动态分支预测" class="headerlink" title="动态分支预测"></a>动态分支预测</h4><p>用硬件动态地进行分支处理的方法。在程序运行的过程中，根据分支指令过去的表现预测将来的行为。如果分支行为发生了变化，预测结果也跟着变化。</p>
-<h5 id="分支历史表（BHT）"><a href="#分支历史表（BHT）" class="headerlink" title="分支历史表（BHT）"></a>分支历史表（BHT）</h5><p>用来记录相关指令最近一次或几次的执行情况是成功还是失败，并根据此进行预测。</p>
-<h5 id="分支目标缓冲器（BTB）"><a href="#分支目标缓冲器（BTB）" class="headerlink" title="分支目标缓冲器（BTB）"></a>分支目标缓冲器（BTB）</h5><p>是一种动态分支预测技术。将（1）<u>执行过的成功分支指令的目标地址</u>（2）<u>预测的分支目标地址</u> 记录在一张硬件表格中。在每次取指令时，用该指令的地址与BTB表中所有项目的第一个字段进行比较，以便尽早知道指令是否分支成功，尽早知道目标地址，达到减少分支开销的目的。</p>
-<p>BHT方法是在<u>译码ID</u>段，就能获得分支目标地址、顺序下一条指令以及预测的结果。BTB方法在<u>取址IF</u>段就能知道这些信息。</p>
-<h5 id="基于硬件的前瞻执行"><a href="#基于硬件的前瞻执行" class="headerlink" title="基于硬件的前瞻执行"></a>基于硬件的前瞻执行</h5><p>是解决控制相关的方法，它对分支指令的结果进行猜测，然后按照这个猜测继续取址、流出和执行后续的指令。但指令执行的结果不写回寄存器或存储器，而是放到一个称为ROB（再定序列缓冲器）中。等到相应的指令得到“确认”（即确实是应该执行）后，才将结果写入寄存器或存储器中。</p>
-<p>把三种思想结合在了一起：</p>
-<ul>
-<li><u>动态分支预测</u>。用来选择后续执行的指令。</li>
-<li>在控制相关的结果尚未出来之前，<u>前瞻</u>地执行后续指令。</li>
-<li>用<u>动态调度</u>对基本块的各种组合进行<u>跨基本块的组合</u>。</li>
-</ul>
-<h4 id="超标量流水线"><a href="#超标量流水线" class="headerlink" title="超标量流水线"></a>超标量流水线</h4><p>是一种多指令流出技术。它在每个时钟周期流出的指令条数不固定，依代码的具体情况而定，但有个上限。</p>
-<h4 id="超长指令字"><a href="#超长指令字" class="headerlink" title="超长指令字"></a>超长指令字</h4><p>是一种多指令流出技术。在每个时钟周期内流出的指令数都是固定的，这些指令构成一条长指令或者一个指令包，在这个指令包中，指令之间的并行性是通过指令显式地表现出来的。这种处理机的指令调度由编译器静态完成。</p>
 ]]></content>
       <categories>
-        <category>计算机体系结构</category>
+        <category>软件工程</category>
       </categories>
       <tags>
-        <tag>计算机体系结构</tag>
-        <tag>指令级并行</tag>
-        <tag>指令相关</tag>
-        <tag>指令冲突</tag>
-        <tag>动态调度</tag>
-        <tag>记分牌</tag>
-        <tag>Tomasulo</tag>
-        <tag>BHT</tag>
-        <tag>BTB</tag>
-        <tag>ROB</tag>
-        <tag>前瞻执行</tag>
-        <tag>超标量</tag>
-        <tag>VLIW</tag>
-        <tag>超长指令字</tag>
+        <tag>流水线</tag>
+        <tag>吞吐率</tag>
+        <tag>加速比</tag>
+        <tag>效率</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>测试</title>
+    <url>/2020/03/12/%E6%B5%8B%E8%AF%95/</url>
+    <content><![CDATA[<h5 id="测试步骤"><a href="#测试步骤" class="headerlink" title="测试步骤"></a>测试步骤</h5><ul>
+<li>模块（单元）测试</li>
+<li>子系统测试</li>
+<li>系统（集成）测试</li>
+<li>验收（确认）测试</li>
+<li>平行运行</li>
+</ul>
+<h5 id="单元测试"><a href="#单元测试" class="headerlink" title="单元测试"></a>单元测试</h5><p>主要使用白盒测试技术。集中检测软件设计的最小单元-模块，对重要的执行通路进行测试，可以发现模块内部的错误。可以用代码审查和计算机测试，来完成单元测试工作。测试重点为：</p>
+<ul>
+<li>模块接口</li>
+<li>局部数据结构</li>
+<li>重要的执行通路</li>
+<li>出错处理通路</li>
+<li>边界条件</li>
+</ul>
+<h5 id="集成测试"><a href="#集成测试" class="headerlink" title="集成测试"></a>集成测试</h5><p>是测试和组装软件的系统化技术，把模块组装成程序，在组装的过程进行测试。</p>
+<p>非渐增式：先分别测试所有模块，再把这些模块组合成要求的程序；</p>
+<p>渐增式：把下一个将要测试的模块同已经测试好的那些模块组合到一起进行测试；</p>
+<ul>
+<li>自底向上集成</li>
+<li>自顶向下集成</li>
+</ul>
+<p>模块测试的特点是主要应用白盒测试，对多个模块的测试可以并发进行；集成测试的特点是可以在测试过程发现接口问题。</p>
+<p>回归测试：重新执行已经做过测试的某个测试的子集。</p>
+<p><img src="/2020/03/12/测试/test.png" alt=""></p>
+]]></content>
+      <categories>
+        <category>软件工程</category>
+      </categories>
+      <tags>
+        <tag>软件工程</tag>
+        <tag>单元测试</tag>
+        <tag>集成测试</tag>
+        <tag>白盒测试</tag>
+        <tag>黑盒测试</tag>
       </tags>
   </entry>
   <entry>
@@ -1959,86 +2192,6 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
         <tag>gradient descent</tag>
         <tag>adagrad</tag>
         <tag>SGD</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>流水线</title>
-    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
-    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
-<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
-<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
-<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
-<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
-<li>需要有<u>通过时间与排空时间</u></li>
-</ul>
-<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
-<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
-<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
-<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
-<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
-<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
-<ul>
-<li><p>从前调度</p>
-</li>
-<li><p>从目标处调度</p>
-</li>
-<li><p>从失败出调度</p>
-</li>
-</ul>
-<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
-<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
-<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
-<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>软件工程</category>
-      </categories>
-      <tags>
-        <tag>流水线</tag>
-        <tag>吞吐率</tag>
-        <tag>加速比</tag>
-        <tag>效率</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>测试</title>
-    <url>/2020/03/12/%E6%B5%8B%E8%AF%95/</url>
-    <content><![CDATA[<h5 id="测试步骤"><a href="#测试步骤" class="headerlink" title="测试步骤"></a>测试步骤</h5><ul>
-<li>模块（单元）测试</li>
-<li>子系统测试</li>
-<li>系统（集成）测试</li>
-<li>验收（确认）测试</li>
-<li>平行运行</li>
-</ul>
-<h5 id="单元测试"><a href="#单元测试" class="headerlink" title="单元测试"></a>单元测试</h5><p>主要使用白盒测试技术。集中检测软件设计的最小单元-模块，对重要的执行通路进行测试，可以发现模块内部的错误。可以用代码审查和计算机测试，来完成单元测试工作。测试重点为：</p>
-<ul>
-<li>模块接口</li>
-<li>局部数据结构</li>
-<li>重要的执行通路</li>
-<li>出错处理通路</li>
-<li>边界条件</li>
-</ul>
-<h5 id="集成测试"><a href="#集成测试" class="headerlink" title="集成测试"></a>集成测试</h5><p>是测试和组装软件的系统化技术，把模块组装成程序，在组装的过程进行测试。</p>
-<p>非渐增式：先分别测试所有模块，再把这些模块组合成要求的程序；</p>
-<p>渐增式：把下一个将要测试的模块同已经测试好的那些模块组合到一起进行测试；</p>
-<ul>
-<li>自底向上集成</li>
-<li>自顶向下集成</li>
-</ul>
-<p>模块测试的特点是主要应用白盒测试，对多个模块的测试可以并发进行；集成测试的特点是可以在测试过程发现接口问题。</p>
-<p>回归测试：重新执行已经做过测试的某个测试的子集。</p>
-<p><img src="/2020/03/12/测试/test.png" alt=""></p>
-]]></content>
-      <categories>
-        <category>软件工程</category>
-      </categories>
-      <tags>
-        <tag>软件工程</tag>
-        <tag>单元测试</tag>
-        <tag>集成测试</tag>
-        <tag>白盒测试</tag>
-        <tag>黑盒测试</tag>
       </tags>
   </entry>
   <entry>
