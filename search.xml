@@ -1,6 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Anomaly Detection</title>
+    <url>/2020/07/03/Anomaly-detection/</url>
+    <content><![CDATA[<h4 id="Problem-Formulation"><a href="#Problem-Formulation" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h4><p>对于给定的训练数据集，做异常检测的目的是找到一个函数，这个函数可以检测输入的x是不是和训练数据集相似的。异常检测知识检测出和训练数据不一样的输入，检测出来的数据并不一定都是不好的，有可能是好的，也有可能是不好的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703142752745.png" alt="image-20200703142752745" style="zoom:60%;"></p>
+<p>那么到底怎么来定义这个similarity呢？这也就是异常检测需要探讨的问题，不同的方法就有不同的定义方式。</p>
+<h4 id="What-is-Anomaly"><a href="#What-is-Anomaly" class="headerlink" title="What is Anomaly?"></a>What is Anomaly?</h4><p>Q：那么我们到底如何来定义anomaly呢？如何确定我们检测出来的输入是anomaly的呢？</p>
+<p>A：取决于具体的训练数据集。在下图中，如果训练集中有很多雷丘，那么皮卡丘就是异常；但如果有很多只皮卡丘，那么雷丘就是异常,….</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703143729820.png" alt="image-20200703143729820" style="zoom:60%;"></p>
+<h4 id="Applications"><a href="#Applications" class="headerlink" title="Applications"></a>Applications</h4><p>异常检测有很多应用，以下简要叙述三个：</p>
+<ol>
+<li><p>Fraud Detection，training data是正常刷卡行为， 那么现有一笔新的交易记录x，我们就可以进行异常检测，来判断x是不是盗刷行为；比如日常都是小额消费，但突然多了一些连续的高额消费，就可以认为这是盗刷行为；</p>
+</li>
+<li><p>Network Intrusion Detection，training data是正常连接行为，现在有一个新的连接x进来，那么我们就可以让机器自己进行异常检测，来判断新连接是不是异常的；</p>
+</li>
+<li><p>Cancer Detection，training data是正常细胞的资料，比如细胞核的大小、分裂的频率等，如果来一个新的细胞x，机器可以自己决定到底是正常细胞还是癌细胞。</p>
+</li>
+</ol>
+<h4 id="Binary-Classification"><a href="#Binary-Classification" class="headerlink" title="Binary Classification?"></a>Binary Classification?</h4><p>Q：给定正常的数据（Class 1）为$\{x^1,x^2,..,x^N\}$，异常的数据（Class 2）为$\{\tilde x^1,\tilde x^2,..,\tilde x^N\}$；那么异常检测可以认为是一个二分类问题吗？</p>
+<p>A：如果正常数据集是“宝可梦”，那么异常数据就“不是宝可梦”，但“不是宝可梦”包含很多种类别，比如茶壶、树等；而且异常数据并不像正常数据那么容易收集；因此并不能简单地进行一个二分类问题。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703145452812.png" alt="image-20200703145452812" style="zoom:60%;"></p>
+<h4 id="Categories"><a href="#Categories" class="headerlink" title="Categories"></a>Categories</h4><p>异常检测可以分为以下几个类别：</p>
+<ol>
+<li>training data带label，每个训练数据$x^i$都有对应的标签$\hat y ^i$，一共有N个类别，那么我们就可以训练一个classifier，来进行分类，如果机器能辨别出这个input是1-N个类别，那么就认为是正常数据；如果机器不能辨别，即输出类别为“unknown”，我们就认为这是异常数据；</li>
+<li>如果training data是unlabel，这时又分为两种情况：（1）training data是clean的，所有的数据都是正常的；（2）training data中有一小部分数据是异常的，比如银行要对用户数据进行异常检测，那么training data就不可避免地包括一些异常数据。</li>
+</ol>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703150215978.png" alt="image-20200703150215978" style="zoom:60%;"></p>
+<h4 id="Case-1-With-Classifier"><a href="#Case-1-With-Classifier" class="headerlink" title="Case 1: With Classifier"></a>Case 1: With Classifier</h4><h5 id="Example-Application"><a href="#Example-Application" class="headerlink" title="Example Application"></a>Example Application</h5><p>现在我们判断一个人物是不是来自辛普森的家庭。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703151112051.png" alt="image-20200703151112051" style="zoom:60%;"></p>
+<p>在下图中对于输入的正常数据$\{x^1,x^2,..,x^N\}$，都有其对应的类别标签$\{\hat y^1,\hat y^2,..,\hat y^N\}$，那么我们就可以训练一个classifier，来预测其输出的类别。一位很喜爱辛普森的学者进行了实验，得出了很不错的分类结果。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703151635273.png" alt="image-20200703151635273" style="zoom:60%;"></p>
+<h5 id="How-to-use-the-Classifier"><a href="#How-to-use-the-Classifier" class="headerlink" title="How to use the Classifier"></a>How to use the Classifier</h5><p>那么根据训练出来的classifier来做异常检测，来判断一个人物到底是不是来自辛普森家庭。</p>
+<p>我们可以让classifier再输出一个confidence score，同时我们还需要定义一个界限threshold $\lambda$，如果信心分数$c(x)&gt;\lambda$，就认为是正常数据；否则就认为是异常数据。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703152031850.png" alt="image-20200703152031850" style="zoom:60%;"></p>
+<p>那么我们如何得到这个confidence score呢？</p>
+<p>在下图的例子中，如果是一个辛普森家庭的人物输入classifier，这个分类器能够很自信地得出分类结果是“霸子”（0.97）；但如果是一个非辛普森的人物输入，classifier的输出分类结果就比较均匀，4个分类就过都是0.20+。那么我们就可以认为classifier对第一个input是很自信的，是normal；第二个input则不自信，被认为是anomaly data。</p>
+<p>那么我们就可以把这个confidence score认为是分类结果的distribution中的最大值，也可以做cross-entropy。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703153414866.png" alt="image-20200703153414866" style="zoom:60%;"></p>
+<p>那么现在我们把辛普森家庭和其他动漫图片的所有数据都进行confidence score计算。在下图中，我们可以发现属于辛普森的confidence score distribution，几乎全都是1；但对于其他动漫的人物，只有10%的score为1，其他大多数的图片得到的分数都是比较低的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703154546578.png" alt="image-20200703154546578" style="zoom:60%;"></p>
+<h5 id="Example-Framework"><a href="#Example-Framework" class="headerlink" title="Example Framework"></a><strong>Example Framework</strong></h5><p>训练数据集是带label的，全都是属于辛普森家庭，那么我们可以训练出一个classifier，根据这个分类器，我们可以计算出每张图片的confidence score，根据threshold来判断这张图片是不是anomaly。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703155315020.png" alt="image-20200703155315020" style="zoom:60%;"></p>
+<p><strong>development set</strong>中需要包括带label（是否属于辛普森）的图片，<u>但这个图片不仅包括辛普森家庭的人物，还包括不属于辛普森家庭的人物</u>。将数据输入训练好的classifier，根据不同的$\lambda$，得到系统的performance，那么我们就可以通过development set来调整$\lambda$的值，选择使系统得到最好performance的$\lambda$。</p>
+<h5 id="Evalution"><a href="#Evalution" class="headerlink" title="Evalution"></a>Evalution</h5><p>现在有100张辛普森人物的图片，5张非辛普森。在图中红色部分则表示非辛普森的score，一共有5个方块，得到的分数都很低。</p>
+<p>正确率并不能来准确衡量一个系统的好坏，很可能一个系统有一个很高的正确率，但其实并不好。在下图中，我们可以计算出这个系统所计算出的accuracy为95.2%，但这并不是因为我们的异常检测系统很好，而是因为数据集的分布差异，异常数据所占的比例非常小。这并不是我们想要的异常检测系统，这个系统几乎会把所有的输入都判断成是异常的，但由于异常数据占比很小，最后的正确率还是会很高。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703160756452.png" alt="image-20200703160756452" style="zoom:60%;"></p>
+<p>因此我们不能用正确率accuracy来判断系统的performance。</p>
+<p>在下图中，我们把threshold设置为大于0.5的值，这时只有1个异常值被检测出来，还有剩下4个异常值没有被检测出来，这4个被认为是<u>missing</u>了；而在所有的100个辛普森人物里面，只有1个被检测为异常值，被认为是<u>False alarm</u>，剩下的99个都认为是正常的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703162036050.png" alt="image-20200703162036050" style="zoom:60%;"></p>
+<p>如果我们现在把threshold设置为大于0.8的值，这时只有2个异常值被检测出来，还有剩下3个异常值没有被检测出来（missing）；而在所有的100个辛普森人物里面，只有6个被检测为异常值（false alarm），剩下的94个都认为是正常的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703162819041.png" alt="image-20200703162819041" style="zoom:60%;"></p>
+<p>那么这两个threshold分别为0.5和0.8的异常检测系统，到底哪一个更好呢？这取决于你认为missing更严重，还是false alarm更严重。</p>
+<p>在下图中的<span style="color: red">Cost Table A</span>，如果是missing，就扣一分；如果是false alarm，就扣100分；如果用这种方式来衡量系统的好坏，那么左边的被扣了104分，右边的被扣了603分。</p>
+<p><span style="color: blue">Cost Table B</span>，如果是missing，就扣100分；如果是false alarm，就扣1分；如果用这种方式来衡量系统的好坏，那么左边的被扣了401分，右边的被扣了306分。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703162727493.png" alt="image-20200703162727493" style="zoom:60%;"></p>
+<p>在不同的场景下，就会有不同的cost table。比如癌症检测，missing比false alarm造成的影响大得多，如果这个人患了癌症却没被检测出来，后果会非常严重，因此这种情况我们table B比较好。</p>
+<h5 id="Possible-Issues"><a href="#Possible-Issues" class="headerlink" title="Possible Issues"></a>Possible Issues</h5><p>下图中展示了猫狗分类的例子，黑色线条表示decision boundary，靠近boundary得到的confidence score不高，如果在boundary上，就说明分类器不能确定图片的类别是猫还是狗。对于一些特别像猫的动物，比如老虎，也能够得到很好的分数，因为老虎有着和猫很像的特征，而这个特征是是分类器进行分类的关键，就可以迷惑分类器，得出错误的分类结果。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703165414744.png" alt="image-20200703165414744" style="zoom:60%;"></p>
+<p>如果这个分类器判断是不是辛普森家庭人物的关键是，人物的脸和皮肤是不是黄色。那么我们可以把其他动漫人物的脸涂成黄色，就可以发现分类器判断为辛普森的概率提高了很多。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703165502001.png" alt="image-20200703165502001" style="zoom:60%;"></p>
+<h5 id="To-Learn-More-……"><a href="#To-Learn-More-……" class="headerlink" title="To Learn More ……"></a>To Learn More ……</h5><p>也有一些文献提出了解决方法，</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703170742579.png" alt="image-20200703170742579" style="zoom:60%;"></p>
+<h4 id="Case-2-Without-Labels"><a href="#Case-2-Without-Labels" class="headerlink" title="Case 2: Without Labels"></a>Case 2: Without Labels</h4><h5 id="Twitch-Plays-Pokemon"><a href="#Twitch-Plays-Pokemon" class="headerlink" title="Twitch Plays Pokémon"></a>Twitch Plays Pokémon</h5><p>先介绍一个游戏，Twitch Plays Pokémon，每个用户都可以在switch上输入自己的指令（up、left、…），可以同时有8万个用户，在这些用户中有些是异常用户，会输入无关指令干扰游戏的正常执行。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703171432329.png" alt="image-20200703171432329" style="zoom:60%;"></p>
+<h5 id="Problem-Formulation-1"><a href="#Problem-Formulation-1" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h5><p>那么我们如何移除这些游戏干扰者呢？</p>
+<p>我们首先对每一个玩家都用x表示，即表示成一个向量；对于其中一个维度$x_2$，如果这个人经常发表无政府言论，我们就可以认为这个人是来游戏中捣乱的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703171722577.png" alt="image-20200703171722577" style="zoom:60%;"></p>
+<p>但现在数据集是没有label的，没有classifier了，那么我们可以建立一个模型$P(x)$，这个模型可以告诉我们发生某种行为的概率有多大。如果$P(x)\geq\lambda$，那么我们就可以认为x是正常的，反之则认为是anomaly。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703172257910.png" alt="image-20200703172257910" style="zoom:60%;"></p>
+<p>如果现在对于一个玩家用二维向量来表示，一个维度表示“说垃圾话”的几率，另一个表示“无政府状态发言”的几率。对N个玩家的数据进行可视化，可以得到下图中的散点图。如果我们对其中“说垃圾话”维度的数据进行可视化，可以发现并不是所有的玩家都不说垃圾话，大部分都会说一点点；对于第二个维度，到底有多少人的发言是在无政府状态下进行的，可以发现多数人都是在无政府状态下发言的。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703172908070.png" alt="image-20200703172908070" style="zoom:60%;"></p>
+<p>对于$P(x)$比较大的玩家，我们就可以认为是normal的；对于$P(x)$小的玩家，我们就认为其是anomaly的。但这并不具体，我们应该用数值化的方法来计算每一个玩家的score。</p>
+<h5 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a><strong>Maximum Likelihood</strong></h5><p>首先我们假设这些数据点都是从概率密度函数$f_{\theta} (x)$中取出来的，$\theta$决定了概率密度函数的形状，需要从训练数据中学习出来。现在我们已经有了数据点，但不知道其概率分布$f_{\theta} (x)$的形式。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703193052117.png" alt="image-20200703193052117" style="zoom:60%;"></p>
+<p>这里引入了likelihood的概念，表示根据我现在有的概率密度函数$f_{\theta} (x^1),f_{\theta} (x^2),..,f_{\theta} (x^N)$，产生左图数据分布的概率有多大。</p>
+<p>Q：那么我们怎么算图中的数据被产生出来的几率大小呢？</p>
+<p>A：对于图中的所有数据点$\{x^1,x^2,..,x^N\}$，产生数据点$x^1$的概率是$f_{\theta} (x^1)$，产生数据点$x^2$的概率是$f_{\theta} (x^2)$，…，产生数据点$x^N$的概率是$f_{\theta} (x^N)$；那么对于产生所有数据点的概率，就可以用以下的式子表示，</p>
+<script type="math/tex; mode=display">
+L(\theta)=f_{\theta} (x^1)f_{\theta} (x^2)\cdot\cdot\cdot f_{\theta} (x^N)</script><p>也就是likelihood，和$\theta$是有关的，选择不同的$\theta$，就会有不同的概率密度函数，也就会有不同的likelihood，那么现在我们的任务就是找到$\theta^*$，使得likelihood可以取得最大值，即</p>
+<script type="math/tex; mode=display">
+\theta ^*=arg \ \mathop{\rm max}_\theta L(\theta)</script><h5 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a><strong>Gaussian Distribution</strong></h5><p>下图中的$f_{\mu,\sum}(x)$为高斯分布，输入为x，输出为x被sample的概率，是一个数值，$\mu$表示均值，$\sum$表示协方差矩阵。 </p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703195322546.png" alt="image-20200703195322546" style="zoom:60%;"></p>
+<p>由于此时的概率密度函数发生了变化，我们现在将likelihood的形式进行变化，即</p>
+<script type="math/tex; mode=display">
+L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^N)</script><p>那么此时我们就需要找到$\mu^<em>,\sum^</em>$，来使likelihood最大化，</p>
+<script type="math/tex; mode=display">
+\mu^*,\sum=arg \ \mathop{\rm max}_{\mu,\sum} L(\mu,\sum)</script><p>在上图中，由于高斯分布的特性，数据点在$\mu$附近的地方很容易被sample到，越远被sample到的几率就越低；如果$\mu$在数据点很密集的地方，我们就可以认为likelihood的值很大；如果$\mu$在偏离高密度的地方，likelihood会小很多。</p>
+<p>$\mu^*$就是输入数据点求均值，</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703201627458.png" alt="image-20200703201627458" style="zoom:60%;"></p>
+<p>找出了对应的$\mu^<em>,\sum^</em>$之后，我们就可以代入对应的概率密度函数，进行异常检测。如果$f_{\mu^<em>,\sum^</em>}(x)&gt;\lambda$，就认为是正常数据；如果$f_{\mu^<em>,\sum^</em>}(x)\leq\lambda$，则认为是异常数据（anomaly）。</p>
+<p>如果把这个二维平面上所有的数据都输入这个概率分布，我们就可以得出下图；颜色越深，表示这越是一个一般的玩家，颜色越浅，表示异常行为越显著。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703201402084.png" alt="image-20200703201402084" style="zoom:60%;"></p>
+<p>如果现在有三个玩家$x=(x_1,x_2,x_3,x_4,x_5)^T$，表现出了不同的行为，根据模型算出来不同的结果。</p>
+<p><img src="/2020/07/03/Anomaly-detection/image-20200703202451744.png" alt="image-20200703202451744" style="zoom:60%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Anomaly Detection</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Attack and Defense</title>
     <url>/2020/06/26/Attack/</url>
     <content><![CDATA[<h4 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h4><p><img src="/2020/06/26/Attack/image-20200626095005396.png" alt="image-20200626095005396" style="zoom:50%;"></p>
@@ -98,109 +201,6 @@ x^*=arg\mathop{min}_\limits {d(x^0,x')\leq\epsilon}L(x')</script><p>这里我们
       </tags>
   </entry>
   <entry>
-    <title>Anomaly Detection</title>
-    <url>/2020/07/03/Anomaly-detection/</url>
-    <content><![CDATA[<h4 id="Problem-Formulation"><a href="#Problem-Formulation" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h4><p>对于给定的训练数据集，做异常检测的目的是找到一个函数，这个函数可以检测输入的x是不是和训练数据集相似的。异常检测知识检测出和训练数据不一样的输入，检测出来的数据并不一定都是不好的，有可能是好的，也有可能是不好的。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703142752745.png" alt="image-20200703142752745" style="zoom:50%;"></p>
-<p>那么到底怎么来定义这个similarity呢？这也就是异常检测需要探讨的问题，不同的方法就有不同的定义方式。</p>
-<h4 id="What-is-Anomaly"><a href="#What-is-Anomaly" class="headerlink" title="What is Anomaly?"></a>What is Anomaly?</h4><p>Q：那么我们到底如何来定义anomaly呢？如何确定我们检测出来的输入是anomaly的呢？</p>
-<p>A：取决于具体的训练数据集。在下图中，如果训练集中有很多雷丘，那么皮卡丘就是异常；但如果有很多只皮卡丘，那么雷丘就是异常,….</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703143729820.png" alt="image-20200703143729820" style="zoom:50%;"></p>
-<h4 id="Applications"><a href="#Applications" class="headerlink" title="Applications"></a>Applications</h4><p>异常检测有很多应用，以下简要叙述三个：</p>
-<ol>
-<li><p>Fraud Detection，training data是正常刷卡行为， 那么现有一笔新的交易记录x，我们就可以进行异常检测，来判断x是不是盗刷行为；比如日常都是小额消费，但突然多了一些连续的高额消费，就可以认为这是盗刷行为；</p>
-</li>
-<li><p>Network Intrusion Detection，training data是正常连接行为，现在有一个新的连接x进来，那么我们就可以让机器自己进行异常检测，来判断新连接是不是异常的；</p>
-</li>
-<li><p>Cancer Detection，training data是正常细胞的资料，比如细胞核的大小、分裂的频率等，如果来一个新的细胞x，机器可以自己决定到底是正常细胞还是癌细胞。</p>
-</li>
-</ol>
-<h4 id="Binary-Classification"><a href="#Binary-Classification" class="headerlink" title="Binary Classification?"></a>Binary Classification?</h4><p>Q：给定正常的数据（Class 1）为$\{x^1,x^2,..,x^N\}$，异常的数据（Class 2）为$\{\tilde x^1,\tilde x^2,..,\tilde x^N\}$；那么异常检测可以认为是一个二分类问题吗？</p>
-<p>A：如果正常数据集是“宝可梦”，那么异常数据就“不是宝可梦”，但“不是宝可梦”包含很多种类别，比如茶壶、树等；而且异常数据并不像正常数据那么容易收集；因此并不能简单地进行一个二分类问题。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703145452812.png" alt="image-20200703145452812" style="zoom:50%;"></p>
-<h4 id="Categories"><a href="#Categories" class="headerlink" title="Categories"></a>Categories</h4><p>异常检测可以分为以下几个类别：</p>
-<ol>
-<li>training data带label，每个训练数据$x^i$都有对应的标签$\hat y ^i$，一共有N个类别，那么我们就可以训练一个classifier，来进行分类，如果机器能辨别出这个input是1-N个类别，那么就认为是正常数据；如果机器不能辨别，即输出类别为“unknown”，我们就认为这是异常数据；</li>
-<li>如果training data是unlabel，这时又分为两种情况：（1）training data是clean的，所有的数据都是正常的；（2）training data中有一小部分数据是异常的，比如银行要对用户数据进行异常检测，那么training data就不可避免地包括一些异常数据。</li>
-</ol>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703150215978.png" alt="image-20200703150215978" style="zoom:50%;"></p>
-<h4 id="Case-1-With-Classifier"><a href="#Case-1-With-Classifier" class="headerlink" title="Case 1: With Classifier"></a>Case 1: With Classifier</h4><h5 id="Example-Application"><a href="#Example-Application" class="headerlink" title="Example Application"></a>Example Application</h5><p>现在我们判断一个人物是不是来自辛普森的家庭。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703151112051.png" alt="image-20200703151112051" style="zoom:50%;"></p>
-<p>在下图中对于输入的正常数据$\{x^1,x^2,..,x^N\}$，都有其对应的类别标签$\{\hat y^1,\hat y^2,..,\hat y^N\}$，那么我们就可以训练一个classifier，来预测其输出的类别。一位很喜爱辛普森的学者进行了实验，得出了很不错的分类结果。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703151635273.png" alt="image-20200703151635273" style="zoom:50%;"></p>
-<h5 id="How-to-use-the-Classifier"><a href="#How-to-use-the-Classifier" class="headerlink" title="How to use the Classifier"></a>How to use the Classifier</h5><p>那么根据训练出来的classifier来做异常检测，来判断一个人物到底是不是来自辛普森家庭。</p>
-<p>我们可以让classifier再输出一个confidence score，同时我们还需要定义一个界限threshold $\lambda$，如果信心分数$c(x)&gt;\lambda$，就认为是正常数据；否则就认为是异常数据。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703152031850.png" alt="image-20200703152031850" style="zoom:50%;"></p>
-<p>那么我们如何得到这个confidence score呢？</p>
-<p>在下图的例子中，如果是一个辛普森家庭的人物输入classifier，这个分类器能够很自信地得出分类结果是“霸子”（0.97）；但如果是一个非辛普森的人物输入，classifier的输出分类结果就比较均匀，4个分类就过都是0.20+。那么我们就可以认为classifier对第一个input是很自信的，是normal；第二个input则不自信，被认为是anomaly data。</p>
-<p>那么我们就可以把这个confidence score认为是分类结果的distribution中的最大值，也可以做cross-entropy。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703153414866.png" alt="image-20200703153414866" style="zoom:50%;"></p>
-<p>那么现在我们把辛普森家庭和其他动漫图片的所有数据都进行confidence score计算。在下图中，我们可以发现属于辛普森的confidence score distribution，几乎全都是1；但对于其他动漫的人物，只有10%的score为1，其他大多数的图片得到的分数都是比较低的。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703154546578.png" alt="image-20200703154546578" style="zoom:50%;"></p>
-<h5 id="Example-Framework"><a href="#Example-Framework" class="headerlink" title="Example Framework"></a><strong>Example Framework</strong></h5><p>训练数据集是带label的，全都是属于辛普森家庭，那么我们可以训练出一个classifier，根据这个分类器，我们可以计算出每张图片的confidence score，根据threshold来判断这张图片是不是anomaly。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703155315020.png" alt="image-20200703155315020" style="zoom:50%;"></p>
-<p><strong>development set</strong>中需要包括带label（是否属于辛普森）的图片，<u>但这个图片不仅包括辛普森家庭的人物，还包括不属于辛普森家庭的人物</u>。将数据输入训练好的classifier，根据不同的$\lambda$，得到系统的performance，那么我们就可以通过development set来调整$\lambda$的值，选择使系统得到最好performance的$\lambda$。</p>
-<h5 id="Evalution"><a href="#Evalution" class="headerlink" title="Evalution"></a>Evalution</h5><p>现在有100张辛普森人物的图片，5张非辛普森。在图中红色部分则表示非辛普森的score，一共有5个方块，得到的分数都很低。</p>
-<p>正确率并不能来准确衡量一个系统的好坏，很可能一个系统有一个很高的正确率，但其实并不好。在下图中，我们可以计算出这个系统所计算出的accuracy为95.2%，但这并不是因为我们的异常检测系统很好，而是因为数据集的分布差异，异常数据所占的比例非常小。这并不是我们想要的异常检测系统，这个系统几乎会把所有的输入都判断成是异常的，但由于异常数据占比很小，最后的正确率还是会很高。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703160756452.png" alt="image-20200703160756452" style="zoom:50%;"></p>
-<p>因此我们不能用正确率accuracy来判断系统的performance。</p>
-<p>在下图中，我们把threshold设置为大于0.5的值，这时只有1个异常值被检测出来，还有剩下4个异常值没有被检测出来，这4个被认为是<u>missing</u>了；而在所有的100个辛普森人物里面，只有1个被检测为异常值，被认为是<u>False alarm</u>，剩下的99个都认为是正常的。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703162036050.png" alt="image-20200703162036050" style="zoom:50%;"></p>
-<p>如果我们现在把threshold设置为大于0.8的值，这时只有2个异常值被检测出来，还有剩下3个异常值没有被检测出来（missing）；而在所有的100个辛普森人物里面，只有6个被检测为异常值（false alarm），剩下的94个都认为是正常的。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703162819041.png" alt="image-20200703162819041" style="zoom:50%;"></p>
-<p>那么这两个threshold分别为0.5和0.8的异常检测系统，到底哪一个更好呢？这取决于你认为missing更严重，还是false alarm更严重。</p>
-<p>在下图中的<span style="color: red">Cost Table A</span>，如果是missing，就扣一分；如果是false alarm，就扣100分；如果用这种方式来衡量系统的好坏，那么左边的被扣了104分，右边的被扣了603分。</p>
-<p><span style="color: blue">Cost Table B</span>，如果是missing，就扣100分；如果是false alarm，就扣1分；如果用这种方式来衡量系统的好坏，那么左边的被扣了401分，右边的被扣了306分。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703162727493.png" alt="image-20200703162727493" style="zoom:50%;"></p>
-<p>在不同的场景下，就会有不同的cost table。比如癌症检测，missing比false alarm造成的影响大得多，如果这个人患了癌症却没被检测出来，后果会非常严重，因此这种情况我们table B比较好。</p>
-<h5 id="Possible-Issues"><a href="#Possible-Issues" class="headerlink" title="Possible Issues"></a>Possible Issues</h5><p>下图中展示了猫狗分类的例子，黑色线条表示decision boundary，靠近boundary得到的confidence score不高，如果在boundary上，就说明分类器不能确定图片的类别是猫还是狗。对于一些特别像猫的动物，比如老虎，也能够得到很好的分数，因为老虎有着和猫很像的特征，而这个特征是是分类器进行分类的关键，就可以迷惑分类器，得出错误的分类结果。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703165414744.png" alt="image-20200703165414744" style="zoom:50%;"></p>
-<p>如果这个分类器判断是不是辛普森家庭人物的关键是，人物的脸和皮肤是不是黄色。那么我们可以把其他动漫人物的脸涂成黄色，就可以发现分类器判断为辛普森的概率提高了很多。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703165502001.png" alt="image-20200703165502001" style="zoom:50%;"></p>
-<h5 id="To-Learn-More-……"><a href="#To-Learn-More-……" class="headerlink" title="To Learn More ……"></a>To Learn More ……</h5><p>也有一些文献提出了解决方法，</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703170742579.png" alt="image-20200703170742579" style="zoom:50%;"></p>
-<h4 id="Case-2-Without-Labels"><a href="#Case-2-Without-Labels" class="headerlink" title="Case 2: Without Labels"></a>Case 2: Without Labels</h4><h5 id="Twitch-Plays-Pokémon"><a href="#Twitch-Plays-Pokémon" class="headerlink" title="Twitch Plays Pokémon"></a>Twitch Plays Pokémon</h5><p>先介绍一个游戏，Twitch Plays Pokémon，每个用户都可以在switch上输入自己的指令（up、left、…），可以同时有8万个用户，在这些用户中有些是异常用户，会输入无关指令干扰游戏的正常执行。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703171432329.png" alt="image-20200703171432329" style="zoom:50%;"></p>
-<h5 id="Problem-Formulation-1"><a href="#Problem-Formulation-1" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h5><p>那么我们如何移除这些游戏干扰者呢？</p>
-<p>我们首先对每一个玩家都用x表示，即表示成一个向量；对于其中一个维度$x_2$，如果这个人经常发表无政府言论，我们就可以认为这个人是来游戏中捣乱的。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703171722577.png" alt="image-20200703171722577" style="zoom:50%;"></p>
-<p>但现在数据集是没有label的，没有classifier了，那么我们可以建立一个模型$P(x)$，这个模型可以告诉我们发生某种行为的概率有多大。如果$P(x)\geq\lambda$，那么我们就可以认为x是正常的，反之则认为是anomaly。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703172257910.png" alt="image-20200703172257910" style="zoom:50%;"></p>
-<p>如果现在对于一个玩家用二维向量来表示，一个维度表示“说垃圾话”的几率，另一个表示“无政府状态发言”的几率。对N个玩家的数据进行可视化，可以得到下图中的散点图。如果我们对其中“说垃圾话”维度的数据进行可视化，可以发现并不是所有的玩家都不说垃圾话，大部分都会说一点点；对于第二个维度，到底有多少人的发言是在无政府状态下进行的，可以发现多数人都是在无政府状态下发言的。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703172908070.png" alt="image-20200703172908070" style="zoom:50%;"></p>
-<p>对于$P(x)$比较大的玩家，我们就可以认为是normal的；对于$P(x)$小的玩家，我们就认为其是anomaly的。但这并不具体，我们应该用数值化的方法来计算每一个玩家的score。</p>
-<h5 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a><strong>Maximum Likelihood</strong></h5><p>首先我们假设这些数据点都是从概率密度函数$f_{\theta} (x)$中取出来的，$\theta$决定了概率密度函数的形状，需要从训练数据中学习出来。现在我们已经有了数据点，但不知道其概率分布$f_{\theta} (x)$的形式。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703193052117.png" alt="image-20200703193052117" style="zoom:50%;"></p>
-<p>这里引入了likelihood的概念，表示根据我现在有的概率密度函数$f_{\theta} (x^1),f_{\theta} (x^2),..,f_{\theta} (x^N)$，产生左图数据分布的概率有多大。</p>
-<p>Q：那么我们怎么算图中的数据被产生出来的几率大小呢？</p>
-<p>A：对于图中的所有数据点$\{x^1,x^2,..,x^N\}$，产生数据点$x^1$的概率是$f_{\theta} (x^1)$，产生数据点$x^2$的概率是$f_{\theta} (x^2)$，…，产生数据点$x^N$的概率是$f_{\theta} (x^N)$；那么对于产生所有数据点的概率，就可以用以下的式子表示，</p>
-<script type="math/tex; mode=display">
-L(\theta)=f_{\theta} (x^1)f_{\theta} (x^2)\cdot\cdot\cdot f_{\theta} (x^N)</script><p>也就是likelihood，和$\theta$是有关的，选择不同的$\theta$，就会有不同的概率密度函数，也就会有不同的likelihood，那么现在我们的任务就是找到$\theta^*$，使得likelihood可以取得最大值，即</p>
-<script type="math/tex; mode=display">
-\theta ^*=arg \ \mathop{\rm max}_\theta L(\theta)</script><h5 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a><strong>Gaussian Distribution</strong></h5><p>下图中的$f_{\mu,\sum}(x)$为高斯分布，输入为x，输出为x被sample的概率，是一个数值，$\mu$表示均值，$\sum$表示协方差矩阵。 </p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703195322546.png" alt="image-20200703195322546" style="zoom:50%;"></p>
-<p>由于此时的概率密度函数发生了变化，我们现在将likelihood的形式进行变化，即</p>
-<script type="math/tex; mode=display">
-L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^N)</script><p>那么此时我们就需要找到$\mu^<em>,\sum^</em>$，来使likelihood最大化，</p>
-<script type="math/tex; mode=display">
-\mu^*,\sum=arg \ \mathop{\rm max}_{\mu,\sum} L(\mu,\sum)</script><p>在上图中，由于高斯分布的特性，数据点在$\mu$附近的地方很容易被sample到，越远被sample到的几率就越低；如果$\mu$在数据点很密集的地方，我们就可以认为likelihood的值很大；如果$\mu$在偏离高密度的地方，likelihood会小很多。</p>
-<p>$\mu^*$就是输入数据点求均值，</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703201627458.png" alt="image-20200703201627458" style="zoom:50%;"></p>
-<p>找出了对应的$\mu^<em>,\sum^</em>$之后，我们就可以代入对应的概率密度函数，进行异常检测。如果$f_{\mu^<em>,\sum^</em>}(x)&gt;\lambda$，就认为是正常数据；如果$f_{\mu^<em>,\sum^</em>}(x)\leq\lambda$，则认为是异常数据（anomaly）。</p>
-<p>如果把这个二维平面上所有的数据都输入这个概率分布，我们就可以得出下图；颜色越深，表示这越是一个一般的玩家，颜色越浅，表示异常行为越显著。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703201402084.png" alt="image-20200703201402084" style="zoom:50%;"></p>
-<p>如果现在有三个玩家$x=(x_1,x_2,x_3,x_4,x_5)^T$，表现出了不同的行为，根据模型算出来不同的结果。</p>
-<p><img src="/2020/07/03/Anomaly-detection/image-20200703202451744.png" alt="image-20200703202451744" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Anomaly Detection</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>CCF-JSON查询</title>
     <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
     <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
@@ -211,6 +211,58 @@ L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^
       </categories>
       <tags>
         <tag>CCF</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Convolutional Neural Network</title>
+    <url>/2020/06/08/CNN/</url>
+    <content><![CDATA[<h4 id="Why-CNN-for-Image"><a href="#Why-CNN-for-Image" class="headerlink" title="Why CNN for Image"></a>Why CNN for Image</h4><p>可以使用相同的参数来提取不同图像中的同一种特征，这样就可以降低网络需要学习的参数</p>
+<p><img src="/2020/06/08/CNN/image-20200608170112931.png" alt="image-20200608170112931" style="zoom:50%;"></p>
+<p>CNN还有另外一种操作可以减少网络需要训练的参数，即下采样（subsampling），subsampling可以减少图像的大小。采样层就是使用pooling的技术来实现的，可以用max pooling或average pooling，获取某个像素点及其周围区域的最大值或平均值，将这些像素都用一个像素来表示，就可以缩小图像的大小。</p>
+<p><img src="/2020/06/08/CNN/image-20200608170313635.png" alt="image-20200608170313635" style="zoom:50%;"></p>
+<p>一个完整的CNN网络结构，由多个convolution和pooling层、以及全连接层组成。输入图像先经过多次的convolution、pooling，提取图像中的特征，再把这些特征flatten成一个一维的向量，即全连接层，最后再得出分类结果 cat or dog</p>
+<p><img src="/2020/06/08/CNN/image-20200608170601092.png" alt="image-20200608170601092" style="zoom:50%;"></p>
+<h4 id="convolution"><a href="#convolution" class="headerlink" title="convolution"></a>convolution</h4><p>对于我们想要提取图像中的两个特征，我们使用filter1和filter2这两个过滤器，</p>
+<p><img src="/2020/06/08/CNN/image-20200608172139320.png" alt="image-20200608172139320" style="zoom:50%;"></p>
+<p><img src="/2020/06/08/CNN/image-20200608172200059.png" alt="image-20200608172200059" style="zoom:50%;"></p>
+<p><img src="/2020/06/08/CNN/image-20200608172256317.png" alt="image-20200608172256317" style="zoom:50%;"></p>
+<p><img src="/2020/06/08/CNN/image-20200608172311889.png" alt="image-20200608172311889" style="zoom:50%;"></p>
+<h4 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h4><h5 id="local-field"><a href="#local-field" class="headerlink" title="local field"></a>local field</h5><p>下一层的neural 3，只与前层的9个neural相连接，而不是和前层的全部neural连接</p>
+<p><img src="/2020/06/08/CNN/image-20200608172513373.png" alt="image-20200608172513373" style="zoom:50%;"></p>
+<h5 id="weight-sharing"><a href="#weight-sharing" class="headerlink" title="weight sharing"></a>weight sharing</h5><p>对于图像的同一种特征，只需要一个过滤器filter即可，这样就可以进一步减少图像中的参数</p>
+<p><img src="/2020/06/08/CNN/image-20200608173532837.png" alt="image-20200608173532837" style="zoom:50%;"></p>
+<h4 id="Flatten"><a href="#Flatten" class="headerlink" title="Flatten"></a>Flatten</h4><p>每经过一次convolution和pooling操作，都会生成一张新的图片，这张新图片的大小比原图要小很多，减少了需要训练的参数</p>
+<p><img src="/2020/06/08/CNN/image-20200608173901231.png" alt="image-20200608173901231" style="zoom:50%;"></p>
+<p>再把经过多次convolution和pooling的图像flatten，展开成一维的向量，再输入全连接层</p>
+<p><img src="/2020/06/08/CNN/image-20200608174020284.png" alt="image-20200608174020284" style="zoom:50%;"></p>
+<h4 id="CNN-in-Keras"><a href="#CNN-in-Keras" class="headerlink" title="CNN in Keras"></a>CNN in Keras</h4><p>首先先介绍一下convolution和pooling对图像大小变化的公式，设输入图像的宽度和高度分别为w和h，卷积核大小为$F\times F$，步长stride大小为S，如果再加入Padding操作，经过卷积或池化操作后图像的大小为W和H</p>
+<script type="math/tex; mode=display">
+H/W=\frac{(h/w - F+2P)}{S}+1</script><p>这里引入了keras，先介绍几个主要函数的参数。</p>
+<p>我们可以先通过以下函数来生成一个convolution layer</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><div class="line">model2.add(Convolution2D(<span class="number">25</span>,<span class="number">3</span>,<span class="number">3</span>, input_shape=(<span class="number">28</span>,<span class="number">28</span>,<span class="number">1</span>)))</div></pre></td></tr></table></figure>
+<p>其中25表示filter的数量，$3\times3$表示filter的大小，<code>model2.add()</code>其中的<code>Convolution2D</code>还有一个参数input_shape，表示函数输入的图像大小，例子中表示一个单通道的$28\times28$图像，如果需要输入彩色图像，则是$28\times28\times3$</p>
+<p><img src="/2020/06/08/CNN/image-20200608174611511.png" alt="image-20200608174611511" style="zoom:50%;"></p>
+<p>下面我们将继续介绍通过convolution和pooling操作后参数数量的变化。对于下图中的例子，我们先考虑输入$28\times28$大小的图像，即$w=28,h=28$，这里默认步长为1，padding为0，经过$3\times3$卷积核大小的过滤，图像的大小就变为$26\times26$</p>
+<script type="math/tex; mode=display">
+\frac{28-3+2*0}{1}+1=26</script><p>由于输入的图像只有1个channel，卷积核大小为$3\times3$，因此第一层只有9个参数</p>
+<p>由于前一层有25个filter，经过一次convolution操作后，图像大小为$26\times26$，本层的neural个数为$25\times26\times26$；还需要再进行一次pooling操作，经过pooling操作之后图像大小为$13\times13$，max pooling操作没有filter，不算参数</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><div class="line">model2.add(MaxPooling2D((<span class="number">2</span>,<span class="number">2</span>)))</div></pre></td></tr></table></figure>
+<p>pooling操作后图像宽度的大小为，</p>
+<script type="math/tex; mode=display">
+\frac{26-2+2*0}{2}+1=13</script><p>经过一次convolution和pooling操作之后，neural个数为$25\times13\times13$；</p>
+<p>对于第二次的convolution操作，有50个大小为$3\times3$的filter，输出的neural数量为$50\times11\times11$；一次pooling操作所包含的区域大小为$2\times2$，输出的neural数量为$50\times5\times5$</p>
+<script type="math/tex; mode=display">
+\frac{13-3+2*0}{1}+1=11\\
+\frac{11-2+2*0}{2}+1=5</script><p><img src="/2020/06/08/CNN/image-20200608175330480.png" alt="image-20200608175330480" style="zoom:50%;"></p>
+<p>经过两次的convolution和pooling操作之后，neural的数量为$50\times5\times5$，下一步操作就是将这些神经元flatten，展开成一维向量；再输入激活函数和全连接层</p>
+<p><img src="/2020/06/08/CNN/image-20200608202515115.png" alt="image-20200608202515115" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>CNN</tag>
       </tags>
   </entry>
   <entry>
@@ -277,58 +329,6 @@ w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="/2020/06/06/Backpropagat
       <tags>
         <tag>Deep Learning</tag>
         <tag>backpropagation</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Convolutional Neural Network</title>
-    <url>/2020/06/08/CNN/</url>
-    <content><![CDATA[<h4 id="Why-CNN-for-Image"><a href="#Why-CNN-for-Image" class="headerlink" title="Why CNN for Image"></a>Why CNN for Image</h4><p>可以使用相同的参数来提取不同图像中的同一种特征，这样就可以降低网络需要学习的参数</p>
-<p><img src="/2020/06/08/CNN/image-20200608170112931.png" alt="image-20200608170112931" style="zoom:50%;"></p>
-<p>CNN还有另外一种操作可以减少网络需要训练的参数，即下采样（subsampling），subsampling可以减少图像的大小。采样层就是使用pooling的技术来实现的，可以用max pooling或average pooling，获取某个像素点及其周围区域的最大值或平均值，将这些像素都用一个像素来表示，就可以缩小图像的大小。</p>
-<p><img src="/2020/06/08/CNN/image-20200608170313635.png" alt="image-20200608170313635" style="zoom:50%;"></p>
-<p>一个完整的CNN网络结构，由多个convolution和pooling层、以及全连接层组成。输入图像先经过多次的convolution、pooling，提取图像中的特征，再把这些特征flatten成一个一维的向量，即全连接层，最后再得出分类结果 cat or dog</p>
-<p><img src="/2020/06/08/CNN/image-20200608170601092.png" alt="image-20200608170601092" style="zoom:50%;"></p>
-<h4 id="convolution"><a href="#convolution" class="headerlink" title="convolution"></a>convolution</h4><p>对于我们想要提取图像中的两个特征，我们使用filter1和filter2这两个过滤器，</p>
-<p><img src="/2020/06/08/CNN/image-20200608172139320.png" alt="image-20200608172139320" style="zoom:50%;"></p>
-<p><img src="/2020/06/08/CNN/image-20200608172200059.png" alt="image-20200608172200059" style="zoom:50%;"></p>
-<p><img src="/2020/06/08/CNN/image-20200608172256317.png" alt="image-20200608172256317" style="zoom:50%;"></p>
-<p><img src="/2020/06/08/CNN/image-20200608172311889.png" alt="image-20200608172311889" style="zoom:50%;"></p>
-<h4 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h4><h5 id="local-field"><a href="#local-field" class="headerlink" title="local field"></a>local field</h5><p>下一层的neural 3，只与前层的9个neural相连接，而不是和前层的全部neural连接</p>
-<p><img src="/2020/06/08/CNN/image-20200608172513373.png" alt="image-20200608172513373" style="zoom:50%;"></p>
-<h5 id="weight-sharing"><a href="#weight-sharing" class="headerlink" title="weight sharing"></a>weight sharing</h5><p>对于图像的同一种特征，只需要一个过滤器filter即可，这样就可以进一步减少图像中的参数</p>
-<p><img src="/2020/06/08/CNN/image-20200608173532837.png" alt="image-20200608173532837" style="zoom:50%;"></p>
-<h4 id="Flatten"><a href="#Flatten" class="headerlink" title="Flatten"></a>Flatten</h4><p>每经过一次convolution和pooling操作，都会生成一张新的图片，这张新图片的大小比原图要小很多，减少了需要训练的参数</p>
-<p><img src="/2020/06/08/CNN/image-20200608173901231.png" alt="image-20200608173901231" style="zoom:50%;"></p>
-<p>再把经过多次convolution和pooling的图像flatten，展开成一维的向量，再输入全连接层</p>
-<p><img src="/2020/06/08/CNN/image-20200608174020284.png" alt="image-20200608174020284" style="zoom:50%;"></p>
-<h4 id="CNN-in-Keras"><a href="#CNN-in-Keras" class="headerlink" title="CNN in Keras"></a>CNN in Keras</h4><p>首先先介绍一下convolution和pooling对图像大小变化的公式，设输入图像的宽度和高度分别为w和h，卷积核大小为$F\times F$，步长stride大小为S，如果再加入Padding操作，经过卷积或池化操作后图像的大小为W和H</p>
-<script type="math/tex; mode=display">
-H/W=\frac{(h/w - F+2P)}{S}+1</script><p>这里引入了keras，先介绍几个主要函数的参数。</p>
-<p>我们可以先通过以下函数来生成一个convolution layer</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><div class="line">model2.add(Convolution2D(<span class="number">25</span>,<span class="number">3</span>,<span class="number">3</span>, input_shape=(<span class="number">28</span>,<span class="number">28</span>,<span class="number">1</span>)))</div></pre></td></tr></table></figure>
-<p>其中25表示filter的数量，$3\times3$表示filter的大小，<code>model2.add()</code>其中的<code>Convolution2D</code>还有一个参数input_shape，表示函数输入的图像大小，例子中表示一个单通道的$28\times28$图像，如果需要输入彩色图像，则是$28\times28\times3$</p>
-<p><img src="/2020/06/08/CNN/image-20200608174611511.png" alt="image-20200608174611511" style="zoom:50%;"></p>
-<p>下面我们将继续介绍通过convolution和pooling操作后参数数量的变化。对于下图中的例子，我们先考虑输入$28\times28$大小的图像，即$w=28,h=28$，这里默认步长为1，padding为0，经过$3\times3$卷积核大小的过滤，图像的大小就变为$26\times26$</p>
-<script type="math/tex; mode=display">
-\frac{28-3+2*0}{1}+1=26</script><p>由于输入的图像只有1个channel，卷积核大小为$3\times3$，因此第一层只有9个参数</p>
-<p>由于前一层有25个filter，经过一次convolution操作后，图像大小为$26\times26$，本层的neural个数为$25\times26\times26$；还需要再进行一次pooling操作，经过pooling操作之后图像大小为$13\times13$，max pooling操作没有filter，不算参数</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><div class="line">model2.add(MaxPooling2D((<span class="number">2</span>,<span class="number">2</span>)))</div></pre></td></tr></table></figure>
-<p>pooling操作后图像宽度的大小为，</p>
-<script type="math/tex; mode=display">
-\frac{26-2+2*0}{2}+1=13</script><p>经过一次convolution和pooling操作之后，neural个数为$25\times13\times13$；</p>
-<p>对于第二次的convolution操作，有50个大小为$3\times3$的filter，输出的neural数量为$50\times11\times11$；一次pooling操作所包含的区域大小为$2\times2$，输出的neural数量为$50\times5\times5$</p>
-<script type="math/tex; mode=display">
-\frac{13-3+2*0}{1}+1=11\\
-\frac{11-2+2*0}{2}+1=5</script><p><img src="/2020/06/08/CNN/image-20200608175330480.png" alt="image-20200608175330480" style="zoom:50%;"></p>
-<p>经过两次的convolution和pooling操作之后，neural的数量为$50\times5\times5$，下一步操作就是将这些神经元flatten，展开成一维向量；再输入激活函数和全连接层</p>
-<p><img src="/2020/06/08/CNN/image-20200608202515115.png" alt="image-20200608202515115" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>CNN</tag>
       </tags>
   </entry>
   <entry>
@@ -553,6 +553,221 @@ L2:\ w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><ul>
       </tags>
   </entry>
   <entry>
+    <title>Deep Autoencoder</title>
+    <url>/2020/06/29/Deep-autoencoder/</url>
+    <content><![CDATA[<h4 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h4><p>对于输入大小为$28\times28$的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简（compact）的特征；</p>
+<p>但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；</p>
+<p>那么我们现在就先来做一个decoder，把code恢复成一张image；</p>
+<p>decoder和encoder单独是没办法训练的，因为是无监督学习，因此现在我们将这两者一起学习</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629094326636.png" alt="image-20200629094326636" style="zoom:50%;"></p>
+<h4 id="Recap-PCA"><a href="#Recap-PCA" class="headerlink" title="Recap: PCA"></a>Recap: PCA</h4><p>这里先回顾一下<a href="https://scarleatt.github.io/2020/06/28/dimension-reduction/" target="_blank" rel="external">PCA</a>，对于输入的图像$x$为$784$维，经过PCA降维，可以降低到324维的图像$\hat x$，在encoder和decoder的学习过程中，应达到的目标是最小化$(x-\hat x)^2$，这个结构可以看成是具有一个hidden layer的network</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629100232021.png" alt="image-20200629100232021" style="zoom:50%;"></p>
+<h4 id="Deep-Auto-encoder"><a href="#Deep-Auto-encoder" class="headerlink" title="Deep Auto-encoder"></a>Deep Auto-encoder</h4><h5 id="Structure"><a href="#Structure" class="headerlink" title="Structure"></a>Structure</h5><p>中间的hidden layer也可以不止一个，也可以是多个的hidden layer，这种结构就称作deep auto-encoder</p>
+<p><span style="color: red">注：encoder和decoder的结构不一定非得是对称的。</span></p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629101531636.png" alt="image-20200629101531636" style="zoom:50%;"></p>
+<h5 id="PCA-vs-Deep-Auto-encoder"><a href="#PCA-vs-Deep-Auto-encoder" class="headerlink" title="PCA. vs Deep Auto-encoder"></a>PCA. vs Deep Auto-encoder</h5><p>对于下图中的图像(0,1,2,3,4)，如果我们使用PCA，只有中间一个hidden layer，先从784维降到30维，再从30维恢复到784维，可以发现图像变得比较模糊；</p>
+<p>如果使用deep auto-encoder，先从784到1000，1000到500，500到250，250到300，再使用类似的encoder恢复图像，可以发现结果图像非常清晰</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629101748853.png" alt="image-20200629101748853" style="zoom:50%;"></p>
+<p>如果我们先使用PCA进行降维，把原图从784降到2维，对二维的数据进行可视化，可以发现不同的digit（不同的颜色代表不同的数字）都叠在一起了；</p>
+<p>如果使用deep autoencoder，可以发现这个数字都是分开的</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629102817764.png" alt="image-20200629102817764" style="zoom:50%;"></p>
+<h4 id="Text-Retrieval"><a href="#Text-Retrieval" class="headerlink" title="Text Retrieval"></a>Text Retrieval</h4><p>下图中蓝色的圆点都表示一个document，我们将输入的query也加入这个document，再计算查询的词汇query和每个document之间的inner product或similarity等，距离最近的document，similarity的值是最大的，因此会retrieval距离红色箭头最近的其他两个蓝色箭头</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629103259176.png" alt="image-20200629103259176" style="zoom:50%;"></p>
+<p>还有另外一种方法，使用一个vector来表示所有的词汇，vector对应的值就是每个character出现的次数；但这种方式没有考虑原来的语义顺序，每个character都是independent的</p>
+<p>在下图中，假设bag里面有2000个词汇，把输入的document或query变成对应的vector，再输入相应的encoder，降维成2维，对这二维的数据进行可视化，如右图所示，不同的颜色代表不同的document；</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629104843900.png" alt="image-20200629104843900" style="zoom:50%;"></p>
+<p>如果我们现在输入一个query，再降维到二维，可以发现和图中对应的document是有关的，我们就可以看到query所属的类别是Energy market</p>
+<p>但用LSA就得不到对应的结果</p>
+<h4 id="Similar-Image-Search"><a href="#Similar-Image-Search" class="headerlink" title="Similar Image Search"></a>Similar Image Search</h4><p>以图找图，如果我们只是做pixel上的相似程度，那么我们可以得到以下的结果，迈克杰克逊和马蹄铁也很像，这显然不符合常理</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110009994.png" alt="image-20200629110009994" style="zoom:50%;"></p>
+<p>我们可以把输入的image经过deep auto-encoder，变成一个code，再去做搜寻；由于auto-encoder是unsupervised learning，收集多少数据都行，不缺数据</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110134069.png" alt="image-20200629110134069" style="zoom:50%;"></p>
+<p>用deep auto-encoder来找类似迈克杰克逊，也可以得到更好的结果（至少全是人脸 ）</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110527622.png" alt="image-20200629110527622" style="zoom:50%;"></p>
+<h4 id="Pre-training-DNN"><a href="#Pre-training-DNN" class="headerlink" title="Pre-training DNN"></a>Pre-training DNN</h4><p>autoencoder也可以用到network的pre-training过程，来初始化所需要的weight；在下图中，如果我们要对第一个hidden layer的weight进行初始化，那么我们可以使用autoencoder，先将784维到1000维，再进行reconstruct，使1000维降到784维，来使$x,\hat x$之间的差值最小</p>
+<p>但这样可能会出现一个问题，由于1000维比784维更高维，autoencoder很可能将input直接embed到1000维里，再进行恢复，这样很可能network什么都没有学到；</p>
+<p>对于这个问题，我们可以把1000维再加上一个regularization，比如L1，这1000维的数据中有某些维必须是为0的，这样就可以避免autoencoder直接将input进行embed</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110742780.png" alt="image-20200629110742780" style="zoom:50%;"></p>
+<p>我们可以学习这样的一个autoencoder，先将input转化成一个1000维的vector，再把这个vector转化为<span style="color: green">1000维的code</span>，再把这个code转化为1000维的vector；使input和output越接近越好，<strong>把$W^2$的值保存下来</strong>，</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629111953318.png" alt="image-20200629111953318" style="zoom:50%;"></p>
+<p>再继续下一个layer，使用第三个autoencoder</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629112400780.png" alt="image-20200629112400780" style="zoom:50%;"></p>
+<p>学习到$W^1,W^2,W^3$之后，就把这个weight作为初始值，$W^4$则进行random init，再使用<span style="color: red">back propagation</span>进行fine-tune</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629112513885.png" alt="image-20200629112513885" style="zoom:50%;"></p>
+<p><span style="color: red">如果我们有大量的unlabeled data，labeled data只有很小一部分，那么我们就可以通过这种无监督学习的方式来初始化weight，再使用剩下的label data来对network进行fine-tune即可</span></p>
+<h4 id="De-noising-auto-encoder"><a href="#De-noising-auto-encoder" class="headerlink" title="De-noising auto-encoder"></a>De-noising auto-encoder</h4><p>对于原来的input x，我们先加入一些noise得到$x’$，进行encode之后再进行decode，使之和最早的input之间的差值最小；encoder现在不仅学习到了encode这件事，还学习到了把noise过滤掉这件事</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629113151447.png" alt="image-20200629113151447" style="zoom:50%;"></p>
+<h4 id="Auto-encoder-for-CNN"><a href="#Auto-encoder-for-CNN" class="headerlink" title="Auto-encoder for CNN"></a>Auto-encoder for CNN</h4><p><img src="/2020/06/29/Deep-autoencoder/image-20200629114519998.png" alt="image-20200629114519998" style="zoom:50%;"></p>
+<h5 id="CNN-Unpooling"><a href="#CNN-Unpooling" class="headerlink" title="CNN -Unpooling"></a>CNN -Unpooling</h5><p>在pooling时，会选择四个方框中的最大值，并记住最大值的location；</p>
+<p>在upooling时，就会用到上面的location</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629114730398.png" alt="image-20200629114730398" style="zoom:50%;"></p>
+<h5 id="Deconvolution"><a href="#Deconvolution" class="headerlink" title="Deconvolution"></a>Deconvolution</h5><p>Deconvolution其实就是在做convolution，</p>
+<p><img src="/2020/06/29/Deep-autoencoder/image-20200629114919151.png" alt="image-20200629114919151" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Deep Autoencoder</tag>
+        <tag>Autoencoder</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Introduction of Generative Adversarial Network (GAN)</title>
+    <url>/2020/07/04/GAN-intro/</url>
+    <content><![CDATA[<p>有很多种不同类型GAN，可以在这里查看<a href="https://github.com/hindupuravinash/the-gan-zoo" target="_blank" rel="external">https://github.com/hindupuravinash/the-gan-zoo</a></p>
+<h4 id="Generation"><a href="#Generation" class="headerlink" title="Generation"></a>Generation</h4><p>对于Image generation，要实现的是输入一个vector，输出一个image；而对于Sentence generation，则实现的是输入一个vector，输出为一个sentence。那么GAN就是用来实现这个中间的NN Generator。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704140831850.png" alt="image-20200704140831850" style="zoom:60%;"></p>
+<h4 id="Basic-Idea-of-GAN"><a href="#Basic-Idea-of-GAN" class="headerlink" title="Basic Idea of GAN"></a>Basic Idea of GAN</h4><h5 id="Generator-vs-Discriminator"><a href="#Generator-vs-Discriminator" class="headerlink" title="Generator vs Discriminator"></a>Generator vs Discriminator</h5><p>这个generator可以是一个神经网络，也可以是一个函数f。</p>
+<p>输入的vector表示我们要generate图像的某种特征，比如vector的第一维如果代表头发的长度，我们现在把这个值设得很大，那么就会generate一张头发很长的图像；如果我们改变了vector倒数第二维（头发为蓝色）的值，可以发现generate的新图头发变蓝了，由于此时只改变了头发的颜色，其他特征都是类似的，所以只有头发的颜色发生了变化。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704141328771.png" alt="image-20200704141328771" style="zoom:60%;"></p>
+<p>Discriminator可以是一个神经网络，也可以是一个函数f。输入是一张image，输出为scalar，数值越大，表示这个image越接近真实图像。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704141804394.png" alt="image-20200704141804394" style="zoom:60%;"></p>
+<p>在大自然中，某种鸟类以枯叶蝶为食。枯叶蝶必须不断地进化，使其看起来越来越像一个枯叶；它的天敌也在不断地进化，如果枯叶蝶看起来并不像叶子，那么它就会被捕食。其中枯叶蝶就相当于一个generator，天敌就相当于discriminator。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704142147503.png" alt="image-20200704142147503" style="zoom:60%;"></p>
+<p>第一代的generator不知道怎样产生二次元的头像，所以会产生一些看起来很像是杂讯的图像，再把这个图像输入discriminator，来判断这是不是一张真实的图像，第一代的discriminator可以根据图像是否有颜色，来正确分辨真实图像和生成的图像；</p>
+<p>那么第二代的generator的目标就是想办法骗过第一代的discriminator，生成了有颜色的图像，随之discriminator也会发生进化，学习了真实图像和生成图像之间的差异（真实图像是有嘴的）；</p>
+<p>第三代的generator生成的图像可以骗过第二代的discriminator，然后discriminator也会继续进化，……</p>
+<p>generator和discriminator都会不断地进化，因此generator会产生越来越像真实图片的图像。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704142643957.png" alt="image-20200704142643957" style="zoom:60%;"></p>
+<p>这个过程可以看作是一个对抗的过程，也看一用另外一个和平的比喻来进行解释。generator相当于一个学生，discriminator相当于一个老师，学生并不知道真实的图像长什么样，但老师看过很多真实的图像，就知道真实的图像应该长什么样子。</p>
+<p>第一代的generator相当于一年级的学生，重复着上述的过程。学生会画得越来越好，老师会越来越严格，那么学生最后就可以画出很想二次元人物的图像了。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704145218224.png" alt="image-20200704145218224" style="zoom:60%;"></p>
+<h5 id="Algorithm"><a href="#Algorithm" class="headerlink" title="Algorithm"></a>Algorithm</h5><p>首先需要随机初始化G和D的参数，</p>
+<p>Step 1：我们需要先调整D的参数，就必须先把G的参数固定。首先把随机产生的vector输入G（fix），生成新的图像之后与从database中sampled出来的图像进行比较。要实现D如果输入真实图像，就会得高分，与1越接近越好，如果输入生成的图像，就会得低分，与0越接近越好。有了这个标准，我们就可以来训练这个discriminator D；</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704145820900.png" alt="image-20200704145820900" style="zoom:60%;"></p>
+<p>Step2：训练好discriminator D之后，我们就可以fix D，来调整generator G。一个vector输入第一代G之后，会生成一张图像，再输入D（fix），就可以得到一个很低的分数（0.13）。那么G训练的目标就是使生成的图片可以“骗”过D，即生成的图片使D给出一个比较高的分数。由于D看过真实的图像，如果给出了很高的分数，就可以说明G生成的图像和真实图像是很接近的。</p>
+<p>在真实的代码实现中，我们通常会把generator和discriminator当成是一个大的network，其中generator的输出就可以看作是一个hidden layer，discriminator所在的层参数是fix的，不用调整，只需要根据整个网络的输出来调整generator的参数。</p>
+<p>由于我们希望使discriminator的输出分数值越大越好，因此这里使用了梯度上升算法 <strong>Gradient Ascent</strong>，也就是梯度下降算法前面多乘了一个负号。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704150612063.png" alt="image-20200704150612063" style="zoom:60%;"></p>
+<p>现在来叙述一下总的算法流程，$\theta_d,\theta_g$分别表示discriminator和generator的参数。</p>
+<p>Learning D：首先从数据库中取出m个真实图片，再根据一个分布随机产生m个vector作为输入$\{z^1,z^2,..,z^m\}$，此时fix G的参数，得到G生成的图像$\{\tilde x^1,\tilde x^2,..,\tilde x^m\}$，再输入discriminator D，不断调整$\theta_d$，使得得到的分数越大越好，</p>
+<script type="math/tex; mode=display">
+\tilde V =\frac{1}{m}\sum_{i=1}^m logD(x^i)+\frac{1}{m}\sum_{i=1}^mlog(1-D(\tilde x^i))</script><p>其中$D(x^i)$表示真实图像所得到的分数，D的目标就是使真实图像获得的分数越大越好；而$D(\tilde x^i)$表示G生成的图像所得到的分数，应该越小越好，所以前面加了负号。为了方便求梯度，在式子前面介入了log，求出梯度$\Delta \tilde V(\theta_d)$，再更新$\theta_d$的值，</p>
+<script type="math/tex; mode=display">
+\theta_d\leftarrow \theta_d+\eta\Delta \tilde V(\theta_d)</script><p><img src="/2020/07/04/GAN-intro/image-20200704152035892.png" alt="image-20200704152035892" style="zoom: 67%;"></p>
+<p>Learning G：把D训练好之后，我们就可以fix D，来训练generator G的参数。首先也需要从分布中随机生成一些噪声z，再输入G，$G(z^i)$再输入D，得到相对应的分数，G的目标是想办法骗过D，不断调整参数$\theta_g$，使生成的图像所得到的分数越高越好，</p>
+<script type="math/tex; mode=display">
+\tilde V =\frac{1}{m}\sum_{i=1}^m logD(G(z^i))</script><p>求出梯度$\Delta \tilde V(\theta_g)$，再更新$\theta_g$的值，</p>
+<script type="math/tex; mode=display">
+\theta_g\leftarrow \theta_g+\eta\Delta \tilde V(\theta_g)</script><p>在每个iteration里，都会进行这个步骤，先训练discriminator，再训练generator；这两个步骤会反复进行。</p>
+<h5 id="Anime-Face-Generation"><a href="#Anime-Face-Generation" class="headerlink" title="Anime Face Generation"></a>Anime Face Generation</h5><p>结果展示</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704154439615.png" alt="image-20200704154439615" style="zoom:60%;"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704154503164.png" alt="image-20200704154503164" style="zoom:60%;"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704154528242.png" alt="image-20200704154528242" style="zoom:60%;"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704154544426.png" alt="image-20200704154544426" style="zoom:60%;"></p>
+<h4 id="GAN-as-structured-learning"><a href="#GAN-as-structured-learning" class="headerlink" title="GAN as structured learning"></a>GAN as structured learning</h4><h5 id="Structed-learning"><a href="#Structed-learning" class="headerlink" title="Structed learning"></a>Structed learning</h5><p><img src="/2020/07/04/GAN-intro/image-20200704155106998.png" alt="image-20200704155106998" style="zoom:60%;"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704155202016.png" alt="image-20200704155202016" style="zoom:60%;"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704155216943.png" alt="image-20200704155216943" style="zoom:60%;"></p>
+<h5 id="Why-Structured-Learning-Challenging"><a href="#Why-Structured-Learning-Challenging" class="headerlink" title="Why Structured Learning Challenging?"></a>Why Structured Learning Challenging?</h5><p>One-shot/Zero-shot Learning，如果有的类别都没有范例，或者只有很少一部分的范例。</p>
+<p>而structured learning是一种极端的One-shot learning，由于output为一个structure，比如一个句子，可能这些句子在training data中从来没出现过，那么如何学习去输出一个从来没看到的structure，machine必须学会去创造。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704155430757.png" alt="image-20200704155430757" style="zoom:60%;"></p>
+<p>machine还必须学会如何去planing，有全局观；比如sentence generation中，如果只看第一句话，会认为是负面的，但如果你把整句话都看完，就会发现这整句话在表达一个正面的意思。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704160320919.png" alt="image-20200704160320919" style="zoom:60%;"></p>
+<h5 id="Structured-Learning-Approach"><a href="#Structured-Learning-Approach" class="headerlink" title="Structured Learning Approach"></a>Structured Learning Approach</h5><p>structured learning有两套方法：</p>
+<ul>
+<li>Bottom up，机器在生成一个部件时，会先生成多个component，这种方法一个很大的问题就是容易失去大局观；</li>
+<li>Top down，产生一个完整的物件之后，再去从整体上看产生物件好不好。</li>
+</ul>
+<p><img src="/2020/07/04/GAN-intro/image-20200704160908741.png" alt="image-20200704160908741" style="zoom:60%;"></p>
+<p>把这两种方法结合起来就是Generator。</p>
+<h4 id="Can-Generator-learn-by-itself"><a href="#Can-Generator-learn-by-itself" class="headerlink" title="Can Generator learn by itself?"></a>Can Generator learn by itself?</h4><h5 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h5><p>对于Generator，首先输入不同的vector，就可以输出不同的图片。如果我们现在输入1对应的vetor，generator会生成一张image，目标是使image和真实的图像越接近越好，这个真实图像现在generator能看到，那么这不就和一般的supervised learning一摸一样了吗？</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704161403974.png" alt="image-20200704161403974" style="zoom:60%;"></p>
+<p>那么我们怎么知道输入的那些vector的数值呢？</p>
+<p>我们可以用一个Encoder来表示，把image输入这个NN Encoder，就会输出对应的特征，把图像的特征用vector来表示即可。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704162515395.png" alt="image-20200704162515395" style="zoom:60%;"></p>
+<h5 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h5><p>Auto-encoder分为encoder和decoder。对于输入的$28\times 28$图像，先用encoder使得输入的图像变成code，decoder把这个code再恢复成原来的图像，这两者会一起进行学习。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704162914235.png" alt="image-20200704162914235" style="zoom:60%;"></p>
+<p>目标是使得input和output越接近越好。这里的decoder就相当于一个generator，我们可以随机输入一个vector，使decoder（generator）生成一张对应的图像。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704163120815.png" alt="image-20200704163120815" style="zoom:60%;"></p>
+<p>这里的code可以训练成二维的。如果code是$(-1.5\ \ 0)^T$，输入decoder会生成对应的图像，即图中的0；如果code是$(1.5\ \ 0)^T$，输入decoder会生成对应的图像，即图中的1.</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704163400098.png" alt="image-20200704163400098" style="zoom:60%;"></p>
+<p>如果我们在这个范围内等距地sample，就有以下结果，</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704163657239.png" alt="image-20200704163657239" style="zoom:60%;"></p>
+<p>但使用auto-encoder也会产生一些问题，如果输入vector为a，那么会产生1的图像，如果输入vector为b，会产生斜着的1；</p>
+<p>Q：那么0.5a+0.5b的vector会产生什么样的结果呢？</p>
+<p>A：由于NN Generator是network，不是线性的，很可能产生不是数字的图像。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704163846888.png" alt="image-20200704163846888" style="zoom:60%;"></p>
+<h5 id="VAE（Variational-Auto-encoder）"><a href="#VAE（Variational-Auto-encoder）" class="headerlink" title="VAE（Variational Auto-encoder）"></a>VAE（<strong>Variational Auto-encoder</strong>）</h5><p>我们可以用VAE来解决这个问题，输入vector a之后，generator不仅产生code m，还会产生每一维的方差$\sigma$，还有一个额外的vector e（noise），最后根据$c_i=exp(\sigma_i)\times e_i+m_i$得出需要的code；decoder需要根据这个带有noise的code，来还原出和input类似的图像。</p>
+<p>那么现在machine不仅看到vector a会产生数字，看到vector b也会产生数字；看到vector a+noise也会产生数字，看到vector b+noise也会产生数字。</p>
+<p>因此，<span style="color: red">对于现在的generator，如果input是在训练的时候从来没见过的vector，也可能output出合理的object。</span></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704164316549.png" alt="image-20200704164316549" style="zoom:60%;"></p>
+<h5 id="What-do-we-miss"><a href="#What-do-we-miss" class="headerlink" title="What do we miss?"></a>What do we miss?</h5><p>现在有一张真实图像Target，通过generator生成的图像为generated image，目标是使这两者之间的差距越小越好。通常这两者之间的差距，可以通过每个像素点之间的差值来进行计算，比如可以将两张图像都表示成一个vector，再通过L1/L2计算两者之间的distance。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704165316903.png" alt="image-20200704165316903" style="zoom:60%;"></p>
+<p>在一种理想的条件下，generator可以生成和Target完全一样的图像。但实际上，generator通常会犯一些错误，在生成的时候会有一些取舍，在一些地方会不得不做出妥协，选择在什么地方做妥协，对结果也会产生至关重要的影响。</p>
+<p>在下图中，有一个Target，和4个Generated image。上面两张图像和target之间的差距只有一个pixel，下面两张图像和target之间的差距有6个pixel。但如果根据我们自己的观点，前两张图效果并不好，看起来并不像人写的数字，后两张图效果要好很多，因为后两张图只是对其中的一些笔画进行了延长。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704171245512.png" alt="image-20200704171245512" style="zoom:60%;"></p>
+<p>因此，<span style="color: red">我们并不能单纯地只是让我们的output和target越像越好，否则就会产生上述的生成效果。</span></p>
+<p>Structure  learning的输出是一个structure，由多个component组成，每个component之间的关系是非常重要的。对于下图中生成的数字图像，左边的图像有个pixel所在的位置很奇怪，不像是人手写的；但在右图中，我们添加了一些深色的pixel（和原来的pixel相邻）进去，就看起来很像是人手写的了。</p>
+<p>但在neural network中，我们很难把component之间的关系放进去。在下图的网络结构中，layer L是output，表示颜色的深浅。如果layer L-1是给定的，那么输出的neural之间其实是independent的，值不会互相影响，也不会互相配合来产生一个相同的颜色。<span style="color: red">为了把不同component之间的关系也考虑进去，我们可以加入多个hidden layer</span>。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704172041505.png" alt="image-20200704172041505" style="zoom:60%;"></p>
+<h5 id="GAN-vs-VAE"><a href="#GAN-vs-VAE" class="headerlink" title="GAN vs VAE"></a>GAN vs VAE</h5><p><span style="color: red">如果现在有相同的network，我们用GAN和VAE都可以用来生成图像，但VAE需要用更大的network（更多的hidden layer）才能达到和GAN接近的结果。</span></p>
+<p>蓝色的点为实验结果，绿色的点表示target，VAE最好能训练的结果也就是图中的蓝色分布了，因为VAE很难考虑不同的dimension之间的关系。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704174238271.png" alt="image-20200704174238271" style="zoom:60%;"></p>
+<h4 id="Can-Discriminator-generate"><a href="#Can-Discriminator-generate" class="headerlink" title="Can Discriminator generate?"></a>Can Discriminator generate?</h4><h5 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h5><p>我们再来回顾一下discriminator的概念，input为一张图像x，output为分数$D(X)$，数值越大，表示这个image越接近真实图像。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704174542805.png" alt="image-20200704174542805" style="zoom:60%;"></p>
+<p>我们也可以用discriminator来生成图像。</p>
+<p>我们之前提到用generator也可以用来生成图像，但考虑每个component之间的关系是非常困难的。对于discriminator，考虑每个component之间的关系，就相对而言比较容易了。</p>
+<p>Q：为什么使用discriminator来生成图像就有优势？</p>
+<p>A：<u>在生成的时候，来考虑每个component之间的关系是很麻烦的；但在整个图片都生成完的时候，再来判断图像每个component之间的关系就很容易了。</u></p>
+<p>在下图中，如果用discriminator来生成图像，就可以根据分数来判断生成的图像到底好不好，比如左边的数字2，就可以给一个很低的分数，右边的数字2，就可以给一个很高的分数。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704174830772.png" alt="image-20200704174830772" style="zoom:60%;"></p>
+<p>Q：那么我们怎么来实际来判断分数呢？</p>
+<p>A：discriminator很可能是convolution neural network，对于其中的一个CNN filter（上图所示），可以来判断某个pixel周围是不是都是empty的，如果是的话，就给他低分。</p>
+<p>如果我们现在有一个discriminator，我们可以通过以下方式来生成图像：穷举所有可能的输入x，看哪一个输入可以得到最高的分数。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704175856938.png" alt="image-20200704175856938" style="zoom:60%;"></p>
+<h5 id="Discriminator-Training"><a href="#Discriminator-Training" class="headerlink" title="Discriminator - Training"></a>Discriminator - Training</h5><p>Discriminator的训练不仅需要真实的图像，也需要一些negative example。如果只有真实的图像，从来没有看过negative example，也不知道negative example长什么样子，D就有可能对所有的输入都输出一个很好的分数1.</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704180319560.png" alt="image-20200704180319560" style="zoom:60%;"></p>
+<p>如何选择negative example也至关重要。在下图中，（左）如果negative example可以让机器很容易就分别出来（0，fake），那么如果我们输入一个相对比较清晰的图像，D就会得出一个很好的分数0.9，其实这个图像是fake的，这并不是我们想看到的结果；（右）如果输入的是非常真实的negative example，D才可以很好地鉴别real or fake image。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704180657495.png" alt="image-20200704180657495" style="zoom:60%;"></p>
+<p>我们可以通过以下步骤来生成realistic negative examples，首先给出positive和negative examples。再进行不断地循环。</p>
+<p>在循环中，D要给positive example很高的分数，给negative example很低的分数；学习出这个discriminator D之后，再用D来做generation（比如穷举找出$\tilde x$，使得分数取得最大值）；</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704181511902.png" alt="image-20200704181511902" style="zoom:60%;"></p>
+<p>找出这些D觉得还不错的图像$\tilde x$之后，进入下一次循环，将$\tilde x$与positive examples进行比较，学习出新的discriminator，……</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704181540562.png" alt="image-20200704181540562" style="zoom:60%;"></p>
+<p>我们现在假设object分布在一维空间中，把object输入D，得到分数$D(x)$。在下图中，$D(x)$再real example区域取得了很不错的分数，在其他区域则分数相对较低。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704182329306.png" alt="image-20200704182329306" style="zoom:60%;"></p>
+<p>但实际上，x所在的空间是非常高维的，</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704183029426.png" alt="image-20200704183029426" style="zoom:60%;"></p>
+<h5 id="Generator-v-s-Discriminator"><a href="#Generator-v-s-Discriminator" class="headerlink" title="Generator v.s. Discriminator"></a>Generator v.s. Discriminator</h5><p>Generator：</p>
+<ul>
+<li>优点：很容易做生成；</li>
+<li>缺点：不容易考虑component之间的关系。</li>
+</ul>
+<p>Discriminator：</p>
+<ul>
+<li>优点：可以很容易考虑每个component之间的关系；</li>
+<li>缺点：生成很慢。</li>
+</ul>
+<p><img src="/2020/07/04/GAN-intro/image-20200704205720871.png" alt="image-20200704205720871" style="zoom:60%;"></p>
+<h5 id="Generator-Discriminator"><a href="#Generator-Discriminator" class="headerlink" title="Generator + Discriminator"></a>Generator + Discriminator</h5><p>现在我们将Generator和Discriminator结合起来，使用G来生成negative examples，现在D就不用那么费力去寻找对应的negative examples了。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704212740716.png" alt="image-20200704212740716" style="zoom:60%;"></p>
+<h5 id="Benefit-of-GAN"><a href="#Benefit-of-GAN" class="headerlink" title="Benefit of GAN"></a>Benefit of GAN</h5><ol>
+<li>从Discriminator的角度来看，现在我们只需要使用generator来生成negative examples，相比于之前的方法，可以更加高效；</li>
+<li>从Generator的角度来看，虽然还是生成component-by-component的object，但此时G得到的feedback不再是L1或者L2 loss了，不用再去计算pixel之间的相似度，而是更具有全局观的discriminator给出的分数评价。</li>
+</ol>
+<p><img src="/2020/07/04/GAN-intro/image-20200704213005168.png" alt="image-20200704213005168" style="zoom:60%;"></p>
+<h5 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h5><p>这里的数据还使用的上文VAE的数据，只是训练方法调整为了GAN。蓝色点点是generator要学习的目标，前文的VAE没有discriminator，可以发现现在GAN比VAE的效果要好很多。在真实的环境中，VAE产生的人脸会比较模糊，GAN生成的人脸就没那么模糊。</p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704213601037.png" alt="image-20200704213601037" style="zoom:60%;"></p>
+<h4 id="A-little-bit-theory"><a href="#A-little-bit-theory" class="headerlink" title="A little bit theory"></a>A little bit theory</h4><p><img src="/2020/07/04/GAN-intro/image-20200704220645444.png" alt="image-20200704220645444"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704220652727.png" alt="image-20200704220652727"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704220700604.png" alt="image-20200704220700604"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704220709098.png" alt="image-20200704220709098"></p>
+<p><img src="/2020/07/04/GAN-intro/image-20200704220719432.png" alt="image-20200704220719432"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Auto-Encoder</tag>
+        <tag>VAE</tag>
+        <tag>GAN</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Explainable Machine Learning</title>
     <url>/2020/06/12/Explainable-AI/</url>
     <content><![CDATA[<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p>机器不仅要告诉我们结果cat，还要告诉我们为什么 </p>
@@ -728,221 +943,6 @@ P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p>
       </tags>
   </entry>
   <entry>
-    <title>Introduction of Generative Adversarial Network (GAN)</title>
-    <url>/2020/07/04/GAN-intro/</url>
-    <content><![CDATA[<p>有很多种不同类型GAN，可以在这里查看<a href="https://github.com/hindupuravinash/the-gan-zoo" target="_blank" rel="external">https://github.com/hindupuravinash/the-gan-zoo</a></p>
-<h4 id="Generation"><a href="#Generation" class="headerlink" title="Generation"></a>Generation</h4><p>对于Image generation，要实现的是输入一个vector，输出一个image；而对于Sentence generation，则实现的是输入一个vector，输出为一个sentence。那么GAN就是用来实现这个中间的NN Generator。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704140831850.png" alt="image-20200704140831850" style="zoom:50%;"></p>
-<h4 id="Basic-Idea-of-GAN"><a href="#Basic-Idea-of-GAN" class="headerlink" title="Basic Idea of GAN"></a>Basic Idea of GAN</h4><h5 id="Generator-vs-Discriminator"><a href="#Generator-vs-Discriminator" class="headerlink" title="Generator vs Discriminator"></a>Generator vs Discriminator</h5><p>这个generator可以是一个神经网络，也可以是一个函数f。</p>
-<p>输入的vector表示我们要generate图像的某种特征，比如vector的第一维如果代表头发的长度，我们现在把这个值设得很大，那么就会generate一张头发很长的图像；如果我们改变了vector倒数第二维（头发为蓝色）的值，可以发现generate的新图头发变蓝了，由于此时只改变了头发的颜色，其他特征都是类似的，所以只有头发的颜色发生了变化。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704141328771.png" alt="image-20200704141328771" style="zoom:50%;"></p>
-<p>Discriminator可以是一个神经网络，也可以是一个函数f。输入是一张image，输出为scalar，数值越大，表示这个image越接近真实图像。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704141804394.png" alt="image-20200704141804394" style="zoom:50%;"></p>
-<p>在大自然中，某种鸟类以枯叶蝶为食。枯叶蝶必须不断地进化，使其看起来越来越像一个枯叶；它的天敌也在不断地进化，如果枯叶蝶看起来并不像叶子，那么它就会被捕食。其中枯叶蝶就相当于一个generator，天敌就相当于discriminator。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704142147503.png" alt="image-20200704142147503" style="zoom:50%;"></p>
-<p>第一代的generator不知道怎样产生二次元的头像，所以会产生一些看起来很像是杂讯的图像，再把这个图像输入discriminator，来判断这是不是一张真实的图像，第一代的discriminator可以根据图像是否有颜色，来正确分辨真实图像和生成的图像；</p>
-<p>那么第二代的generator的目标就是想办法骗过第一代的discriminator，生成了有颜色的图像，随之discriminator也会发生进化，学习了真实图像和生成图像之间的差异（真实图像是有嘴的）；</p>
-<p>第三代的generator生成的图像可以骗过第二代的discriminator，然后discriminator也会继续进化，……</p>
-<p>generator和discriminator都会不断地进化，因此generator会产生越来越像真实图片的图像。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704142643957.png" alt="image-20200704142643957" style="zoom:50%;"></p>
-<p>这个过程可以看作是一个对抗的过程，也看一用另外一个和平的比喻来进行解释。generator相当于一个学生，discriminator相当于一个老师，学生并不知道真实的图像长什么样，但老师看过很多真实的图像，就知道真实的图像应该长什么样子。</p>
-<p>第一代的generator相当于一年级的学生，重复着上述的过程。学生会画得越来越好，老师会越来越严格，那么学生最后就可以画出很想二次元人物的图像了。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704145218224.png" alt="image-20200704145218224" style="zoom:50%;"></p>
-<h5 id="Algorithm"><a href="#Algorithm" class="headerlink" title="Algorithm"></a>Algorithm</h5><p>首先需要随机初始化G和D的参数，</p>
-<p>Step 1：我们需要先调整D的参数，就必须先把G的参数固定。首先把随机产生的vector输入G（fix），生成新的图像之后与从database中sampled出来的图像进行比较。要实现D如果输入真实图像，就会得高分，与1越接近越好，如果输入生成的图像，就会得低分，与0越接近越好。有了这个标准，我们就可以来训练这个discriminator D；</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704145820900.png" alt="image-20200704145820900" style="zoom:50%;"></p>
-<p>Step2：训练好discriminator D之后，我们就可以fix D，来调整generator G。一个vector输入第一代G之后，会生成一张图像，再输入D（fix），就可以得到一个很低的分数（0.13）。那么G训练的目标就是使生成的图片可以“骗”过D，即生成的图片使D给出一个比较高的分数。由于D看过真实的图像，如果给出了很高的分数，就可以说明G生成的图像和真实图像是很接近的。</p>
-<p>在真实的代码实现中，我们通常会把generator和discriminator当成是一个大的network，其中generator的输出就可以看作是一个hidden layer，discriminator所在的层参数是fix的，不用调整，只需要根据整个网络的输出来调整generator的参数。</p>
-<p>由于我们希望使discriminator的输出分数值越大越好，因此这里使用了梯度上升算法 <strong>Gradient Ascent</strong>，也就是梯度下降算法前面多乘了一个负号。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704150612063.png" alt="image-20200704150612063" style="zoom:50%;"></p>
-<p>现在来叙述一下总的算法流程，$\theta_d,\theta_g$分别表示discriminator和generator的参数。</p>
-<p>Learning D：首先从数据库中取出m个真实图片，再根据一个分布随机产生m个vector作为输入$\{z^1,z^2,..,z^m\}$，此时fix G的参数，得到G生成的图像$\{\tilde x^1,\tilde x^2,..,\tilde x^m\}$，再输入discriminator D，不断调整$\theta_d$，使得得到的分数越大越好，</p>
-<script type="math/tex; mode=display">
-\tilde V =\frac{1}{m}\sum_{i=1}^m logD(x^i)+\frac{1}{m}\sum_{i=1}^mlog(1-D(\tilde x^i))</script><p>其中$D(x^i)$表示真实图像所得到的分数，D的目标就是使真实图像获得的分数越大越好；而$D(\tilde x^i)$表示G生成的图像所得到的分数，应该越小越好，所以前面加了负号。为了方便求梯度，在式子前面介入了log，求出梯度$\Delta \tilde V(\theta_d)$，再更新$\theta_d$的值，</p>
-<script type="math/tex; mode=display">
-\theta_d\leftarrow \theta_d+\eta\Delta \tilde V(\theta_d)</script><p><img src="/2020/07/04/GAN-intro/image-20200704152035892.png" alt="image-20200704152035892" style="zoom: 67%;"></p>
-<p>Learning G：把D训练好之后，我们就可以fix D，来训练generator G的参数。首先也需要从分布中随机生成一些噪声z，再输入G，$G(z^i)$再输入D，得到相对应的分数，G的目标是想办法骗过D，不断调整参数$\theta_g$，使生成的图像所得到的分数越高越好，</p>
-<script type="math/tex; mode=display">
-\tilde V =\frac{1}{m}\sum_{i=1}^m logD(G(z^i))</script><p>求出梯度$\Delta \tilde V(\theta_g)$，再更新$\theta_g$的值，</p>
-<script type="math/tex; mode=display">
-\theta_g\leftarrow \theta_g+\eta\Delta \tilde V(\theta_g)</script><p>在每个iteration里，都会进行这个步骤，先训练discriminator，再训练generator；这两个步骤会反复进行。</p>
-<h5 id="Anime-Face-Generation"><a href="#Anime-Face-Generation" class="headerlink" title="Anime Face Generation"></a>Anime Face Generation</h5><p>结果展示</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704154439615.png" alt="image-20200704154439615" style="zoom:50%;"></p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704154503164.png" alt="image-20200704154503164" style="zoom:50%;"></p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704154528242.png" alt="image-20200704154528242" style="zoom:50%;"></p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704154544426.png" alt="image-20200704154544426" style="zoom:50%;"></p>
-<h4 id="GAN-as-structured-learning"><a href="#GAN-as-structured-learning" class="headerlink" title="GAN as structured learning"></a>GAN as structured learning</h4><h5 id="Structed-learning"><a href="#Structed-learning" class="headerlink" title="Structed learning"></a>Structed learning</h5><p><img src="/2020/07/04/GAN-intro/image-20200704155106998.png" alt="image-20200704155106998" style="zoom:50%;"></p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704155202016.png" alt="image-20200704155202016" style="zoom:50%;"></p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704155216943.png" alt="image-20200704155216943" style="zoom:50%;"></p>
-<h5 id="Why-Structured-Learning-Challenging"><a href="#Why-Structured-Learning-Challenging" class="headerlink" title="Why Structured Learning Challenging?"></a>Why Structured Learning Challenging?</h5><p>One-shot/Zero-shot Learning，如果有的类别都没有范例，或者只有很少一部分的范例。</p>
-<p>而structured learning是一种极端的One-shot learning，由于output为一个structure，比如一个句子，可能这些句子在training data中从来没出现过，那么如何学习去输出一个从来没看到的structure，machine必须学会去创造。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704155430757.png" alt="image-20200704155430757" style="zoom:50%;"></p>
-<p>machine还必须学会如何去planing，有全局观；比如sentence generation中，如果只看第一句话，会认为是负面的，但如果你把整句话都看完，就会发现这整句话在表达一个正面的意思。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704160320919.png" alt="image-20200704160320919" style="zoom:50%;"></p>
-<h5 id="Structured-Learning-Approach"><a href="#Structured-Learning-Approach" class="headerlink" title="Structured Learning Approach"></a>Structured Learning Approach</h5><p>structured learning有两套方法：</p>
-<ul>
-<li>Bottom up，机器在生成一个部件时，会先生成多个component，这种方法一个很大的问题就是容易失去大局观；</li>
-<li>Top down，产生一个完整的物件之后，再去从整体上看产生物件好不好。</li>
-</ul>
-<p><img src="/2020/07/04/GAN-intro/image-20200704160908741.png" alt="image-20200704160908741" style="zoom:50%;"></p>
-<p>把这两种方法结合起来就是Generator。</p>
-<h4 id="Can-Generator-learn-by-itself"><a href="#Can-Generator-learn-by-itself" class="headerlink" title="Can Generator learn by itself?"></a>Can Generator learn by itself?</h4><h5 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h5><p>对于Generator，首先输入不同的vector，就可以输出不同的图片。如果我们现在输入1对应的vetor，generator会生成一张image，目标是使image和真实的图像越接近越好，这个真实图像现在generator能看到，那么这不就和一般的supervised learning一摸一样了吗？</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704161403974.png" alt="image-20200704161403974" style="zoom:50%;"></p>
-<p>那么我们怎么知道输入的那些vector的数值呢？</p>
-<p>我们可以用一个Encoder来表示，把image输入这个NN Encoder，就会输出对应的特征，把图像的特征用vector来表示即可。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704162515395.png" alt="image-20200704162515395" style="zoom:50%;"></p>
-<h5 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h5><p>Auto-encoder分为encoder和decoder。对于输入的$28\times 28$图像，先用encoder使得输入的图像变成code，decoder把这个code再恢复成原来的图像，这两者会一起进行学习。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704162914235.png" alt="image-20200704162914235" style="zoom:50%;"></p>
-<p>目标是使得input和output越接近越好。这里的decoder就相当于一个generator，我们可以随机输入一个vector，使decoder（generator）生成一张对应的图像。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704163120815.png" alt="image-20200704163120815" style="zoom:50%;"></p>
-<p>这里的code可以训练成二维的。如果code是$(-1.5\ \ 0)^T$，输入decoder会生成对应的图像，即图中的0；如果code是$(1.5\ \ 0)^T$，输入decoder会生成对应的图像，即图中的1.</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704163400098.png" alt="image-20200704163400098" style="zoom:50%;"></p>
-<p>如果我们在这个范围内等距地sample，就有以下结果，</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704163657239.png" alt="image-20200704163657239" style="zoom:50%;"></p>
-<p>但使用auto-encoder也会产生一些问题，如果输入vector为a，那么会产生1的图像，如果输入vector为b，会产生斜着的1；</p>
-<p>Q：那么0.5a+0.5b的vector会产生什么样的结果呢？</p>
-<p>A：由于NN Generator是network，不是线性的，很可能产生不是数字的图像。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704163846888.png" alt="image-20200704163846888" style="zoom:50%;"></p>
-<h5 id="VAE（Variational-Auto-encoder）"><a href="#VAE（Variational-Auto-encoder）" class="headerlink" title="VAE（Variational Auto-encoder）"></a>VAE（<strong>Variational Auto-encoder</strong>）</h5><p>我们可以用VAE来解决这个问题，输入vector a之后，generator不仅产生code m，还会产生每一维的方差$\sigma$，还有一个额外的vector e（noise），最后根据$c_i=exp(\sigma_i)\times e_i+m_i$得出需要的code；decoder需要根据这个带有noise的code，来还原出和input类似的图像。</p>
-<p>那么现在machine不仅看到vector a会产生数字，看到vector b也会产生数字；看到vector a+noise也会产生数字，看到vector b+noise也会产生数字。</p>
-<p>因此，<span style="color: red">对于现在的generator，如果input是在训练的时候从来没见过的vector，也可能output出合理的object。</span></p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704164316549.png" alt="image-20200704164316549" style="zoom:50%;"></p>
-<h5 id="What-do-we-miss"><a href="#What-do-we-miss" class="headerlink" title="What do we miss?"></a>What do we miss?</h5><p>现在有一张真实图像Target，通过generator生成的图像为generated image，目标是使这两者之间的差距越小越好。通常这两者之间的差距，可以通过每个像素点之间的差值来进行计算，比如可以将两张图像都表示成一个vector，再通过L1/L2计算两者之间的distance。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704165316903.png" alt="image-20200704165316903" style="zoom:50%;"></p>
-<p>在一种理想的条件下，generator可以生成和Target完全一样的图像。但实际上，generator通常会犯一些错误，在生成的时候会有一些取舍，在一些地方会不得不做出妥协，选择在什么地方做妥协，对结果也会产生至关重要的影响。</p>
-<p>在下图中，有一个Target，和4个Generated image。上面两张图像和target之间的差距只有一个pixel，下面两张图像和target之间的差距有6个pixel。但如果根据我们自己的观点，前两张图效果并不好，看起来并不像人写的数字，后两张图效果要好很多，因为后两张图只是对其中的一些笔画进行了延长。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704171245512.png" alt="image-20200704171245512" style="zoom:50%;"></p>
-<p>因此，<span style="color: red">我们并不能单纯地只是让我们的output和target越像越好，否则就会产生上述的生成效果。</span></p>
-<p>Structure  learning的输出是一个structure，由多个component组成，每个component之间的关系是非常重要的。对于下图中生成的数字图像，左边的图像有个pixel所在的位置很奇怪，不像是人手写的；但在右图中，我们添加了一些深色的pixel（和原来的pixel相邻）进去，就看起来很像是人手写的了。</p>
-<p>但在neural network中，我们很难把component之间的关系放进去。在下图的网络结构中，layer L是output，表示颜色的深浅。如果layer L-1是给定的，那么输出的neural之间其实是independent的，值不会互相影响，也不会互相配合来产生一个相同的颜色。<span style="color: red">为了把不同component之间的关系也考虑进去，我们可以加入多个hidden layer</span>。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704172041505.png" alt="image-20200704172041505" style="zoom:50%;"></p>
-<h5 id="GAN-vs-VAE"><a href="#GAN-vs-VAE" class="headerlink" title="GAN vs VAE"></a>GAN vs VAE</h5><p><span style="color: red">如果现在有相同的network，我们用GAN和VAE都可以用来生成图像，但VAE需要用更大的network（更多的hidden layer）才能达到和GAN接近的结果。</span></p>
-<p>蓝色的点为实验结果，绿色的点表示target，VAE最好能训练的结果也就是图中的蓝色分布了，因为VAE很难考虑不同的dimension之间的关系。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704174238271.png" alt="image-20200704174238271" style="zoom:50%;"></p>
-<h4 id="Can-Discriminator-generate"><a href="#Can-Discriminator-generate" class="headerlink" title="Can Discriminator generate?"></a>Can Discriminator generate?</h4><h5 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h5><p>我们再来回顾一下discriminator的概念，input为一张图像x，output为分数$D(X)$，数值越大，表示这个image越接近真实图像。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704174542805.png" alt="image-20200704174542805" style="zoom:50%;"></p>
-<p>我们也可以用discriminator来生成图像。</p>
-<p>我们之前提到用generator也可以用来生成图像，但考虑每个component之间的关系是非常困难的。对于discriminator，考虑每个component之间的关系，就相对而言比较容易了。</p>
-<p>Q：为什么使用discriminator来生成图像就有优势？</p>
-<p>A：<u>在生成的时候，来考虑每个component之间的关系是很麻烦的；但在整个图片都生成完的时候，再来判断图像每个component之间的关系就很容易了。</u></p>
-<p>在下图中，如果用discriminator来生成图像，就可以根据分数来判断生成的图像到底好不好，比如左边的数字2，就可以给一个很低的分数，右边的数字2，就可以给一个很高的分数。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704174830772.png" alt="image-20200704174830772" style="zoom:50%;"></p>
-<p>Q：那么我们怎么来实际来判断分数呢？</p>
-<p>A：discriminator很可能是convolution neural network，对于其中的一个CNN filter（上图所示），可以来判断某个pixel周围是不是都是empty的，如果是的话，就给他低分。</p>
-<p>如果我们现在有一个discriminator，我们可以通过以下方式来生成图像：穷举所有可能的输入x，看哪一个输入可以得到最高的分数。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704175856938.png" alt="image-20200704175856938" style="zoom:50%;"></p>
-<h5 id="Discriminator-Training"><a href="#Discriminator-Training" class="headerlink" title="Discriminator - Training"></a>Discriminator - Training</h5><p>Discriminator的训练不仅需要真实的图像，也需要一些negative example。如果只有真实的图像，从来没有看过negative example，也不知道negative example长什么样子，D就有可能对所有的输入都输出一个很好的分数1.</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704180319560.png" alt="image-20200704180319560" style="zoom:50%;"></p>
-<p>如何选择negative example也至关重要。在下图中，（左）如果negative example可以让机器很容易就分别出来（0，fake），那么如果我们输入一个相对比较清晰的图像，D就会得出一个很好的分数0.9，其实这个图像是fake的，这并不是我们想看到的结果；（右）如果输入的是非常真实的negative example，D才可以很好地鉴别real or fake image。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704180657495.png" alt="image-20200704180657495" style="zoom:50%;"></p>
-<p>我们可以通过以下步骤来生成realistic negative examples，首先给出positive和negative examples。再进行不断地循环。</p>
-<p>在循环中，D要给positive example很高的分数，给negative example很低的分数；学习出这个discriminator D之后，再用D来做generation（比如穷举找出$\tilde x$，使得分数取得最大值）；</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704181511902.png" alt="image-20200704181511902" style="zoom:50%;"></p>
-<p>找出这些D觉得还不错的图像$\tilde x$之后，进入下一次循环，将$\tilde x$与positive examples进行比较，学习出新的discriminator，……</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704181540562.png" alt="image-20200704181540562" style="zoom:50%;"></p>
-<p>我们现在假设object分布在一维空间中，把object输入D，得到分数$D(x)$。在下图中，$D(x)$再real example区域取得了很不错的分数，在其他区域则分数相对较低。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704182329306.png" alt="image-20200704182329306" style="zoom:50%;"></p>
-<p>但实际上，x所在的空间是非常高维的，</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704183029426.png" alt="image-20200704183029426" style="zoom:50%;"></p>
-<h5 id="Generator-v-s-Discriminator"><a href="#Generator-v-s-Discriminator" class="headerlink" title="Generator v.s. Discriminator"></a>Generator v.s. Discriminator</h5><p>Generator：</p>
-<ul>
-<li>优点：很容易做生成；</li>
-<li>缺点：不容易考虑component之间的关系。</li>
-</ul>
-<p>Discriminator：</p>
-<ul>
-<li>优点：可以很容易考虑每个component之间的关系；</li>
-<li>缺点：生成很慢。</li>
-</ul>
-<p><img src="/2020/07/04/GAN-intro/image-20200704205720871.png" alt="image-20200704205720871" style="zoom:50%;"></p>
-<h5 id="Generator-Discriminator"><a href="#Generator-Discriminator" class="headerlink" title="Generator + Discriminator"></a>Generator + Discriminator</h5><p>现在我们将Generator和Discriminator结合起来，使用G来生成negative examples，现在D就不用那么费力去寻找对应的negative examples了。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704212740716.png" alt="image-20200704212740716" style="zoom:50%;"></p>
-<h5 id="Benefit-of-GAN"><a href="#Benefit-of-GAN" class="headerlink" title="Benefit of GAN"></a>Benefit of GAN</h5><ol>
-<li>从Discriminator的角度来看，现在我们只需要使用generator来生成negative examples，相比于之前的方法，可以更加高效；</li>
-<li>从Generator的角度来看，虽然还是生成component-by-component的object，但此时G得到的feedback不再是L1或者L2 loss了，不用再去计算pixel之间的相似度，而是更具有全局观的discriminator给出的分数评价。</li>
-</ol>
-<p><img src="/2020/07/04/GAN-intro/image-20200704213005168.png" alt="image-20200704213005168" style="zoom:50%;"></p>
-<h5 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h5><p>这里的数据还使用的上文VAE的数据，只是训练方法调整为了GAN。蓝色点点是generator要学习的目标，前文的VAE没有discriminator，可以发现现在GAN比VAE的效果要好很多。在真实的环境中，VAE产生的人脸会比较模糊，GAN生成的人脸就没那么模糊。</p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704213601037.png" alt="image-20200704213601037" style="zoom:50%;"></p>
-<h4 id="A-little-bit-theory"><a href="#A-little-bit-theory" class="headerlink" title="A little bit theory"></a>A little bit theory</h4><p><img src="/2020/07/04/GAN-intro/image-20200704220645444.png" alt="image-20200704220645444"></p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704220652727.png" alt="image-20200704220652727"></p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704220700604.png" alt="image-20200704220700604"></p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704220709098.png" alt="image-20200704220709098"></p>
-<p><img src="/2020/07/04/GAN-intro/image-20200704220719432.png" alt="image-20200704220719432"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Auto-Encoder</tag>
-        <tag>VAE</tag>
-        <tag>GAN</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Deep Autoencoder</title>
-    <url>/2020/06/29/Deep-autoencoder/</url>
-    <content><![CDATA[<h4 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h4><p>对于输入大小为$28\times28$的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简（compact）的特征；</p>
-<p>但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；</p>
-<p>那么我们现在就先来做一个decoder，把code恢复成一张image；</p>
-<p>decoder和encoder单独是没办法训练的，因为是无监督学习，因此现在我们将这两者一起学习</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629094326636.png" alt="image-20200629094326636" style="zoom:50%;"></p>
-<h4 id="Recap-PCA"><a href="#Recap-PCA" class="headerlink" title="Recap: PCA"></a>Recap: PCA</h4><p>这里先回顾一下<a href="https://scarleatt.github.io/2020/06/28/dimension-reduction/" target="_blank" rel="external">PCA</a>，对于输入的图像$x$为$784$维，经过PCA降维，可以降低到324维的图像$\hat x$，在encoder和decoder的学习过程中，应达到的目标是最小化$(x-\hat x)^2$，这个结构可以看成是具有一个hidden layer的network</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629100232021.png" alt="image-20200629100232021" style="zoom:50%;"></p>
-<h4 id="Deep-Auto-encoder"><a href="#Deep-Auto-encoder" class="headerlink" title="Deep Auto-encoder"></a>Deep Auto-encoder</h4><h5 id="Structure"><a href="#Structure" class="headerlink" title="Structure"></a>Structure</h5><p>中间的hidden layer也可以不止一个，也可以是多个的hidden layer，这种结构就称作deep auto-encoder</p>
-<p><span style="color: red">注：encoder和decoder的结构不一定非得是对称的。</span></p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629101531636.png" alt="image-20200629101531636" style="zoom:50%;"></p>
-<h5 id="PCA-vs-Deep-Auto-encoder"><a href="#PCA-vs-Deep-Auto-encoder" class="headerlink" title="PCA. vs Deep Auto-encoder"></a>PCA. vs Deep Auto-encoder</h5><p>对于下图中的图像(0,1,2,3,4)，如果我们使用PCA，只有中间一个hidden layer，先从784维降到30维，再从30维恢复到784维，可以发现图像变得比较模糊；</p>
-<p>如果使用deep auto-encoder，先从784到1000，1000到500，500到250，250到300，再使用类似的encoder恢复图像，可以发现结果图像非常清晰</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629101748853.png" alt="image-20200629101748853" style="zoom:50%;"></p>
-<p>如果我们先使用PCA进行降维，把原图从784降到2维，对二维的数据进行可视化，可以发现不同的digit（不同的颜色代表不同的数字）都叠在一起了；</p>
-<p>如果使用deep autoencoder，可以发现这个数字都是分开的</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629102817764.png" alt="image-20200629102817764" style="zoom:50%;"></p>
-<h4 id="Text-Retrieval"><a href="#Text-Retrieval" class="headerlink" title="Text Retrieval"></a>Text Retrieval</h4><p>下图中蓝色的圆点都表示一个document，我们将输入的query也加入这个document，再计算查询的词汇query和每个document之间的inner product或similarity等，距离最近的document，similarity的值是最大的，因此会retrieval距离红色箭头最近的其他两个蓝色箭头</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629103259176.png" alt="image-20200629103259176" style="zoom:50%;"></p>
-<p>还有另外一种方法，使用一个vector来表示所有的词汇，vector对应的值就是每个character出现的次数；但这种方式没有考虑原来的语义顺序，每个character都是independent的</p>
-<p>在下图中，假设bag里面有2000个词汇，把输入的document或query变成对应的vector，再输入相应的encoder，降维成2维，对这二维的数据进行可视化，如右图所示，不同的颜色代表不同的document；</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629104843900.png" alt="image-20200629104843900" style="zoom:50%;"></p>
-<p>如果我们现在输入一个query，再降维到二维，可以发现和图中对应的document是有关的，我们就可以看到query所属的类别是Energy market</p>
-<p>但用LSA就得不到对应的结果</p>
-<h4 id="Similar-Image-Search"><a href="#Similar-Image-Search" class="headerlink" title="Similar Image Search"></a>Similar Image Search</h4><p>以图找图，如果我们只是做pixel上的相似程度，那么我们可以得到以下的结果，迈克杰克逊和马蹄铁也很像，这显然不符合常理</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110009994.png" alt="image-20200629110009994" style="zoom:50%;"></p>
-<p>我们可以把输入的image经过deep auto-encoder，变成一个code，再去做搜寻；由于auto-encoder是unsupervised learning，收集多少数据都行，不缺数据</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110134069.png" alt="image-20200629110134069" style="zoom:50%;"></p>
-<p>用deep auto-encoder来找类似迈克杰克逊，也可以得到更好的结果（至少全是人脸 ）</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110527622.png" alt="image-20200629110527622" style="zoom:50%;"></p>
-<h4 id="Pre-training-DNN"><a href="#Pre-training-DNN" class="headerlink" title="Pre-training DNN"></a>Pre-training DNN</h4><p>autoencoder也可以用到network的pre-training过程，来初始化所需要的weight；在下图中，如果我们要对第一个hidden layer的weight进行初始化，那么我们可以使用autoencoder，先将784维到1000维，再进行reconstruct，使1000维降到784维，来使$x,\hat x$之间的差值最小</p>
-<p>但这样可能会出现一个问题，由于1000维比784维更高维，autoencoder很可能将input直接embed到1000维里，再进行恢复，这样很可能network什么都没有学到；</p>
-<p>对于这个问题，我们可以把1000维再加上一个regularization，比如L1，这1000维的数据中有某些维必须是为0的，这样就可以避免autoencoder直接将input进行embed</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629110742780.png" alt="image-20200629110742780" style="zoom:50%;"></p>
-<p>我们可以学习这样的一个autoencoder，先将input转化成一个1000维的vector，再把这个vector转化为<span style="color: green">1000维的code</span>，再把这个code转化为1000维的vector；使input和output越接近越好，<strong>把$W^2$的值保存下来</strong>，</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629111953318.png" alt="image-20200629111953318" style="zoom:50%;"></p>
-<p>再继续下一个layer，使用第三个autoencoder</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629112400780.png" alt="image-20200629112400780" style="zoom:50%;"></p>
-<p>学习到$W^1,W^2,W^3$之后，就把这个weight作为初始值，$W^4$则进行random init，再使用<span style="color: red">back propagation</span>进行fine-tune</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629112513885.png" alt="image-20200629112513885" style="zoom:50%;"></p>
-<p><span style="color: red">如果我们有大量的unlabeled data，labeled data只有很小一部分，那么我们就可以通过这种无监督学习的方式来初始化weight，再使用剩下的label data来对network进行fine-tune即可</span></p>
-<h4 id="De-noising-auto-encoder"><a href="#De-noising-auto-encoder" class="headerlink" title="De-noising auto-encoder"></a>De-noising auto-encoder</h4><p>对于原来的input x，我们先加入一些noise得到$x’$，进行encode之后再进行decode，使之和最早的input之间的差值最小；encoder现在不仅学习到了encode这件事，还学习到了把noise过滤掉这件事</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629113151447.png" alt="image-20200629113151447" style="zoom:50%;"></p>
-<h4 id="Auto-encoder-for-CNN"><a href="#Auto-encoder-for-CNN" class="headerlink" title="Auto-encoder for CNN"></a>Auto-encoder for CNN</h4><p><img src="/2020/06/29/Deep-autoencoder/image-20200629114519998.png" alt="image-20200629114519998" style="zoom:50%;"></p>
-<h5 id="CNN-Unpooling"><a href="#CNN-Unpooling" class="headerlink" title="CNN -Unpooling"></a>CNN -Unpooling</h5><p>在pooling时，会选择四个方框中的最大值，并记住最大值的location；</p>
-<p>在upooling时，就会用到上面的location</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629114730398.png" alt="image-20200629114730398" style="zoom:50%;"></p>
-<h5 id="Deconvolution"><a href="#Deconvolution" class="headerlink" title="Deconvolution"></a>Deconvolution</h5><p>Deconvolution其实就是在做convolution，</p>
-<p><img src="/2020/06/29/Deep-autoencoder/image-20200629114919151.png" alt="image-20200629114919151" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Deep Autoencoder</tag>
-        <tag>Autoencoder</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Recurrent Neural Network</title>
     <url>/2020/06/10/RNN/</url>
     <content><![CDATA[<h4 id="Example-Application"><a href="#Example-Application" class="headerlink" title="Example Application"></a>Example Application</h4><p>将Taipei作为向量的输入，由于RNN网络是有记忆的，因此可以根据输入来预测目的地dest，以及离开的时间</p>
@@ -1106,204 +1106,34 @@ a=h(c')f(z_0)=7</script><p><img src="/2020/06/10/RNN/image-20200609225546396.png
       </tags>
   </entry>
   <entry>
-    <title>Generative Models</title>
-    <url>/2020/06/29/generative-models/</url>
-    <content><![CDATA[<blockquote>
-<p>本文主要叙述了集中generative models，包括PixelRNN、VAE，GAN（生成对抗网络）；还叙述了auto-encoder和VAE的区别，以及VAE进行改进的地方，通过高斯混合模型来对VAE的原理进行了详细介绍。</p>
-</blockquote>
-<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>Generative Models可以分为三大类：pixelRNN、autoencoder、GAN；</p>
-<p>现在machine可以对猫狗进行分类，在将来machine就可以通过自己的学习画出一只猫来。</p>
-<p><img src="/2020/06/29/generative-models/image-20200629141407487.png" alt="image-20200629141407487" style="zoom: 67%;"></p>
-<h4 id="PixelRNN"><a href="#PixelRNN" class="headerlink" title="PixelRNN"></a>PixelRNN</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>如果要生成一张图像，我们可以先生成这张图像的第一个红色pixel，再根据这个pixel生成下一个蓝色pixel，每个pixel可以用一个三维的vector来进行表示</p>
-<p><img src="/2020/06/29/generative-models/image-20200629141521860.png" alt="image-20200629141521860" style="zoom: 67%;"></p>
-<p>这是一个无监督学习的过程，并不需要对data进行标注</p>
-<p>如果我们现在把下图中的狗下半身遮住，可以让machine学习出下半身的图片</p>
-<p><img src="/2020/06/29/generative-models/image-20200629141945697.png" alt="image-20200629141945697" style="zoom: 67%;"></p>
-<p>也可以用到声讯号</p>
-<p><img src="/2020/06/29/generative-models/image-20200629142331286.png" alt="image-20200629142331286" style="zoom:50%;"></p>
-<p><img src="/2020/06/29/generative-models/image-20200629142353897.png" alt="image-20200629142353897" style="zoom:50%;"></p>
-<h5 id="Practicing-Generation-Models-Pokemon-Creation"><a href="#Practicing-Generation-Models-Pokemon-Creation" class="headerlink" title="Practicing Generation Models: Pokémon Creation"></a>Practicing Generation Models: Pokémon Creation</h5><p><img src="/2020/06/29/generative-models/image-20200629142516414.png" alt="image-20200629142516414" style="zoom: 67%;"></p>
-<p>做这个实验时，有一些tips；</p>
-<p>由于每个pixel都使用三维的vector来表示（RGB），只有三个channel的值相差特别大时，才会有颜色特别鲜明的图片，但学习结果并不能保证这一点，因此图片会会比较灰蒙蒙的，最后得出来的结果会不太好；</p>
-<p>因此，每个pixel最好使用1-of-N encoding来表示，输入一个绿色的方块，vector中只有绿色方块对应的dimensions为1，其他都是0；但有$256\times256$种颜色，颜色种类非常繁多，可以先对类似的颜色做一个<strong>clustering</strong>，类似的颜色都用同一种颜色来表示，可以把颜色数量缩小到167种</p>
-<p><img src="/2020/06/29/generative-models/image-20200629142535096.png" alt="image-20200629142535096" style="zoom: 67%;"></p>
-<p>下面开始正式做实验</p>
-<p><img src="/2020/06/29/generative-models/image-20200629143804656.png" alt="image-20200629143804656" style="zoom: 67%;"></p>
-<p><img src="/2020/06/29/generative-models/image-20200629143843226.png" alt="image-20200629143843226" style="zoom: 33%;"></p>
-<h4 id="VAE"><a href="#VAE" class="headerlink" title="VAE"></a>VAE</h4><h5 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h5><p><img src="/2020/06/29/generative-models/image-20200629144022672.png" alt="image-20200629144022672" style="zoom: 67%;"></p>
-<h5 id="VAE-1"><a href="#VAE-1" class="headerlink" title="VAE"></a>VAE</h5><p>VAE不像autoencoder那样，直接得出code，经过了一些变换，即$c_i=exp(\sigma_i)\times e_i+m_i$，也是来最小化reconstruction error</p>
-<p><img src="/2020/06/29/generative-models/image-20200629144250780.png" alt="image-20200629144250780" style="zoom: 67%;"></p>
-<p>minimize的目标还有</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><h5 id="Pokemon-Creation"><a href="#Pokemon-Creation" class="headerlink" title="Pokémon Creation"></a>Pokémon Creation</h5><p>input一个宝可梦图像，进行encoder、decoder，得到reconstruct之后的图像，其中code是10-dim的；</p>
-<p>现在我们只选择其中的2个纬度出来，其他纬度的值都固定不变，对这个二维的坐标轴，放入不同的点，再输入对应的Decoder，观察其合成出来的image；如果使用不同维度的点，就可以观察到不同维度生成的image；根据不同的维度，我们就可以根据自己的需要，调整这些维度的值，从而得出我们想要的结果</p>
-<p><img src="/2020/06/29/generative-models/image-20200629150656140.png" alt="image-20200629150656140" style="zoom: 50%;"></p>
-<p>部分结果展示</p>
-<p><img src="/2020/06/29/generative-models/image-20200629151406932.png" alt="image-20200629151406932" style="zoom:50%;"></p>
-<h5 id="Why-VAE"><a href="#Why-VAE" class="headerlink" title="Why VAE?"></a>Why VAE?</h5><p>对于一张满月的图像，先进行encode，再进行decode，使得input和output之间的差值最小化；对半月的图像输入也如此</p>
-<p><img src="/2020/06/29/generative-models/image-20200629152107223.png" alt="image-20200629152107223" style="zoom: 67%;"></p>
-<p>对于encoder的其中一个输出$\sigma_i$，表示noise的variance，需要再输入exp函数进行计算，保证其值是大于0的，是machine自己学习的</p>
-<p><img src="/2020/06/29/generative-models/image-20200629153400892.png" alt="image-20200629153400892" style="zoom: 67%;"></p>
-<p>但只有noise是不够的，还需要加一些限制</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>在下图中，蓝色的线表示$exp(\sigma_i)$，红色的线表示$(1+\sigma_i)$，绿色的线表示两者的差值，可以发现在原点处差值是最小的，$\sigma _i$的值接近1，variance的值接近1</p>
-<p><img src="/2020/06/29/generative-models/image-20200629153918937.png" alt="image-20200629153918937" style="zoom:50%;"></p>
-<p>$(m_i)^2$为正则项regularization term，让结果不那么overfiting</p>
-<p>在下图中，为一个高维的坐标（用一维进行了展示），曲线表示image是宝可梦的概率，可以在图中看到，对于一些很像宝可梦的image，$P(x)$值很高，但对于一些比较模棱两可的image，$P(x)$值就很低</p>
-<p><img src="/2020/06/29/generative-models/image-20200629154606838.png" alt="image-20200629154606838" style="zoom: 33%;"></p>
-<p>那么我们到底要怎么来评估这个probability distribution呢？答案是高斯混合模型</p>
-<h5 id="Gaussian-Mixture-Model"><a href="#Gaussian-Mixture-Model" class="headerlink" title="Gaussian Mixture Model"></a>Gaussian Mixture Model</h5><p>对于下图中的曲线图，蓝色表示多个高斯模型，黑色曲线表示这些模型通过一定的weight进行叠加之后的结果</p>
-<p>现在有很多个gaussian model（1，2，3，4，5…），且都对应了自己的weight $P(m)$（蓝色方块），<span style="color: red">要先根据weight选对应的gaussian，再决定到底要从gaussian中sample哪些data</span> ;我们使用$P(m)$表示每个gaussian的weight，$P(x|m)$表示从对应的gaussian中选出data x的概率</p>
-<p>x并不是代表着某个类别，而是用一个vector来进行表示，每个维度表示不同的特征，即 <u>Distributed representation is better than cluster</u></p>
-<p><img src="/2020/06/29/generative-models/image-20200629155005437.png" alt="image-20200629155005437" style="zoom: 67%;"></p>
-<p>我们现在从正态分布中sample一个data z，z的每个dimension就表示某种attribute；</p>
-<p>根据z我们就可以得出高斯分布mean和variance，即$\mu (z),\sigma(z)$，z有无穷多个可能，mean和variance也有无穷多个可能</p>
-<p><img src="/2020/06/29/generative-models/image-20200629160314318.png" alt="image-20200629160314318" style="zoom: 67%;"></p>
-<p>在最下方的图中，我们可以认为最中间的圆点被sample到的几率最大，其他圆点被sample到的几率就相对较小；<span style="color: red">每个z被sample到之后，根据某个function，计算出对应的mean和variance，都对应着不同的gaussian model</span></p>
-<p>这个function可以是一个neural network，input为z，output为$\mu(z),\sigma(z)$</p>
-<p>由于现在是连续的z，$P(z)$的形式也发生了变化，</p>
-<script type="math/tex; mode=display">
-P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><h5 id="Maximizing-Likelihood"><a href="#Maximizing-Likelihood" class="headerlink" title="Maximizing Likelihood"></a><strong>Maximizing Likelihood</strong></h5><p>现在我们需要找到z和$\mu(z),\sigma(z)$之间的关系，用network来进行计算的时候也需要一个评估手段，这里我们采用的是最大化$L=\sum_xlogP(x)$，即最大化我们已经看到的image x的likelihood；</p>
-<p>那么我们现在就有一个NN的参数需要调整，来最大化likelihood L；</p>
-<p><img src="/2020/06/29/generative-models/image-20200629162138964.png" alt="image-20200629162138964" style="zoom: 67%;"></p>
-<p>现在我们还有另外一个distribution $q(z|x)$，和前一个是相反的，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，其mean和variance，即$\mu’(x),\sigma’(x)$</p>
-<p>$P(x|z)$表示z决定了x的distribution，$q(z|x)$表示x决定了z的distribution</p>
-<p><img src="/2020/06/29/generative-models/image-20200629163947560.png" alt="image-20200629163947560" style="zoom:45%;"></p>
-<p>其中$P(z,x)=P(x)P(z|x)$</p>
-<p><img src="/2020/06/29/generative-models/image-20200629165559403.png" alt="image-20200629165559403" style="zoom:50%;"></p>
-<p>我们本来需要调整的参数是$P(x|z)$，使得$P(x)$取得最大值，从而使likelihood取得最大值；但现在的lower bound为$L_b$，是$log(P(x))$的最小值，其中$P(z)$是已知的，不知道的参数是$P(x|z),q(z|x)$，两项都需要调整</p>
-<p>Q：这里为什么突然多了一项需要调整的参数？</p>
-<p>A：这里并不知道lower bound和likelihood之间的关系到底是怎样的，有可能升高了lower bound，但likelihood反而下降了；引入q就可以解决这个问题</p>
-<p>根据原式子，即$P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z$，只和$P(x|z)$有关，与$q(z|x)$是无关的，即下图中<span style="color: purple">方框</span>部分是不变的，</p>
-<p><img src="/2020/06/29/generative-models/image-20200629170614939.png" alt="image-20200629170614939" style="zoom: 67%;"></p>
-<p><strong>如果我们现在固定$P(x|z)$，想通过$q(z|x)$来使$L_b$ 最大化，那么对应的KL divergence就会最小化，到一种很极端的情况，KL divergence会变为0；如果$L_b$继续上升，那么肯定会超出该区域，因此对应的$logP(x)$也会继续上升；KL divergence不断变小的过程，$q(z|x),P(z|x)$之间的差距也会不断缩小</strong></p>
-<p>因此，这个过程不仅让likelihood变得越来越大，也会找到和$P(x|z)$接近的$q(z|x)$</p>
-<p><img src="/2020/06/29/generative-models/image-20200629171631388.png" alt="image-20200629171631388" style="zoom:50%;"></p>
-<p>对于$q(z|x)$，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，就可以知道z是从什么样的gaussian distribution得出来的</p>
-<h5 id="Connection-with-Network"><a href="#Connection-with-Network" class="headerlink" title="Connection with Network"></a><strong>Connection with Network</strong></h5><p>现在我们的目标就是最小化$q(z|x),P(z)$之间的KL divergence，即使$q(z|x)$和normal distribution $P(z)$越接近越好，即minimize</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>还需要maximizing</p>
-<script type="math/tex; mode=display">
-P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><p><img src="/2020/06/29/generative-models/image-20200629172034668.png" alt="image-20200629172034668" style="zoom:50%;"></p>
-<p>对于input的x，我们先输入网络$NN’$，得到获取z的gaussian distribution；sample得到z之后，再输入网络$NN$，得到获取x的gaussian distribution，使得新分布的mean和x越接近越好</p>
-<h5 id="KL散度"><a href="#KL散度" class="headerlink" title="KL散度"></a>KL散度</h5><blockquote>
-<p>所谓KL散度，是指当某分布q(x)被用于近似p(x)时的信息损失。</p>
-</blockquote>
-<p>计算公式为</p>
-<script type="math/tex; mode=display">
-KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href="#Problems-of-VAE" class="headerlink" title="Problems of VAE"></a>Problems of VAE</h5><p><img src="/2020/06/29/generative-models/image-20200629174600157.png" alt="image-20200629174600157" style="zoom:50%;"></p>
-<h4 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h4><h5 id="The-evolution-of-generation"><a href="#The-evolution-of-generation" class="headerlink" title="The evolution of generation"></a>The evolution of generation</h5><p>v1：会generate一些奇怪的图片，然后会有一个第一代的discriminator，来辨别到底哪一个是real image；</p>
-<p>V2： generater会根据上一次discriminater的结果进行调整，第二代生成的image就和真实的image更像了，再把image输入第二代discriminator，再进行比较；</p>
-<p>…….</p>
-<p><img src="/2020/06/29/generative-models/image-20200629175524852.png" alt="image-20200629175524852" style="zoom:50%;"></p>
-<h5 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h5><p>对于generator，可以看作是VAE里面的decoder，我们通常选择从某个distributionsample出来的vector，输入到第一代的generator，再生成相对应的image，有多少个vector，就生成多少个image；</p>
-<p>把真实的image输入discriminator，与generator生成的image进行比较；并对这些data进行标注，real image标注为1，其余标注为0</p>
-<p><img src="/2020/06/29/generative-models/image-20200629201306815.png" alt="image-20200629201306815" style="zoom:50%;"></p>
-<h5 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h5><p>首先随机sample一个vector，作为Generator的输入，generator会生成对应的image，再把这个image输入discriminator，输出是real image的概率，对于第一代（v1），generator还不成熟，因此概率只有0.87；generator接下来会调整自己的参数，使discriminator认为其生成的image是real image；</p>
-<p>这generator+discriminator就相当于一个network，整体目标是使discriminator认为generator生成的image是real image，就可以根据这个指标来使用梯度下降算法，进行back propagation，来不断调整generator的参数；</p>
-<p><span style="color: red">注：在训练过程中应该固定discriminator的参数，来调整generator的参数</span></p>
-<p><img src="/2020/06/29/generative-models/image-20200629201707553.png" alt="image-20200629201707553" style="zoom:50%;"></p>
-<h5 id="Why-GAN-is-hard-to-train"><a href="#Why-GAN-is-hard-to-train" class="headerlink" title="Why GAN is hard to train?"></a>Why GAN is hard to train?</h5><p><img src="/2020/06/29/generative-models/image-20200629202903543.png" alt="image-20200629202903543" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>VAE</tag>
-        <tag>GAN</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Autoencoder</tag>
-        <tag>PixelRNN</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Network Compression</title>
-    <url>/2020/06/27/network-conpression/</url>
-    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
-<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="/2020/06/27/network-conpression/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
-<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="/2020/06/27/network-conpression/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
-<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
-<ul>
-<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
-<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
-</ul>
-<p><img src="/2020/06/27/network-conpression/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
-<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
-<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
-<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
-<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="external">大的network更容易optimize</a></p>
-<p><strong>Lottery Ticket Hypothesis</strong></p>
-<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
-<ul>
-<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
-</li>
-<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
-</li>
-</ul>
-<p><img src="/2020/06/27/network-conpression/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
-<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
-<p><strong>Rethinking the Value of Network Pruning</strong></p>
-<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
-<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
-<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
-<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
-<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
-<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
-<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
-<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
-<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
-<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="/2020/06/27/network-conpression/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
-<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="/2020/06/27/network-conpression/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
-<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
-<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
-<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
-<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
-<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
-<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="/2020/06/27/network-conpression/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
-<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
-<p><img src="/2020/06/27/network-conpression/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
-<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="/2020/06/27/network-conpression/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
-<p><img src="/2020/06/27/network-conpression/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>network compression</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Word Embedding</title>
     <url>/2020/06/11/Word-Embedding/</url>
     <content><![CDATA[<h4 id="Word-Embedding"><a href="#Word-Embedding" class="headerlink" title="Word Embedding"></a>Word Embedding</h4><p>如果使用1-of-N encoding，每个单词用一个vector表示，那么5个单词就需要5个vector；如果我们把同一个类别的单词都放到那个类里，即属于class1的单词有dog、cat、bird，属于动物类的单词，同理可以得出class2，class3；</p>
-<p>但只做classify是不够的，这些class之间也有一些其他的联系；比如class1属于动物，class3属于植物，他们都是生物，只做classify并不能体现这种联系</p>
-<p>现在我们把每个word都project到一个两个dimension上， 水平的dimension可以是表示生物（class1，class3）和其他类别class2之间的差距，竖直的dimension可以是会动（class2，class3）的和不会动class1之间的差距</p>
-<p>如果现在有10w个单词，1-of-N encoding就需要10w个vector，但word embedding可能只需要50维左右，就可以表示这些所有的word</p>
+<p>但只做classify是不够的，这些class之间也有一些其他的联系；比如class1属于动物，class3属于植物，他们都是生物，只做classify并不能体现这种联系；</p>
+<p>现在我们把每个word都project到一个两个dimension上， 水平的dimension可以是表示生物（class1，class3）和其他类别class2之间的差距，竖直的dimension可以是会动（class2，class3）的和不会动class1之间的差距；</p>
+<p>如果现在有10w个单词，1-of-N encoding就需要10w个vector，但word embedding可能只需要50维左右，就可以表示这些所有的word。</p>
 <p><img src="/2020/06/11/Word-Embedding/image-20200611094055907.png" alt="image-20200611094055907" style="zoom:50%;"></p>
 <p>word2vec是一个无监督学习问题，如果network的input为“Apple”，要输出其对应的vector </p>
 <p><img src="/2020/06/11/Word-Embedding/image-20200611095916810.png" alt="image-20200611095916810" style="zoom:50%;"></p>
-<h4 id="How-to-exploit-the-context"><a href="#How-to-exploit-the-context" class="headerlink" title="How to exploit the context?"></a>How to exploit the context?</h4><h5 id="Count-based"><a href="#Count-based" class="headerlink" title="Count based"></a>Count based</h5><p><img src="/2020/06/11/Word-Embedding/image-20200611102225747.png" alt="image-20200611102225747" style="zoom:50%;"></p>
-<h5 id="Prediction-based"><a href="#Prediction-based" class="headerlink" title="Prediction-based"></a>Prediction-based</h5><p>根据词义的上下文来了解词义</p>
-<p><img src="/2020/06/11/Word-Embedding/image-20200611102755128.png" alt="image-20200611102755128" style="zoom:50%;"></p>
-<p><strong>Sharing weight</strong></p>
-<p>$w_{i-1},w_{i-2}$的第一维对应$z_1$，其对应的weight是一样的；同理$w_{i-1},w_{i-2}$的第二维对应$z_1$，其对应的weight是一样的,……，如果每一维对应的weight都不一样，那么实际上就输入了两个vector，</p>
-<p>网络输出每个word为下一个生成word的probability</p>
+<p>下面我们将叙述生成词向量的两种主要手段。</p>
+<h4 id="Count-based"><a href="#Count-based" class="headerlink" title="Count based"></a>Count based</h4><p>基于计数的方法，记录文本中词的出现次数。如果两个单词$w_i,w_j$常常一起出现，那么我们就认为其对应的vector $V(w_i),V(w_j)$之间就是非常接近的。</p>
+<p>用$N_{i,j}$表示$w_i,w_j$在同一个document中出现的次数，那么我们希望找到对应的$V(w_i),V(w_j)$，其做inner product的值和这个次数越接近越好。</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611102225747.png" alt="image-20200611102225747" style="zoom:50%;"></p>
+<h4 id="Prediction-based"><a href="#Prediction-based" class="headerlink" title="Prediction-based"></a>Prediction-based</h4><p>基于预测的方法，即可以通过上下文预测中心词，也可以通过中心词预测上下文。中心词即我们要预测的词。在下文中，$w_i$是我们要预测的值，$…,w_{i-2},w_{i-1}$就是其对应的上下文；</p>
+<p>现在我们把$w_{i-1}$的one-hot encoding作为网络的输入，网络的输出为每个词作为下一个词$w_i$输出的概率，如果词袋中有10w个词，那么输出的维度就对应为10w维。</p>
+<p>把网络中第一个hidden layer的input拿出来，即$z=(z_1,z_2,…)^T$；如果输入为不同1-of-N encoding，那么对应的z也是不一样的。我们就可以用z来代表一个word，即z就是我们要寻找的word vector $V(w)$。</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200611102755128.png" alt="image-20200611102755128" style="zoom: 40%;"></p>
+<p>如果现在有两个training text，“蔡英文 宣誓就职”、“马英九 宣誓就职”，如果输入的1-of-N encoding是“蔡英文”或“马英九”，那么我们希望在网络的输出概率中，“宣誓就职”的概率是最大的。同理我们也可以把网络的第一个hidden layer的输入作为z，就是我们要寻找的word vector $V(w)$。</p>
+<p>这时我们就需要中间的hidden layer来做这样一件事，如果输入为不同的词汇（“蔡英文”，“马英九”），那么我们希望中间的hidden layer可以把不同的词汇project到相同的空间，这样网络的输出才可能都是“宣誓就职”对应的概率最大。</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200705122246038.png" alt="image-20200705122246038" style="zoom:50%;"></p>
+<h5 id="Sharing-weight"><a href="#Sharing-weight" class="headerlink" title="Sharing weight"></a><strong>Sharing weight</strong></h5><p>只考虑前面的一个词汇，来预测下一个词汇会很难，我们可以考虑前面的几个词汇。现在我们来叙述考虑前两个词汇的结果。</p>
+<p>现在我们并不能像之间的neural network那样，所有的输入都连成一个vector作为输入。但实际上，我们希望不同的one-hot vector的同一维度之间是tie在一起的。即$w_{i-1},w_{i-2}$的第一维对应$z_1$，其对应的weight是一样的；同理$w_{i-1},w_{i-2}$的第二维对应$z_1$，其对应的weight是一样的，……</p>
+<p>Q：为什么不同的one-hot vector的同一维度之间是tie在一起的呢？</p>
+<p>A：我们现在把同一个word放到$w_{i-1},w_{i-2}$的位置， 如果每一维对应的weight都不一样，那么实际上就输入了两个vector。</p>
 <p><img src="/2020/06/11/Word-Embedding/image-20200611103812991.png" alt="image-20200611103812991" style="zoom:50%;"></p>
 <p>如果我们设置$x_{i-1},x_{i-2}$的长度都是$|V|$，$z$的长度是$|Z|$，那么</p>
 <script type="math/tex; mode=display">
-z=W_1x_{i-2}+W_2x_{i-1}</script><p>其中$W_1=W_2=W$，那么$z=W(x_{i-2}+x_{i-1})$,</p>
+z=W_1x_{i-2}+W_2x_{i-1}</script><p>其中$W_1=W_2=W$，那么$z=W(x_{i-2}+x_{i-1})$，也就得到了word vector $V(w)$，</p>
 <p><img src="/2020/06/11/Word-Embedding/image-20200611104833054.png" alt="image-20200611104833054" style="zoom:50%;"></p>
 <p>那么在实际的网络训练中，我们如何保证$W_1=W_2$呢？</p>
 <p>首先需要将$w_1,w_2$初始化为相同的值，那么</p>
@@ -1313,13 +1143,15 @@ w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}</script><p>由于gradient
 <script type="math/tex; mode=display">
 w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}-\eta \frac{\partial C}{\partial w_j}\\
 w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}-\eta \frac{\partial C}{\partial w_i}</script><p>这样每次更新的值都一样的，也就保证了$w_1=w_2$</p>
-<p><strong>Training</strong></p>
-<p>对于输入“潮水、退了”，我们希望network的输出和“就”越接近越好，即最小化cross entropy</p>
+<h5 id="Training"><a href="#Training" class="headerlink" title="Training"></a><strong>Training</strong></h5><p>对于输入“潮水、退了”，我们希望network的输出和“就”越接近越好，即最小化cross entropy</p>
 <p><img src="/2020/06/11/Word-Embedding/image-20200611103701528.png" alt="image-20200611103701528" style="zoom:50%;"></p>
-<p> <strong>Various Architectures</strong></p>
+<h5 id="Various-Architectures"><a href="#Various-Architectures" class="headerlink" title="Various Architectures"></a>Various Architectures</h5><p>CBOW：根据上下文的词汇$w_{i-1},w_{i+1}$来预测中心词$w_i$;</p>
+<p>Skip-gram：根据中心词$w_i$来预测上下文$w_{i-1},w_{i+1}$。</p>
 <p><img src="/2020/06/11/Word-Embedding/image-20200611110004840.png" alt="image-20200611110004840" style="zoom:50%;"></p>
-<p><strong>Result</strong></p>
+<h5 id="Result"><a href="#Result" class="headerlink" title="Result"></a>Result</h5><p>vec(Rome) - vec(Italy) $\approx$ vec(Berlin) - vec(Germany)，Italy和Rome之间有is-capital-of的关系，这种关系也恰好在Madrid和Spain之间出现。</p>
 <p><img src="/2020/06/11/Word-Embedding/image-20200611110430525.png" alt="image-20200611110430525" style="zoom:50%;"></p>
+<p>如果现在有人问机器一个问题，Rome和Italy之间的关系就像是Berlin和什么的关系？我们就可以通过计算vec(Berlin) $\approx$ vec(Rome) - vec(Italy)  + vec(Germany)得出结果。</p>
+<p><img src="/2020/06/11/Word-Embedding/image-20200705125922175.png" alt="image-20200705125922175" style="zoom:50%;"></p>
 ]]></content>
       <categories>
         <category>ML-notes</category>
@@ -1440,6 +1272,185 @@ W=\begin{pmatrix}
         <tag>Unsupervised Learning</tag>
         <tag>Dimension Reduction</tag>
         <tag>PCA</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Network Compression</title>
+    <url>/2020/06/27/network-conpression/</url>
+    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
+<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="/2020/06/27/network-conpression/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
+<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="/2020/06/27/network-conpression/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
+<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
+<ul>
+<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
+<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
+</ul>
+<p><img src="/2020/06/27/network-conpression/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
+<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
+<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
+<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
+<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="external">大的network更容易optimize</a></p>
+<p><strong>Lottery Ticket Hypothesis</strong></p>
+<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
+<ul>
+<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
+</li>
+<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
+</li>
+</ul>
+<p><img src="/2020/06/27/network-conpression/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
+<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
+<p><strong>Rethinking the Value of Network Pruning</strong></p>
+<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
+<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
+<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
+<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
+<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
+<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
+<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
+<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
+<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
+<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="/2020/06/27/network-conpression/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
+<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="/2020/06/27/network-conpression/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
+<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
+<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
+<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
+<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
+<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
+<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="/2020/06/27/network-conpression/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
+<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
+<p><img src="/2020/06/27/network-conpression/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
+<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="/2020/06/27/network-conpression/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
+<p><img src="/2020/06/27/network-conpression/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>network compression</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Generative Models</title>
+    <url>/2020/06/29/generative-models/</url>
+    <content><![CDATA[<blockquote>
+<p>本文主要叙述了集中generative models，包括PixelRNN、VAE，GAN（生成对抗网络）；还叙述了auto-encoder和VAE的区别，以及VAE进行改进的地方，通过高斯混合模型来对VAE的原理进行了详细介绍。</p>
+</blockquote>
+<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>Generative Models可以分为三大类：pixelRNN、autoencoder、GAN；</p>
+<p>现在machine可以对猫狗进行分类，在将来machine就可以通过自己的学习画出一只猫来。</p>
+<p><img src="/2020/06/29/generative-models/image-20200629141407487.png" alt="image-20200629141407487" style="zoom: 67%;"></p>
+<h4 id="PixelRNN"><a href="#PixelRNN" class="headerlink" title="PixelRNN"></a>PixelRNN</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>如果要生成一张图像，我们可以先生成这张图像的第一个红色pixel，再根据这个pixel生成下一个蓝色pixel，每个pixel可以用一个三维的vector来进行表示</p>
+<p><img src="/2020/06/29/generative-models/image-20200629141521860.png" alt="image-20200629141521860" style="zoom: 67%;"></p>
+<p>这是一个无监督学习的过程，并不需要对data进行标注</p>
+<p>如果我们现在把下图中的狗下半身遮住，可以让machine学习出下半身的图片</p>
+<p><img src="/2020/06/29/generative-models/image-20200629141945697.png" alt="image-20200629141945697" style="zoom: 67%;"></p>
+<p>也可以用到声讯号</p>
+<p><img src="/2020/06/29/generative-models/image-20200629142331286.png" alt="image-20200629142331286" style="zoom:50%;"></p>
+<p><img src="/2020/06/29/generative-models/image-20200629142353897.png" alt="image-20200629142353897" style="zoom:50%;"></p>
+<h5 id="Practicing-Generation-Models-Pokemon-Creation"><a href="#Practicing-Generation-Models-Pokemon-Creation" class="headerlink" title="Practicing Generation Models: Pokémon Creation"></a>Practicing Generation Models: Pokémon Creation</h5><p><img src="/2020/06/29/generative-models/image-20200629142516414.png" alt="image-20200629142516414" style="zoom: 67%;"></p>
+<p>做这个实验时，有一些tips；</p>
+<p>由于每个pixel都使用三维的vector来表示（RGB），只有三个channel的值相差特别大时，才会有颜色特别鲜明的图片，但学习结果并不能保证这一点，因此图片会会比较灰蒙蒙的，最后得出来的结果会不太好；</p>
+<p>因此，每个pixel最好使用1-of-N encoding来表示，输入一个绿色的方块，vector中只有绿色方块对应的dimensions为1，其他都是0；但有$256\times256$种颜色，颜色种类非常繁多，可以先对类似的颜色做一个<strong>clustering</strong>，类似的颜色都用同一种颜色来表示，可以把颜色数量缩小到167种</p>
+<p><img src="/2020/06/29/generative-models/image-20200629142535096.png" alt="image-20200629142535096" style="zoom: 67%;"></p>
+<p>下面开始正式做实验</p>
+<p><img src="/2020/06/29/generative-models/image-20200629143804656.png" alt="image-20200629143804656" style="zoom: 67%;"></p>
+<p><img src="/2020/06/29/generative-models/image-20200629143843226.png" alt="image-20200629143843226" style="zoom: 33%;"></p>
+<h4 id="VAE"><a href="#VAE" class="headerlink" title="VAE"></a>VAE</h4><h5 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h5><p><img src="/2020/06/29/generative-models/image-20200629144022672.png" alt="image-20200629144022672" style="zoom: 67%;"></p>
+<h5 id="VAE-1"><a href="#VAE-1" class="headerlink" title="VAE"></a>VAE</h5><p>VAE不像autoencoder那样，直接得出code，经过了一些变换，即$c_i=exp(\sigma_i)\times e_i+m_i$，也是来最小化reconstruction error</p>
+<p><img src="/2020/06/29/generative-models/image-20200629144250780.png" alt="image-20200629144250780" style="zoom: 67%;"></p>
+<p>minimize的目标还有</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><h5 id="Pokemon-Creation"><a href="#Pokemon-Creation" class="headerlink" title="Pokémon Creation"></a>Pokémon Creation</h5><p>input一个宝可梦图像，进行encoder、decoder，得到reconstruct之后的图像，其中code是10-dim的；</p>
+<p>现在我们只选择其中的2个纬度出来，其他纬度的值都固定不变，对这个二维的坐标轴，放入不同的点，再输入对应的Decoder，观察其合成出来的image；如果使用不同维度的点，就可以观察到不同维度生成的image；根据不同的维度，我们就可以根据自己的需要，调整这些维度的值，从而得出我们想要的结果</p>
+<p><img src="/2020/06/29/generative-models/image-20200629150656140.png" alt="image-20200629150656140" style="zoom: 50%;"></p>
+<p>部分结果展示</p>
+<p><img src="/2020/06/29/generative-models/image-20200629151406932.png" alt="image-20200629151406932" style="zoom:50%;"></p>
+<h5 id="Why-VAE"><a href="#Why-VAE" class="headerlink" title="Why VAE?"></a>Why VAE?</h5><p>对于一张满月的图像，先进行encode，再进行decode，使得input和output之间的差值最小化；对半月的图像输入也如此</p>
+<p><img src="/2020/06/29/generative-models/image-20200629152107223.png" alt="image-20200629152107223" style="zoom: 67%;"></p>
+<p>对于encoder的其中一个输出$\sigma_i$，表示noise的variance，需要再输入exp函数进行计算，保证其值是大于0的，是machine自己学习的</p>
+<p><img src="/2020/06/29/generative-models/image-20200629153400892.png" alt="image-20200629153400892" style="zoom: 67%;"></p>
+<p>但只有noise是不够的，还需要加一些限制</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>在下图中，蓝色的线表示$exp(\sigma_i)$，红色的线表示$(1+\sigma_i)$，绿色的线表示两者的差值，可以发现在原点处差值是最小的，$\sigma _i$的值接近1，variance的值接近1</p>
+<p><img src="/2020/06/29/generative-models/image-20200629153918937.png" alt="image-20200629153918937" style="zoom:50%;"></p>
+<p>$(m_i)^2$为正则项regularization term，让结果不那么overfiting</p>
+<p>在下图中，为一个高维的坐标（用一维进行了展示），曲线表示image是宝可梦的概率，可以在图中看到，对于一些很像宝可梦的image，$P(x)$值很高，但对于一些比较模棱两可的image，$P(x)$值就很低</p>
+<p><img src="/2020/06/29/generative-models/image-20200629154606838.png" alt="image-20200629154606838" style="zoom: 33%;"></p>
+<p>那么我们到底要怎么来评估这个probability distribution呢？答案是高斯混合模型</p>
+<h5 id="Gaussian-Mixture-Model"><a href="#Gaussian-Mixture-Model" class="headerlink" title="Gaussian Mixture Model"></a>Gaussian Mixture Model</h5><p>对于下图中的曲线图，蓝色表示多个高斯模型，黑色曲线表示这些模型通过一定的weight进行叠加之后的结果</p>
+<p>现在有很多个gaussian model（1，2，3，4，5…），且都对应了自己的weight $P(m)$（蓝色方块），<span style="color: red">要先根据weight选对应的gaussian，再决定到底要从gaussian中sample哪些data</span> ;我们使用$P(m)$表示每个gaussian的weight，$P(x|m)$表示从对应的gaussian中选出data x的概率</p>
+<p>x并不是代表着某个类别，而是用一个vector来进行表示，每个维度表示不同的特征，即 <u>Distributed representation is better than cluster</u></p>
+<p><img src="/2020/06/29/generative-models/image-20200629155005437.png" alt="image-20200629155005437" style="zoom: 67%;"></p>
+<p>我们现在从正态分布中sample一个data z，z的每个dimension就表示某种attribute；</p>
+<p>根据z我们就可以得出高斯分布mean和variance，即$\mu (z),\sigma(z)$，z有无穷多个可能，mean和variance也有无穷多个可能</p>
+<p><img src="/2020/06/29/generative-models/image-20200629160314318.png" alt="image-20200629160314318" style="zoom: 67%;"></p>
+<p>在最下方的图中，我们可以认为最中间的圆点被sample到的几率最大，其他圆点被sample到的几率就相对较小；<span style="color: red">每个z被sample到之后，根据某个function，计算出对应的mean和variance，都对应着不同的gaussian model</span></p>
+<p>这个function可以是一个neural network，input为z，output为$\mu(z),\sigma(z)$</p>
+<p>由于现在是连续的z，$P(z)$的形式也发生了变化，</p>
+<script type="math/tex; mode=display">
+P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><h5 id="Maximizing-Likelihood"><a href="#Maximizing-Likelihood" class="headerlink" title="Maximizing Likelihood"></a><strong>Maximizing Likelihood</strong></h5><p>现在我们需要找到z和$\mu(z),\sigma(z)$之间的关系，用network来进行计算的时候也需要一个评估手段，这里我们采用的是最大化$L=\sum_xlogP(x)$，即最大化我们已经看到的image x的likelihood；</p>
+<p>那么我们现在就有一个NN的参数需要调整，来最大化likelihood L；</p>
+<p><img src="/2020/06/29/generative-models/image-20200629162138964.png" alt="image-20200629162138964" style="zoom: 67%;"></p>
+<p>现在我们还有另外一个distribution $q(z|x)$，和前一个是相反的，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，其mean和variance，即$\mu’(x),\sigma’(x)$</p>
+<p>$P(x|z)$表示z决定了x的distribution，$q(z|x)$表示x决定了z的distribution</p>
+<p><img src="/2020/06/29/generative-models/image-20200629163947560.png" alt="image-20200629163947560" style="zoom:45%;"></p>
+<p>其中$P(z,x)=P(x)P(z|x)$</p>
+<p><img src="/2020/06/29/generative-models/image-20200629165559403.png" alt="image-20200629165559403" style="zoom:50%;"></p>
+<p>我们本来需要调整的参数是$P(x|z)$，使得$P(x)$取得最大值，从而使likelihood取得最大值；但现在的lower bound为$L_b$，是$log(P(x))$的最小值，其中$P(z)$是已知的，不知道的参数是$P(x|z),q(z|x)$，两项都需要调整</p>
+<p>Q：这里为什么突然多了一项需要调整的参数？</p>
+<p>A：这里并不知道lower bound和likelihood之间的关系到底是怎样的，有可能升高了lower bound，但likelihood反而下降了；引入q就可以解决这个问题</p>
+<p>根据原式子，即$P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z$，只和$P(x|z)$有关，与$q(z|x)$是无关的，即下图中<span style="color: purple">方框</span>部分是不变的，</p>
+<p><img src="/2020/06/29/generative-models/image-20200629170614939.png" alt="image-20200629170614939" style="zoom: 67%;"></p>
+<p><strong>如果我们现在固定$P(x|z)$，想通过$q(z|x)$来使$L_b$ 最大化，那么对应的KL divergence就会最小化，到一种很极端的情况，KL divergence会变为0；如果$L_b$继续上升，那么肯定会超出该区域，因此对应的$logP(x)$也会继续上升；KL divergence不断变小的过程，$q(z|x),P(z|x)$之间的差距也会不断缩小</strong></p>
+<p>因此，这个过程不仅让likelihood变得越来越大，也会找到和$P(x|z)$接近的$q(z|x)$</p>
+<p><img src="/2020/06/29/generative-models/image-20200629171631388.png" alt="image-20200629171631388" style="zoom:50%;"></p>
+<p>对于$q(z|x)$，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，就可以知道z是从什么样的gaussian distribution得出来的</p>
+<h5 id="Connection-with-Network"><a href="#Connection-with-Network" class="headerlink" title="Connection with Network"></a><strong>Connection with Network</strong></h5><p>现在我们的目标就是最小化$q(z|x),P(z)$之间的KL divergence，即使$q(z|x)$和normal distribution $P(z)$越接近越好，即minimize</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>还需要maximizing</p>
+<script type="math/tex; mode=display">
+P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><p><img src="/2020/06/29/generative-models/image-20200629172034668.png" alt="image-20200629172034668" style="zoom:50%;"></p>
+<p>对于input的x，我们先输入网络$NN’$，得到获取z的gaussian distribution；sample得到z之后，再输入网络$NN$，得到获取x的gaussian distribution，使得新分布的mean和x越接近越好</p>
+<h5 id="KL散度"><a href="#KL散度" class="headerlink" title="KL散度"></a>KL散度</h5><blockquote>
+<p>所谓KL散度，是指当某分布q(x)被用于近似p(x)时的信息损失。</p>
+</blockquote>
+<p>计算公式为</p>
+<script type="math/tex; mode=display">
+KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href="#Problems-of-VAE" class="headerlink" title="Problems of VAE"></a>Problems of VAE</h5><p><img src="/2020/06/29/generative-models/image-20200629174600157.png" alt="image-20200629174600157" style="zoom:50%;"></p>
+<h4 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h4><h5 id="The-evolution-of-generation"><a href="#The-evolution-of-generation" class="headerlink" title="The evolution of generation"></a>The evolution of generation</h5><p>v1：会generate一些奇怪的图片，然后会有一个第一代的discriminator，来辨别到底哪一个是real image；</p>
+<p>V2： generater会根据上一次discriminater的结果进行调整，第二代生成的image就和真实的image更像了，再把image输入第二代discriminator，再进行比较；</p>
+<p>…….</p>
+<p><img src="/2020/06/29/generative-models/image-20200629175524852.png" alt="image-20200629175524852" style="zoom:50%;"></p>
+<h5 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h5><p>对于generator，可以看作是VAE里面的decoder，我们通常选择从某个distributionsample出来的vector，输入到第一代的generator，再生成相对应的image，有多少个vector，就生成多少个image；</p>
+<p>把真实的image输入discriminator，与generator生成的image进行比较；并对这些data进行标注，real image标注为1，其余标注为0</p>
+<p><img src="/2020/06/29/generative-models/image-20200629201306815.png" alt="image-20200629201306815" style="zoom:50%;"></p>
+<h5 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h5><p>首先随机sample一个vector，作为Generator的输入，generator会生成对应的image，再把这个image输入discriminator，输出是real image的概率，对于第一代（v1），generator还不成熟，因此概率只有0.87；generator接下来会调整自己的参数，使discriminator认为其生成的image是real image；</p>
+<p>这generator+discriminator就相当于一个network，整体目标是使discriminator认为generator生成的image是real image，就可以根据这个指标来使用梯度下降算法，进行back propagation，来不断调整generator的参数；</p>
+<p><span style="color: red">注：在训练过程中应该固定discriminator的参数，来调整generator的参数</span></p>
+<p><img src="/2020/06/29/generative-models/image-20200629201707553.png" alt="image-20200629201707553" style="zoom:50%;"></p>
+<h5 id="Why-GAN-is-hard-to-train"><a href="#Why-GAN-is-hard-to-train" class="headerlink" title="Why GAN is hard to train?"></a>Why GAN is hard to train?</h5><p><img src="/2020/06/29/generative-models/image-20200629202903543.png" alt="image-20200629202903543" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Autoencoder</tag>
+        <tag>VAE</tag>
+        <tag>GAN</tag>
+        <tag>PixelRNN</tag>
       </tags>
   </entry>
   <entry>
@@ -1658,52 +1669,88 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
       </tags>
   </entry>
   <entry>
-    <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
-    <url>/2020/06/28/t-SNE/</url>
-    <content><![CDATA[<blockquote>
-<p>本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；</p>
-</blockquote>
-<h4 id="Manifold-Learning"><a href="#Manifold-Learning" class="headerlink" title="Manifold Learning"></a>Manifold Learning</h4><p>在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learning 任务</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628202133893.png" alt="image-20200628202133893" style="zoom:50%;"></p>
-<h4 id="Locally-Linear-Embedding-LLE"><a href="#Locally-Linear-Embedding-LLE" class="headerlink" title="Locally Linear Embedding (LLE)"></a>Locally Linear Embedding (LLE)</h4><p>用$w_{ij}$表示$x_i,x_j$之间的联系，先找到使得$\sum_i ||x^i-\sum_jw_{ij}x^j||_2$最小化的$w_{ij}$，再根据这个$w_{ij}$来找到降维的结果$z_i,z_j$</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628202738023.png" alt="image-20200628202738023" style="zoom:50%;"></p>
-<p>如果并不知道之前的$x_i,x_j$，那么就可以用LLE这种方法，也可以得出$z_i,z_j$</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628203501209.png" alt="image-20200628203501209" style="zoom:50%;"></p>
-<h4 id="Laplacian-Eigenmaps"><a href="#Laplacian-Eigenmaps" class="headerlink" title="Laplacian Eigenmaps"></a>Laplacian Eigenmaps</h4><p>Review: 在之前的semi-supervised learning中，如果$x^1,x^2$在一个high density region内是相近的，那么我们就可以认为$\hat y^1,\hat y^2$也有类似的表现</p>
-<p>如果$y^i,y^j$是connected的，那么其$w_{ij}$就是对应的相似度；如果没有connect，其$w_{ij}$就是0</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628204015777.png" alt="image-20200628204015777" style="zoom:50%;"></p>
-<p>我们也可以得出类似smoothness的式子，计算$z^i,z^j$之间的smoothness</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628205136836.png" alt="image-20200628205136836" style="zoom:50%;"></p>
-<p>那么我们现在的目标就是找到$z^i,z^j$，来使S达到最小值，还需要有一些额外的constrains</p>
-<p>现在我们对z加入一些constrains，如果降维后z的维数是M，那么我们就不希望取出来的这些点还生活在比M还低维的空间里面；我们现在希望把塞进高维空间的低维空间展开，我们就不希望展开之后的点在一个更低维的空间里面</p>
-<h4 id="T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><a href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE" class="headerlink" title="T-distributed Stochastic Neighbor Embedding (t-SNE)"></a>T-distributed Stochastic Neighbor Embedding (t-SNE)</h4><p>对于之前的LLE方法，类似的data之间是很close的，<u>但不同类别之间的data却没有分开，是叠成一团的</u></p>
-<p><img src="/2020/06/28/t-SNE/image-20200628210651621.png" alt="image-20200628210651621" style="zoom:50%;"></p>
-<p><strong>为了找到对应的$z^i,z^j$</strong>，先计算$x^i,x^j$之间的相似度$S(x^i,x^j)$，再得出一个分布 $P(x^j|x^i)$；还要计算$z^i,z^j$之间的相似度$S’(z^i,z^j)$，得出分布$Q(z^j|z^i)$；</p>
-<p>这两个分布应该越接近越好，使用L来表示</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628211215304.png" alt="image-20200628211215304" style="zoom:50%;"></p>
-<p>可以使用gradient descent，有了L函数，再分别对$z^i,z^j$求偏微分即可</p>
-<p>但t-SNE要对所有的point之间都求similarity，因此计算量比较大，在数据量很大的情况下电脑的计算速度会非常慢</p>
-<p>因此，对于很高的dimensions，通常先做降维（PCA），比如可以降维到50维，再使用t-SNE降到2维</p>
-<p><span style="color: red">通常我们使用t-SNE来对高维的数据进行可视化</span></p>
-<p><img src="/2020/06/28/t-SNE/image-20200628211326492.png" alt="image-20200628211326492" style="zoom:50%;"></p>
-<p>在上图中，红色曲线表示SNE，蓝色曲线表示t-SNE，纵轴表示distribution；如果我们想要维持相同的distribution，即在同一个水平线上，就达到了如图所示的效果；相同的几率，t-SNE的$||z^i-z^j||_2$之间的距离越大</p>
-<p>如果本来就离得很近，那么经过t-SNE之间的距离还是很小；如果本来就离得很远，那么从原来的distribution拉到t-SNE之后，距离会更远；</p>
-<p>到实际的例子中，<span style="color: red">如果本来是同一个类别的data，由于这些data之间的距离很近，不会收到t-SNE很大的影响；但如果是属于不同类别的data，距离是比较远的，t-SNE会放大这种距离</span></p>
-<p>对于下图中的MNIST，先使用PCA进行降维，再进行可视化，就可以得到下图中的good visualization</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628213646582.png" alt="image-20200628213646582" style="zoom:50%;"></p>
-<p>下图中有一个更加直观的例子，使用t-SNE算法，运用gradient descent的思想，不同类别的data之间的距离会越来越大</p>
-<p><img src="/2020/06/28/t-SNE/image-20200628214657615.png" alt="image-20200628214657615" style="zoom:50%;"></p>
-<p><img src="/2020/06/28/t-SNE/image-20200628214721028.png" alt="image-20200628214721028" style="zoom:50%;"></p>
+    <title>多处理机</title>
+    <url>/2020/03/11/%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA/</url>
+    <content><![CDATA[<h5 id="计算机分类"><a href="#计算机分类" class="headerlink" title="计算机分类"></a>计算机分类</h5><ul>
+<li>按照<u>Flynn分类</u>法，可将计算机分为<u>SISD、SIMD、MISD、MIMD</u>四类。</li>
+<li><u>冯氏分类</u>法，<u>字串位串、字串位并、字并位串、字并位并</u>。</li>
+<li><u>Handler分类法</u>。</li>
+</ul>
+<h5 id="存储器系统结构"><a href="#存储器系统结构" class="headerlink" title="存储器系统结构"></a>存储器系统结构</h5><ul>
+<li>集中式存储器：各处理器可共享一个集中式的物理存储器；</li>
+<li>分布式存储器：存储器分布到各个处理器中。<ul>
+<li>如果大多数的访存都是针对本地节点进行的，就可以<u>降低</u>对存储器和互联网络的<u>带宽要求</u>；</li>
+<li>对本地存储器的<u>访问延迟小</u>。</li>
+<li>缺点：处理器之间的<u>通信</u>较为<u>复杂</u>。</li>
+</ul>
+</li>
+</ul>
+<p>存储器在物理上分布到各节点中，但<u>逻辑地址空间</u>的组织方式以及处理器之间<u>通信方式</u>不同：</p>
+<ul>
+<li>把在物理上分离的存储器作为一个<u>统一的共享逻辑空间</u>进行编址，不同处理器上的同一个物理地址指向同一个存储单元。<u>分布式共享存储器系统（DSM）</u>。采用<u>共享存储器</u>通信机制。</li>
+<li>把每个节点中的存储器编址为一个<u>独立的地址空间</u>，不同节点的地址空间之间是相互独立的，不同处理器上的同一个物理地址指向不同的存储单元。<u>机群</u>。采用<u>消息传递</u>机制。</li>
+</ul>
+<h5 id="通信机制"><a href="#通信机制" class="headerlink" title="通信机制"></a>通信机制</h5><p><strong>共享存储器</strong></p>
+<p>处理器之间的通信是通过load和store指令对相同存储器地址进行读/写来实现的。</p>
+<ul>
+<li>与常用的对称式多处理机的通信机制兼容；</li>
+<li>处理机之间的通信方式比较复杂时，编程相对容易；</li>
+<li>在开发程序时，可以将重点放到对性能影响较大的数据访问上；</li>
+<li>通信数据量小时，通信开销小，贷款利用好；</li>
+<li>可以通过Cathe缓冲技术来减少远程通信的频度。</li>
+</ul>
+<p><strong>消息传递</strong></p>
+<p>处理器之间是通过显示地发送消息来进行通信的，把消息看成是一个远程进程调用（RPC）。</p>
+<ul>
+<li>硬件更简单；</li>
+<li>通信是显示的，可以更容易搞清楚何时发生通信以及通信开销是多少；</li>
+<li>显示通信可以使编程者重点注意并行计算的主要通信开销，使之有可能开发出结构更好、性能更高的并行程序；</li>
+<li>可以减少不当同步带来错误的可能性。</li>
+</ul>
+<h5 id="并行处理面临的挑战"><a href="#并行处理面临的挑战" class="headerlink" title="并行处理面临的挑战"></a>并行处理面临的挑战</h5><ul>
+<li>程序中的并行性有限；</li>
+<li>相对较大通信开销。</li>
+<li>计算：Amdahl</li>
+</ul>
+<script type="math/tex; mode=display">
+加速比=\frac{1}{\frac{可加速部分比例}{部件加速比}+(1-可加速部分比例)}</script><script type="math/tex; mode=display">
+S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（MIMD）"><a href="#并行计算机系统结构（MIMD）" class="headerlink" title="并行计算机系统结构（MIMD）"></a>并行计算机系统结构（MIMD）</h5><ul>
+<li>PVP</li>
+<li><strong>SMP</strong>，对称式共享存储器多处理机</li>
+<li>DSM</li>
+<li><strong>MPP</strong>，大规模并行处理机</li>
+<li><strong>机群</strong></li>
+</ul>
+<h5 id="对称式共享存储器多处理机（SMP）"><a href="#对称式共享存储器多处理机（SMP）" class="headerlink" title="对称式共享存储器多处理机（SMP）"></a>对称式共享存储器多处理机（SMP）</h5><p>也称为集中式共享多处理机，一般由十几个处理器构成，各处理器共享一个集中式的物理存储器，这个主存相对于各处理器的关系是对称的。</p>
+<ul>
+<li>商用处理器</li>
+<li>共享存储器</li>
+<li>集中共享</li>
+</ul>
+<h5 id="大规模并行处理机（MPP）"><a href="#大规模并行处理机（MPP）" class="headerlink" title="大规模并行处理机（MPP）"></a>大规模并行处理机（MPP）</h5><p>按照当前的标准，具有几百台~几千台处理机的任何机器都是大规模并行处理系统。</p>
+<ul>
+<li>处理节点使用商用微处理器，每个节点可以有多个微处理器；</li>
+<li>具有较好的可扩展性；</li>
+<li>采用分布式非共享的存储器，各节点有自己的地址空间；</li>
+<li>采用消息传递的通信机制。</li>
+</ul>
+<h5 id="机群"><a href="#机群" class="headerlink" title="机群"></a>机群</h5><p>是一种价格低廉、易于构建、扩放性极强的并行计算机系统。它由多台同构或者异构的独立计算机通过高性能网络和局域网连在一起，协同完成特定的并行计算任务。从用户的角度看，它就是一个单一的、集中的计算资源。</p>
+<ul>
+<li>商用处理器</li>
+<li>分布非共享式</li>
+<li>消息传递</li>
+</ul>
 ]]></content>
       <categories>
-        <category>ML-notes</category>
+        <category>计算机体系结构</category>
       </categories>
       <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Dimension Reduction</tag>
-        <tag>LLE</tag>
-        <tag>t-SNE</tag>
+        <tag>计算机体系结构</tag>
+        <tag>机群</tag>
+        <tag>MPP</tag>
+        <tag>SMP</tag>
+        <tag>消息传递</tag>
+        <tag>共享存储器</tag>
       </tags>
   </entry>
   <entry>
@@ -1852,91 +1899,6 @@ L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="/2020/07/03/基于知识图
       </tags>
   </entry>
   <entry>
-    <title>多处理机</title>
-    <url>/2020/03/11/%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA/</url>
-    <content><![CDATA[<h5 id="计算机分类"><a href="#计算机分类" class="headerlink" title="计算机分类"></a>计算机分类</h5><ul>
-<li>按照<u>Flynn分类</u>法，可将计算机分为<u>SISD、SIMD、MISD、MIMD</u>四类。</li>
-<li><u>冯氏分类</u>法，<u>字串位串、字串位并、字并位串、字并位并</u>。</li>
-<li><u>Handler分类法</u>。</li>
-</ul>
-<h5 id="存储器系统结构"><a href="#存储器系统结构" class="headerlink" title="存储器系统结构"></a>存储器系统结构</h5><ul>
-<li>集中式存储器：各处理器可共享一个集中式的物理存储器；</li>
-<li>分布式存储器：存储器分布到各个处理器中。<ul>
-<li>如果大多数的访存都是针对本地节点进行的，就可以<u>降低</u>对存储器和互联网络的<u>带宽要求</u>；</li>
-<li>对本地存储器的<u>访问延迟小</u>。</li>
-<li>缺点：处理器之间的<u>通信</u>较为<u>复杂</u>。</li>
-</ul>
-</li>
-</ul>
-<p>存储器在物理上分布到各节点中，但<u>逻辑地址空间</u>的组织方式以及处理器之间<u>通信方式</u>不同：</p>
-<ul>
-<li>把在物理上分离的存储器作为一个<u>统一的共享逻辑空间</u>进行编址，不同处理器上的同一个物理地址指向同一个存储单元。<u>分布式共享存储器系统（DSM）</u>。采用<u>共享存储器</u>通信机制。</li>
-<li>把每个节点中的存储器编址为一个<u>独立的地址空间</u>，不同节点的地址空间之间是相互独立的，不同处理器上的同一个物理地址指向不同的存储单元。<u>机群</u>。采用<u>消息传递</u>机制。</li>
-</ul>
-<h5 id="通信机制"><a href="#通信机制" class="headerlink" title="通信机制"></a>通信机制</h5><p><strong>共享存储器</strong></p>
-<p>处理器之间的通信是通过load和store指令对相同存储器地址进行读/写来实现的。</p>
-<ul>
-<li>与常用的对称式多处理机的通信机制兼容；</li>
-<li>处理机之间的通信方式比较复杂时，编程相对容易；</li>
-<li>在开发程序时，可以将重点放到对性能影响较大的数据访问上；</li>
-<li>通信数据量小时，通信开销小，贷款利用好；</li>
-<li>可以通过Cathe缓冲技术来减少远程通信的频度。</li>
-</ul>
-<p><strong>消息传递</strong></p>
-<p>处理器之间是通过显示地发送消息来进行通信的，把消息看成是一个远程进程调用（RPC）。</p>
-<ul>
-<li>硬件更简单；</li>
-<li>通信是显示的，可以更容易搞清楚何时发生通信以及通信开销是多少；</li>
-<li>显示通信可以使编程者重点注意并行计算的主要通信开销，使之有可能开发出结构更好、性能更高的并行程序；</li>
-<li>可以减少不当同步带来错误的可能性。</li>
-</ul>
-<h5 id="并行处理面临的挑战"><a href="#并行处理面临的挑战" class="headerlink" title="并行处理面临的挑战"></a>并行处理面临的挑战</h5><ul>
-<li>程序中的并行性有限；</li>
-<li>相对较大通信开销。</li>
-<li>计算：Amdahl</li>
-</ul>
-<script type="math/tex; mode=display">
-加速比=\frac{1}{\frac{可加速部分比例}{部件加速比}+(1-可加速部分比例)}</script><script type="math/tex; mode=display">
-S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（MIMD）"><a href="#并行计算机系统结构（MIMD）" class="headerlink" title="并行计算机系统结构（MIMD）"></a>并行计算机系统结构（MIMD）</h5><ul>
-<li>PVP</li>
-<li><strong>SMP</strong>，对称式共享存储器多处理机</li>
-<li>DSM</li>
-<li><strong>MPP</strong>，大规模并行处理机</li>
-<li><strong>机群</strong></li>
-</ul>
-<h5 id="对称式共享存储器多处理机（SMP）"><a href="#对称式共享存储器多处理机（SMP）" class="headerlink" title="对称式共享存储器多处理机（SMP）"></a>对称式共享存储器多处理机（SMP）</h5><p>也称为集中式共享多处理机，一般由十几个处理器构成，各处理器共享一个集中式的物理存储器，这个主存相对于各处理器的关系是对称的。</p>
-<ul>
-<li>商用处理器</li>
-<li>共享存储器</li>
-<li>集中共享</li>
-</ul>
-<h5 id="大规模并行处理机（MPP）"><a href="#大规模并行处理机（MPP）" class="headerlink" title="大规模并行处理机（MPP）"></a>大规模并行处理机（MPP）</h5><p>按照当前的标准，具有几百台~几千台处理机的任何机器都是大规模并行处理系统。</p>
-<ul>
-<li>处理节点使用商用微处理器，每个节点可以有多个微处理器；</li>
-<li>具有较好的可扩展性；</li>
-<li>采用分布式非共享的存储器，各节点有自己的地址空间；</li>
-<li>采用消息传递的通信机制。</li>
-</ul>
-<h5 id="机群"><a href="#机群" class="headerlink" title="机群"></a>机群</h5><p>是一种价格低廉、易于构建、扩放性极强的并行计算机系统。它由多台同构或者异构的独立计算机通过高性能网络和局域网连在一起，协同完成特定的并行计算任务。从用户的角度看，它就是一个单一的、集中的计算资源。</p>
-<ul>
-<li>商用处理器</li>
-<li>分布非共享式</li>
-<li>消息传递</li>
-</ul>
-]]></content>
-      <categories>
-        <category>计算机体系结构</category>
-      </categories>
-      <tags>
-        <tag>计算机体系结构</tag>
-        <tag>机群</tag>
-        <tag>MPP</tag>
-        <tag>SMP</tag>
-        <tag>消息传递</tag>
-        <tag>共享存储器</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>指令级并行</title>
     <url>/2020/03/11/%E6%8C%87%E4%BB%A4%E7%BA%A7%E5%B9%B6%E8%A1%8C/</url>
     <content><![CDATA[<h5 id="指令级并行"><a href="#指令级并行" class="headerlink" title="指令级并行"></a>指令级并行</h5><p>指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：</p>
@@ -2009,6 +1971,55 @@ S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（M
         <tag>超标量</tag>
         <tag>VLIW</tag>
         <tag>超长指令字</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
+    <url>/2020/06/28/t-SNE/</url>
+    <content><![CDATA[<blockquote>
+<p>本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；</p>
+</blockquote>
+<h4 id="Manifold-Learning"><a href="#Manifold-Learning" class="headerlink" title="Manifold Learning"></a>Manifold Learning</h4><p>在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learning 任务</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628202133893.png" alt="image-20200628202133893" style="zoom:50%;"></p>
+<h4 id="Locally-Linear-Embedding-LLE"><a href="#Locally-Linear-Embedding-LLE" class="headerlink" title="Locally Linear Embedding (LLE)"></a>Locally Linear Embedding (LLE)</h4><p>用$w_{ij}$表示$x_i,x_j$之间的联系，先找到使得$\sum_i ||x^i-\sum_jw_{ij}x^j||_2$最小化的$w_{ij}$，再根据这个$w_{ij}$来找到降维的结果$z_i,z_j$</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628202738023.png" alt="image-20200628202738023" style="zoom:50%;"></p>
+<p>如果并不知道之前的$x_i,x_j$，那么就可以用LLE这种方法，也可以得出$z_i,z_j$</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628203501209.png" alt="image-20200628203501209" style="zoom:50%;"></p>
+<h4 id="Laplacian-Eigenmaps"><a href="#Laplacian-Eigenmaps" class="headerlink" title="Laplacian Eigenmaps"></a>Laplacian Eigenmaps</h4><p>Review: 在之前的semi-supervised learning中，如果$x^1,x^2$在一个high density region内是相近的，那么我们就可以认为$\hat y^1,\hat y^2$也有类似的表现</p>
+<p>如果$y^i,y^j$是connected的，那么其$w_{ij}$就是对应的相似度；如果没有connect，其$w_{ij}$就是0</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628204015777.png" alt="image-20200628204015777" style="zoom:50%;"></p>
+<p>我们也可以得出类似smoothness的式子，计算$z^i,z^j$之间的smoothness</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628205136836.png" alt="image-20200628205136836" style="zoom:50%;"></p>
+<p>那么我们现在的目标就是找到$z^i,z^j$，来使S达到最小值，还需要有一些额外的constrains</p>
+<p>现在我们对z加入一些constrains，如果降维后z的维数是M，那么我们就不希望取出来的这些点还生活在比M还低维的空间里面；我们现在希望把塞进高维空间的低维空间展开，我们就不希望展开之后的点在一个更低维的空间里面</p>
+<h4 id="T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><a href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE" class="headerlink" title="T-distributed Stochastic Neighbor Embedding (t-SNE)"></a>T-distributed Stochastic Neighbor Embedding (t-SNE)</h4><p>对于之前的LLE方法，类似的data之间是很close的，<u>但不同类别之间的data却没有分开，是叠成一团的</u></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628210651621.png" alt="image-20200628210651621" style="zoom:50%;"></p>
+<p><strong>为了找到对应的$z^i,z^j$</strong>，先计算$x^i,x^j$之间的相似度$S(x^i,x^j)$，再得出一个分布 $P(x^j|x^i)$；还要计算$z^i,z^j$之间的相似度$S’(z^i,z^j)$，得出分布$Q(z^j|z^i)$；</p>
+<p>这两个分布应该越接近越好，使用L来表示</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628211215304.png" alt="image-20200628211215304" style="zoom:50%;"></p>
+<p>可以使用gradient descent，有了L函数，再分别对$z^i,z^j$求偏微分即可</p>
+<p>但t-SNE要对所有的point之间都求similarity，因此计算量比较大，在数据量很大的情况下电脑的计算速度会非常慢</p>
+<p>因此，对于很高的dimensions，通常先做降维（PCA），比如可以降维到50维，再使用t-SNE降到2维</p>
+<p><span style="color: red">通常我们使用t-SNE来对高维的数据进行可视化</span></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628211326492.png" alt="image-20200628211326492" style="zoom:50%;"></p>
+<p>在上图中，红色曲线表示SNE，蓝色曲线表示t-SNE，纵轴表示distribution；如果我们想要维持相同的distribution，即在同一个水平线上，就达到了如图所示的效果；相同的几率，t-SNE的$||z^i-z^j||_2$之间的距离越大</p>
+<p>如果本来就离得很近，那么经过t-SNE之间的距离还是很小；如果本来就离得很远，那么从原来的distribution拉到t-SNE之后，距离会更远；</p>
+<p>到实际的例子中，<span style="color: red">如果本来是同一个类别的data，由于这些data之间的距离很近，不会收到t-SNE很大的影响；但如果是属于不同类别的data，距离是比较远的，t-SNE会放大这种距离</span></p>
+<p>对于下图中的MNIST，先使用PCA进行降维，再进行可视化，就可以得到下图中的good visualization</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628213646582.png" alt="image-20200628213646582" style="zoom:50%;"></p>
+<p>下图中有一个更加直观的例子，使用t-SNE算法，运用gradient descent的思想，不同类别的data之间的距离会越来越大</p>
+<p><img src="/2020/06/28/t-SNE/image-20200628214657615.png" alt="image-20200628214657615" style="zoom:50%;"></p>
+<p><img src="/2020/06/28/t-SNE/image-20200628214721028.png" alt="image-20200628214721028" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Dimension Reduction</tag>
+        <tag>LLE</tag>
+        <tag>t-SNE</tag>
       </tags>
   </entry>
   <entry>
@@ -2297,66 +2308,6 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
       </tags>
   </entry>
   <entry>
-    <title>计算机体系结构重要考点</title>
-    <url>/2020/03/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%87%8D%E8%A6%81%E8%80%83%E7%82%B9/</url>
-    <content><![CDATA[<h4 id="同时多线程"><a href="#同时多线程" class="headerlink" title="同时多线程"></a>同时多线程</h4><p>线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。</p>
-<p>线程级并行：指并行执行两个或两个以上的线程。</p>
-<p>同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种改进。通过寄存器命名和动态调度机制，来自各个独立线程的多条指令可以同时流出，而不用考虑它们之间的相互依赖关系。</p>
-<h5 id="实现多线程的主要方法"><a href="#实现多线程的主要方法" class="headerlink" title="实现多线程的主要方法"></a>实现多线程的主要方法</h5><p><u>细粒度多线程</u>：在每条指令之间都可以进行线程的切换，从而使得多个线程可以交替执行。</p>
-<ul>
-<li>优点：能够隐藏由长时间停顿带来的吞吐率的损失，也能够隐藏由段时间停顿带来的损失。</li>
-<li>缺点：减慢了单个线程的执行。即使没有任何停顿的线程也不能连续执行，而且会因为其他线程的指令的插入执行而被延迟。</li>
-</ul>
-<p><u>粗粒度多线程</u>：线程之间的切换只发生在时间较长的停顿出现的时候。</p>
-<ul>
-<li>优点：减少了切换次数，很大程度上也不会降低单个线程的执行速度。</li>
-<li>缺点：减少吞吐率损失的能力有限。由于实现粗粒度多线程的CPU只能执行单个线程的指令，不能交叉执行多个线程，因此当发生停顿时，流水线必须排空或暂停。</li>
-</ul>
-<h4 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h4><h5 id="写策略"><a href="#写策略" class="headerlink" title="写策略"></a>写策略</h5><p>写直达法：在执行写操作时，不仅把数据写入Cathe中相应的块，而且也写入下一级存储器。减少CPU写停顿的常用方法是，采用写缓冲器。</p>
-<p>写回法：只把数据写入Cathe中相应的块，不写入下一级存储器。这些最新数据只有在相应的块被替换出时，才被写回下一级存储器。速度快，要设置“修改位”。</p>
-<p>写不命中时，</p>
-<p>按写分配法：写不命中时，把所写单元的块从主存中调入Cathe，然后再进行写入。与<u>写回法</u>配合。</p>
-<p>不按写分配法：写不命中时，直接写入下一级存储器而不将相应的块调入Cathe。</p>
-<h5 id="三种类型的Cathe不命中"><a href="#三种类型的Cathe不命中" class="headerlink" title="三种类型的Cathe不命中"></a>三种类型的Cathe不命中</h5><p><u>强制性不命中</u>：当第一次访问一个快时，该块不在Cathe中，需从下一级存储器中调入Cathe。（冷启动访问不命中，首次访问不命中）</p>
-<p><u>容量不命中</u>：如果<u>程序执行时所需的块</u>不能全部调入Cathe中，当某些块被调出后，若又重新被访问，就会发生不命中。</p>
-<p><u>冲突不命中</u>：在组相联或者直接映像Cathe中，若太多的块映像到同一组（块）中，则会出现该组中某个块被别的块替换掉，然后又重新被访问的情况。（碰撞不命中，冲突不命中）</p>
-<p>关系：</p>
-<ul>
-<li><strong>相联度</strong>越高，冲突不命中就越少；</li>
-<li>强制性不命中和容量不命中不受相联度的影响；</li>
-<li>强制性不命中不受<strong>Cathe容量</strong>的影响，但容量不命中却随着容量的增加而减少。</li>
-</ul>
-<h4 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h4><h5 id="I-O系统的可靠性、可用性和可信性"><a href="#I-O系统的可靠性、可用性和可信性" class="headerlink" title="I/O系统的可靠性、可用性和可信性"></a>I/O系统的可靠性、可用性和可信性</h5><p>可靠性：系统从某个初始参考点开始<u>一直连续提供服务的能力</u>，用平均无故障时间（<strong>MTTF</strong>）来衡量。MTTF的导数是失效率。系统总体的失效率是各部件的失效率之和。系统<u>中断服务的时间</u>用平均修复时间（<strong>MTTR</strong>）来衡量。</p>
-<p>可用性：系统正常工作的时间在连续两次服务间隔时间中所占的比例。</p>
-<script type="math/tex; mode=display">
-可用性=\frac{MTTF}{MTTF+MTTR}</script><p>   平均失效间隔时间，MTBF</p>
-<script type="math/tex; mode=display">
-MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u>的。</p>
-<h5 id="廉价磁盘冗余阵列-RAID"><a href="#廉价磁盘冗余阵列-RAID" class="headerlink" title="廉价磁盘冗余阵列 (RAID)"></a>廉价磁盘冗余阵列 (RAID)</h5><p>RAID0：<u>无冗余和无校验</u>的磁盘阵列，成本最低。</p>
-<p>RAID1：<u>镜像</u>磁盘阵列。</p>
-<p>RAID2：采用纠错的<u>海明码</u>的磁盘阵列，冗余盘数量为$log_2m$，m为数据盘的个数。</p>
-<p>RAID3：<u>位</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
-<p>RAID4：<u>块</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
-<p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
-<p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
-<p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
-<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。<br>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
-]]></content>
-      <categories>
-        <category>计算机体系结构</category>
-      </categories>
-      <tags>
-        <tag>计算机体系结构</tag>
-        <tag>机群</tag>
-        <tag>MPP</tag>
-        <tag>SMP</tag>
-        <tag>消息传递</tag>
-        <tag>共享存储器</tag>
-        <tag>同时多线程</tag>
-        <tag>RAID</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>软件工程学概述</title>
     <url>/2020/03/08/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%AD%A6%E6%A6%82%E8%BF%B0/</url>
     <content><![CDATA[<h4 id="软件危机"><a href="#软件危机" class="headerlink" title="软件危机"></a>软件危机</h4><ol>
@@ -2520,6 +2471,66 @@ MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u
         <tag>软件危机</tag>
         <tag>软件生命周期</tag>
         <tag>软件工程方法学</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>计算机体系结构重要考点</title>
+    <url>/2020/03/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%87%8D%E8%A6%81%E8%80%83%E7%82%B9/</url>
+    <content><![CDATA[<h4 id="同时多线程"><a href="#同时多线程" class="headerlink" title="同时多线程"></a>同时多线程</h4><p>线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。</p>
+<p>线程级并行：指并行执行两个或两个以上的线程。</p>
+<p>同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种改进。通过寄存器命名和动态调度机制，来自各个独立线程的多条指令可以同时流出，而不用考虑它们之间的相互依赖关系。</p>
+<h5 id="实现多线程的主要方法"><a href="#实现多线程的主要方法" class="headerlink" title="实现多线程的主要方法"></a>实现多线程的主要方法</h5><p><u>细粒度多线程</u>：在每条指令之间都可以进行线程的切换，从而使得多个线程可以交替执行。</p>
+<ul>
+<li>优点：能够隐藏由长时间停顿带来的吞吐率的损失，也能够隐藏由段时间停顿带来的损失。</li>
+<li>缺点：减慢了单个线程的执行。即使没有任何停顿的线程也不能连续执行，而且会因为其他线程的指令的插入执行而被延迟。</li>
+</ul>
+<p><u>粗粒度多线程</u>：线程之间的切换只发生在时间较长的停顿出现的时候。</p>
+<ul>
+<li>优点：减少了切换次数，很大程度上也不会降低单个线程的执行速度。</li>
+<li>缺点：减少吞吐率损失的能力有限。由于实现粗粒度多线程的CPU只能执行单个线程的指令，不能交叉执行多个线程，因此当发生停顿时，流水线必须排空或暂停。</li>
+</ul>
+<h4 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h4><h5 id="写策略"><a href="#写策略" class="headerlink" title="写策略"></a>写策略</h5><p>写直达法：在执行写操作时，不仅把数据写入Cathe中相应的块，而且也写入下一级存储器。减少CPU写停顿的常用方法是，采用写缓冲器。</p>
+<p>写回法：只把数据写入Cathe中相应的块，不写入下一级存储器。这些最新数据只有在相应的块被替换出时，才被写回下一级存储器。速度快，要设置“修改位”。</p>
+<p>写不命中时，</p>
+<p>按写分配法：写不命中时，把所写单元的块从主存中调入Cathe，然后再进行写入。与<u>写回法</u>配合。</p>
+<p>不按写分配法：写不命中时，直接写入下一级存储器而不将相应的块调入Cathe。</p>
+<h5 id="三种类型的Cathe不命中"><a href="#三种类型的Cathe不命中" class="headerlink" title="三种类型的Cathe不命中"></a>三种类型的Cathe不命中</h5><p><u>强制性不命中</u>：当第一次访问一个快时，该块不在Cathe中，需从下一级存储器中调入Cathe。（冷启动访问不命中，首次访问不命中）</p>
+<p><u>容量不命中</u>：如果<u>程序执行时所需的块</u>不能全部调入Cathe中，当某些块被调出后，若又重新被访问，就会发生不命中。</p>
+<p><u>冲突不命中</u>：在组相联或者直接映像Cathe中，若太多的块映像到同一组（块）中，则会出现该组中某个块被别的块替换掉，然后又重新被访问的情况。（碰撞不命中，冲突不命中）</p>
+<p>关系：</p>
+<ul>
+<li><strong>相联度</strong>越高，冲突不命中就越少；</li>
+<li>强制性不命中和容量不命中不受相联度的影响；</li>
+<li>强制性不命中不受<strong>Cathe容量</strong>的影响，但容量不命中却随着容量的增加而减少。</li>
+</ul>
+<h4 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h4><h5 id="I-O系统的可靠性、可用性和可信性"><a href="#I-O系统的可靠性、可用性和可信性" class="headerlink" title="I/O系统的可靠性、可用性和可信性"></a>I/O系统的可靠性、可用性和可信性</h5><p>可靠性：系统从某个初始参考点开始<u>一直连续提供服务的能力</u>，用平均无故障时间（<strong>MTTF</strong>）来衡量。MTTF的导数是失效率。系统总体的失效率是各部件的失效率之和。系统<u>中断服务的时间</u>用平均修复时间（<strong>MTTR</strong>）来衡量。</p>
+<p>可用性：系统正常工作的时间在连续两次服务间隔时间中所占的比例。</p>
+<script type="math/tex; mode=display">
+可用性=\frac{MTTF}{MTTF+MTTR}</script><p>   平均失效间隔时间，MTBF</p>
+<script type="math/tex; mode=display">
+MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u>的。</p>
+<h5 id="廉价磁盘冗余阵列-RAID"><a href="#廉价磁盘冗余阵列-RAID" class="headerlink" title="廉价磁盘冗余阵列 (RAID)"></a>廉价磁盘冗余阵列 (RAID)</h5><p>RAID0：<u>无冗余和无校验</u>的磁盘阵列，成本最低。</p>
+<p>RAID1：<u>镜像</u>磁盘阵列。</p>
+<p>RAID2：采用纠错的<u>海明码</u>的磁盘阵列，冗余盘数量为$log_2m$，m为数据盘的个数。</p>
+<p>RAID3：<u>位</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID4：<u>块</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
+<p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
+<p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
+<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。<br>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
+]]></content>
+      <categories>
+        <category>计算机体系结构</category>
+      </categories>
+      <tags>
+        <tag>计算机体系结构</tag>
+        <tag>机群</tag>
+        <tag>MPP</tag>
+        <tag>SMP</tag>
+        <tag>消息传递</tag>
+        <tag>共享存储器</tag>
+        <tag>同时多线程</tag>
+        <tag>RAID</tag>
       </tags>
   </entry>
 </search>
