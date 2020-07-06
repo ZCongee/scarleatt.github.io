@@ -1,6 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Anomaly Detection</title>
+    <url>/2020/07/03/Anomaly-detection/</url>
+    <content><![CDATA[<h4 id="Problem-Formulation"><a href="#Problem-Formulation" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h4><p>对于给定的训练数据集，做异常检测的目的是找到一个函数，这个函数可以检测输入的x是不是和训练数据集相似的。异常检测知识检测出和训练数据不一样的输入，检测出来的数据并不一定都是不好的，有可能是好的，也有可能是不好的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703142752745.png" alt="image-20200703142752745" style="zoom:60%;"></p>
+<p>那么到底怎么来定义这个similarity呢？这也就是异常检测需要探讨的问题，不同的方法就有不同的定义方式。</p>
+<h4 id="What-is-Anomaly"><a href="#What-is-Anomaly" class="headerlink" title="What is Anomaly?"></a>What is Anomaly?</h4><p>Q：那么我们到底如何来定义anomaly呢？如何确定我们检测出来的输入是anomaly的呢？</p>
+<p>A：取决于具体的训练数据集。在下图中，如果训练集中有很多雷丘，那么皮卡丘就是异常；但如果有很多只皮卡丘，那么雷丘就是异常,….</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703143729820.png" alt="image-20200703143729820" style="zoom:60%;"></p>
+<h4 id="Applications"><a href="#Applications" class="headerlink" title="Applications"></a>Applications</h4><p>异常检测有很多应用，以下简要叙述三个：</p>
+<ol>
+<li><p>Fraud Detection，training data是正常刷卡行为， 那么现有一笔新的交易记录x，我们就可以进行异常检测，来判断x是不是盗刷行为；比如日常都是小额消费，但突然多了一些连续的高额消费，就可以认为这是盗刷行为；</p>
+</li>
+<li><p>Network Intrusion Detection，training data是正常连接行为，现在有一个新的连接x进来，那么我们就可以让机器自己进行异常检测，来判断新连接是不是异常的；</p>
+</li>
+<li><p>Cancer Detection，training data是正常细胞的资料，比如细胞核的大小、分裂的频率等，如果来一个新的细胞x，机器可以自己决定到底是正常细胞还是癌细胞。</p>
+</li>
+</ol>
+<h4 id="Binary-Classification"><a href="#Binary-Classification" class="headerlink" title="Binary Classification?"></a>Binary Classification?</h4><p>Q：给定正常的数据（Class 1）为$\{x^1,x^2,..,x^N\}$，异常的数据（Class 2）为$\{\tilde x^1,\tilde x^2,..,\tilde x^N\}$；那么异常检测可以认为是一个二分类问题吗？</p>
+<p>A：如果正常数据集是“宝可梦”，那么异常数据就“不是宝可梦”，但“不是宝可梦”包含很多种类别，比如茶壶、树等；而且异常数据并不像正常数据那么容易收集；因此并不能简单地进行一个二分类问题。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703145452812.png" alt="image-20200703145452812" style="zoom:60%;"></p>
+<h4 id="Categories"><a href="#Categories" class="headerlink" title="Categories"></a>Categories</h4><p>异常检测可以分为以下几个类别：</p>
+<ol>
+<li>training data带label，每个训练数据$x^i$都有对应的标签$\hat y ^i$，一共有N个类别，那么我们就可以训练一个classifier，来进行分类，如果机器能辨别出这个input是1-N个类别，那么就认为是正常数据；如果机器不能辨别，即输出类别为“unknown”，我们就认为这是异常数据；</li>
+<li>如果training data是unlabel，这时又分为两种情况：（1）training data是clean的，所有的数据都是正常的；（2）training data中有一小部分数据是异常的，比如银行要对用户数据进行异常检测，那么training data就不可避免地包括一些异常数据。</li>
+</ol>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703150215978.png" alt="image-20200703150215978" style="zoom:60%;"></p>
+<h4 id="Case-1-With-Classifier"><a href="#Case-1-With-Classifier" class="headerlink" title="Case 1: With Classifier"></a>Case 1: With Classifier</h4><h5 id="Example-Application"><a href="#Example-Application" class="headerlink" title="Example Application"></a>Example Application</h5><p>现在我们判断一个人物是不是来自辛普森的家庭。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703151112051.png" alt="image-20200703151112051" style="zoom:60%;"></p>
+<p>在下图中对于输入的正常数据$\{x^1,x^2,..,x^N\}$，都有其对应的类别标签$\{\hat y^1,\hat y^2,..,\hat y^N\}$，那么我们就可以训练一个classifier，来预测其输出的类别。一位很喜爱辛普森的学者进行了实验，得出了很不错的分类结果。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703151635273.png" alt="image-20200703151635273" style="zoom:60%;"></p>
+<h5 id="How-to-use-the-Classifier"><a href="#How-to-use-the-Classifier" class="headerlink" title="How to use the Classifier"></a>How to use the Classifier</h5><p>那么根据训练出来的classifier来做异常检测，来判断一个人物到底是不是来自辛普森家庭。</p>
+<p>我们可以让classifier再输出一个confidence score，同时我们还需要定义一个界限threshold $\lambda$，如果信心分数$c(x)&gt;\lambda$，就认为是正常数据；否则就认为是异常数据。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703152031850.png" alt="image-20200703152031850" style="zoom:60%;"></p>
+<p>那么我们如何得到这个confidence score呢？</p>
+<p>在下图的例子中，如果是一个辛普森家庭的人物输入classifier，这个分类器能够很自信地得出分类结果是“霸子”（0.97）；但如果是一个非辛普森的人物输入，classifier的输出分类结果就比较均匀，4个分类就过都是0.20+。那么我们就可以认为classifier对第一个input是很自信的，是normal；第二个input则不自信，被认为是anomaly data。</p>
+<p>那么我们就可以把这个confidence score认为是分类结果的distribution中的最大值，也可以做cross-entropy。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703153414866.png" alt="image-20200703153414866" style="zoom:60%;"></p>
+<p>那么现在我们把辛普森家庭和其他动漫图片的所有数据都进行confidence score计算。在下图中，我们可以发现属于辛普森的confidence score distribution，几乎全都是1；但对于其他动漫的人物，只有10%的score为1，其他大多数的图片得到的分数都是比较低的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703154546578.png" alt="image-20200703154546578" style="zoom:60%;"></p>
+<h5 id="Example-Framework"><a href="#Example-Framework" class="headerlink" title="Example Framework"></a><strong>Example Framework</strong></h5><p>训练数据集是带label的，全都是属于辛普森家庭，那么我们可以训练出一个classifier，根据这个分类器，我们可以计算出每张图片的confidence score，根据threshold来判断这张图片是不是anomaly。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703155315020.png" alt="image-20200703155315020" style="zoom:60%;"></p>
+<p><strong>development set</strong>中需要包括带label（是否属于辛普森）的图片，<u>但这个图片不仅包括辛普森家庭的人物，还包括不属于辛普森家庭的人物</u>。将数据输入训练好的classifier，根据不同的$\lambda$，得到系统的performance，那么我们就可以通过development set来调整$\lambda$的值，选择使系统得到最好performance的$\lambda$。</p>
+<h5 id="Evalution"><a href="#Evalution" class="headerlink" title="Evalution"></a>Evalution</h5><p>现在有100张辛普森人物的图片，5张非辛普森。在图中红色部分则表示非辛普森的score，一共有5个方块，得到的分数都很低。</p>
+<p>正确率并不能来准确衡量一个系统的好坏，很可能一个系统有一个很高的正确率，但其实并不好。在下图中，我们可以计算出这个系统所计算出的accuracy为95.2%，但这并不是因为我们的异常检测系统很好，而是因为数据集的分布差异，异常数据所占的比例非常小。这并不是我们想要的异常检测系统，这个系统几乎会把所有的输入都判断成是异常的，但由于异常数据占比很小，最后的正确率还是会很高。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703160756452.png" alt="image-20200703160756452" style="zoom:60%;"></p>
+<p>因此我们不能用正确率accuracy来判断系统的performance。</p>
+<p>在下图中，我们把threshold设置为大于0.5的值，这时只有1个异常值被检测出来，还有剩下4个异常值没有被检测出来，这4个被认为是<u>missing</u>了；而在所有的100个辛普森人物里面，只有1个被检测为异常值，被认为是<u>False alarm</u>，剩下的99个都认为是正常的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703162036050.png" alt="image-20200703162036050" style="zoom:60%;"></p>
+<p>如果我们现在把threshold设置为大于0.8的值，这时只有2个异常值被检测出来，还有剩下3个异常值没有被检测出来（missing）；而在所有的100个辛普森人物里面，只有6个被检测为异常值（false alarm），剩下的94个都认为是正常的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703162819041.png" alt="image-20200703162819041" style="zoom:60%;"></p>
+<p>那么这两个threshold分别为0.5和0.8的异常检测系统，到底哪一个更好呢？这取决于你认为missing更严重，还是false alarm更严重。</p>
+<p>在下图中的<span style="color: red">Cost Table A</span>，如果是missing，就扣一分；如果是false alarm，就扣100分；如果用这种方式来衡量系统的好坏，那么左边的被扣了104分，右边的被扣了603分。</p>
+<p><span style="color: blue">Cost Table B</span>，如果是missing，就扣100分；如果是false alarm，就扣1分；如果用这种方式来衡量系统的好坏，那么左边的被扣了401分，右边的被扣了306分。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703162727493.png" alt="image-20200703162727493" style="zoom:60%;"></p>
+<p>在不同的场景下，就会有不同的cost table。比如癌症检测，missing比false alarm造成的影响大得多，如果这个人患了癌症却没被检测出来，后果会非常严重，因此这种情况我们table B比较好。</p>
+<h5 id="Possible-Issues"><a href="#Possible-Issues" class="headerlink" title="Possible Issues"></a>Possible Issues</h5><p>下图中展示了猫狗分类的例子，黑色线条表示decision boundary，靠近boundary得到的confidence score不高，如果在boundary上，就说明分类器不能确定图片的类别是猫还是狗。对于一些特别像猫的动物，比如老虎，也能够得到很好的分数，因为老虎有着和猫很像的特征，而这个特征是是分类器进行分类的关键，就可以迷惑分类器，得出错误的分类结果。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703165414744.png" alt="image-20200703165414744" style="zoom:60%;"></p>
+<p>如果这个分类器判断是不是辛普森家庭人物的关键是，人物的脸和皮肤是不是黄色。那么我们可以把其他动漫人物的脸涂成黄色，就可以发现分类器判断为辛普森的概率提高了很多。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703165502001.png" alt="image-20200703165502001" style="zoom:60%;"></p>
+<h5 id="To-Learn-More-……"><a href="#To-Learn-More-……" class="headerlink" title="To Learn More ……"></a>To Learn More ……</h5><p>也有一些文献提出了解决方法，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703170742579.png" alt="image-20200703170742579" style="zoom:60%;"></p>
+<h4 id="Case-2-Without-Labels"><a href="#Case-2-Without-Labels" class="headerlink" title="Case 2: Without Labels"></a>Case 2: Without Labels</h4><h5 id="Twitch-Plays-Pokemon"><a href="#Twitch-Plays-Pokemon" class="headerlink" title="Twitch Plays Pokémon"></a>Twitch Plays Pokémon</h5><p>先介绍一个游戏，Twitch Plays Pokémon，每个用户都可以在switch上输入自己的指令（up、left、…），可以同时有8万个用户，在这些用户中有些是异常用户，会输入无关指令干扰游戏的正常执行。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703171432329.png" alt="image-20200703171432329" style="zoom:60%;"></p>
+<h5 id="Problem-Formulation-1"><a href="#Problem-Formulation-1" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h5><p>那么我们如何移除这些游戏干扰者呢？</p>
+<p>我们首先对每一个玩家都用x表示，即表示成一个向量；对于其中一个维度$x_2$，如果这个人经常发表无政府言论，我们就可以认为这个人是来游戏中捣乱的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703171722577.png" alt="image-20200703171722577" style="zoom:60%;"></p>
+<p>但现在数据集是没有label的，没有classifier了，那么我们可以建立一个模型$P(x)$，这个模型可以告诉我们发生某种行为的概率有多大。如果$P(x)\geq\lambda$，那么我们就可以认为x是正常的，反之则认为是anomaly。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703172257910.png" alt="image-20200703172257910" style="zoom:60%;"></p>
+<p>如果现在对于一个玩家用二维向量来表示，一个维度表示“说垃圾话”的几率，另一个表示“无政府状态发言”的几率。对N个玩家的数据进行可视化，可以得到下图中的散点图。如果我们对其中“说垃圾话”维度的数据进行可视化，可以发现并不是所有的玩家都不说垃圾话，大部分都会说一点点；对于第二个维度，到底有多少人的发言是在无政府状态下进行的，可以发现多数人都是在无政府状态下发言的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703172908070.png" alt="image-20200703172908070" style="zoom:60%;"></p>
+<p>对于$P(x)$比较大的玩家，我们就可以认为是normal的；对于$P(x)$小的玩家，我们就认为其是anomaly的。但这并不具体，我们应该用数值化的方法来计算每一个玩家的score。</p>
+<h5 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a><strong>Maximum Likelihood</strong></h5><p>首先我们假设这些数据点都是从概率密度函数$f_{\theta} (x)$中取出来的，$\theta$决定了概率密度函数的形状，需要从训练数据中学习出来。现在我们已经有了数据点，但不知道其概率分布$f_{\theta} (x)$的形式。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703193052117.png" alt="image-20200703193052117" style="zoom:60%;"></p>
+<p>这里引入了likelihood的概念，表示根据我现在有的概率密度函数$f_{\theta} (x^1),f_{\theta} (x^2),..,f_{\theta} (x^N)$，产生左图数据分布的概率有多大。</p>
+<p>Q：那么我们怎么算图中的数据被产生出来的几率大小呢？</p>
+<p>A：对于图中的所有数据点$\{x^1,x^2,..,x^N\}$，产生数据点$x^1$的概率是$f_{\theta} (x^1)$，产生数据点$x^2$的概率是$f_{\theta} (x^2)$，…，产生数据点$x^N$的概率是$f_{\theta} (x^N)$；那么对于产生所有数据点的概率，就可以用以下的式子表示，</p>
+<script type="math/tex; mode=display">
+L(\theta)=f_{\theta} (x^1)f_{\theta} (x^2)\cdot\cdot\cdot f_{\theta} (x^N)</script><p>也就是likelihood，和$\theta$是有关的，选择不同的$\theta$，就会有不同的概率密度函数，也就会有不同的likelihood，那么现在我们的任务就是找到$\theta^*$，使得likelihood可以取得最大值，即</p>
+<script type="math/tex; mode=display">
+\theta ^*=arg \ \mathop{\rm max}_\theta L(\theta)</script><h5 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a><strong>Gaussian Distribution</strong></h5><p>下图中的$f_{\mu,\sum}(x)$为高斯分布，输入为x，输出为x被sample的概率，是一个数值，$\mu$表示均值，$\sum$表示协方差矩阵。 </p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703195322546.png" alt="image-20200703195322546" style="zoom:60%;"></p>
+<p>由于此时的概率密度函数发生了变化，我们现在将likelihood的形式进行变化，即</p>
+<script type="math/tex; mode=display">
+L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^N)</script><p>那么此时我们就需要找到$\mu^<em>,\sum^</em>$，来使likelihood最大化，</p>
+<script type="math/tex; mode=display">
+\mu^*,\sum=arg \ \mathop{\rm max}_{\mu,\sum} L(\mu,\sum)</script><p>在上图中，由于高斯分布的特性，数据点在$\mu$附近的地方很容易被sample到，越远被sample到的几率就越低；如果$\mu$在数据点很密集的地方，我们就可以认为likelihood的值很大；如果$\mu$在偏离高密度的地方，likelihood会小很多。</p>
+<p>$\mu^*$就是输入数据点求均值，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703201627458.png" alt="image-20200703201627458" style="zoom:60%;"></p>
+<p>找出了对应的$\mu^<em>,\sum^</em>$之后，我们就可以代入对应的概率密度函数，进行异常检测。如果$f_{\mu^<em>,\sum^</em>}(x)&gt;\lambda$，就认为是正常数据；如果$f_{\mu^<em>,\sum^</em>}(x)\leq\lambda$，则认为是异常数据（anomaly）。</p>
+<p>如果把这个二维平面上所有的数据都输入这个概率分布，我们就可以得出下图；颜色越深，表示这越是一个一般的玩家，颜色越浅，表示异常行为越显著。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703201402084.png" alt="image-20200703201402084" style="zoom:60%;"></p>
+<p>如果现在有三个玩家$x=(x_1,x_2,x_3,x_4,x_5)^T$，表现出了不同的行为，根据模型算出来不同的结果。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703202451744.png" alt="image-20200703202451744" style="zoom:60%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Anomaly Detection</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Attack and Defense</title>
     <url>/2020/06/26/Attack/</url>
     <content><![CDATA[<h4 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200626095005396.png" alt="image-20200626095005396" style="zoom:50%;"></p>
@@ -177,109 +280,6 @@ w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="https://gitee.com/scarle
       </tags>
   </entry>
   <entry>
-    <title>Anomaly Detection</title>
-    <url>/2020/07/03/Anomaly-detection/</url>
-    <content><![CDATA[<h4 id="Problem-Formulation"><a href="#Problem-Formulation" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h4><p>对于给定的训练数据集，做异常检测的目的是找到一个函数，这个函数可以检测输入的x是不是和训练数据集相似的。异常检测知识检测出和训练数据不一样的输入，检测出来的数据并不一定都是不好的，有可能是好的，也有可能是不好的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703142752745.png" alt="image-20200703142752745" style="zoom:60%;"></p>
-<p>那么到底怎么来定义这个similarity呢？这也就是异常检测需要探讨的问题，不同的方法就有不同的定义方式。</p>
-<h4 id="What-is-Anomaly"><a href="#What-is-Anomaly" class="headerlink" title="What is Anomaly?"></a>What is Anomaly?</h4><p>Q：那么我们到底如何来定义anomaly呢？如何确定我们检测出来的输入是anomaly的呢？</p>
-<p>A：取决于具体的训练数据集。在下图中，如果训练集中有很多雷丘，那么皮卡丘就是异常；但如果有很多只皮卡丘，那么雷丘就是异常,….</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703143729820.png" alt="image-20200703143729820" style="zoom:60%;"></p>
-<h4 id="Applications"><a href="#Applications" class="headerlink" title="Applications"></a>Applications</h4><p>异常检测有很多应用，以下简要叙述三个：</p>
-<ol>
-<li><p>Fraud Detection，training data是正常刷卡行为， 那么现有一笔新的交易记录x，我们就可以进行异常检测，来判断x是不是盗刷行为；比如日常都是小额消费，但突然多了一些连续的高额消费，就可以认为这是盗刷行为；</p>
-</li>
-<li><p>Network Intrusion Detection，training data是正常连接行为，现在有一个新的连接x进来，那么我们就可以让机器自己进行异常检测，来判断新连接是不是异常的；</p>
-</li>
-<li><p>Cancer Detection，training data是正常细胞的资料，比如细胞核的大小、分裂的频率等，如果来一个新的细胞x，机器可以自己决定到底是正常细胞还是癌细胞。</p>
-</li>
-</ol>
-<h4 id="Binary-Classification"><a href="#Binary-Classification" class="headerlink" title="Binary Classification?"></a>Binary Classification?</h4><p>Q：给定正常的数据（Class 1）为$\{x^1,x^2,..,x^N\}$，异常的数据（Class 2）为$\{\tilde x^1,\tilde x^2,..,\tilde x^N\}$；那么异常检测可以认为是一个二分类问题吗？</p>
-<p>A：如果正常数据集是“宝可梦”，那么异常数据就“不是宝可梦”，但“不是宝可梦”包含很多种类别，比如茶壶、树等；而且异常数据并不像正常数据那么容易收集；因此并不能简单地进行一个二分类问题。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703145452812.png" alt="image-20200703145452812" style="zoom:60%;"></p>
-<h4 id="Categories"><a href="#Categories" class="headerlink" title="Categories"></a>Categories</h4><p>异常检测可以分为以下几个类别：</p>
-<ol>
-<li>training data带label，每个训练数据$x^i$都有对应的标签$\hat y ^i$，一共有N个类别，那么我们就可以训练一个classifier，来进行分类，如果机器能辨别出这个input是1-N个类别，那么就认为是正常数据；如果机器不能辨别，即输出类别为“unknown”，我们就认为这是异常数据；</li>
-<li>如果training data是unlabel，这时又分为两种情况：（1）training data是clean的，所有的数据都是正常的；（2）training data中有一小部分数据是异常的，比如银行要对用户数据进行异常检测，那么training data就不可避免地包括一些异常数据。</li>
-</ol>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703150215978.png" alt="image-20200703150215978" style="zoom:60%;"></p>
-<h4 id="Case-1-With-Classifier"><a href="#Case-1-With-Classifier" class="headerlink" title="Case 1: With Classifier"></a>Case 1: With Classifier</h4><h5 id="Example-Application"><a href="#Example-Application" class="headerlink" title="Example Application"></a>Example Application</h5><p>现在我们判断一个人物是不是来自辛普森的家庭。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703151112051.png" alt="image-20200703151112051" style="zoom:60%;"></p>
-<p>在下图中对于输入的正常数据$\{x^1,x^2,..,x^N\}$，都有其对应的类别标签$\{\hat y^1,\hat y^2,..,\hat y^N\}$，那么我们就可以训练一个classifier，来预测其输出的类别。一位很喜爱辛普森的学者进行了实验，得出了很不错的分类结果。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703151635273.png" alt="image-20200703151635273" style="zoom:60%;"></p>
-<h5 id="How-to-use-the-Classifier"><a href="#How-to-use-the-Classifier" class="headerlink" title="How to use the Classifier"></a>How to use the Classifier</h5><p>那么根据训练出来的classifier来做异常检测，来判断一个人物到底是不是来自辛普森家庭。</p>
-<p>我们可以让classifier再输出一个confidence score，同时我们还需要定义一个界限threshold $\lambda$，如果信心分数$c(x)&gt;\lambda$，就认为是正常数据；否则就认为是异常数据。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703152031850.png" alt="image-20200703152031850" style="zoom:60%;"></p>
-<p>那么我们如何得到这个confidence score呢？</p>
-<p>在下图的例子中，如果是一个辛普森家庭的人物输入classifier，这个分类器能够很自信地得出分类结果是“霸子”（0.97）；但如果是一个非辛普森的人物输入，classifier的输出分类结果就比较均匀，4个分类就过都是0.20+。那么我们就可以认为classifier对第一个input是很自信的，是normal；第二个input则不自信，被认为是anomaly data。</p>
-<p>那么我们就可以把这个confidence score认为是分类结果的distribution中的最大值，也可以做cross-entropy。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703153414866.png" alt="image-20200703153414866" style="zoom:60%;"></p>
-<p>那么现在我们把辛普森家庭和其他动漫图片的所有数据都进行confidence score计算。在下图中，我们可以发现属于辛普森的confidence score distribution，几乎全都是1；但对于其他动漫的人物，只有10%的score为1，其他大多数的图片得到的分数都是比较低的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703154546578.png" alt="image-20200703154546578" style="zoom:60%;"></p>
-<h5 id="Example-Framework"><a href="#Example-Framework" class="headerlink" title="Example Framework"></a><strong>Example Framework</strong></h5><p>训练数据集是带label的，全都是属于辛普森家庭，那么我们可以训练出一个classifier，根据这个分类器，我们可以计算出每张图片的confidence score，根据threshold来判断这张图片是不是anomaly。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703155315020.png" alt="image-20200703155315020" style="zoom:60%;"></p>
-<p><strong>development set</strong>中需要包括带label（是否属于辛普森）的图片，<u>但这个图片不仅包括辛普森家庭的人物，还包括不属于辛普森家庭的人物</u>。将数据输入训练好的classifier，根据不同的$\lambda$，得到系统的performance，那么我们就可以通过development set来调整$\lambda$的值，选择使系统得到最好performance的$\lambda$。</p>
-<h5 id="Evalution"><a href="#Evalution" class="headerlink" title="Evalution"></a>Evalution</h5><p>现在有100张辛普森人物的图片，5张非辛普森。在图中红色部分则表示非辛普森的score，一共有5个方块，得到的分数都很低。</p>
-<p>正确率并不能来准确衡量一个系统的好坏，很可能一个系统有一个很高的正确率，但其实并不好。在下图中，我们可以计算出这个系统所计算出的accuracy为95.2%，但这并不是因为我们的异常检测系统很好，而是因为数据集的分布差异，异常数据所占的比例非常小。这并不是我们想要的异常检测系统，这个系统几乎会把所有的输入都判断成是异常的，但由于异常数据占比很小，最后的正确率还是会很高。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703160756452.png" alt="image-20200703160756452" style="zoom:60%;"></p>
-<p>因此我们不能用正确率accuracy来判断系统的performance。</p>
-<p>在下图中，我们把threshold设置为大于0.5的值，这时只有1个异常值被检测出来，还有剩下4个异常值没有被检测出来，这4个被认为是<u>missing</u>了；而在所有的100个辛普森人物里面，只有1个被检测为异常值，被认为是<u>False alarm</u>，剩下的99个都认为是正常的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703162036050.png" alt="image-20200703162036050" style="zoom:60%;"></p>
-<p>如果我们现在把threshold设置为大于0.8的值，这时只有2个异常值被检测出来，还有剩下3个异常值没有被检测出来（missing）；而在所有的100个辛普森人物里面，只有6个被检测为异常值（false alarm），剩下的94个都认为是正常的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703162819041.png" alt="image-20200703162819041" style="zoom:60%;"></p>
-<p>那么这两个threshold分别为0.5和0.8的异常检测系统，到底哪一个更好呢？这取决于你认为missing更严重，还是false alarm更严重。</p>
-<p>在下图中的<span style="color: red">Cost Table A</span>，如果是missing，就扣一分；如果是false alarm，就扣100分；如果用这种方式来衡量系统的好坏，那么左边的被扣了104分，右边的被扣了603分。</p>
-<p><span style="color: blue">Cost Table B</span>，如果是missing，就扣100分；如果是false alarm，就扣1分；如果用这种方式来衡量系统的好坏，那么左边的被扣了401分，右边的被扣了306分。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703162727493.png" alt="image-20200703162727493" style="zoom:60%;"></p>
-<p>在不同的场景下，就会有不同的cost table。比如癌症检测，missing比false alarm造成的影响大得多，如果这个人患了癌症却没被检测出来，后果会非常严重，因此这种情况我们table B比较好。</p>
-<h5 id="Possible-Issues"><a href="#Possible-Issues" class="headerlink" title="Possible Issues"></a>Possible Issues</h5><p>下图中展示了猫狗分类的例子，黑色线条表示decision boundary，靠近boundary得到的confidence score不高，如果在boundary上，就说明分类器不能确定图片的类别是猫还是狗。对于一些特别像猫的动物，比如老虎，也能够得到很好的分数，因为老虎有着和猫很像的特征，而这个特征是是分类器进行分类的关键，就可以迷惑分类器，得出错误的分类结果。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703165414744.png" alt="image-20200703165414744" style="zoom:60%;"></p>
-<p>如果这个分类器判断是不是辛普森家庭人物的关键是，人物的脸和皮肤是不是黄色。那么我们可以把其他动漫人物的脸涂成黄色，就可以发现分类器判断为辛普森的概率提高了很多。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703165502001.png" alt="image-20200703165502001" style="zoom:60%;"></p>
-<h5 id="To-Learn-More-……"><a href="#To-Learn-More-……" class="headerlink" title="To Learn More ……"></a>To Learn More ……</h5><p>也有一些文献提出了解决方法，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703170742579.png" alt="image-20200703170742579" style="zoom:60%;"></p>
-<h4 id="Case-2-Without-Labels"><a href="#Case-2-Without-Labels" class="headerlink" title="Case 2: Without Labels"></a>Case 2: Without Labels</h4><h5 id="Twitch-Plays-Pokemon"><a href="#Twitch-Plays-Pokemon" class="headerlink" title="Twitch Plays Pokémon"></a>Twitch Plays Pokémon</h5><p>先介绍一个游戏，Twitch Plays Pokémon，每个用户都可以在switch上输入自己的指令（up、left、…），可以同时有8万个用户，在这些用户中有些是异常用户，会输入无关指令干扰游戏的正常执行。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703171432329.png" alt="image-20200703171432329" style="zoom:60%;"></p>
-<h5 id="Problem-Formulation-1"><a href="#Problem-Formulation-1" class="headerlink" title="Problem Formulation"></a>Problem Formulation</h5><p>那么我们如何移除这些游戏干扰者呢？</p>
-<p>我们首先对每一个玩家都用x表示，即表示成一个向量；对于其中一个维度$x_2$，如果这个人经常发表无政府言论，我们就可以认为这个人是来游戏中捣乱的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703171722577.png" alt="image-20200703171722577" style="zoom:60%;"></p>
-<p>但现在数据集是没有label的，没有classifier了，那么我们可以建立一个模型$P(x)$，这个模型可以告诉我们发生某种行为的概率有多大。如果$P(x)\geq\lambda$，那么我们就可以认为x是正常的，反之则认为是anomaly。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703172257910.png" alt="image-20200703172257910" style="zoom:60%;"></p>
-<p>如果现在对于一个玩家用二维向量来表示，一个维度表示“说垃圾话”的几率，另一个表示“无政府状态发言”的几率。对N个玩家的数据进行可视化，可以得到下图中的散点图。如果我们对其中“说垃圾话”维度的数据进行可视化，可以发现并不是所有的玩家都不说垃圾话，大部分都会说一点点；对于第二个维度，到底有多少人的发言是在无政府状态下进行的，可以发现多数人都是在无政府状态下发言的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703172908070.png" alt="image-20200703172908070" style="zoom:60%;"></p>
-<p>对于$P(x)$比较大的玩家，我们就可以认为是normal的；对于$P(x)$小的玩家，我们就认为其是anomaly的。但这并不具体，我们应该用数值化的方法来计算每一个玩家的score。</p>
-<h5 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a><strong>Maximum Likelihood</strong></h5><p>首先我们假设这些数据点都是从概率密度函数$f_{\theta} (x)$中取出来的，$\theta$决定了概率密度函数的形状，需要从训练数据中学习出来。现在我们已经有了数据点，但不知道其概率分布$f_{\theta} (x)$的形式。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703193052117.png" alt="image-20200703193052117" style="zoom:60%;"></p>
-<p>这里引入了likelihood的概念，表示根据我现在有的概率密度函数$f_{\theta} (x^1),f_{\theta} (x^2),..,f_{\theta} (x^N)$，产生左图数据分布的概率有多大。</p>
-<p>Q：那么我们怎么算图中的数据被产生出来的几率大小呢？</p>
-<p>A：对于图中的所有数据点$\{x^1,x^2,..,x^N\}$，产生数据点$x^1$的概率是$f_{\theta} (x^1)$，产生数据点$x^2$的概率是$f_{\theta} (x^2)$，…，产生数据点$x^N$的概率是$f_{\theta} (x^N)$；那么对于产生所有数据点的概率，就可以用以下的式子表示，</p>
-<script type="math/tex; mode=display">
-L(\theta)=f_{\theta} (x^1)f_{\theta} (x^2)\cdot\cdot\cdot f_{\theta} (x^N)</script><p>也就是likelihood，和$\theta$是有关的，选择不同的$\theta$，就会有不同的概率密度函数，也就会有不同的likelihood，那么现在我们的任务就是找到$\theta^*$，使得likelihood可以取得最大值，即</p>
-<script type="math/tex; mode=display">
-\theta ^*=arg \ \mathop{\rm max}_\theta L(\theta)</script><h5 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a><strong>Gaussian Distribution</strong></h5><p>下图中的$f_{\mu,\sum}(x)$为高斯分布，输入为x，输出为x被sample的概率，是一个数值，$\mu$表示均值，$\sum$表示协方差矩阵。 </p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703195322546.png" alt="image-20200703195322546" style="zoom:60%;"></p>
-<p>由于此时的概率密度函数发生了变化，我们现在将likelihood的形式进行变化，即</p>
-<script type="math/tex; mode=display">
-L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^N)</script><p>那么此时我们就需要找到$\mu^<em>,\sum^</em>$，来使likelihood最大化，</p>
-<script type="math/tex; mode=display">
-\mu^*,\sum=arg \ \mathop{\rm max}_{\mu,\sum} L(\mu,\sum)</script><p>在上图中，由于高斯分布的特性，数据点在$\mu$附近的地方很容易被sample到，越远被sample到的几率就越低；如果$\mu$在数据点很密集的地方，我们就可以认为likelihood的值很大；如果$\mu$在偏离高密度的地方，likelihood会小很多。</p>
-<p>$\mu^*$就是输入数据点求均值，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703201627458.png" alt="image-20200703201627458" style="zoom:60%;"></p>
-<p>找出了对应的$\mu^<em>,\sum^</em>$之后，我们就可以代入对应的概率密度函数，进行异常检测。如果$f_{\mu^<em>,\sum^</em>}(x)&gt;\lambda$，就认为是正常数据；如果$f_{\mu^<em>,\sum^</em>}(x)\leq\lambda$，则认为是异常数据（anomaly）。</p>
-<p>如果把这个二维平面上所有的数据都输入这个概率分布，我们就可以得出下图；颜色越深，表示这越是一个一般的玩家，颜色越浅，表示异常行为越显著。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703201402084.png" alt="image-20200703201402084" style="zoom:60%;"></p>
-<p>如果现在有三个玩家$x=(x_1,x_2,x_3,x_4,x_5)^T$，表现出了不同的行为，根据模型算出来不同的结果。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703202451744.png" alt="image-20200703202451744" style="zoom:60%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Anomaly Detection</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Conditional GAN (CGAN)</title>
     <url>/2020/07/05/CGAN/</url>
     <content><![CDATA[<p>对于一般的GAN，都是随机生成一个vector，然后输入GAN，再生成一张image，但我们并不能控制output。对于本文要讲述的CGAN，我们则可以操控其输出的结果。</p>
@@ -342,6 +342,55 @@ L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^
       </tags>
   </entry>
   <entry>
+    <title>Classification</title>
+    <url>/2020/06/05/Classification/</url>
+    <content><![CDATA[<p>考虑到宝可梦的两个属性（<strong>Defense</strong>、<strong>SP Defense</strong>），将输入的宝可梦进行属性分类（Water、Normal）</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605204445258.png" alt="image-20200605204445258" style="zoom:50%;"></p>
+<h4 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a>Gaussian Distribution</h4><p>假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605202837571.png" alt="image-20200605202837571" style="zoom:50%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605204129951.png" alt="image-20200605204129951" style="zoom:50%;"></p>
+<h4 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a>Maximum Likelihood</h4><p>第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\mu,\sum)$的表达式，其中$\mu=\mu^<em>,\sum=\sum^</em>$时，函数L得到最大值</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605203041766.png" alt="image-20200605203041766" style="zoom:50%;"></p>
+<p>这里我们假设有两个类别，其参数和分布如下，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605210600803.png" alt="image-20200605210600803" style="zoom:50%;"></p>
+<p>输入样例x是Class 1:Water的概率为，</p>
+<script type="math/tex; mode=display">
+P(C_1|x)=\frac{P(x|C_1)P(C_1)}{P(x)}=\frac{P(x|C_1)P(C_1)}
+{P(x|C_1)P(C_1)+P(x|C_2)P(C_2)}</script><p>再代入相应的表达式，其中$P(x|C_1)=f_{\mu^1,\sum^1},P(x|C_2)=f_{\mu^2,\sum^2}$，即可算出x为C1的概率，如果算出这个概率大于0.5，我们就可以认为x的属性为C1</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605212347236.png" alt="image-20200605212347236" style="zoom:50%;"></p>
+<p>但这样子算出来的分类精确度很低，只有47%，就算加入其他的属性，精确度也只提高到了54%</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605214028329.png" alt="image-20200605214028329" style="zoom:50%;"></p>
+<h4 id="Modifying-Model"><a href="#Modifying-Model" class="headerlink" title="Modifying Model"></a>Modifying Model</h4><p>由于上面模型的精确度都不高，所以在此我们对模型进行了修改，模型的参数就只有三个，$\mu^1,\mu^2,\sum=\sum^1=\sum^2$</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605214245755.png" alt="image-20200605214245755" style="zoom:50%;"></p>
+<p>对于Water属性的宝可梦对应参数为$\mu^1$，Normal属性的宝可梦为$\mu^2$，共同属性为$\sum$，这时对应的最大似然函数为$L(\mu^1,\mu^2,\sum)$，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605214446675.png" alt="image-20200605214446675" style="zoom:50%;"></p>
+<p>修改后的模型准确率可以达到54%，如果加入更多的属性，准确率可以提高到73%</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605215021833.png" alt="image-20200605215021833" style="zoom:50%;"></p>
+<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><p>这里再回忆一下三个步骤：<br>（1）Function Set，计算分类为该类的概率$P(C_1|x)$，如果大于0.5，则认为类别为1，否则为类别2<br>（2）找出相对应的$\mu,\sum$，使得似然函数L取得最大值；<br>（3）得出使似然函数最大化的参数，$\mu^<em>,\sum^</em>$，</p>
+<script type="math/tex; mode=display">
+u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\mu^*)(x^n-\mu^*)^T</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605220705405.png" alt="image-20200605220705405" style="zoom:50%;"></p>
+<h4 id="Probability-Distribution"><a href="#Probability-Distribution" class="headerlink" title="Probability Distribution"></a>Probability Distribution</h4><p>这里我们所使用的概率分布是</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605221617855.png" alt="image-20200605221617855" style="zoom:50%;"></p>
+<p>下面开始公式推导，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605221733838.png" alt="image-20200605221733838" style="zoom:50%;"></p>
+<p>得出了我们的Sigmoid函数，$\sigma(z)$的函数图像为s型，值域范围为[0,1]，将z化简，并代入$P(C_i)=\frac{N_i}{N_1+N_2}$ (i=1,2)，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605221911457.png" alt="image-20200605221911457" style="zoom:50%;"></p>
+<p>将$P(x|C_1),P(x|C_2)$的表达式代入$ln\frac{P(x|C_1)}{P(x|C_2)}$，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605222200879.png" alt="image-20200605222200879" style="zoom:50%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605223207505.png" alt="image-20200605223207505" style="zoom:50%;"></p>
+<p>再进行进一步化简，带入$\sum^1=\sum^2=\sum$，我们可以得出z的简易表达式$z=w\cdot x + b$，可得出$P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)$。当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605223410530.png" alt="image-20200605223410530" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>classification</tag>
+        <tag>sigmoid function</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Convolutional Neural Network</title>
     <url>/2020/06/08/CNN/</url>
     <content><![CDATA[<h4 id="Why-CNN-for-Image"><a href="#Why-CNN-for-Image" class="headerlink" title="Why CNN for Image"></a>Why CNN for Image</h4><p>可以使用相同的参数来提取不同图像中的同一种特征，这样就可以降低网络需要学习的参数</p>
@@ -391,55 +440,6 @@ H/W=\frac{(h/w - F+2P)}{S}+1</script><p>这里引入了keras，先介绍几个�
       <tags>
         <tag>Deep Learning</tag>
         <tag>CNN</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Classification</title>
-    <url>/2020/06/05/Classification/</url>
-    <content><![CDATA[<p>考虑到宝可梦的两个属性（<strong>Defense</strong>、<strong>SP Defense</strong>），将输入的宝可梦进行属性分类（Water、Normal）</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605204445258.png" alt="image-20200605204445258" style="zoom:50%;"></p>
-<h4 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a>Gaussian Distribution</h4><p>假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605202837571.png" alt="image-20200605202837571" style="zoom:50%;"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605204129951.png" alt="image-20200605204129951" style="zoom:50%;"></p>
-<h4 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a>Maximum Likelihood</h4><p>第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\mu,\sum)$的表达式，其中$\mu=\mu^<em>,\sum=\sum^</em>$时，函数L得到最大值</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605203041766.png" alt="image-20200605203041766" style="zoom:50%;"></p>
-<p>这里我们假设有两个类别，其参数和分布如下，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605210600803.png" alt="image-20200605210600803" style="zoom:50%;"></p>
-<p>输入样例x是Class 1:Water的概率为，</p>
-<script type="math/tex; mode=display">
-P(C_1|x)=\frac{P(x|C_1)P(C_1)}{P(x)}=\frac{P(x|C_1)P(C_1)}
-{P(x|C_1)P(C_1)+P(x|C_2)P(C_2)}</script><p>再代入相应的表达式，其中$P(x|C_1)=f_{\mu^1,\sum^1},P(x|C_2)=f_{\mu^2,\sum^2}$，即可算出x为C1的概率，如果算出这个概率大于0.5，我们就可以认为x的属性为C1</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605212347236.png" alt="image-20200605212347236" style="zoom:50%;"></p>
-<p>但这样子算出来的分类精确度很低，只有47%，就算加入其他的属性，精确度也只提高到了54%</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605214028329.png" alt="image-20200605214028329" style="zoom:50%;"></p>
-<h4 id="Modifying-Model"><a href="#Modifying-Model" class="headerlink" title="Modifying Model"></a>Modifying Model</h4><p>由于上面模型的精确度都不高，所以在此我们对模型进行了修改，模型的参数就只有三个，$\mu^1,\mu^2,\sum=\sum^1=\sum^2$</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605214245755.png" alt="image-20200605214245755" style="zoom:50%;"></p>
-<p>对于Water属性的宝可梦对应参数为$\mu^1$，Normal属性的宝可梦为$\mu^2$，共同属性为$\sum$，这时对应的最大似然函数为$L(\mu^1,\mu^2,\sum)$，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605214446675.png" alt="image-20200605214446675" style="zoom:50%;"></p>
-<p>修改后的模型准确率可以达到54%，如果加入更多的属性，准确率可以提高到73%</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605215021833.png" alt="image-20200605215021833" style="zoom:50%;"></p>
-<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><p>这里再回忆一下三个步骤：<br>（1）Function Set，计算分类为该类的概率$P(C_1|x)$，如果大于0.5，则认为类别为1，否则为类别2<br>（2）找出相对应的$\mu,\sum$，使得似然函数L取得最大值；<br>（3）得出使似然函数最大化的参数，$\mu^<em>,\sum^</em>$，</p>
-<script type="math/tex; mode=display">
-u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\mu^*)(x^n-\mu^*)^T</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605220705405.png" alt="image-20200605220705405" style="zoom:50%;"></p>
-<h4 id="Probability-Distribution"><a href="#Probability-Distribution" class="headerlink" title="Probability Distribution"></a>Probability Distribution</h4><p>这里我们所使用的概率分布是</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605221617855.png" alt="image-20200605221617855" style="zoom:50%;"></p>
-<p>下面开始公式推导，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605221733838.png" alt="image-20200605221733838" style="zoom:50%;"></p>
-<p>得出了我们的Sigmoid函数，$\sigma(z)$的函数图像为s型，值域范围为[0,1]，将z化简，并代入$P(C_i)=\frac{N_i}{N_1+N_2}$ (i=1,2)，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605221911457.png" alt="image-20200605221911457" style="zoom:50%;"></p>
-<p>将$P(x|C_1),P(x|C_2)$的表达式代入$ln\frac{P(x|C_1)}{P(x|C_2)}$，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605222200879.png" alt="image-20200605222200879" style="zoom:50%;"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605223207505.png" alt="image-20200605223207505" style="zoom:50%;"></p>
-<p>再进行进一步化简，带入$\sum^1=\sum^2=\sum$，我们可以得出z的简易表达式$z=w\cdot x + b$，可得出$P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)$。当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605223410530.png" alt="image-20200605223410530" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>classification</tag>
-        <tag>sigmoid function</tag>
       </tags>
   </entry>
   <entry>
@@ -854,6 +854,59 @@ y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情�
       </tags>
   </entry>
   <entry>
+    <title>Logistic Regression</title>
+    <url>/2020/06/06/Logistic-Regression/</url>
+    <content><![CDATA[<h4 id="Review"><a href="#Review" class="headerlink" title="Review"></a>Review</h4><p>我们可以得出z的简易表达式$z=w\cdot x + b$，可得出</p>
+<script type="math/tex; mode=display">
+P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)</script><p>当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
+<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><h5 id="Step1-Function-Set"><a href="#Step1-Function-Set" class="headerlink" title="Step1: Function Set"></a>Step1: Function Set</h5><p>把所有的w和b都要包括进来，这里使用的function set就是sigmoid函数，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606111122013.png" alt="image-20200606111122013" style="zoom:50%;"></p>
+<h5 id="Step2-Goodness-of-a-Function"><a href="#Step2-Goodness-of-a-Function" class="headerlink" title="Step2: Goodness of a Function"></a>Step2: Goodness of a Function</h5><p>对于给定的一组w和b，得出似然函数L(w,b)的表达式，对于一个二分类问题，类别C1的概率为$f_{w,b}(x^i),\ i=1,2,4,…N$，而类别C2的概率则为$1-f_{w,b}(x^3)$。找出相对应的$w^{<em>},b^{</em>}$，使得L取得最大值。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606111627142.png" alt="image-20200606111627142" style="zoom:50%;"></p>
+<p>对于训练数据集，我们设C1的$\hat y=1$，C2的$\hat y =0$，服从Bernoulli distribution。在函数前面加-号就可以使原来的最大化函数，转化为对目标的最小化。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606112102628.png" alt="image-20200606112102628" style="zoom:50%;"></p>
+<p>这时原来的似然函数L转化为了一个新形式，把原来的乘法变成了ln项相加，可以方便后边对w的求导</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606112315406.png" alt="image-20200606112315406" style="zoom:50%;"></p>
+<p>现在我们的目标就转化为了找出$w^<em>,b^</em>=argmin-lnL(w,b)$，交叉熵的形式为</p>
+<script type="math/tex; mode=display">
+-lnL(w,b)=\sum_n -[\hat y^nlnf_{w,b}(x^n)+(1-\hat y^n)ln(1-f_{w,b}(x^n))</script><h5 id="Step3-Find-the-best-function"><a href="#Step3-Find-the-best-function" class="headerlink" title="Step3: Find the best function"></a>Step3: Find the best function</h5><p>为了找出那组使得$-lnL(w,b)$最小化的参数$w^<em>,b^</em>$，这里我们使用了Gradient Descent方法</p>
+<script type="math/tex; mode=display">
+f_{w,b}(x)=\sigma (x)=\frac{1}{1+e^{-z}},\quad z=w\cdot x+b=\sum_i w_ix_i+b</script><p>对wi求导，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606113919943.png" alt="image-20200606113919943" style="zoom:50%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606113959065.png" alt="image-20200606113959065" style="zoom:50%;"></p>
+<p>分别得出$\frac{\partial lnf_{w,b}(x)}{\partial w_i},\frac{\partial ln(1-f_{w,b}(x))}{\partial w_i}$，代入原式子，化简可得</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606114230182.png" alt="image-20200606114230182" style="zoom:50%;"></p>
+<p>得出梯度$\frac{\partial (-ln L(w,b))}{\partial w_i}=\sum_n -\left(\hat y^n-f_{w,b}(x^n)\right)x_i^n$，代入每次的梯度更新公式，</p>
+<script type="math/tex; mode=display">
+w_i\leftarrow w_i -\eta \frac{\partial (-ln L(w,b))}{\partial w_i}=w_i -\eta \sum_n -\left(\hat y^n-f_{w,b}(x^n)\right)x_i^n</script><h5 id="Logistic-Regression-Square-error是否可行"><a href="#Logistic-Regression-Square-error是否可行" class="headerlink" title="Logistic Regression + Square error是否可行"></a>Logistic Regression + Square error是否可行</h5><p>按照之前的步骤，先得出$f_{w,b}(x),L(f)$的表达式，第三步再求导，可以发现一个问题，代入训练数据集的$\hat y$后，梯度总是为0，模型最后无法训练，所以这样的结合是不可行的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606115052273.png" alt="image-20200606115052273" style="zoom:50%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606115706601.png" alt="image-20200606115706601" style="zoom:50%;"></p>
+<h5 id="Cross-Entropy-v-s-Square-Error"><a href="#Cross-Entropy-v-s-Square-Error" class="headerlink" title="Cross Entropy v.s. Square Error"></a>Cross Entropy v.s. Square Error</h5><p>下图我们将Cross entropy和square error进行了对比，黑色网格线表示cross entropy，红色表示square error</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606115544160.png" alt="image-20200606115544160" style="zoom:50%;"></p>
+<p>对于cross entropy，loss变化较大，曲线比较sharp，相应的微分也较大，每次跨越的步长也较长</p>
+<p>对于square error，loss曲线变化比较平缓，微分值很小，每次跨越的步长也小，当gradient接近于0的时候，参数就很有可能不再更新，训练也会停下来。就算将gradient设置为很小的值，使训练不那么容易停下来，但由于每次跨越的步长很小很小，也会出现训练非常缓慢的问题</p>
+<h4 id="Logistic-vs-Linear-Regression"><a href="#Logistic-vs-Linear-Regression" class="headerlink" title="Logistic vs Linear Regression"></a>Logistic vs Linear Regression</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606121346151.png" alt="image-20200606121346151" style="zoom:50%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606121324734.png" alt="image-20200606121324734" style="zoom:50%;"></p>
+<h4 id="Discriminative-v-s-Generative"><a href="#Discriminative-v-s-Generative" class="headerlink" title="Discriminative v.s. Generative"></a>Discriminative v.s. Generative</h4><p>logistic regression我们称之为Discriminative方法；而我们将gaussian来描述posterior probability，称之为Generative方法。虽然都使用了相同的函数表达式，但需要找到的参数却是不同的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606122040582.png" alt="image-20200606122040582" style="zoom:50%;"></p>
+<p>logistic regression<strong>没有实质性的假设</strong>，要求直接找出对应的w和b。但generative model<strong>做出了假设</strong>，假设输入的数据是服从Gaussian分布的，需要先找出$\mu^1,\mu^2,\sum^{-1}$，再根据这些值得出相对应的w和b。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606143847987.png" alt="image-20200606143847987" style="zoom:50%;"></p>
+<h5 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606143950210.png" alt="image-20200606143950210" style="zoom:50%;"></p>
+<p>对于包含13个example 的训练数据，对于图中所示的测试数据，我们可以明显看出测试example属于Class1，那么通过Naive Bayes（朴素贝叶斯）计算的结果也是这样吗？下面我们将开始验证，</p>
+<script type="math/tex; mode=display">
+P(x|C1)=P(x_1=1|C_1)\times P(x_2=1|C_1)=1\times1\\
+P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606144006375.png" alt="image-20200606144006375" style="zoom:50%;"></p>
+<p>根据这个计算结果可知，属于Class1的概率是小于0.5的，因此可以看出根据朴素贝叶斯算法算出，测试的example是属于Class2，和我们的直觉是相反的。==这是由于训练数据集中属于Class1的数量太少了，==比例只有1/13。在实际生活中的模型训练中，我们也必须要避免数据集的差异对实验结果造成的影响，数据集中每个类别所占的比例应该是差别不大的。</p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Logistic Regression</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Introduction of Generative Adversarial Network (GAN)</title>
     <url>/2020/07/04/GAN-intro/</url>
     <content><![CDATA[<p>有很多种不同类型GAN，可以在这里查看<a href="https://github.com/hindupuravinash/the-gan-zoo" target="_blank" rel="external">https://github.com/hindupuravinash/the-gan-zoo</a></p>
@@ -1031,59 +1084,6 @@ y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情�
 ]]></content>
       <tags>
         <tag>Pytorch</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Logistic Regression</title>
-    <url>/2020/06/06/Logistic-Regression/</url>
-    <content><![CDATA[<h4 id="Review"><a href="#Review" class="headerlink" title="Review"></a>Review</h4><p>我们可以得出z的简易表达式$z=w\cdot x + b$，可得出</p>
-<script type="math/tex; mode=display">
-P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)</script><p>当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
-<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><h5 id="Step1-Function-Set"><a href="#Step1-Function-Set" class="headerlink" title="Step1: Function Set"></a>Step1: Function Set</h5><p>把所有的w和b都要包括进来，这里使用的function set就是sigmoid函数，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606111122013.png" alt="image-20200606111122013" style="zoom:50%;"></p>
-<h5 id="Step2-Goodness-of-a-Function"><a href="#Step2-Goodness-of-a-Function" class="headerlink" title="Step2: Goodness of a Function"></a>Step2: Goodness of a Function</h5><p>对于给定的一组w和b，得出似然函数L(w,b)的表达式，对于一个二分类问题，类别C1的概率为$f_{w,b}(x^i),\ i=1,2,4,…N$，而类别C2的概率则为$1-f_{w,b}(x^3)$。找出相对应的$w^{<em>},b^{</em>}$，使得L取得最大值。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606111627142.png" alt="image-20200606111627142" style="zoom:50%;"></p>
-<p>对于训练数据集，我们设C1的$\hat y=1$，C2的$\hat y =0$，服从Bernoulli distribution。在函数前面加-号就可以使原来的最大化函数，转化为对目标的最小化。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606112102628.png" alt="image-20200606112102628" style="zoom:50%;"></p>
-<p>这时原来的似然函数L转化为了一个新形式，把原来的乘法变成了ln项相加，可以方便后边对w的求导</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606112315406.png" alt="image-20200606112315406" style="zoom:50%;"></p>
-<p>现在我们的目标就转化为了找出$w^<em>,b^</em>=argmin-lnL(w,b)$，交叉熵的形式为</p>
-<script type="math/tex; mode=display">
--lnL(w,b)=\sum_n -[\hat y^nlnf_{w,b}(x^n)+(1-\hat y^n)ln(1-f_{w,b}(x^n))</script><h5 id="Step3-Find-the-best-function"><a href="#Step3-Find-the-best-function" class="headerlink" title="Step3: Find the best function"></a>Step3: Find the best function</h5><p>为了找出那组使得$-lnL(w,b)$最小化的参数$w^<em>,b^</em>$，这里我们使用了Gradient Descent方法</p>
-<script type="math/tex; mode=display">
-f_{w,b}(x)=\sigma (x)=\frac{1}{1+e^{-z}},\quad z=w\cdot x+b=\sum_i w_ix_i+b</script><p>对wi求导，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606113919943.png" alt="image-20200606113919943" style="zoom:50%;"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606113959065.png" alt="image-20200606113959065" style="zoom:50%;"></p>
-<p>分别得出$\frac{\partial lnf_{w,b}(x)}{\partial w_i},\frac{\partial ln(1-f_{w,b}(x))}{\partial w_i}$，代入原式子，化简可得</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606114230182.png" alt="image-20200606114230182" style="zoom:50%;"></p>
-<p>得出梯度$\frac{\partial (-ln L(w,b))}{\partial w_i}=\sum_n -\left(\hat y^n-f_{w,b}(x^n)\right)x_i^n$，代入每次的梯度更新公式，</p>
-<script type="math/tex; mode=display">
-w_i\leftarrow w_i -\eta \frac{\partial (-ln L(w,b))}{\partial w_i}=w_i -\eta \sum_n -\left(\hat y^n-f_{w,b}(x^n)\right)x_i^n</script><h5 id="Logistic-Regression-Square-error是否可行"><a href="#Logistic-Regression-Square-error是否可行" class="headerlink" title="Logistic Regression + Square error是否可行"></a>Logistic Regression + Square error是否可行</h5><p>按照之前的步骤，先得出$f_{w,b}(x),L(f)$的表达式，第三步再求导，可以发现一个问题，代入训练数据集的$\hat y$后，梯度总是为0，模型最后无法训练，所以这样的结合是不可行的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606115052273.png" alt="image-20200606115052273" style="zoom:50%;"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606115706601.png" alt="image-20200606115706601" style="zoom:50%;"></p>
-<h5 id="Cross-Entropy-v-s-Square-Error"><a href="#Cross-Entropy-v-s-Square-Error" class="headerlink" title="Cross Entropy v.s. Square Error"></a>Cross Entropy v.s. Square Error</h5><p>下图我们将Cross entropy和square error进行了对比，黑色网格线表示cross entropy，红色表示square error</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606115544160.png" alt="image-20200606115544160" style="zoom:50%;"></p>
-<p>对于cross entropy，loss变化较大，曲线比较sharp，相应的微分也较大，每次跨越的步长也较长</p>
-<p>对于square error，loss曲线变化比较平缓，微分值很小，每次跨越的步长也小，当gradient接近于0的时候，参数就很有可能不再更新，训练也会停下来。就算将gradient设置为很小的值，使训练不那么容易停下来，但由于每次跨越的步长很小很小，也会出现训练非常缓慢的问题</p>
-<h4 id="Logistic-vs-Linear-Regression"><a href="#Logistic-vs-Linear-Regression" class="headerlink" title="Logistic vs Linear Regression"></a>Logistic vs Linear Regression</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606121346151.png" alt="image-20200606121346151" style="zoom:50%;"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606121324734.png" alt="image-20200606121324734" style="zoom:50%;"></p>
-<h4 id="Discriminative-v-s-Generative"><a href="#Discriminative-v-s-Generative" class="headerlink" title="Discriminative v.s. Generative"></a>Discriminative v.s. Generative</h4><p>logistic regression我们称之为Discriminative方法；而我们将gaussian来描述posterior probability，称之为Generative方法。虽然都使用了相同的函数表达式，但需要找到的参数却是不同的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606122040582.png" alt="image-20200606122040582" style="zoom:50%;"></p>
-<p>logistic regression<strong>没有实质性的假设</strong>，要求直接找出对应的w和b。但generative model<strong>做出了假设</strong>，假设输入的数据是服从Gaussian分布的，需要先找出$\mu^1,\mu^2,\sum^{-1}$，再根据这些值得出相对应的w和b。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606143847987.png" alt="image-20200606143847987" style="zoom:50%;"></p>
-<h5 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606143950210.png" alt="image-20200606143950210" style="zoom:50%;"></p>
-<p>对于包含13个example 的训练数据，对于图中所示的测试数据，我们可以明显看出测试example属于Class1，那么通过Naive Bayes（朴素贝叶斯）计算的结果也是这样吗？下面我们将开始验证，</p>
-<script type="math/tex; mode=display">
-P(x|C1)=P(x_1=1|C_1)\times P(x_2=1|C_1)=1\times1\\
-P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200606144006375.png" alt="image-20200606144006375" style="zoom:50%;"></p>
-<p>根据这个计算结果可知，属于Class1的概率是小于0.5的，因此可以看出根据朴素贝叶斯算法算出，测试的example是属于Class2，和我们的直觉是相反的。==这是由于训练数据集中属于Class1的数量太少了，==比例只有1/13。在实际生活中的模型训练中，我们也必须要避免数据集的差异对实验结果造成的影响，数据集中每个类别所占的比例应该是差别不大的。</p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Logistic Regression</tag>
       </tags>
   </entry>
   <entry>
@@ -1531,6 +1531,151 @@ KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href=
       </tags>
   </entry>
   <entry>
+    <title>基于知识图谱和GCN的应用和开发</title>
+    <url>/2020/07/03/knowledge-graph/</url>
+    <content><![CDATA[<h4 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h4><p>深度学习的主要思想有三个：</p>
+<ul>
+<li><p>权重分配；</p>
+</li>
+<li><p>层级结构：每一层训练的结果都依赖于上一层；</p>
+</li>
+<li><p>欧几里得空间数据：比如图像数据，可以通过二维坐标(x,y)进行表示，语音信号是一个一维的数据，围棋的话也是一个二维数据，目前的大多数数据都是可以用欧几里得空间数据进行表示的，即可以投影到坐标轴上</p>
+</li>
+</ul>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702101528758-20200706215024224.png" alt="image-20200702101528758"></p>
+<p>但在实际生活中，有很多数据并不能用欧几里得数据来进行表示，比如在微信上，每个人都相当于一个节点，朋友之间的关系相当于是一条边，相当于图，没有任何的空间信息，是<u>非欧几里得的空间结构</u>（eg. 社交网络、科学网络等） </p>
+<p>那要怎么对这类信息进行训练呢？传统的深度学习方法（CNN和RNN等）并没有办法训练这类数据，因此就产生了图卷积（GCN）</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702103428339.png" alt="image-20200702103428339"></p>
+<h4 id="图卷积背景和基本框架"><a href="#图卷积背景和基本框架" class="headerlink" title="图卷积背景和基本框架"></a>图卷积背景和基本框架</h4><h5 id="图卷积发展历史"><a href="#图卷积发展历史" class="headerlink" title="图卷积发展历史"></a>图卷积发展历史</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702104325966.png" alt="image-20200702104325966"></p>
+<h5 id="邻接矩阵"><a href="#邻接矩阵" class="headerlink" title="邻接矩阵"></a>邻接矩阵</h5><p>无向图的邻接矩阵是对角矩阵</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702104743073.png" alt="image-20200702104743073"></p>
+<h5 id="图卷积基本框架"><a href="#图卷积基本框架" class="headerlink" title="图卷积基本框架"></a>图卷积基本框架</h5><p>在下图中，A为邻接矩阵，H为特征矩阵（$N\times F$），，N为节点个数，F表示每个节点的特征数；比如我们每个人在社交网络中都是一个节点，也有一些对应的特征，名字、年龄、出生日期，这些特征就构成了这个特征矩阵$N\times F$；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702104938456.png" alt="image-20200702104938456"></p>
+<p>在这个基本框架中，input为邻接矩阵A，第一个hidden layer把特征矩阵点乘到每一个节点上进行训练，再进入下一层，再进行点乘，…，一直不断重复这个过程。每次训练更新的参数是特征矩阵，最后的output和input是一样的，图结构没有发生变化，但特征矩阵达到了收敛（基本上不会发生变化），最后再对图中的每个节点进行分类；</p>
+<p><span style="color: red">把节点和特征矩阵进行点乘，就实现了信息在节点和社区间进行传递</span></p>
+<h4 id="图卷积"><a href="#图卷积" class="headerlink" title="图卷积"></a>图卷积</h4><p>那么下面我们将具体介绍节点和特征矩阵是怎样进行点乘的，怎样一步步进行训练。</p>
+<h5 id="回顾CNN"><a href="#回顾CNN" class="headerlink" title="回顾CNN"></a>回顾CNN</h5><p>我们先回顾一下CNN是如何做卷积操作的，如下图所示，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702110939157.png" alt="image-20200702110939157"></p>
+<h5 id="图卷积-1"><a href="#图卷积-1" class="headerlink" title="图卷积"></a>图卷积</h5><p>这是卷积操作的参数更新公式，</p>
+<script type="math/tex; mode=display">
+h_i^{l+1}=\sigma(W_0^{(l)}h_0^{(l)}+W_1^{(l)}h_1^{(l)}+\cdot\cdot\cdot+W_8^{(l)}h_8^{(l)})</script><p>图卷积相比较于卷积，在$h_0^{(l)}W_0^{(l)}$的基础上，多了邻接矩阵的信息$\frac{1}{c_{ij}}h_j^{(l)}$，<span style="color: red">权重矩阵W也没有卷积操作那么重要</span>，其参数更新公式为，</p>
+<script type="math/tex; mode=display">
+h_i^{l+1}=\sigma(h_0^{(l)}W_0^{(l)} + 
+\sum_{j\in N_i} \frac{1}{c_{ij}}h_j^{(l)}W_1^{(l)})</script><p>更新参数的时候，通过周围的节点来更新该节点（下图中红色节点），与该节点不直接相连的节点无关</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702111915112.png" alt="image-20200702111915112"></p>
+<p>那么我们就可以通过以下公式来更新特征矩阵，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde AH^{(l)}W^{(l)})</script><p>其中A为邻接矩阵，H为特征矩阵，W为权重矩阵，本次的特征矩阵$H^{(l+1)}$根据上一次的特征矩阵$H^{(l)}$生成；</p>
+<p>如果只根据邻接矩阵来更新H，会出现一些问题：</p>
+<ul>
+<li>无法提取自身信息，邻接矩阵对角线上的元素始终是0（如果没有自环），自身的信息在训练过程中是无法考虑进去的；</li>
+<li>$\tilde A$没有归一化</li>
+</ul>
+<p>我们需要把参数更新公式进行一些变化，首先解决邻接矩阵对角线元素为0的问题，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma((\tilde D-\tilde A)H^{(l)}W^{(l)})</script><p><span style="color: red">其中</span>矩阵$\tilde D$是一个对角矩阵（degree matrix），对角线上的数值表示了每个节点所相连的边数。</p>
+<p>归一化处理主要列出两种方式，要根据不同的输入数据来进行选择，其中第一种归一化方式比较常用</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)\\
+H^{(l+1)}=\sigma(\tilde D^{-1}(\tilde D-\tilde A)\tilde H^{(l)}W^{(l)})</script><h5 id="图卷积的计算"><a href="#图卷积的计算" class="headerlink" title="图卷积的计算"></a>图卷积的计算</h5><p>下面我们将一个具体的例子来讲述公式(1),</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702114057283.png" alt="image-20200702114057283"></p>
+<p>在上图中，degree matrix表示了每个节点所相连的边数，比如2表示1号节点相连的边有2条，该对角矩阵也就是前文提到的$\tilde D$，$(\tilde D-\tilde A)$就是laplacian matrix；</p>
+<p>我们将特征矩阵$H_0$和权重矩阵W进行随机初始化，再代入公式(1)，即可得出训练完成的结果$H_N$，再求出每一列的最大值，即MaxValue$(H(i))=[1,1,4,1,1,4]$，即分类结果，其中第1，2，4，5个节点分类为1，第3，6个节点分类为4，把整个图的节点分成了两类；</p>
+<p>那么为什么可以这样分类呢？我们可以回到原图labeled graph中，节点1，2，5相当于是一个全连接图，可以当作一个类别，而节点4，5都和三个节点相连，有三条边，也可以当作是一个类别；节点3，6就没有前几个节点那样关系比较紧密，因此被分成了第二个类别</p>
+<p>我们可以得出以下两点：</p>
+<ul>
+<li>对于随机产生的特征矩阵，依靠图自身的结构，就可以得到一个很好的分类效果；</li>
+<li>在这个例子中，进行10次运算，特征矩阵就收敛了，收敛速度非常快</li>
+</ul>
+<p>再来回顾下这个核心公式，所有的图卷积的变化和应用都离不开这个公式。W不那么重要，特征矩阵$H^{(l)}$表示每个人根据自己的实际特征来进行特征提取；邻接矩阵$\tilde A$表示每个人（节点）之间的关系，关系不一样就会构建出不同的图</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)</script><p><span style="color: red">那么我们要在图卷积进行创新的话，就只有改变邻接矩阵A和特征矩阵H，即如何新建这个图、如何提取这个特征；由于机器学习和深度学习技术的不断发展，特征提取的方法已经非常成熟，<u>关键的创新点还是如何新建这个图</u></span></p>
+<h5 id="边信息嵌入"><a href="#边信息嵌入" class="headerlink" title="边信息嵌入"></a>边信息嵌入</h5><p>图中的边信息有时候是包含权重的，我们也应该把边的信息值也考虑进去，即把原图转化为一个线图；在下图中，原图中节点为i，j，m，边为a，b，c，转化为线图后，节点变成a，b，c，边为i，j，m，把边变成了点，把点变成了边</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702122014466.png" alt="image-20200702122014466"></p>
+<p>经过两次不同的输入$h_{(i,j)}^l,h_j^{l+1}$，分别对应原图和线图，这样训练就可以把边的信息也整合进去</p>
+<h5 id="Example-1-半监督图分类"><a href="#Example-1-半监督图分类" class="headerlink" title="Example 1: 半监督图分类"></a>Example 1: 半监督图分类</h5><p>在下图中，黑色圈点表示已经知道了分类的类别，其他的没有被黑色线条包围的点表示没有进行分类，目标是预测未分类的节点的类别，这里我们还定义了一个损失函数L，Z表示GCN的输出结果（上文的公式(1)）</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702123720321.png" alt="image-20200702123720321"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124159182.png" alt="image-20200702124159182"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124253302.png" alt="image-20200702124253302"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124330022.png" alt="image-20200702124330022"></p>
+<p>得到实验结果，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124418966.png" alt="image-20200702124418966"></p>
+<h5 id="Example-2-科学家网络"><a href="#Example-2-科学家网络" class="headerlink" title="Example 2: 科学家网络"></a>Example 2: 科学家网络</h5><p>每篇论文都会有一个题目，互相引用这篇论文则会形成一个关系，我们的任务是根据论文的题目来预测论文的类别（统计、物理、数学）</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124600168.png" alt="image-20200702124600168"></p>
+<p>这个例子只用了2层的GCN，其中$\hat AXW^{(0)}$表示第一层，$\hat A \ {\rm ReLU}(\hat AXW^{(0)})W^{(1)}$表示第二层，再输入softmax函数，整个训练过程更新的参数是X，从表格中的数据也可以看出，GCN取得了非常不错的效果</p>
+<h4 id="基于知识图谱的图卷积"><a href="#基于知识图谱的图卷积" class="headerlink" title="基于知识图谱的图卷积"></a>基于知识图谱的图卷积</h4><h5 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h5><blockquote>
+<p>知识图谱是Google用于增强其搜索引擎功能的知识库。本质上, 知识图谱旨在描述真实世界中存在的各种实体或概念及其关系,其构成一张巨大的语义网络图，节点表示实体或概念，边则由属性或关系构成。现在的知识图谱已被用来泛指各种大规模的知识库。 </p>
+</blockquote>
+<p>如果你输入搜索引擎中国这个词，相应的会出来中国的一些特征，比如中国的城市、国土面积、人口等；中国和国家都可以看作是图中的一个节点，中国和国家的关系就可以看作是一条边</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702145803375.png" alt="image-20200702145803375"></p>
+<h5 id="图卷积：知识图谱"><a href="#图卷积：知识图谱" class="headerlink" title="图卷积：知识图谱"></a>图卷积：知识图谱</h5><p>先把数据用图表示出来，用户为U，实体为V，$y_{uv}=1$则表示用户u和实体v之间有联系，比如我对电影很感兴趣；每个实体u之间会有关系r，比如电影和教父；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702150629999.png" alt="image-20200702150629999"></p>
+<p>将图卷积应用到知识图谱，可以用以下公式来进行更新，不断更新特征矩阵H直至其收敛即可，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D_u^{-\frac{1}{2}}\tilde A_u\tilde D_u^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad</script><p>那么我们怎么把实体推荐给用户呢？我们又怎么知道用户是不是对这个实体感兴趣呢？</p>
+<p>（1）我们可以针对每个用户再新建一个图，先引入一个函数$S_u(\cdot)$，表示这条边（关系）对用户的重要性；</p>
+<p>（2）再把原来的实体矩阵变成一个有权重的矩阵，比如边$r_1$输入函数$S_u(\cdot)$，得到$S_u(r_1)$，就是新的关系值。<u>每个用户都有一个邻接矩阵，再对每个用户的邻接矩阵进行训练，就可以得出用户到底对哪个电影感兴趣</u>；</p>
+<p>（3）图卷积；</p>
+<p>（4）<strong>标签顺滑</strong>，比如对于一个动物，机器可以很自信地确定这个动物到底是猫还是狗，输出值只有0或者1；由于机器过于自信，可能会导致很多额外的误差，我们现在就可以把这个值改成0.1或者0.9，就可以得到更好的结果。</p>
+<p>总结：先新建一个图（knowledge graph，KG），再把用户对感兴趣的实体新建一个权重矩阵，再进行图卷积和标签顺滑。那么现在我们的损失函数就有了一些小变化，结合了图卷积和标签顺滑，即</p>
+<script type="math/tex; mode=display">
+L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702153035542.png" alt="image-20200702153035542"></p>
+<p>下面我们将简要叙述这个训练的过程，图中的水平虚线表示decision boundary：</p>
+<p>（a）其中蓝色的点表示用户感兴趣的点（observed）；在其下方有一些其他的点（unobserved），我们希望把黄色的点（被黄色方框围住）就推荐给用户，让用户去选择，而剩下蓝色的点，则是用户不感兴趣的，不推荐给用户；</p>
+<p>（b）一共要进行两层的训练，对于第一层的训练结果，我们现在把其中两个黄色的点就推荐给用户了；</p>
+<p>（c）对于第二层的训练结果，就把其中的三个点推荐给用户了，但最左端的点也在decision boundary之上，也会被推荐给用户，模型在训练过程中会存在一定的误差，</p>
+<p>（d）这里就开始对第二个用户的模型进行训练；</p>
+<p>（e）这是加入了标签顺滑（label smoothing）的结果，推荐会更加精准，在图中，我们可以看到用户不感兴趣的点进行下移，用户感兴趣的点（a图中的黄色方框部分）则上移，尽量移到decision boundary之上</p>
+<h5 id="Label-Smoothing-Regularization"><a href="#Label-Smoothing-Regularization" class="headerlink" title="Label Smoothing Regularization"></a>Label Smoothing Regularization</h5><p>（1）在下图的能量方程中，$l_u(e_i)$表示用户u是否对实体$e_i$感兴趣（值为0或1），能量方程可以把相同的label保存下来，把不同的label就去掉了；（2）再找到使得能量方程取得最小值的$l_u^<em>$；（3）再通过KL距离函数求得$y_{uv}$和$\hat l_u^</em>(v)$之间的相似度，也是求最小值，可得$R(A)$，再代入损失函数</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702155919603.png" alt="image-20200702155919603"></p>
+<p>$\lambda$可以不断做调整，来找到损失函数的最小值</p>
+<h5 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h5><p>输入为知识图谱G，新建一个邻接矩阵M后；（2）再把用户对感兴趣的实体新建一个权重矩阵（输入mapping函数S），再进行图卷积更新特征矩阵，即$e_u^{(i)}\leftarrow \sigma (\cdot)$；（3）标签顺滑，更新$l_u^{(i)}(e)$，再代入损失函数中的 J；不断地进行这个过程，只到损失函数收敛为止</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702162309077.png" alt="image-20200702162309077"></p>
+<h5 id="结果演示"><a href="#结果演示" class="headerlink" title="结果演示"></a>结果演示</h5><p>下图是几种推荐算法的比较，推荐给用户Top-K的实体，看最后的准确率如何，可以发现GCN的结构取得了非常不错的效果。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702163653325.png" alt="image-20200702163653325"></p>
+<p>下面是一些可视化的对比，图1是推荐食物，可以看到GCN的结构取得了很好的效果；图2表示取不同的$\lambda$，得到的$R(A_u)$的值；图三对比了不同算法的运行速度，可以看到KGCN用时最少，速度最快</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702163938245.png" alt="image-20200702163938245"></p>
+<h4 id="研究方向"><a href="#研究方向" class="headerlink" title="研究方向"></a>研究方向</h4><h5 id="人体姿势识别"><a href="#人体姿势识别" class="headerlink" title="人体姿势识别"></a>人体姿势识别</h5><p> 人体的关节就可以看作是一个节点，关节之间的骨骼就可以看作是边，结合起来就是一张图；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702165243019.png" alt="image-20200702165243019"></p>
+<p>核心框架：输入为一个视频，视频的每个时间序列都是一张图像，每一帧的视频取出来就是一张图像；把每一帧的图像先构建成一个骨骼和关节点图，再通过时间的顺序把每一帧对应的关节点都连接起来，形成一张大图，再输入GCN进行训练，通过分类器识别出这是一个跑步的动作。</p>
+<p>在上图中的左下角中，横轴表示每一帧的骨骼图，纵轴表示时间，把相应的骨骼节点连接起来，变成一张大图，再输入GCN进行训练。</p>
+<p>下图为实验结果，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702170313601.png" alt="image-20200702170313601"></p>
+<h5 id="超图"><a href="#超图" class="headerlink" title="超图"></a>超图</h5><p>超图是图的一个基本概念，下图中的图有8个点，选择不同的点，可以有多种排列组合。如果选一个点，一共有个点可以选择，那么就有8种（$C_n^1$）组合。如果我选两个点，比如$n_3,n_8$，这两个点构成一个子图，就有6种（$C_n^2$）组合。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702170734267.png" alt="image-20200702170734267"></p>
+<p>选出不同的点后，得到不同的邻接矩阵，再进行训练。每一层选出不同组合的邻接矩阵再输入GCN进行图卷积。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703093426889.png" alt="image-20200703093426889"></p>
+<p>超图卷积的核心公式就是下图中的公式(11)</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703093638629.png" alt="image-20200703093638629"></p>
+<h5 id="图构建"><a href="#图构建" class="headerlink" title="图构建"></a>图构建</h5><p>对于给定的数据，新建图之后再输入GCN进行分类，我们要怎么画成一张图呢？</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703093921828.png" alt="image-20200703093921828"></p>
+<p>在上图中，observed dynamics表示5个分子的运动轨迹图，我们的目标是构建新图，并预测分子的下一步轨迹；对于人体的动作，我们也得通过学习才能知道，到底是以左手还是右手为重心。</p>
+<p>在下图中，展示了图构建的大概过程，编码器和解码器都是GCNs。对于编码器部分，先进行了从边到节点($v\rightarrow e$)的过程，再从节点到边($e\rightarrow v$)，再从边到节点($v\rightarrow e$)；对于解码器，先从边到点，再从点到边，进行图卷积，最后再进行分类，得到下一步的运动轨迹。</p>
+<p>其中x表示节点，z表示x这个点与i、j相连的概率，z是一个概率分布。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703095234400.png" alt="image-20200703095234400"></p>
+<p>预测下一步运动轨迹：在下图中，我们可以看出预测图和真实值之间差距并不大，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703100157533.png" alt="image-20200703100157533"></p>
+<h5 id="子图嵌入"><a href="#子图嵌入" class="headerlink" title="子图嵌入"></a>子图嵌入</h5><p>在原来的GCN中，我们每次只会考虑一个点；如果我们现在把多个点（关联性很大的点）表示成一个点，再输入GCN，效果会不会更好呢？这也是一个很火的研究方向。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703101250920.png" alt="image-20200703101250920"></p>
+<h4 id="场景应用"><a href="#场景应用" class="headerlink" title="场景应用"></a>场景应用</h4><h5 id="用户推荐系统"><a href="#用户推荐系统" class="headerlink" title="用户推荐系统"></a>用户推荐系统</h5><p>在搜索中推荐相关联的朋友给你。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703102812106.png" alt="image-20200703102812106"></p>
+<h5 id="舆情监控和控制"><a href="#舆情监控和控制" class="headerlink" title="舆情监控和控制"></a>舆情监控和控制</h5><p>每个国家都需要舆情监控，比如关于假消息和真消息的分类或者监控，在网络传播过程中找到假消息源，进行封锁等，用GCN都可以起到很好的作用。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703102736481.png" alt="image-20200703102736481"></p>
+<h5 id="自动驾驶"><a href="#自动驾驶" class="headerlink" title="自动驾驶"></a>自动驾驶</h5><p>所有的车都有一个车载系统，每个车载系统之间进行联网，就可以构成非常大的图。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703102850234.png" alt="image-20200703102850234"></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703103300945.png" alt="image-20200703103300945"></p>
+<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><p>本文是观看杨栋老师在B上讲解的直播课程《基于知识图谱和图卷积神经网络的应用和开发》的笔记，直播地址：<a href="https://live.bilibili.com/11869202" target="_blank" rel="external">https://live.bilibili.com/11869202</a> ，贪心科技官网录播回放：<a href="https://www.greedyai.com/course/139" target="_blank" rel="external">https://www.greedyai.com/course/139</a></p>
+]]></content>
+      <categories>
+        <category>知识图谱</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>知识图谱</tag>
+        <tag>GCN</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Semi-supervised</title>
     <url>/2020/06/10/semi-supervised/</url>
     <content><![CDATA[<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610195909860.png" alt="image-20200610195909860" style="zoom:50%;"></p>
@@ -1616,6 +1761,73 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
         <tag>Deep Learning</tag>
         <tag>semi-supervised</tag>
         <tag>smoothness</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Network Compression</title>
+    <url>/2020/06/27/network-conpression/</url>
+    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
+<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
+<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
+<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
+<ul>
+<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
+<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
+</ul>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
+<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
+<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
+<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
+<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="external">大的network更容易optimize</a></p>
+<p><strong>Lottery Ticket Hypothesis</strong></p>
+<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
+<ul>
+<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
+</li>
+<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
+</li>
+</ul>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
+<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
+<p><strong>Rethinking the Value of Network Pruning</strong></p>
+<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
+<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
+<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
+<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
+<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
+<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
+<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
+<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
+<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
+<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
+<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
+<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
+<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
+<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
+<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
+<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
+<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
+<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
+<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>network compression</tag>
       </tags>
   </entry>
   <entry>
@@ -1746,73 +1958,6 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
       </tags>
   </entry>
   <entry>
-    <title>Network Compression</title>
-    <url>/2020/06/27/network-conpression/</url>
-    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
-<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
-<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
-<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
-<ul>
-<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
-<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
-</ul>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
-<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
-<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
-<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
-<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="external">大的network更容易optimize</a></p>
-<p><strong>Lottery Ticket Hypothesis</strong></p>
-<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
-<ul>
-<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
-</li>
-<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
-</li>
-</ul>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
-<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
-<p><strong>Rethinking the Value of Network Pruning</strong></p>
-<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
-<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
-<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
-<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
-<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
-<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
-<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
-<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
-<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
-<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
-<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
-<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
-<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
-<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
-<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
-<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
-<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
-<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
-<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>network compression</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
     <url>/2020/06/28/t-SNE/</url>
     <content><![CDATA[<blockquote>
@@ -1859,254 +2004,6 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
         <tag>Dimension Reduction</tag>
         <tag>LLE</tag>
         <tag>t-SNE</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>基于知识图谱和GCN的应用和开发</title>
-    <url>/2020/07/03/%E5%9F%BA%E4%BA%8E%E7%9F%A5%E8%AF%86%E5%9B%BE%E8%B0%B1%E5%92%8C%E5%9B%BE%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E7%9A%84%E5%BA%94%E7%94%A8%E5%92%8C%E5%BC%80%E5%8F%91/</url>
-    <content><![CDATA[<h4 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h4><p>深度学习的主要思想有三个：</p>
-<ul>
-<li><p>权重分配；</p>
-</li>
-<li><p>层级结构：每一层训练的结果都依赖于上一层；</p>
-</li>
-<li><p>欧几里得空间数据：比如图像数据，可以通过二维坐标(x,y)进行表示，语音信号是一个一维的数据，围棋的话也是一个二维数据，目前的大多数数据都是可以用欧几里得空间数据进行表示的，即可以投影到坐标轴上</p>
-</li>
-</ul>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702101528758.png" alt="image-20200702101528758"></p>
-<p>但在实际生活中，有很多数据并不能用欧几里得数据来进行表示，比如在微信上，每个人都相当于一个节点，朋友之间的关系相当于是一条边，相当于图，没有任何的空间信息，是<u>非欧几里得的空间结构</u>（eg. 社交网络、科学网络等） </p>
-<p>那要怎么对这类信息进行训练呢？传统的深度学习方法（CNN和RNN等）并没有办法训练这类数据，因此就产生了图卷积（GCN）</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702103428339.png" alt="image-20200702103428339"></p>
-<h4 id="图卷积背景和基本框架"><a href="#图卷积背景和基本框架" class="headerlink" title="图卷积背景和基本框架"></a>图卷积背景和基本框架</h4><h5 id="图卷积发展历史"><a href="#图卷积发展历史" class="headerlink" title="图卷积发展历史"></a>图卷积发展历史</h5><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104325966.png" alt="image-20200702104325966"></p>
-<h5 id="邻接矩阵"><a href="#邻接矩阵" class="headerlink" title="邻接矩阵"></a>邻接矩阵</h5><p>无向图的邻接矩阵是对角矩阵</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104743073.png" alt="image-20200702104743073"></p>
-<h5 id="图卷积基本框架"><a href="#图卷积基本框架" class="headerlink" title="图卷积基本框架"></a>图卷积基本框架</h5><p>在下图中，A为邻接矩阵，H为特征矩阵（$N\times F$），，N为节点个数，F表示每个节点的特征数；比如我们每个人在社交网络中都是一个节点，也有一些对应的特征，名字、年龄、出生日期，这些特征就构成了这个特征矩阵$N\times F$；</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702104938456.png" alt="image-20200702104938456"></p>
-<p>在这个基本框架中，input为邻接矩阵A，第一个hidden layer把特征矩阵点乘到每一个节点上进行训练，再进入下一层，再进行点乘，…，一直不断重复这个过程。每次训练更新的参数是特征矩阵，最后的output和input是一样的，图结构没有发生变化，但特征矩阵达到了收敛（基本上不会发生变化），最后再对图中的每个节点进行分类；</p>
-<p><span style="color: red">把节点和特征矩阵进行点乘，就实现了信息在节点和社区间进行传递</span></p>
-<h4 id="图卷积"><a href="#图卷积" class="headerlink" title="图卷积"></a>图卷积</h4><p>那么下面我们将具体介绍节点和特征矩阵是怎样进行点乘的，怎样一步步进行训练。</p>
-<h5 id="回顾CNN"><a href="#回顾CNN" class="headerlink" title="回顾CNN"></a>回顾CNN</h5><p>我们先回顾一下CNN是如何做卷积操作的，如下图所示，</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702110939157.png" alt="image-20200702110939157"></p>
-<h5 id="图卷积-1"><a href="#图卷积-1" class="headerlink" title="图卷积"></a>图卷积</h5><p>这是卷积操作的参数更新公式，</p>
-<script type="math/tex; mode=display">
-h_i^{l+1}=\sigma(W_0^{(l)}h_0^{(l)}+W_1^{(l)}h_1^{(l)}+\cdot\cdot\cdot+W_8^{(l)}h_8^{(l)})</script><p>图卷积相比较于卷积，在$h_0^{(l)}W_0^{(l)}$的基础上，多了邻接矩阵的信息$\frac{1}{c_{ij}}h_j^{(l)}$，<span style="color: red">权重矩阵W也没有卷积操作那么重要</span>，其参数更新公式为，</p>
-<script type="math/tex; mode=display">
-h_i^{l+1}=\sigma(h_0^{(l)}W_0^{(l)} + 
-\sum_{j\in N_i} \frac{1}{c_{ij}}h_j^{(l)}W_1^{(l)})</script><p>更新参数的时候，通过周围的节点来更新该节点（下图中红色节点），与该节点不直接相连的节点无关</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702111915112.png" alt="image-20200702111915112"></p>
-<p>那么我们就可以通过以下公式来更新特征矩阵，</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde AH^{(l)}W^{(l)})</script><p>其中A为邻接矩阵，H为特征矩阵，W为权重矩阵，本次的特征矩阵$H^{(l+1)}$根据上一次的特征矩阵$H^{(l)}$生成；</p>
-<p>如果只根据邻接矩阵来更新H，会出现一些问题：</p>
-<ul>
-<li>无法提取自身信息，邻接矩阵对角线上的元素始终是0（如果没有自环），自身的信息在训练过程中是无法考虑进去的；</li>
-<li>$\tilde A$没有归一化</li>
-</ul>
-<p>我们需要把参数更新公式进行一些变化，首先解决邻接矩阵对角线元素为0的问题，</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma((\tilde D-\tilde A)H^{(l)}W^{(l)})</script><p><span style="color: red">其中</span>矩阵$\tilde D$是一个对角矩阵（degree matrix），对角线上的数值表示了每个节点所相连的边数。</p>
-<p>归一化处理主要列出两种方式，要根据不同的输入数据来进行选择，其中第一种归一化方式比较常用</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)\\
-H^{(l+1)}=\sigma(\tilde D^{-1}(\tilde D-\tilde A)\tilde H^{(l)}W^{(l)})</script><h5 id="图卷积的计算"><a href="#图卷积的计算" class="headerlink" title="图卷积的计算"></a>图卷积的计算</h5><p>下面我们将一个具体的例子来讲述公式(1),</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702114057283.png" alt="image-20200702114057283"></p>
-<p>在上图中，degree matrix表示了每个节点所相连的边数，比如2表示1号节点相连的边有2条，该对角矩阵也就是前文提到的$\tilde D$，$(\tilde D-\tilde A)$就是laplacian matrix；</p>
-<p>我们将特征矩阵$H_0$和权重矩阵W进行随机初始化，再代入公式(1)，即可得出训练完成的结果$H_N$，再求出每一列的最大值，即MaxValue$(H(i))=[1,1,4,1,1,4]$，即分类结果，其中第1，2，4，5个节点分类为1，第3，6个节点分类为4，把整个图的节点分成了两类；</p>
-<p>那么为什么可以这样分类呢？我们可以回到原图labeled graph中，节点1，2，5相当于是一个全连接图，可以当作一个类别，而节点4，5都和三个节点相连，有三条边，也可以当作是一个类别；节点3，6就没有前几个节点那样关系比较紧密，因此被分成了第二个类别</p>
-<p>我们可以得出以下两点：</p>
-<ul>
-<li>对于随机产生的特征矩阵，依靠图自身的结构，就可以得到一个很好的分类效果；</li>
-<li>在这个例子中，进行10次运算，特征矩阵就收敛了，收敛速度非常快</li>
-</ul>
-<p>再来回顾下这个核心公式，所有的图卷积的变化和应用都离不开这个公式。W不那么重要，特征矩阵$H^{(l)}$表示每个人根据自己的实际特征来进行特征提取；邻接矩阵$\tilde A$表示每个人（节点）之间的关系，关系不一样就会构建出不同的图</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)</script><p><span style="color: red">那么我们要在图卷积进行创新的话，就只有改变邻接矩阵A和特征矩阵H，即如何新建这个图、如何提取这个特征；由于机器学习和深度学习技术的不断发展，特征提取的方法已经非常成熟，<u>关键的创新点还是如何新建这个图</u></span></p>
-<h5 id="边信息嵌入"><a href="#边信息嵌入" class="headerlink" title="边信息嵌入"></a>边信息嵌入</h5><p>图中的边信息有时候是包含权重的，我们也应该把边的信息值也考虑进去，即把原图转化为一个线图；在下图中，原图中节点为i，j，m，边为a，b，c，转化为线图后，节点变成a，b，c，边为i，j，m，把边变成了点，把点变成了边</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702122014466.png" alt="image-20200702122014466"></p>
-<p>经过两次不同的输入$h_{(i,j)}^l,h_j^{l+1}$，分别对应原图和线图，这样训练就可以把边的信息也整合进去</p>
-<h5 id="Example-1-半监督图分类"><a href="#Example-1-半监督图分类" class="headerlink" title="Example 1: 半监督图分类"></a>Example 1: 半监督图分类</h5><p>在下图中，黑色圈点表示已经知道了分类的类别，其他的没有被黑色线条包围的点表示没有进行分类，目标是预测未分类的节点的类别，这里我们还定义了一个损失函数L，Z表示GCN的输出结果（上文的公式(1)）</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702123720321.png" alt="image-20200702123720321"></p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124159182.png" alt="image-20200702124159182"></p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124253302.png" alt="image-20200702124253302"></p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124330022.png" alt="image-20200702124330022"></p>
-<p>得到实验结果，</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124418966.png" alt="image-20200702124418966"></p>
-<h5 id="Example-2-科学家网络"><a href="#Example-2-科学家网络" class="headerlink" title="Example 2: 科学家网络"></a>Example 2: 科学家网络</h5><p>每篇论文都会有一个题目，互相引用这篇论文则会形成一个关系，我们的任务是根据论文的题目来预测论文的类别（统计、物理、数学）</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702124600168.png" alt="image-20200702124600168"></p>
-<p>这个例子只用了2层的GCN，其中$\hat AXW^{(0)}$表示第一层，$\hat A \ {\rm ReLU}(\hat AXW^{(0)})W^{(1)}$表示第二层，再输入softmax函数，整个训练过程更新的参数是X，从表格中的数据也可以看出，GCN取得了非常不错的效果</p>
-<h4 id="基于知识图谱的图卷积"><a href="#基于知识图谱的图卷积" class="headerlink" title="基于知识图谱的图卷积"></a>基于知识图谱的图卷积</h4><h5 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h5><blockquote>
-<p>知识图谱是Google用于增强其搜索引擎功能的知识库。本质上, 知识图谱旨在描述真实世界中存在的各种实体或概念及其关系,其构成一张巨大的语义网络图，节点表示实体或概念，边则由属性或关系构成。现在的知识图谱已被用来泛指各种大规模的知识库。 </p>
-</blockquote>
-<p>如果你输入搜索引擎中国这个词，相应的会出来中国的一些特征，比如中国的城市、国土面积、人口等；中国和国家都可以看作是图中的一个节点，中国和国家的关系就可以看作是一条边</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702145803375.png" alt="image-20200702145803375"></p>
-<h5 id="图卷积：知识图谱"><a href="#图卷积：知识图谱" class="headerlink" title="图卷积：知识图谱"></a>图卷积：知识图谱</h5><p>先把数据用图表示出来，用户为U，实体为V，$y_{uv}=1$则表示用户u和实体v之间有联系，比如我对电影很感兴趣；每个实体u之间会有关系r，比如电影和教父；</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702150629999.png" alt="image-20200702150629999"></p>
-<p>将图卷积应用到知识图谱，可以用以下公式来进行更新，不断更新特征矩阵H直至其收敛即可，</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde D_u^{-\frac{1}{2}}\tilde A_u\tilde D_u^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad</script><p>那么我们怎么把实体推荐给用户呢？我们又怎么知道用户是不是对这个实体感兴趣呢？</p>
-<p>（1）我们可以针对每个用户再新建一个图，先引入一个函数$S_u(\cdot)$，表示这条边（关系）对用户的重要性；</p>
-<p>（2）再把原来的实体矩阵变成一个有权重的矩阵，比如边$r_1$输入函数$S_u(\cdot)$，得到$S_u(r_1)$，就是新的关系值。<u>每个用户都有一个邻接矩阵，再对每个用户的邻接矩阵进行训练，就可以得出用户到底对哪个电影感兴趣</u>；</p>
-<p>（3）图卷积；</p>
-<p>（4）<strong>标签顺滑</strong>，比如对于一个动物，机器可以很自信地确定这个动物到底是猫还是狗，输出值只有0或者1；由于机器过于自信，可能会导致很多额外的误差，我们现在就可以把这个值改成0.1或者0.9，就可以得到更好的结果。</p>
-<p>总结：先新建一个图（knowledge graph，KG），再把用户对感兴趣的实体新建一个权重矩阵，再进行图卷积和标签顺滑。那么现在我们的损失函数就有了一些小变化，结合了图卷积和标签顺滑，即</p>
-<script type="math/tex; mode=display">
-L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702153035542.png" alt="image-20200702153035542"></p>
-<p>下面我们将简要叙述这个训练的过程，图中的水平虚线表示decision boundary：</p>
-<p>（a）其中蓝色的点表示用户感兴趣的点（observed）；在其下方有一些其他的点（unobserved），我们希望把黄色的点（被黄色方框围住）就推荐给用户，让用户去选择，而剩下蓝色的点，则是用户不感兴趣的，不推荐给用户；</p>
-<p>（b）一共要进行两层的训练，对于第一层的训练结果，我们现在把其中两个黄色的点就推荐给用户了；</p>
-<p>（c）对于第二层的训练结果，就把其中的三个点推荐给用户了，但最左端的点也在decision boundary之上，也会被推荐给用户，模型在训练过程中会存在一定的误差，</p>
-<p>（d）这里就开始对第二个用户的模型进行训练；</p>
-<p>（e）这是加入了标签顺滑（label smoothing）的结果，推荐会更加精准，在图中，我们可以看到用户不感兴趣的点进行下移，用户感兴趣的点（a图中的黄色方框部分）则上移，尽量移到decision boundary之上</p>
-<h5 id="Label-Smoothing-Regularization"><a href="#Label-Smoothing-Regularization" class="headerlink" title="Label Smoothing Regularization"></a>Label Smoothing Regularization</h5><p>（1）在下图的能量方程中，$l_u(e_i)$表示用户u是否对实体$e_i$感兴趣（值为0或1），能量方程可以把相同的label保存下来，把不同的label就去掉了；（2）再找到使得能量方程取得最小值的$l_u^<em>$；（3）再通过KL距离函数求得$y_{uv}$和$\hat l_u^</em>(v)$之间的相似度，也是求最小值，可得$R(A)$，再代入损失函数</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702155919603.png" alt="image-20200702155919603"></p>
-<p>$\lambda$可以不断做调整，来找到损失函数的最小值</p>
-<h5 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h5><p>输入为知识图谱G，新建一个邻接矩阵M后；（2）再把用户对感兴趣的实体新建一个权重矩阵（输入mapping函数S），再进行图卷积更新特征矩阵，即$e_u^{(i)}\leftarrow \sigma (\cdot)$；（3）标签顺滑，更新$l_u^{(i)}(e)$，再代入损失函数中的 J；不断地进行这个过程，只到损失函数收敛为止</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702162309077.png" alt="image-20200702162309077"></p>
-<h5 id="结果演示"><a href="#结果演示" class="headerlink" title="结果演示"></a>结果演示</h5><p>下图是几种推荐算法的比较，推荐给用户Top-K的实体，看最后的准确率如何，可以发现GCN的结构取得了非常不错的效果。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702163653325.png" alt="image-20200702163653325"></p>
-<p>下面是一些可视化的对比，图1是推荐食物，可以看到GCN的结构取得了很好的效果；图2表示取不同的$\lambda$，得到的$R(A_u)$的值；图三对比了不同算法的运行速度，可以看到KGCN用时最少，速度最快</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702163938245.png" alt="image-20200702163938245"></p>
-<h4 id="研究方向"><a href="#研究方向" class="headerlink" title="研究方向"></a>研究方向</h4><h5 id="人体姿势识别"><a href="#人体姿势识别" class="headerlink" title="人体姿势识别"></a>人体姿势识别</h5><p> 人体的关节就可以看作是一个节点，关节之间的骨骼就可以看作是边，结合起来就是一张图；</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702165243019.png" alt="image-20200702165243019"></p>
-<p>核心框架：输入为一个视频，视频的每个时间序列都是一张图像，每一帧的视频取出来就是一张图像；把每一帧的图像先构建成一个骨骼和关节点图，再通过时间的顺序把每一帧对应的关节点都连接起来，形成一张大图，再输入GCN进行训练，通过分类器识别出这是一个跑步的动作。</p>
-<p>在上图中的左下角中，横轴表示每一帧的骨骼图，纵轴表示时间，把相应的骨骼节点连接起来，变成一张大图，再输入GCN进行训练。</p>
-<p>下图为实验结果，</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702170313601.png" alt="image-20200702170313601"></p>
-<h5 id="超图"><a href="#超图" class="headerlink" title="超图"></a>超图</h5><p>超图是图的一个基本概念，下图中的图有8个点，选择不同的点，可以有多种排列组合。如果选一个点，一共有个点可以选择，那么就有8种（$C_n^1$）组合。如果我选两个点，比如$n_3,n_8$，这两个点构成一个子图，就有6种（$C_n^2$）组合。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200702170734267.png" alt="image-20200702170734267"></p>
-<p>选出不同的点后，得到不同的邻接矩阵，再进行训练。每一层选出不同组合的邻接矩阵再输入GCN进行图卷积。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093426889.png" alt="image-20200703093426889"></p>
-<p>超图卷积的核心公式就是下图中的公式(11)</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093638629.png" alt="image-20200703093638629"></p>
-<h5 id="图构建"><a href="#图构建" class="headerlink" title="图构建"></a>图构建</h5><p>对于给定的数据，新建图之后再输入GCN进行分类，我们要怎么画成一张图呢？</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703093921828.png" alt="image-20200703093921828"></p>
-<p>在上图中，observed dynamics表示5个分子的运动轨迹图，我们的目标是构建新图，并预测分子的下一步轨迹；对于人体的动作，我们也得通过学习才能知道，到底是以左手还是右手为重心。</p>
-<p>在下图中，展示了图构建的大概过程，编码器和解码器都是GCNs。对于编码器部分，先进行了从边到节点($v\rightarrow e$)的过程，再从节点到边($e\rightarrow v$)，再从边到节点($v\rightarrow e$)；对于解码器，先从边到点，再从点到边，进行图卷积，最后再进行分类，得到下一步的运动轨迹。</p>
-<p>其中x表示节点，z表示x这个点与i、j相连的概率，z是一个概率分布。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703095234400.png" alt="image-20200703095234400"></p>
-<p>预测下一步运动轨迹：在下图中，我们可以看出预测图和真实值之间差距并不大，</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703100157533.png" alt="image-20200703100157533"></p>
-<h5 id="子图嵌入"><a href="#子图嵌入" class="headerlink" title="子图嵌入"></a>子图嵌入</h5><p>在原来的GCN中，我们每次只会考虑一个点；如果我们现在把多个点（关联性很大的点）表示成一个点，再输入GCN，效果会不会更好呢？这也是一个很火的研究方向。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703101250920.png" alt="image-20200703101250920"></p>
-<h4 id="场景应用"><a href="#场景应用" class="headerlink" title="场景应用"></a>场景应用</h4><h5 id="用户推荐系统"><a href="#用户推荐系统" class="headerlink" title="用户推荐系统"></a>用户推荐系统</h5><p>在搜索中推荐相关联的朋友给你。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102812106.png" alt="image-20200703102812106"></p>
-<h5 id="舆情监控和控制"><a href="#舆情监控和控制" class="headerlink" title="舆情监控和控制"></a>舆情监控和控制</h5><p>每个国家都需要舆情监控，比如关于假消息和真消息的分类或者监控，在网络传播过程中找到假消息源，进行封锁等，用GCN都可以起到很好的作用。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102736481.png" alt="image-20200703102736481"></p>
-<h5 id="自动驾驶"><a href="#自动驾驶" class="headerlink" title="自动驾驶"></a>自动驾驶</h5><p>所有的车都有一个车载系统，每个车载系统之间进行联网，就可以构成非常大的图。</p>
-<p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703102850234.png" alt="image-20200703102850234"></p>
-<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p><img src="/2020/07/03/基于知识图谱和图卷积神经网络的应用和开发/image-20200703103300945.png" alt="image-20200703103300945"></p>
-<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><p>本文是观看杨栋老师在B上讲解的直播课程《基于知识图谱和图卷积神经网络的应用和开发》的笔记，直播地址：<a href="https://live.bilibili.com/11869202" target="_blank" rel="external">https://live.bilibili.com/11869202</a> ，贪心科技官网录播回放：<a href="https://www.greedyai.com/course/139" target="_blank" rel="external">https://www.greedyai.com/course/139</a></p>
-]]></content>
-      <categories>
-        <category>知识图谱</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>知识图谱</tag>
-        <tag>GCN</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Gradient Descent</title>
-    <url>/2020/06/04/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/</url>
-    <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>梯度下降的目标是使损失函数L最小化，$\theta^* = arg\ min\ L(\theta)$</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603152209444.png" alt="image-20200603152209444" style="zoom:50%; "></p>
-<h4 id="Learning-Rate"><a href="#Learning-Rate" class="headerlink" title="Learning Rate"></a>Learning Rate</h4><p>从$\theta_0$开始，先计算出$\theta_0$的梯度，其中红色箭头表示梯度的方向，蓝色箭头表示移动的方向。<br><u>梯度的方向是函数值在这个点增长最快的方向，想要使损失函数L的值达到最小值，就必须要往相反的方向运动。</u></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603152117920.png" alt="image-20200603152117920" style="zoom: 50%;"></p>
-<p>学习率会出现以下四种不同的情况：</p>
-<ul>
-<li>学习率太小，即图中蓝色的线，每次跨越的步长很小很小，梯度每次变化的值也小，模型要达到local minima，就必须需要更多的训练时间；</li>
-<li>学习率太大，即图中绿色的线，每次跨越的步长会很大，很可能形成在山谷之间震荡的现象；</li>
-<li>学习率特别大，即图中黄色的线，就很可能会直接跳出local minima，loss会越来越大；</li>
-<li>学习率刚好合适，即图中红色的线，每次跨越的步长非常合适，达到local minima的时间也不需要特别多。</li>
-</ul>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603161210664.png" alt="image-20200603161210664" style="zoom:50%;"></p>
-<p>由于手动设置learning rate会导致很多问题，就出现了一些自适应的梯度调整方法。</p>
-<ul>
-<li>刚开始训练时，我们离local minimum的距离还很远，因此可以使用稍大的learning rate；</li>
-<li>在经过多次的训练后，离local minimum的距离已经很近了，所以这时可以使用小的learning rate；</li>
-<li>在经过t次的训练后，learning rate可以衰减为$\eta^t=\frac{\eta}{\sqrt{t+1}}$</li>
-</ul>
-<h4 id="Adagrad"><a href="#Adagrad" class="headerlink" title="Adagrad"></a>Adagrad</h4><blockquote>
-<p>Divide the learning rate of each parameter by the <strong>root mean square of its previous derivatives</strong></p>
-</blockquote>
-<h5 id="理论推导"><a href="#理论推导" class="headerlink" title="理论推导"></a>理论推导</h5><p>使用这个公式来更新参数w，$w^{t+1} \leftarrow  w^t - \frac{\eta^t}{\sigma^t}g^t$<br>其中，t表示第t次的update，$g^t = \frac{\partial L(\theta ^t)}{\partial w}$，是损失函数L对参数w的导数，$\sigma^t$表示其先前导数的均方根（root mean square）</p>
-<p>计算w的具体例子如下所示，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603165047318.png" alt="image-20200603165047318" style="zoom: 50%; "></p>
-<p>得出了$\sigma^t$和$\eta^t$的表达式后，再带入原式，消除分母上的$\sqrt{t+1}$即可得出下面的公式，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603165417281.png" alt="image-20200603165417281" style="zoom:50%;"></p>
-<h5 id="Contradiction"><a href="#Contradiction" class="headerlink" title="Contradiction"></a>Contradiction</h5><p>如上图所示，对于一般的梯度下降算法（vanilla gradient descent），当梯度g越大时，步长就越大；对于Adagrad，   $g^t$在分子上，梯度越大步长也越大，$\sum_{i=0}^t(g^i)^2$在分母上，数值越大步长也就越小，看似出现了一个矛盾。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603172539601.png" alt="image-20200603172539601" style="zoom:50%;"></p>
-<p>有学者对此也做出了解释，认为Adagrad可以解释$g^t$和$\sum_{i=0}^t(g^i)^2$之间的反差，造成了反差的效果。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603173305074.png" alt="image-20200603173305074" style="zoom:50%;"></p>
-<p><strong>gradient越大，函数值离minima的距离就越远</strong>这个说法不一定在所有情况下都是成立的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603174942400.png" alt="image-20200603174942400" style="zoom:50%;"></p>
-<p>对于左图中的两个参数w1和w2，画两条直线，保持其中一个变量不变，得出另一个变量的变化曲线，分别对应右图中的曲线。在右图中，对于w1中的a点和w2中的c点，c点距离minimum的距离最近，但梯度却更大。因此在分析梯度和步长时，我们不能只考虑一阶导数的大小，还必须要要考虑二阶导数的大小，即$y^{‘’}=2a$。</p>
-<p>右图中的w1曲线，曲率半径比w2的曲线更大，一阶导数变化得更平缓，因此二阶导数的变化就比w2大</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603175920345.png" alt="image-20200603175920345" style="zoom:50%;"></p>
-<p>再来回顾下Adagrad中每次更新w的表达式，$w^{t+1}\leftarrow w^t - \frac{\eta}{\sqrt{\sum_{t=0}^t(g^i)^2}}g^t$</p>
-<p>一阶导数用$g^t$表示，二阶导数的值则用分母中的$\sum_{i=0}^t(g^i)^2$来进行评估，即使用一阶导数的值来表示二阶导数的值。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603180425226.png" alt="image-20200603180425226" style="zoom:50%;"></p>
-<h4 id="Stochastic-Gradient-Descent"><a href="#Stochastic-Gradient-Descent" class="headerlink" title="Stochastic Gradient Descent"></a>Stochastic Gradient Descent</h4><p>对于传统的梯度下降算法，损失函数L的计算包含了所有的样本;<br>随机梯度下降算法，损失函数$L^n$则只使用其中一个样本，计算效率可以提高很多</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603215238564.png" alt="image-20200603215238564" style="zoom:50%;"></p>
-<p>对比示意图如下，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603215557501.png" alt="image-20200603215557501" style="zoom:50%;"></p>
-<h4 id="Feature-scaling"><a href="#Feature-scaling" class="headerlink" title="Feature scaling"></a>Feature scaling</h4><h5 id="原理介绍"><a href="#原理介绍" class="headerlink" title="原理介绍"></a>原理介绍</h5><blockquote>
-<p>Make different features have the same scaling</p>
-</blockquote>
-<p>使不同量级的数据集都具有相同的规模，比如x2的都是大于100的值，经过feature scaling，就可以使x2的数值范围和x1相接近。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603220106332.png" alt="image-20200603220106332" style="zoom:50%;"></p>
-<p>x2对应w2，x1对应w1，对于同一个w1、w2，但x2的数值不同</p>
-<p>在左图中，由于x1的数值相对于x2来说都很小，x1的变化对于y来说影响很小，w1对y的影响也很小，对loss的影响也小，因此梯度$\frac{\partial L}{\partial w_1}$在w1方向的变换也比较平缓；x2的数值较大，对loss的影响也大，因此梯度$\frac{\partial L}{\partial w_2}$在w2方向的变换就比较sharp</p>
-<p>在右图中，x1和x2的规模（scale）是接近的，对y的影响不相上下，对loss的影响也差不多</p>
-<h5 id="计算"><a href="#计算" class="headerlink" title="计算"></a>计算</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603225755433.png" alt="image-20200603225755433" style="zoom:50%;"></p>
-<p>计算方式：用$m_i$表示当前样本的平均值，$\sigma_i$为当前样本的标准差，i表示维度，$x_i^r$表示第r个example，使用公式$x_i^r \leftarrow \frac{x_i^r-m_i}{\sigma_i}$来进行归一化计算</p>
-<p>feature scaling其实就是将每一个example都进行归一化，使之服从标准正态分布$f(x)=\frac{1}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}$</p>
-<script type="math/tex; mode=display">
-\frac{X-\bar {X}}{\sqrt{D(x)}} \sim N(0,1)</script><h4 id="Gradient-Descent-Theory"><a href="#Gradient-Descent-Theory" class="headerlink" title="Gradient Descent Theory"></a>Gradient Descent Theory</h4><h5 id="Question"><a href="#Question" class="headerlink" title="Question"></a>Question</h5><p>在求解最小化问题时，$\theta^* = arg\ min\ L(\theta)$，每次更新$\theta$的值，并不一定能使$𝐿(\theta^0) &gt;𝐿(\theta^1)&gt;𝐿(\theta^2) &gt;⋯$成立</p>
-<p>对于给出的$\theta^1,\theta^2$，我们要如何根据这些值来找出最小的loss？这也是我们接下来会研究的问题</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200604110917247.png" alt="image-20200604110917247" style="zoom:50%;"></p>
-<h5 id="Taylor-Series"><a href="#Taylor-Series" class="headerlink" title="Taylor Series"></a>Taylor Series</h5><p>泰勒公式定义如下，将函数h(x)在x=x0处展开</p>
-<script type="math/tex; mode=display">
-h(x) = \sum_{k=0}^{\infty}\frac{h^{(k)}(x_0)}{k!}(x-x_0)^k</script><p>当$x\rightarrow x_0$时，表达式可写为$h(x)\approx h(x_0)+h’(x_0)(x-x_0)$</p>
-<p>对于二元函数，当$x\rightarrow x_0,y\rightarrow y_0$时，相应的表达式可以简化为</p>
-<script type="math/tex; mode=display">
-h(x,y)\approx h(x_0,y_0)+\frac{\partial h(x_0,y_0)}{\partial x}(x-x_0) + \frac{\partial h(x_0,y_0)}{\partial y}(y-y_0)</script><h5 id="Back-to-Formal-Derivation"><a href="#Back-to-Formal-Derivation" class="headerlink" title="Back to Formal Derivation"></a>Back to Formal Derivation</h5><p>损失函数loss可以用以下公式表示，</p>
-<script type="math/tex; mode=display">
-L(\theta)=L(a,b)+\frac{\partial L(a,b)}{\partial \theta_1}(\theta_1-a) +\frac{\partial L(a,b)}{\partial \theta_2}(\theta_2-b)</script><p>简化表达形式，令$s=L(a,b),\ u=\frac{\partial L(a,b)}{\partial \theta_1},\ v=\frac{\partial L(a,b)}{\partial \theta_2}$</p>
-<p>则$L(\theta)\approx s+u(\theta_1-a)+v(\theta_2-b)$</p>
-<p>如下图所示，在图中red circle的范围内，找到$\theta_1,\theta_2$，使得loss最小化，设red circle的半径为d，圆心坐标为(a,b)，就新增了一个限制条件$(\theta_1-a)^2+(\theta_2-b)^2\leq d^2$</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200604114112061.png" alt="image-20200604114112061" style="zoom:50%;"></p>
-<p>由于s与$\theta_1,\theta_2$不相关，这里把s项去掉，$L(\theta)$可以转为内积</p>
-<script type="math/tex; mode=display">
-\begin{aligned}
-
-L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
- & =  (u,v)\cdot(\theta_1-a,\theta_2-b) \\
- & =  (u,v)\cdot(\Delta \theta_1,\Delta\theta_2)
-\end{aligned}</script><p>当$(\Delta \theta_1,\Delta\theta_2)$与$(u,v)$方向相反时，两者的内积为最小值，由于两者的模长不同，用参数$\eta$来表示两者之间的关系。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200604114656448.png" alt="image-20200604114656448" style="zoom:50%;"></p>
-<p>由于$\Delta\theta_1=\theta_1-a,\Delta\theta_2=\theta_2-b$，则$\theta_1=a+\Delta\theta_1,\theta_2=b+\Delta\theta_2$，可得出</p>
-<script type="math/tex; mode=display">
-\begin{bmatrix} \theta_1 \\ \theta_2  \end{bmatrix}
-=
-\begin{bmatrix} a \\ b  \end{bmatrix}
-- \eta \begin{bmatrix} u \\ v  \end{bmatrix}
-
-=
-\begin{bmatrix} a \\ b  \end{bmatrix}
-- \eta \begin{bmatrix} \frac{\partial L(a,b)}{\partial \theta_1} \\ \frac{\partial L(a,b)}{\partial \theta_2}  \end{bmatrix}</script><h5 id="Limitation"><a href="#Limitation" class="headerlink" title="Limitation"></a>Limitation</h5><p>在真实的实验环境中，我们往往会设置一个临界值（比如$10^{-4}$），当该点的梯度小于该值（即$\approx 0$）时，就停止训练。</p>
-<p>因此，gradient descent的限制是，gradient为0的点并不一定是local minimum，还有可能是saddle point，也有可能是接近于0的点</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200604123420086.png" alt="image-20200604123420086" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>gradient descent</tag>
-        <tag>adagrad</tag>
-        <tag>SGD</tag>
       </tags>
   </entry>
   <entry>
@@ -2267,6 +2164,351 @@ S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（M
         <tag>超标量</tag>
         <tag>VLIW</tag>
         <tag>超长指令字</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Gradient Descent</title>
+    <url>/2020/06/04/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/</url>
+    <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>梯度下降的目标是使损失函数L最小化，$\theta^* = arg\ min\ L(\theta)$</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603152209444.png" alt="image-20200603152209444" style="zoom:50%; "></p>
+<h4 id="Learning-Rate"><a href="#Learning-Rate" class="headerlink" title="Learning Rate"></a>Learning Rate</h4><p>从$\theta_0$开始，先计算出$\theta_0$的梯度，其中红色箭头表示梯度的方向，蓝色箭头表示移动的方向。<br><u>梯度的方向是函数值在这个点增长最快的方向，想要使损失函数L的值达到最小值，就必须要往相反的方向运动。</u></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603152117920.png" alt="image-20200603152117920" style="zoom: 50%;"></p>
+<p>学习率会出现以下四种不同的情况：</p>
+<ul>
+<li>学习率太小，即图中蓝色的线，每次跨越的步长很小很小，梯度每次变化的值也小，模型要达到local minima，就必须需要更多的训练时间；</li>
+<li>学习率太大，即图中绿色的线，每次跨越的步长会很大，很可能形成在山谷之间震荡的现象；</li>
+<li>学习率特别大，即图中黄色的线，就很可能会直接跳出local minima，loss会越来越大；</li>
+<li>学习率刚好合适，即图中红色的线，每次跨越的步长非常合适，达到local minima的时间也不需要特别多。</li>
+</ul>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603161210664.png" alt="image-20200603161210664" style="zoom:50%;"></p>
+<p>由于手动设置learning rate会导致很多问题，就出现了一些自适应的梯度调整方法。</p>
+<ul>
+<li>刚开始训练时，我们离local minimum的距离还很远，因此可以使用稍大的learning rate；</li>
+<li>在经过多次的训练后，离local minimum的距离已经很近了，所以这时可以使用小的learning rate；</li>
+<li>在经过t次的训练后，learning rate可以衰减为$\eta^t=\frac{\eta}{\sqrt{t+1}}$</li>
+</ul>
+<h4 id="Adagrad"><a href="#Adagrad" class="headerlink" title="Adagrad"></a>Adagrad</h4><blockquote>
+<p>Divide the learning rate of each parameter by the <strong>root mean square of its previous derivatives</strong></p>
+</blockquote>
+<h5 id="理论推导"><a href="#理论推导" class="headerlink" title="理论推导"></a>理论推导</h5><p>使用这个公式来更新参数w，$w^{t+1} \leftarrow  w^t - \frac{\eta^t}{\sigma^t}g^t$<br>其中，t表示第t次的update，$g^t = \frac{\partial L(\theta ^t)}{\partial w}$，是损失函数L对参数w的导数，$\sigma^t$表示其先前导数的均方根（root mean square）</p>
+<p>计算w的具体例子如下所示，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603165047318.png" alt="image-20200603165047318" style="zoom: 50%; "></p>
+<p>得出了$\sigma^t$和$\eta^t$的表达式后，再带入原式，消除分母上的$\sqrt{t+1}$即可得出下面的公式，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603165417281.png" alt="image-20200603165417281" style="zoom:50%;"></p>
+<h5 id="Contradiction"><a href="#Contradiction" class="headerlink" title="Contradiction"></a>Contradiction</h5><p>如上图所示，对于一般的梯度下降算法（vanilla gradient descent），当梯度g越大时，步长就越大；对于Adagrad，   $g^t$在分子上，梯度越大步长也越大，$\sum_{i=0}^t(g^i)^2$在分母上，数值越大步长也就越小，看似出现了一个矛盾。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603172539601.png" alt="image-20200603172539601" style="zoom:50%;"></p>
+<p>有学者对此也做出了解释，认为Adagrad可以解释$g^t$和$\sum_{i=0}^t(g^i)^2$之间的反差，造成了反差的效果。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603173305074.png" alt="image-20200603173305074" style="zoom:50%;"></p>
+<p><strong>gradient越大，函数值离minima的距离就越远</strong>这个说法不一定在所有情况下都是成立的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603174942400.png" alt="image-20200603174942400" style="zoom:50%;"></p>
+<p>对于左图中的两个参数w1和w2，画两条直线，保持其中一个变量不变，得出另一个变量的变化曲线，分别对应右图中的曲线。在右图中，对于w1中的a点和w2中的c点，c点距离minimum的距离最近，但梯度却更大。因此在分析梯度和步长时，我们不能只考虑一阶导数的大小，还必须要要考虑二阶导数的大小，即$y^{‘’}=2a$。</p>
+<p>右图中的w1曲线，曲率半径比w2的曲线更大，一阶导数变化得更平缓，因此二阶导数的变化就比w2大</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603175920345.png" alt="image-20200603175920345" style="zoom:50%;"></p>
+<p>再来回顾下Adagrad中每次更新w的表达式，$w^{t+1}\leftarrow w^t - \frac{\eta}{\sqrt{\sum_{t=0}^t(g^i)^2}}g^t$</p>
+<p>一阶导数用$g^t$表示，二阶导数的值则用分母中的$\sum_{i=0}^t(g^i)^2$来进行评估，即使用一阶导数的值来表示二阶导数的值。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603180425226.png" alt="image-20200603180425226" style="zoom:50%;"></p>
+<h4 id="Stochastic-Gradient-Descent"><a href="#Stochastic-Gradient-Descent" class="headerlink" title="Stochastic Gradient Descent"></a>Stochastic Gradient Descent</h4><p>对于传统的梯度下降算法，损失函数L的计算包含了所有的样本;<br>随机梯度下降算法，损失函数$L^n$则只使用其中一个样本，计算效率可以提高很多</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603215238564.png" alt="image-20200603215238564" style="zoom:50%;"></p>
+<p>对比示意图如下，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603215557501.png" alt="image-20200603215557501" style="zoom:50%;"></p>
+<h4 id="Feature-scaling"><a href="#Feature-scaling" class="headerlink" title="Feature scaling"></a>Feature scaling</h4><h5 id="原理介绍"><a href="#原理介绍" class="headerlink" title="原理介绍"></a>原理介绍</h5><blockquote>
+<p>Make different features have the same scaling</p>
+</blockquote>
+<p>使不同量级的数据集都具有相同的规模，比如x2的都是大于100的值，经过feature scaling，就可以使x2的数值范围和x1相接近。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603220106332.png" alt="image-20200603220106332" style="zoom:50%;"></p>
+<p>x2对应w2，x1对应w1，对于同一个w1、w2，但x2的数值不同</p>
+<p>在左图中，由于x1的数值相对于x2来说都很小，x1的变化对于y来说影响很小，w1对y的影响也很小，对loss的影响也小，因此梯度$\frac{\partial L}{\partial w_1}$在w1方向的变换也比较平缓；x2的数值较大，对loss的影响也大，因此梯度$\frac{\partial L}{\partial w_2}$在w2方向的变换就比较sharp</p>
+<p>在右图中，x1和x2的规模（scale）是接近的，对y的影响不相上下，对loss的影响也差不多</p>
+<h5 id="计算"><a href="#计算" class="headerlink" title="计算"></a>计算</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200603225755433.png" alt="image-20200603225755433" style="zoom:50%;"></p>
+<p>计算方式：用$m_i$表示当前样本的平均值，$\sigma_i$为当前样本的标准差，i表示维度，$x_i^r$表示第r个example，使用公式$x_i^r \leftarrow \frac{x_i^r-m_i}{\sigma_i}$来进行归一化计算</p>
+<p>feature scaling其实就是将每一个example都进行归一化，使之服从标准正态分布$f(x)=\frac{1}{\sqrt{2\pi}}e^{-\frac{x^2}{2}}$</p>
+<script type="math/tex; mode=display">
+\frac{X-\bar {X}}{\sqrt{D(x)}} \sim N(0,1)</script><h4 id="Gradient-Descent-Theory"><a href="#Gradient-Descent-Theory" class="headerlink" title="Gradient Descent Theory"></a>Gradient Descent Theory</h4><h5 id="Question"><a href="#Question" class="headerlink" title="Question"></a>Question</h5><p>在求解最小化问题时，$\theta^* = arg\ min\ L(\theta)$，每次更新$\theta$的值，并不一定能使$𝐿(\theta^0) &gt;𝐿(\theta^1)&gt;𝐿(\theta^2) &gt;⋯$成立</p>
+<p>对于给出的$\theta^1,\theta^2$，我们要如何根据这些值来找出最小的loss？这也是我们接下来会研究的问题</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200604110917247.png" alt="image-20200604110917247" style="zoom:50%;"></p>
+<h5 id="Taylor-Series"><a href="#Taylor-Series" class="headerlink" title="Taylor Series"></a>Taylor Series</h5><p>泰勒公式定义如下，将函数h(x)在x=x0处展开</p>
+<script type="math/tex; mode=display">
+h(x) = \sum_{k=0}^{\infty}\frac{h^{(k)}(x_0)}{k!}(x-x_0)^k</script><p>当$x\rightarrow x_0$时，表达式可写为$h(x)\approx h(x_0)+h’(x_0)(x-x_0)$</p>
+<p>对于二元函数，当$x\rightarrow x_0,y\rightarrow y_0$时，相应的表达式可以简化为</p>
+<script type="math/tex; mode=display">
+h(x,y)\approx h(x_0,y_0)+\frac{\partial h(x_0,y_0)}{\partial x}(x-x_0) + \frac{\partial h(x_0,y_0)}{\partial y}(y-y_0)</script><h5 id="Back-to-Formal-Derivation"><a href="#Back-to-Formal-Derivation" class="headerlink" title="Back to Formal Derivation"></a>Back to Formal Derivation</h5><p>损失函数loss可以用以下公式表示，</p>
+<script type="math/tex; mode=display">
+L(\theta)=L(a,b)+\frac{\partial L(a,b)}{\partial \theta_1}(\theta_1-a) +\frac{\partial L(a,b)}{\partial \theta_2}(\theta_2-b)</script><p>简化表达形式，令$s=L(a,b),\ u=\frac{\partial L(a,b)}{\partial \theta_1},\ v=\frac{\partial L(a,b)}{\partial \theta_2}$</p>
+<p>则$L(\theta)\approx s+u(\theta_1-a)+v(\theta_2-b)$</p>
+<p>如下图所示，在图中red circle的范围内，找到$\theta_1,\theta_2$，使得loss最小化，设red circle的半径为d，圆心坐标为(a,b)，就新增了一个限制条件$(\theta_1-a)^2+(\theta_2-b)^2\leq d^2$</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200604114112061.png" alt="image-20200604114112061" style="zoom:50%;"></p>
+<p>由于s与$\theta_1,\theta_2$不相关，这里把s项去掉，$L(\theta)$可以转为内积</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+
+L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
+ & =  (u,v)\cdot(\theta_1-a,\theta_2-b) \\
+ & =  (u,v)\cdot(\Delta \theta_1,\Delta\theta_2)
+\end{aligned}</script><p>当$(\Delta \theta_1,\Delta\theta_2)$与$(u,v)$方向相反时，两者的内积为最小值，由于两者的模长不同，用参数$\eta$来表示两者之间的关系。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200604114656448.png" alt="image-20200604114656448" style="zoom:50%;"></p>
+<p>由于$\Delta\theta_1=\theta_1-a,\Delta\theta_2=\theta_2-b$，则$\theta_1=a+\Delta\theta_1,\theta_2=b+\Delta\theta_2$，可得出</p>
+<script type="math/tex; mode=display">
+\begin{bmatrix} \theta_1 \\ \theta_2  \end{bmatrix}
+=
+\begin{bmatrix} a \\ b  \end{bmatrix}
+- \eta \begin{bmatrix} u \\ v  \end{bmatrix}
+
+=
+\begin{bmatrix} a \\ b  \end{bmatrix}
+- \eta \begin{bmatrix} \frac{\partial L(a,b)}{\partial \theta_1} \\ \frac{\partial L(a,b)}{\partial \theta_2}  \end{bmatrix}</script><h5 id="Limitation"><a href="#Limitation" class="headerlink" title="Limitation"></a>Limitation</h5><p>在真实的实验环境中，我们往往会设置一个临界值（比如$10^{-4}$），当该点的梯度小于该值（即$\approx 0$）时，就停止训练。</p>
+<p>因此，gradient descent的限制是，gradient为0的点并不一定是local minimum，还有可能是saddle point，也有可能是接近于0的点</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200604123420086.png" alt="image-20200604123420086" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>gradient descent</tag>
+        <tag>adagrad</tag>
+        <tag>SGD</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>流水线</title>
+    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
+    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
+<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
+<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
+<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
+<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
+<li>需要有<u>通过时间与排空时间</u></li>
+</ul>
+<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
+<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
+<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
+<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
+<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
+<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
+<ul>
+<li><p>从前调度</p>
+</li>
+<li><p>从目标处调度</p>
+</li>
+<li><p>从失败出调度</p>
+</li>
+</ul>
+<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
+<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
+<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
+<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>软件工程</category>
+      </categories>
+      <tags>
+        <tag>流水线</tag>
+        <tag>吞吐率</tag>
+        <tag>加速比</tag>
+        <tag>效率</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>测试</title>
+    <url>/2020/03/12/%E6%B5%8B%E8%AF%95/</url>
+    <content><![CDATA[<h5 id="测试步骤"><a href="#测试步骤" class="headerlink" title="测试步骤"></a>测试步骤</h5><ul>
+<li>模块（单元）测试</li>
+<li>子系统测试</li>
+<li>系统（集成）测试</li>
+<li>验收（确认）测试</li>
+<li>平行运行</li>
+</ul>
+<h5 id="单元测试"><a href="#单元测试" class="headerlink" title="单元测试"></a>单元测试</h5><p>主要使用白盒测试技术。集中检测软件设计的最小单元-模块，对重要的执行通路进行测试，可以发现模块内部的错误。可以用代码审查和计算机测试，来完成单元测试工作。测试重点为：</p>
+<ul>
+<li>模块接口</li>
+<li>局部数据结构</li>
+<li>重要的执行通路</li>
+<li>出错处理通路</li>
+<li>边界条件</li>
+</ul>
+<h5 id="集成测试"><a href="#集成测试" class="headerlink" title="集成测试"></a>集成测试</h5><p>是测试和组装软件的系统化技术，把模块组装成程序，在组装的过程进行测试。</p>
+<p>非渐增式：先分别测试所有模块，再把这些模块组合成要求的程序；</p>
+<p>渐增式：把下一个将要测试的模块同已经测试好的那些模块组合到一起进行测试；</p>
+<ul>
+<li>自底向上集成</li>
+<li>自顶向下集成</li>
+</ul>
+<p>模块测试的特点是主要应用白盒测试，对多个模块的测试可以并发进行；集成测试的特点是可以在测试过程发现接口问题。</p>
+<p>回归测试：重新执行已经做过测试的某个测试的子集。</p>
+<p><img src="/2020/03/12/测试/test.png" alt=""></p>
+]]></content>
+      <categories>
+        <category>软件工程</category>
+      </categories>
+      <tags>
+        <tag>软件工程</tag>
+        <tag>单元测试</tag>
+        <tag>集成测试</tag>
+        <tag>白盒测试</tag>
+        <tag>黑盒测试</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>计算机体系结构的基础知识</title>
+    <url>/2020/03/13/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E7%9A%84%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/</url>
+    <content><![CDATA[<h4 id="计算机系统结构、组成和实现"><a href="#计算机系统结构、组成和实现" class="headerlink" title="计算机系统结构、组成和实现"></a>计算机系统结构、组成和实现</h4><p>计算机系统结构是指传统机器程序员所看到的计算机属性，即概念结构与功能特性。</p>
+<p>在设计主存系统的时候，确定主存容量、寻址方式等属于计算机体系结构；确定时钟周期、逻辑设计等属于计算机组成；而主存存储芯片的类型、线路设计、微组装技术属于计算机实现。</p>
+<p>计算机组成是计算机体系结构的逻辑实现，计算机实现是计算机体系结构的物理实现。一种体系结构可以有多种组成，一种组成可以有多种实现。</p>
+<h4 id="计算机系统结构的分类"><a href="#计算机系统结构的分类" class="headerlink" title="计算机系统结构的分类"></a>计算机系统结构的分类</h4><h5 id="Flynn分类法"><a href="#Flynn分类法" class="headerlink" title="Flynn分类法"></a>Flynn分类法</h5><p>按照指令流和数据流的多倍性进行分类的。</p>
+<ul>
+<li>SISD，标量流水线</li>
+<li>SIMD，向量流水线</li>
+<li>MISD，只是一种人为的划分，目前并没有实际的机器</li>
+<li>MIMD，多处理机，<ul>
+<li>机群，</li>
+<li>PVP（并行向量处理机），</li>
+<li>SMP（对称式共享存储器多处理机），</li>
+<li>MPP（大规模并行处理机），</li>
+<li>DSM（分布式共享存储器多处理机）。</li>
+</ul>
+</li>
+</ul>
+<h5 id="冯氏分类法"><a href="#冯氏分类法" class="headerlink" title="冯氏分类法"></a>冯氏分类法</h5><p>用系统的最大并行度对计算机进行分类。最大并行度$P_m$为：单位时间内能够处理的最大二进制位数。</p>
+<ul>
+<li>字串位串</li>
+<li>字串位并</li>
+<li>字并位串</li>
+<li>字并位并</li>
+</ul>
+<h5 id="Handler分类法"><a href="#Handler分类法" class="headerlink" title="Handler分类法"></a>Handler分类法</h5><p>根据并行度和流水线来分类。</p>
+<h4 id="计算机体系结构设计的主要方法"><a href="#计算机体系结构设计的主要方法" class="headerlink" title="计算机体系结构设计的主要方法"></a>计算机体系结构设计的主要方法</h4><h5 id="由上往下"><a href="#由上往下" class="headerlink" title="由上往下"></a>由上往下</h5><p>从层次结构中的最上面一级开始，逐层往下设计各层机器。先设计软件，再设计硬件。</p>
+<h5 id="由下往上"><a href="#由下往上" class="headerlink" title="由下往上"></a>由下往上</h5><p>从层次结构的最下面一级开始，逐层往上设计各层的机器。先设计硬件，再设计软件。</p>
+<h5 id="从中间开始"><a href="#从中间开始" class="headerlink" title="从中间开始"></a>从中间开始</h5><p>这里的“中间”是指层次结构中软硬件的交界面，一般指的是传统机器语言级和操作系统级之间。先进行软硬件的分工，确定好这个界面，从这个界面开始，软件设计者开始往上设计操作系统、编译系统等，硬件设计者开始往下设计传统机器级、微程序机器级等。优点：</p>
+<ul>
+<li>软件和硬件并行设计可以缩短设计周期，设计过程中可以交流协调，是一种交互式的、很好的设计方案。</li>
+</ul>
+<h4 id="实现软件的可移植性"><a href="#实现软件的可移植性" class="headerlink" title="实现软件的可移植性"></a>实现软件的可移植性</h4><h5 id="统一高级语言"><a href="#统一高级语言" class="headerlink" title="统一高级语言"></a>统一高级语言</h5><p>可以解决所有计算机之间的软件移植，比如Java语言。</p>
+<h5 id="采用系列机"><a href="#采用系列机" class="headerlink" title="采用系列机"></a>采用系列机</h5><p>系列机是指同一厂家生产的具有相同的系统结构，但具有不同组成和实现的同一系列不同型号的计算机。</p>
+<p>采用系列机可以解决<u>同一系列的计算机</u>之间的软件移植。</p>
+<ul>
+<li>向上兼容，程序不修改就可以运行于比它<u>高档</u>的计算机</li>
+<li>向后兼容，程序不修改就可以运行于在它<u>之后投入市场</u>的计算机</li>
+</ul>
+<h5 id="模拟和仿真"><a href="#模拟和仿真" class="headerlink" title="模拟和仿真"></a>模拟和仿真</h5><p>可以在不同体系结构的计算机之间相互移植，在一种计算机上实现另一种计算机的指令系统。</p>
+<p><strong>模拟</strong>是用<u>软件</u>的方法在一台计算机（宿主机）上实现另一台计算机（虚拟机）的指令系统。运行速度慢，性能较差。</p>
+<p><strong>仿真</strong>是用现有计算机（宿主机）的<u>微程序</u>去解释实现另一台计算机（目标机）的指令系统。</p>
+<p>主要区别在于解释执行所用的语言。仿真是用微程序去解释，其解释程序放在控制存储器中；模拟是用机器语言去解释，其解释程序放在主存中。仿真的运行速度更快，但仿真只能在系统结构差异不大的计算机之间使用。</p>
+<h4 id="摩尔定律"><a href="#摩尔定律" class="headerlink" title="摩尔定律"></a>摩尔定律</h4><p>集成电路芯片上所集成的晶体管数目每隔18个月就翻一番。</p>
+<h4 id="并行性"><a href="#并行性" class="headerlink" title="并行性"></a>并行性</h4><p>计算机系统的并行性具有不同的等级。</p>
+<p>从处理数据的角度来看：</p>
+<ul>
+<li>字串位串，每次只对一个字的一位进行处理</li>
+<li>字串位并</li>
+<li>字并位串</li>
+<li>字并位并</li>
+</ul>
+<p>从执行程序的角度来看：</p>
+<ul>
+<li>指令内部并行，单指令之间各种微操作并行</li>
+<li>指令级并行，并行或并发执行两条或两条以上指令</li>
+<li>线程级并行<ul>
+<li>线程是一个相对独立、可独立调度和指派的执行单元，它比进程要轻巧。</li>
+</ul>
+</li>
+<li>任务级或过程级并行</li>
+<li>作业或程序级并行</li>
+</ul>
+<h4 id="指令集结构"><a href="#指令集结构" class="headerlink" title="指令集结构"></a>指令集结构</h4><p>根据CPU内部状态，可以将指令系统的机构分为：</p>
+<ul>
+<li><u>堆栈</u>型结构</li>
+<li><u>累加器</u>型结构</li>
+<li><u>通用寄存器</u>结构</li>
+</ul>
+<p>将通用存储器型结构进一步细分为：<u>RR型、RM型、MM型</u>。</p>
+<h4 id="向量的处理方式"><a href="#向量的处理方式" class="headerlink" title="向量的处理方式"></a>向量的处理方式</h4><ul>
+<li>横向处理方式，按行的方式从左到右进行计算的，相当于进行了N次循环；</li>
+<li>纵向处理方式，按列的方式从上到下进行计算的，将整个向量按相同的运算处理完之后，再去进行别的运算；</li>
+<li>纵横处理方式，又称为分组处理方式，把向量分成若干组，组内按照纵向方式处理，一次处理各组。</li>
+</ul>
+<p>后面两种方式都适用于向量处理机。</p>
+<h4 id="提高向量处理机性能的常用技术"><a href="#提高向量处理机性能的常用技术" class="headerlink" title="提高向量处理机性能的常用技术"></a>提高向量处理机性能的常用技术</h4><ul>
+<li>设置多个处理部件，使它们并行工作；</li>
+<li>采用链接技术，加快一串向量指令的执行；</li>
+<li>采用循环开采技术，加快循环的处理；</li>
+<li>采用多处理机系统，进一步提高系统性能。</li>
+</ul>
+<p><strong>链接</strong>：具有<u>先写后读相关（RAW）</u>的两条指令，在不出现<u>功能部件</u>冲突和其他<u>$V_i$（寄存器）</u>冲突的情况下，可以把功能部件链接起来进行流水处理。</p>
+<p><strong>分段开采技术</strong>：当向量的长度大于向量处理器的长度时，必须把长向量分为长度固定的段，然后循环分段处理，每一次循环只处理一个向量段。</p>
+]]></content>
+      <categories>
+        <category>计算机体系结构</category>
+      </categories>
+      <tags>
+        <tag>计算机体系结构</tag>
+        <tag>Flynn分类法</tag>
+        <tag>冯氏分类法</tag>
+        <tag>Handler分类法</tag>
+        <tag>模拟</tag>
+        <tag>仿真</tag>
+        <tag>系列机</tag>
+        <tag>分段开采</tag>
+        <tag>链接</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>计算机体系结构重要考点</title>
+    <url>/2020/03/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%87%8D%E8%A6%81%E8%80%83%E7%82%B9/</url>
+    <content><![CDATA[<h4 id="同时多线程"><a href="#同时多线程" class="headerlink" title="同时多线程"></a>同时多线程</h4><p>线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。</p>
+<p>线程级并行：指并行执行两个或两个以上的线程。</p>
+<p>同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种改进。通过寄存器命名和动态调度机制，来自各个独立线程的多条指令可以同时流出，而不用考虑它们之间的相互依赖关系。</p>
+<h5 id="实现多线程的主要方法"><a href="#实现多线程的主要方法" class="headerlink" title="实现多线程的主要方法"></a>实现多线程的主要方法</h5><p><u>细粒度多线程</u>：在每条指令之间都可以进行线程的切换，从而使得多个线程可以交替执行。</p>
+<ul>
+<li>优点：能够隐藏由长时间停顿带来的吞吐率的损失，也能够隐藏由段时间停顿带来的损失。</li>
+<li>缺点：减慢了单个线程的执行。即使没有任何停顿的线程也不能连续执行，而且会因为其他线程的指令的插入执行而被延迟。</li>
+</ul>
+<p><u>粗粒度多线程</u>：线程之间的切换只发生在时间较长的停顿出现的时候。</p>
+<ul>
+<li>优点：减少了切换次数，很大程度上也不会降低单个线程的执行速度。</li>
+<li>缺点：减少吞吐率损失的能力有限。由于实现粗粒度多线程的CPU只能执行单个线程的指令，不能交叉执行多个线程，因此当发生停顿时，流水线必须排空或暂停。</li>
+</ul>
+<h4 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h4><h5 id="写策略"><a href="#写策略" class="headerlink" title="写策略"></a>写策略</h5><p>写直达法：在执行写操作时，不仅把数据写入Cathe中相应的块，而且也写入下一级存储器。减少CPU写停顿的常用方法是，采用写缓冲器。</p>
+<p>写回法：只把数据写入Cathe中相应的块，不写入下一级存储器。这些最新数据只有在相应的块被替换出时，才被写回下一级存储器。速度快，要设置“修改位”。</p>
+<p>写不命中时，</p>
+<p>按写分配法：写不命中时，把所写单元的块从主存中调入Cathe，然后再进行写入。与<u>写回法</u>配合。</p>
+<p>不按写分配法：写不命中时，直接写入下一级存储器而不将相应的块调入Cathe。</p>
+<h5 id="三种类型的Cathe不命中"><a href="#三种类型的Cathe不命中" class="headerlink" title="三种类型的Cathe不命中"></a>三种类型的Cathe不命中</h5><p><u>强制性不命中</u>：当第一次访问一个快时，该块不在Cathe中，需从下一级存储器中调入Cathe。（冷启动访问不命中，首次访问不命中）</p>
+<p><u>容量不命中</u>：如果<u>程序执行时所需的块</u>不能全部调入Cathe中，当某些块被调出后，若又重新被访问，就会发生不命中。</p>
+<p><u>冲突不命中</u>：在组相联或者直接映像Cathe中，若太多的块映像到同一组（块）中，则会出现该组中某个块被别的块替换掉，然后又重新被访问的情况。（碰撞不命中，冲突不命中）</p>
+<p>关系：</p>
+<ul>
+<li><strong>相联度</strong>越高，冲突不命中就越少；</li>
+<li>强制性不命中和容量不命中不受相联度的影响；</li>
+<li>强制性不命中不受<strong>Cathe容量</strong>的影响，但容量不命中却随着容量的增加而减少。</li>
+</ul>
+<h4 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h4><h5 id="I-O系统的可靠性、可用性和可信性"><a href="#I-O系统的可靠性、可用性和可信性" class="headerlink" title="I/O系统的可靠性、可用性和可信性"></a>I/O系统的可靠性、可用性和可信性</h5><p>可靠性：系统从某个初始参考点开始<u>一直连续提供服务的能力</u>，用平均无故障时间（<strong>MTTF</strong>）来衡量。MTTF的导数是失效率。系统总体的失效率是各部件的失效率之和。系统<u>中断服务的时间</u>用平均修复时间（<strong>MTTR</strong>）来衡量。</p>
+<p>可用性：系统正常工作的时间在连续两次服务间隔时间中所占的比例。</p>
+<script type="math/tex; mode=display">
+可用性=\frac{MTTF}{MTTF+MTTR}</script><p>   平均失效间隔时间，MTBF</p>
+<script type="math/tex; mode=display">
+MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u>的。</p>
+<h5 id="廉价磁盘冗余阵列-RAID"><a href="#廉价磁盘冗余阵列-RAID" class="headerlink" title="廉价磁盘冗余阵列 (RAID)"></a>廉价磁盘冗余阵列 (RAID)</h5><p>RAID0：<u>无冗余和无校验</u>的磁盘阵列，成本最低。</p>
+<p>RAID1：<u>镜像</u>磁盘阵列。</p>
+<p>RAID2：采用纠错的<u>海明码</u>的磁盘阵列，冗余盘数量为$log_2m$，m为数据盘的个数。</p>
+<p>RAID3：<u>位</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID4：<u>块</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
+<p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
+<p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
+<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。<br>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
+]]></content>
+      <categories>
+        <category>计算机体系结构</category>
+      </categories>
+      <tags>
+        <tag>计算机体系结构</tag>
+        <tag>机群</tag>
+        <tag>MPP</tag>
+        <tag>SMP</tag>
+        <tag>消息传递</tag>
+        <tag>共享存储器</tag>
+        <tag>同时多线程</tag>
+        <tag>RAID</tag>
       </tags>
   </entry>
   <entry>
@@ -2433,248 +2675,6 @@ S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（M
         <tag>软件危机</tag>
         <tag>软件生命周期</tag>
         <tag>软件工程方法学</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>测试</title>
-    <url>/2020/03/12/%E6%B5%8B%E8%AF%95/</url>
-    <content><![CDATA[<h5 id="测试步骤"><a href="#测试步骤" class="headerlink" title="测试步骤"></a>测试步骤</h5><ul>
-<li>模块（单元）测试</li>
-<li>子系统测试</li>
-<li>系统（集成）测试</li>
-<li>验收（确认）测试</li>
-<li>平行运行</li>
-</ul>
-<h5 id="单元测试"><a href="#单元测试" class="headerlink" title="单元测试"></a>单元测试</h5><p>主要使用白盒测试技术。集中检测软件设计的最小单元-模块，对重要的执行通路进行测试，可以发现模块内部的错误。可以用代码审查和计算机测试，来完成单元测试工作。测试重点为：</p>
-<ul>
-<li>模块接口</li>
-<li>局部数据结构</li>
-<li>重要的执行通路</li>
-<li>出错处理通路</li>
-<li>边界条件</li>
-</ul>
-<h5 id="集成测试"><a href="#集成测试" class="headerlink" title="集成测试"></a>集成测试</h5><p>是测试和组装软件的系统化技术，把模块组装成程序，在组装的过程进行测试。</p>
-<p>非渐增式：先分别测试所有模块，再把这些模块组合成要求的程序；</p>
-<p>渐增式：把下一个将要测试的模块同已经测试好的那些模块组合到一起进行测试；</p>
-<ul>
-<li>自底向上集成</li>
-<li>自顶向下集成</li>
-</ul>
-<p>模块测试的特点是主要应用白盒测试，对多个模块的测试可以并发进行；集成测试的特点是可以在测试过程发现接口问题。</p>
-<p>回归测试：重新执行已经做过测试的某个测试的子集。</p>
-<p><img src="/2020/03/12/测试/test.png" alt=""></p>
-]]></content>
-      <categories>
-        <category>软件工程</category>
-      </categories>
-      <tags>
-        <tag>软件工程</tag>
-        <tag>单元测试</tag>
-        <tag>集成测试</tag>
-        <tag>白盒测试</tag>
-        <tag>黑盒测试</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>计算机体系结构的基础知识</title>
-    <url>/2020/03/13/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E7%9A%84%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/</url>
-    <content><![CDATA[<h4 id="计算机系统结构、组成和实现"><a href="#计算机系统结构、组成和实现" class="headerlink" title="计算机系统结构、组成和实现"></a>计算机系统结构、组成和实现</h4><p>计算机系统结构是指传统机器程序员所看到的计算机属性，即概念结构与功能特性。</p>
-<p>在设计主存系统的时候，确定主存容量、寻址方式等属于计算机体系结构；确定时钟周期、逻辑设计等属于计算机组成；而主存存储芯片的类型、线路设计、微组装技术属于计算机实现。</p>
-<p>计算机组成是计算机体系结构的逻辑实现，计算机实现是计算机体系结构的物理实现。一种体系结构可以有多种组成，一种组成可以有多种实现。</p>
-<h4 id="计算机系统结构的分类"><a href="#计算机系统结构的分类" class="headerlink" title="计算机系统结构的分类"></a>计算机系统结构的分类</h4><h5 id="Flynn分类法"><a href="#Flynn分类法" class="headerlink" title="Flynn分类法"></a>Flynn分类法</h5><p>按照指令流和数据流的多倍性进行分类的。</p>
-<ul>
-<li>SISD，标量流水线</li>
-<li>SIMD，向量流水线</li>
-<li>MISD，只是一种人为的划分，目前并没有实际的机器</li>
-<li>MIMD，多处理机，<ul>
-<li>机群，</li>
-<li>PVP（并行向量处理机），</li>
-<li>SMP（对称式共享存储器多处理机），</li>
-<li>MPP（大规模并行处理机），</li>
-<li>DSM（分布式共享存储器多处理机）。</li>
-</ul>
-</li>
-</ul>
-<h5 id="冯氏分类法"><a href="#冯氏分类法" class="headerlink" title="冯氏分类法"></a>冯氏分类法</h5><p>用系统的最大并行度对计算机进行分类。最大并行度$P_m$为：单位时间内能够处理的最大二进制位数。</p>
-<ul>
-<li>字串位串</li>
-<li>字串位并</li>
-<li>字并位串</li>
-<li>字并位并</li>
-</ul>
-<h5 id="Handler分类法"><a href="#Handler分类法" class="headerlink" title="Handler分类法"></a>Handler分类法</h5><p>根据并行度和流水线来分类。</p>
-<h4 id="计算机体系结构设计的主要方法"><a href="#计算机体系结构设计的主要方法" class="headerlink" title="计算机体系结构设计的主要方法"></a>计算机体系结构设计的主要方法</h4><h5 id="由上往下"><a href="#由上往下" class="headerlink" title="由上往下"></a>由上往下</h5><p>从层次结构中的最上面一级开始，逐层往下设计各层机器。先设计软件，再设计硬件。</p>
-<h5 id="由下往上"><a href="#由下往上" class="headerlink" title="由下往上"></a>由下往上</h5><p>从层次结构的最下面一级开始，逐层往上设计各层的机器。先设计硬件，再设计软件。</p>
-<h5 id="从中间开始"><a href="#从中间开始" class="headerlink" title="从中间开始"></a>从中间开始</h5><p>这里的“中间”是指层次结构中软硬件的交界面，一般指的是传统机器语言级和操作系统级之间。先进行软硬件的分工，确定好这个界面，从这个界面开始，软件设计者开始往上设计操作系统、编译系统等，硬件设计者开始往下设计传统机器级、微程序机器级等。优点：</p>
-<ul>
-<li>软件和硬件并行设计可以缩短设计周期，设计过程中可以交流协调，是一种交互式的、很好的设计方案。</li>
-</ul>
-<h4 id="实现软件的可移植性"><a href="#实现软件的可移植性" class="headerlink" title="实现软件的可移植性"></a>实现软件的可移植性</h4><h5 id="统一高级语言"><a href="#统一高级语言" class="headerlink" title="统一高级语言"></a>统一高级语言</h5><p>可以解决所有计算机之间的软件移植，比如Java语言。</p>
-<h5 id="采用系列机"><a href="#采用系列机" class="headerlink" title="采用系列机"></a>采用系列机</h5><p>系列机是指同一厂家生产的具有相同的系统结构，但具有不同组成和实现的同一系列不同型号的计算机。</p>
-<p>采用系列机可以解决<u>同一系列的计算机</u>之间的软件移植。</p>
-<ul>
-<li>向上兼容，程序不修改就可以运行于比它<u>高档</u>的计算机</li>
-<li>向后兼容，程序不修改就可以运行于在它<u>之后投入市场</u>的计算机</li>
-</ul>
-<h5 id="模拟和仿真"><a href="#模拟和仿真" class="headerlink" title="模拟和仿真"></a>模拟和仿真</h5><p>可以在不同体系结构的计算机之间相互移植，在一种计算机上实现另一种计算机的指令系统。</p>
-<p><strong>模拟</strong>是用<u>软件</u>的方法在一台计算机（宿主机）上实现另一台计算机（虚拟机）的指令系统。运行速度慢，性能较差。</p>
-<p><strong>仿真</strong>是用现有计算机（宿主机）的<u>微程序</u>去解释实现另一台计算机（目标机）的指令系统。</p>
-<p>主要区别在于解释执行所用的语言。仿真是用微程序去解释，其解释程序放在控制存储器中；模拟是用机器语言去解释，其解释程序放在主存中。仿真的运行速度更快，但仿真只能在系统结构差异不大的计算机之间使用。</p>
-<h4 id="摩尔定律"><a href="#摩尔定律" class="headerlink" title="摩尔定律"></a>摩尔定律</h4><p>集成电路芯片上所集成的晶体管数目每隔18个月就翻一番。</p>
-<h4 id="并行性"><a href="#并行性" class="headerlink" title="并行性"></a>并行性</h4><p>计算机系统的并行性具有不同的等级。</p>
-<p>从处理数据的角度来看：</p>
-<ul>
-<li>字串位串，每次只对一个字的一位进行处理</li>
-<li>字串位并</li>
-<li>字并位串</li>
-<li>字并位并</li>
-</ul>
-<p>从执行程序的角度来看：</p>
-<ul>
-<li>指令内部并行，单指令之间各种微操作并行</li>
-<li>指令级并行，并行或并发执行两条或两条以上指令</li>
-<li>线程级并行<ul>
-<li>线程是一个相对独立、可独立调度和指派的执行单元，它比进程要轻巧。</li>
-</ul>
-</li>
-<li>任务级或过程级并行</li>
-<li>作业或程序级并行</li>
-</ul>
-<h4 id="指令集结构"><a href="#指令集结构" class="headerlink" title="指令集结构"></a>指令集结构</h4><p>根据CPU内部状态，可以将指令系统的机构分为：</p>
-<ul>
-<li><u>堆栈</u>型结构</li>
-<li><u>累加器</u>型结构</li>
-<li><u>通用寄存器</u>结构</li>
-</ul>
-<p>将通用存储器型结构进一步细分为：<u>RR型、RM型、MM型</u>。</p>
-<h4 id="向量的处理方式"><a href="#向量的处理方式" class="headerlink" title="向量的处理方式"></a>向量的处理方式</h4><ul>
-<li>横向处理方式，按行的方式从左到右进行计算的，相当于进行了N次循环；</li>
-<li>纵向处理方式，按列的方式从上到下进行计算的，将整个向量按相同的运算处理完之后，再去进行别的运算；</li>
-<li>纵横处理方式，又称为分组处理方式，把向量分成若干组，组内按照纵向方式处理，一次处理各组。</li>
-</ul>
-<p>后面两种方式都适用于向量处理机。</p>
-<h4 id="提高向量处理机性能的常用技术"><a href="#提高向量处理机性能的常用技术" class="headerlink" title="提高向量处理机性能的常用技术"></a>提高向量处理机性能的常用技术</h4><ul>
-<li>设置多个处理部件，使它们并行工作；</li>
-<li>采用链接技术，加快一串向量指令的执行；</li>
-<li>采用循环开采技术，加快循环的处理；</li>
-<li>采用多处理机系统，进一步提高系统性能。</li>
-</ul>
-<p><strong>链接</strong>：具有<u>先写后读相关（RAW）</u>的两条指令，在不出现<u>功能部件</u>冲突和其他<u>$V_i$（寄存器）</u>冲突的情况下，可以把功能部件链接起来进行流水处理。</p>
-<p><strong>分段开采技术</strong>：当向量的长度大于向量处理器的长度时，必须把长向量分为长度固定的段，然后循环分段处理，每一次循环只处理一个向量段。</p>
-]]></content>
-      <categories>
-        <category>计算机体系结构</category>
-      </categories>
-      <tags>
-        <tag>计算机体系结构</tag>
-        <tag>Flynn分类法</tag>
-        <tag>冯氏分类法</tag>
-        <tag>Handler分类法</tag>
-        <tag>模拟</tag>
-        <tag>仿真</tag>
-        <tag>系列机</tag>
-        <tag>分段开采</tag>
-        <tag>链接</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>流水线</title>
-    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
-    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
-<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
-<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
-<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
-<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
-<li>需要有<u>通过时间与排空时间</u></li>
-</ul>
-<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
-<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
-<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
-<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
-<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
-<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
-<ul>
-<li><p>从前调度</p>
-</li>
-<li><p>从目标处调度</p>
-</li>
-<li><p>从失败出调度</p>
-</li>
-</ul>
-<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
-<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
-<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
-<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>软件工程</category>
-      </categories>
-      <tags>
-        <tag>流水线</tag>
-        <tag>吞吐率</tag>
-        <tag>加速比</tag>
-        <tag>效率</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>计算机体系结构重要考点</title>
-    <url>/2020/03/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%87%8D%E8%A6%81%E8%80%83%E7%82%B9/</url>
-    <content><![CDATA[<h4 id="同时多线程"><a href="#同时多线程" class="headerlink" title="同时多线程"></a>同时多线程</h4><p>线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。</p>
-<p>线程级并行：指并行执行两个或两个以上的线程。</p>
-<p>同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种改进。通过寄存器命名和动态调度机制，来自各个独立线程的多条指令可以同时流出，而不用考虑它们之间的相互依赖关系。</p>
-<h5 id="实现多线程的主要方法"><a href="#实现多线程的主要方法" class="headerlink" title="实现多线程的主要方法"></a>实现多线程的主要方法</h5><p><u>细粒度多线程</u>：在每条指令之间都可以进行线程的切换，从而使得多个线程可以交替执行。</p>
-<ul>
-<li>优点：能够隐藏由长时间停顿带来的吞吐率的损失，也能够隐藏由段时间停顿带来的损失。</li>
-<li>缺点：减慢了单个线程的执行。即使没有任何停顿的线程也不能连续执行，而且会因为其他线程的指令的插入执行而被延迟。</li>
-</ul>
-<p><u>粗粒度多线程</u>：线程之间的切换只发生在时间较长的停顿出现的时候。</p>
-<ul>
-<li>优点：减少了切换次数，很大程度上也不会降低单个线程的执行速度。</li>
-<li>缺点：减少吞吐率损失的能力有限。由于实现粗粒度多线程的CPU只能执行单个线程的指令，不能交叉执行多个线程，因此当发生停顿时，流水线必须排空或暂停。</li>
-</ul>
-<h4 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h4><h5 id="写策略"><a href="#写策略" class="headerlink" title="写策略"></a>写策略</h5><p>写直达法：在执行写操作时，不仅把数据写入Cathe中相应的块，而且也写入下一级存储器。减少CPU写停顿的常用方法是，采用写缓冲器。</p>
-<p>写回法：只把数据写入Cathe中相应的块，不写入下一级存储器。这些最新数据只有在相应的块被替换出时，才被写回下一级存储器。速度快，要设置“修改位”。</p>
-<p>写不命中时，</p>
-<p>按写分配法：写不命中时，把所写单元的块从主存中调入Cathe，然后再进行写入。与<u>写回法</u>配合。</p>
-<p>不按写分配法：写不命中时，直接写入下一级存储器而不将相应的块调入Cathe。</p>
-<h5 id="三种类型的Cathe不命中"><a href="#三种类型的Cathe不命中" class="headerlink" title="三种类型的Cathe不命中"></a>三种类型的Cathe不命中</h5><p><u>强制性不命中</u>：当第一次访问一个快时，该块不在Cathe中，需从下一级存储器中调入Cathe。（冷启动访问不命中，首次访问不命中）</p>
-<p><u>容量不命中</u>：如果<u>程序执行时所需的块</u>不能全部调入Cathe中，当某些块被调出后，若又重新被访问，就会发生不命中。</p>
-<p><u>冲突不命中</u>：在组相联或者直接映像Cathe中，若太多的块映像到同一组（块）中，则会出现该组中某个块被别的块替换掉，然后又重新被访问的情况。（碰撞不命中，冲突不命中）</p>
-<p>关系：</p>
-<ul>
-<li><strong>相联度</strong>越高，冲突不命中就越少；</li>
-<li>强制性不命中和容量不命中不受相联度的影响；</li>
-<li>强制性不命中不受<strong>Cathe容量</strong>的影响，但容量不命中却随着容量的增加而减少。</li>
-</ul>
-<h4 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h4><h5 id="I-O系统的可靠性、可用性和可信性"><a href="#I-O系统的可靠性、可用性和可信性" class="headerlink" title="I/O系统的可靠性、可用性和可信性"></a>I/O系统的可靠性、可用性和可信性</h5><p>可靠性：系统从某个初始参考点开始<u>一直连续提供服务的能力</u>，用平均无故障时间（<strong>MTTF</strong>）来衡量。MTTF的导数是失效率。系统总体的失效率是各部件的失效率之和。系统<u>中断服务的时间</u>用平均修复时间（<strong>MTTR</strong>）来衡量。</p>
-<p>可用性：系统正常工作的时间在连续两次服务间隔时间中所占的比例。</p>
-<script type="math/tex; mode=display">
-可用性=\frac{MTTF}{MTTF+MTTR}</script><p>   平均失效间隔时间，MTBF</p>
-<script type="math/tex; mode=display">
-MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u>的。</p>
-<h5 id="廉价磁盘冗余阵列-RAID"><a href="#廉价磁盘冗余阵列-RAID" class="headerlink" title="廉价磁盘冗余阵列 (RAID)"></a>廉价磁盘冗余阵列 (RAID)</h5><p>RAID0：<u>无冗余和无校验</u>的磁盘阵列，成本最低。</p>
-<p>RAID1：<u>镜像</u>磁盘阵列。</p>
-<p>RAID2：采用纠错的<u>海明码</u>的磁盘阵列，冗余盘数量为$log_2m$，m为数据盘的个数。</p>
-<p>RAID3：<u>位</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
-<p>RAID4：<u>块</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
-<p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
-<p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
-<p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
-<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。<br>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
-]]></content>
-      <categories>
-        <category>计算机体系结构</category>
-      </categories>
-      <tags>
-        <tag>计算机体系结构</tag>
-        <tag>机群</tag>
-        <tag>MPP</tag>
-        <tag>SMP</tag>
-        <tag>消息传递</tag>
-        <tag>共享存储器</tag>
-        <tag>同时多线程</tag>
-        <tag>RAID</tag>
       </tags>
   </entry>
 </search>
