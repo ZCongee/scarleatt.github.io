@@ -4,10 +4,10 @@
 
 
 <html class="theme-next mist" lang="zh-Hans">
-<head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#222">
 
 
@@ -18,8 +18,8 @@
 
 
 
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
 
 
 
@@ -38,7 +38,7 @@
 
   
   
-  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
 
 
 
@@ -46,9 +46,9 @@
 
 
 
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
 
-<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
@@ -64,7 +64,7 @@
 
 
 
-  <meta name="keywords" content="Deep Learning,Cycle GAN,StarGAN,GAN," />
+  <meta name="keywords" content="Deep Learning,Cycle GAN,StarGAN,GAN,">
 
 
 
@@ -104,7 +104,7 @@
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200706194620613.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200706200901735.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200706202208008.png">
-<meta property="og:updated_time" content="2020-07-06T12:31:44.656Z">
+<meta property="og:updated_time" content="2020-07-06T12:31:44.657Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Unsupervised Conditional Generation">
 <meta name="twitter:description" content="在以前的文章中，我们提到过CGAN，训练数据包括图像和其对应的文字描述，是一种监督学习的方法。本文将叙述一种使用CGAN进行无监督学习的方法，主要包括两大类的方法：Direct Transformation和Projection to Common Space。 Unsupervised Conditional Generation如果现在有一张真实的风景照X，还有一张图像是梵谷的画作Y，那么我们">
@@ -138,7 +138,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2020/07/06/CycleGAN/"/>
+  <link rel="canonical" href="http://yoursite.com/2020/07/06/CycleGAN/">
 
 
 
@@ -172,7 +172,7 @@
     
 
     <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
+      <a href="/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
         <span class="site-title">Scarleatt</span>
         <span class="logo-line-after"><i></i></span>
@@ -202,7 +202,7 @@
         <li class="menu-item menu-item-home">
           <a href="/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
             
             首页
           </a>
@@ -212,7 +212,7 @@
         <li class="menu-item menu-item-tags">
           <a href="/tags/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
             
             标签
           </a>
@@ -222,7 +222,7 @@
         <li class="menu-item menu-item-categories">
           <a href="/categories/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
             
             分类
           </a>
@@ -232,7 +232,7 @@
         <li class="menu-item menu-item-archives">
           <a href="/archives/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
             
             归档
           </a>
@@ -242,7 +242,7 @@
         <li class="menu-item menu-item-about">
           <a href="/about/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
             
             关于
           </a>
@@ -255,7 +255,7 @@
             <a href="javascript:;" class="popup-trigger">
           
             
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
             
             搜索
           </a>
@@ -276,9 +276,7 @@
       <i class="fa fa-times-circle"></i>
     </span>
     <div class="local-search-input-wrapper">
-      <input autocomplete="off"
-             placeholder="搜索..." spellcheck="false"
-             type="text" id="local-search-input">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
     </div>
   </div>
   <div id="local-search-result"></div>
@@ -319,7 +317,7 @@
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Scarleatt">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content>
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
@@ -355,7 +353,7 @@
           </span>
 
           
-            <span class="post-category" >
+            <span class="post-category">
             
               <span class="post-meta-divider">|</span>
             
@@ -435,7 +433,7 @@
       
 
       
-        <p>在以前的文章中，我们提到过<a href="https://scarleatt.github.io/2020/07/05/CGAN/" target="_blank" rel="external">CGAN</a>，训练数据包括图像和其对应的文字描述，是一种监督学习的方法。本文将叙述一种使用CGAN进行无监督学习的方法，主要包括两大类的方法：Direct Transformation和Projection to Common Space。</p>
+        <p>在以前的文章中，我们提到过<a href="https://scarleatt.github.io/2020/07/05/CGAN/" target="_blank" rel="noopener">CGAN</a>，训练数据包括图像和其对应的文字描述，是一种监督学习的方法。本文将叙述一种使用CGAN进行无监督学习的方法，主要包括两大类的方法：Direct Transformation和Projection to Common Space。</p>
 <h4 id="Unsupervised-Conditional-Generation"><a href="#Unsupervised-Conditional-Generation" class="headerlink" title="Unsupervised Conditional Generation"></a>Unsupervised Conditional Generation</h4><p>如果现在有一张真实的风景照X，还有一张图像是梵谷的画作Y，那么我们就可以训练一个generator，使其输出像梵谷画作的图像。现在我们要完成的任务是对图像进行风格转换，我们可以收集很多真实的风景照，也可以收集很多梵谷的画作，但我们很难收集到这两者之间的联系，相当于训练数据是没有label的，因此就需要进行无监督的学习。</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200706144703530.png" alt="image-20200706144703530" style="zoom:60%;"></p>
 <p>这种技术不仅可以用到图像领域，也可以用到其他领域，比如语音处理领域。</p>
@@ -454,7 +452,7 @@
 <p>有学者在论文中提出了其他的解决方法。</p>
 <p>(1) 如果generator比较shallow，不那么deep，不用加额外的constrain，就可以使input和output差距不大；如果generator很深，就可以使input和output差距很大，这时就需要一些额外的constrain。</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200706154355533.png" alt="image-20200706154355533" style="zoom:60%;"></p>
-<p>(2) 还可以使用另外一种方法。现在有一个pre-trained的network（VGG等），把generator的input和output输入这个network，会输出一个embedding（<a href="https://scarleatt.github.io/2020/06/11/Word-Embedding/" target="_blank" rel="external">word embedding</a>）。那么generator的目标就有两个：输出和梵谷画作类似的图像；其input和output之间的差距也不能太大。</p>
+<p>(2) 还可以使用另外一种方法。现在有一个pre-trained的network（VGG等），把generator的input和output输入这个network，会输出一个embedding（<a href="https://scarleatt.github.io/2020/06/11/Word-Embedding/" target="_blank" rel="noopener">word embedding</a>）。那么generator的目标就有两个：输出和梵谷画作类似的图像；其input和output之间的差距也不能太大。</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200706155513844.png" alt="image-20200706155513844" style="zoom:60%;"></p>
 <h5 id="Cycle-GAN"><a href="#Cycle-GAN" class="headerlink" title="Cycle GAN"></a>Cycle GAN</h5><p>(3) <strong>Cycle GAN</strong>，现在有一个<span style="color: blue">generator</span> $G_{X\rightarrow Y}$可以生成domain X到Y的图像，还有另外一个<span style="color: orange">generator</span> $G_{Y\rightarrow X}$可以生成domain Y到X的图像output，生成的图像应与原来的input越接近越好。现在的generator有了两个目标：产生能骗过discriminator的图像；使对应的input和output越接近越好。</p>
 <p>那么现在就不可能在中间产生一个像梵谷自画像的图像，因为这时第二个generator就不可能从这个自画像返回原来的自画像，不满足两个限制条件。</p>
@@ -549,6 +547,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2020/07/08/GAN-theory/" rel="prev" title="Theory behind GAN">
+                Theory behind GAN <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -613,9 +615,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <img class="site-author-image" itemprop="image"
-                src="/images/avatar.gif"
-                alt="Scarleatt" />
+              <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Scarleatt">
             
               <p class="site-author-name" itemprop="name">Scarleatt</p>
               <p class="site-description motion-element" itemprop="description"></p>
@@ -628,7 +628,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-count">32</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -650,7 +650,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">88</span>
+                  <span class="site-state-item-count">91</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -733,7 +733,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">53.7k</span>
+    <span title="Site words total count">57.1k</span>
   
 </div>
 

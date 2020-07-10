@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next mist" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+
+
+
+
+  <meta name="keywords" content="Deep Learning,GAN,Maximum Likelihood Estimation,Minimize KL Divergence,似然函数和KL散度的关系,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文主要介绍了GAN的基础理论。还对似然函数和KL散度的关系进行了推导。 Generation现在我们用x来表示一张图像，是一个高维的vector，比如图像大小是$64\times64$维的，那么vector的维数就是$64\times64$。每张图像都是这个高维空间中的一个点。为了方便展示，下图中我们假设图像是二维空间中的一个点。 对于我们要产生的图像，有一个固定的distribution $P">
+<meta name="keywords" content="Deep Learning,GAN,Maximum Likelihood Estimation,Minimize KL Divergence,似然函数和KL散度的关系">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Theory behind GAN">
+<meta property="og:url" content="http://yoursite.com/2020/07/08/GAN-theory/index.html">
+<meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="本文主要介绍了GAN的基础理论。还对似然函数和KL散度的关系进行了推导。 Generation现在我们用x来表示一张图像，是一个高维的vector，比如图像大小是$64\times64$维的，那么vector的维数就是$64\times64$。每张图像都是这个高维空间中的一个点。为了方便展示，下图中我们假设图像是二维空间中的一个点。 对于我们要产生的图像，有一个固定的distribution $P">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708134708130.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708141336553.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708142636137.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708154052356.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708154159852.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708161546891.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708163901367.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708164929216.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708170505053.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708192757596.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708192923990.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708201616936.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708203440933.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708205829068.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708212957397.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708222236749.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708223556261.png">
+<meta property="og:updated_time" content="2020-07-10T04:24:35.483Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Theory behind GAN">
+<meta name="twitter:description" content="本文主要介绍了GAN的基础理论。还对似然函数和KL散度的关系进行了推导。 Generation现在我们用x来表示一张图像，是一个高维的vector，比如图像大小是$64\times64$维的，那么vector的维数就是$64\times64$。每张图像都是这个高维空间中的一个点。为了方便展示，下图中我们假设图像是二维空间中的一个点。 对于我们要产生的图像，有一个固定的distribution $P">
+<meta name="twitter:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200708134708130.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/07/08/GAN-theory/">
+
+
+
+
+
+  <title>Theory behind GAN | Scarleatt</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Scarleatt</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/08/GAN-theory/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Theory behind GAN</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-08T22:40:44+08:00">
+                2020-07-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ML-notes/" itemprop="url" rel="index">
+                    <span itemprop="name">ML-notes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.3k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  14
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文主要介绍了GAN的基础理论。还对似然函数和KL散度的关系进行了推导。</p>
+<h4 id="Generation"><a href="#Generation" class="headerlink" title="Generation"></a>Generation</h4><p>现在我们用x来表示一张图像，是一个高维的vector，比如图像大小是$64\times64$维的，那么vector的维数就是$64\times64$。每张图像都是这个高维空间中的一个点。为了方便展示，下图中我们假设图像是二维空间中的一个点。</p>
+<p>对于我们要产生的图像，有一个固定的distribution $P_{data}(x)$。在整个图像所构成的高维空间中，只有一小部分sample出来的图像和人脸接近，其他部分都不像人脸。比如我们从下图中蓝色的distribution中进行sample，看起来就很像是人脸，在其他区域就不像人脸。</p>
+<p>那么我们现在的目标就是找到这个distribution。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708134708130.png" alt="image-20200708134708130" style="zoom:60%;"></p>
+<p>在有GAN之前，我们通常用Maximum Likelihood Estimation来做这件事。</p>
+<h4 id="Maximum-Likelihood-Estimation"><a href="#Maximum-Likelihood-Estimation" class="headerlink" title="Maximum Likelihood Estimation"></a>Maximum Likelihood Estimation</h4><ol>
+<li>我们可以从这个distribution中sample图像，但我们并不知道其对应的formula长什么样子；</li>
+<li>那么我们现在就可以找到另外一个distribution $P_G(x;\theta)$，比如其对应的参数可以是$\mu,\sum$，来使这个distribution的参数和原来的相接近。</li>
+</ol>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708141336553.png" alt="image-20200708141336553" style="zoom:60%;"></p>
+<p>具体做法如下，</p>
+<ul>
+<li>先从原来的distribution中sample出$\{x^1,x^2,…x^m\}$；</li>
+<li>把$x^i$代入现在的已知的distribution $P_G(x^i;\theta)$，表示$x^i$是从现在这个distribution中sample出来的概率；</li>
+<li>把这些概率相乘，得到似然函数L；最后找到对应的参数$\theta$，使似然函数取得最大值。</li>
+</ul>
+<script type="math/tex; mode=display">
+L=\prod_{i=1}^mP_G(x^i;\theta)</script><h4 id="Minimize-KL-Divergence"><a href="#Minimize-KL-Divergence" class="headerlink" title="Minimize KL Divergence"></a>Minimize KL Divergence</h4><p>最大似然估计也就等同于来最小化KL divergence。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708142636137.png" alt="image-20200708142636137" style="zoom:60%;"></p>
+<p>现在我们的问题是找到参数$\theta^*$，使得$E_{x\sim P_{data}}[logP_G(x;\theta)]$可以取得最大值。$\{x^1,x^2,…x^m\}$是从distribution $P_{data}$中sample出来的，我们把这里的$E_{x\sim P_{data}}$展开，从离散值变到连续值，即</p>
+<script type="math/tex; mode=display">
+E_{x\sim P_{data}}[logP_G(x;\theta)]=\int_xP_{data}(x)[logP_G(x;\theta)]dx</script><p>由于我们的目标是找到$P_G$分布对应的参数，现在加入一个常数项$\int_xP_{data}(x)[logP_{data}(x;\theta)]$，对最大化的问题也不会产生影响，即</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&arg\mathop{\rm  max}_{\theta} E_{x\sim P_{data}}[logP_G(x;\theta)]\\
+=&arg\mathop{\rm  max}_{\theta}\int_xP_{data}(x)[logP_G(x;\theta)]dx\\
+=&arg\mathop{\rm  max}_{\theta}\int_xP_{data}(x)[logP_G(x;\theta)]dx-\int_xP_{data}(x)[logP_{data}(x;\theta)]dx\\
+=&arg\mathop{\rm  max}_{\theta}\int_xP_{data}(x)[logP_G(x;\theta)-logP_{data}(x;\theta)]dx\\
+=&arg\mathop{\rm  max}_{\theta}\int_xP_{data}(x)[log\frac{P_G(x;\theta)}{P_{data}(x;\theta)}]dx\\
+=&arg \mathop{\rm  max}_{\theta}-\int_xP_{data}(x)[log\frac{P_{data}(x;\theta)}{P_{G}(x;\theta)}]dx\\
+=&arg \mathop{\rm  min}_{\theta}\int_xP_{data}(x)[log\frac{P_{data}(x;\theta)}{P_{G}(x;\theta)}]dx\\
+=&arg \mathop{\rm  min}_{\theta}KL(P_{data}||P_G)
+\end{aligned}</script><p>就把这个最大化似然函数问题转化为了最小化KL divergence的问题。</p>
+<p>那么我们如何来定义$P_G$的表达式呢？</p>
+<p>首先$P_G$是类似于高斯分布这样的distribution，很容易计算出其对应的likelihood；但如果是neural network这样的distribution，就很难算出这个likelihood。</p>
+<h4 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h4><p>现在分布是neural network，如果我们还是用高斯分布的公式来进行调整，那么我们不管怎么变化mean和variance，其分布都不可能和neural network相接近。因此我们需要一个更加general的方式来学习generative这件事。</p>
+<p>现在我们有一个generator G，input z是从normal distribution中sample出来的，output为$x=G(z)$，不同的z就会有不同的x，x就组成了一个新的distribution $P_G(x)$。这个distribution可以非常复杂，比如neural network。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708154052356.png" alt="image-20200708154052356" style="zoom:60%;"></p>
+<p>我们希望通过G得出的这个distribution $P_G(x)$，与目标$P_{data}(x)$可以越接近越好，即$P_G,P_{data}$之间的divergence可以越小越好，可以是KLdivergence，也可以是其他的divergence，即</p>
+<script type="math/tex; mode=display">
+G^*=arg\mathop{\rm  min}_{\theta}Div(P_G,P_{data})</script><p>那么我们怎么来minimize这个divergence呢？</p>
+<p>如果我们知道$P_G,P_{data}$的formulation，那么我们就可以计算出divergence，再使用gradient descent算法。但现在我们并不知道他们的formulation，就不能使用gradient descent算法。</p>
+<h4 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h4><p>虽然我们并不知道这两者的distribution，但我们可以从这两个分布sample 很多data出来。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708154159852.png" alt="image-20200708154159852" style="zoom:60%;"></p>
+<p>从这两个分布中sample很多data出来，又如何来计算分布之间的divergence呢？</p>
+<p>我们可以使用GAN的discriminator来完成这个任务。</p>
+<p>在下图中，我们使用蓝色星星表示从$P_{data}$中sample出来的数据，红色星星表示从$P_G$中sample出来的数据。再来训练我们的discriminator D，D对$P_{data}$中sample出来的数据会给高分，从$P_G$中sample出来的数据给低分。这个训练的结果就可以告诉我们$P_G,P_{data}$之间的divergence。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708161546891.png" alt="image-20200708161546891" style="zoom:60%;"></p>
+<p>先fix掉G的参数，再来训练discriminator D，D得出的分数越大越好。找到$D^*$，使得$V(G,D)$最大化。</p>
+<script type="math/tex; mode=display">
+V(G,D)=E_{x\sim P_{data}}[log(D(x))]+E_{x\sim P_{G}}[1-log(D(x))]</script><p>其中$E_{x\sim P_{data}}[log(D(x))]$表示真实图像所得到的分数，D的目标就是使真实图像获得的分数越大越好；而$E_{x\sim P_{G}}[log(D(x))]$表示G生成的图像所得到的分数，应该越小越好，所以前面加了负号。</p>
+<p>这个$V(D,G)$的表达式其实和二分类的问题是一样的，红色星星表示class 1，蓝色星星表示class 2，discriminator的任务就是对这两个class进行分类，来最小化cross entropy，也就相当于在解这个问题</p>
+<script type="math/tex; mode=display">
+D^*=arg\mathop{\rm  max}_{G}V(D,G)</script><p>我们最后找到的$D^*$，能使objective function $V(D,G)$取得最大值。这个objective function和divergence是有一定关系的。如果这两个类别之间很接近、很难区分，分类器训练的时候loss就会很大，对应的V的值就会很低，对应的divergence的值也会很低；如果这两个类别很好区分，discriminator就很容易找到$D$，使得V取得很大的值，从而divergence的值就会很大。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708163901367.png" alt="image-20200708163901367" style="zoom:60%;"></p>
+<h4 id="V-G-D-和divergence之间的关系"><a href="#V-G-D-和divergence之间的关系" class="headerlink" title="V(G,D)和divergence之间的关系"></a>V(G,D)和divergence之间的关系</h4><p>根据大数定律，</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+V(G,D)&=E_{x\sim P_{data}}[log(D(x))]+E_{x\sim P_{G}}[1-log(D(x))]\\
+&=\int_x[P_{data}(x)logD(x)+P_G(x)log(1-D(x))]dx
+\end{aligned}</script><p>其中我们假设$D(x)$可以是任意函数，现在我们的目标是找到其中某个D使V最大化。我们可以把积分中的x分开来算，对于其中的任意一个x，都可以分配一个最好的D函数。那么现在的问题就变成：对于给定的x，来找到最优值$D^*$使V最大化，即最大化</p>
+<script type="math/tex; mode=display">
+P_{data}(x)logD(x)+P_G(x)log(1-D(x))</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708164929216.png" alt="image-20200708164929216" style="zoom:60%;"></p>
+<p>现在我们用$a=P_{data},b=P_G,D=D(x)$，来简化式子，即找到$D^*$来最大化</p>
+<script type="math/tex; mode=display">
+f(D)={\rm a}\ log(D)+{\rm b}\ log(1-D)</script><p>对D求导，并令成0，可以得到</p>
+<script type="math/tex; mode=display">
+D^*=\frac{a}{a+b}\quad\rightarrow\quad D^*(x)=\frac{P_{data}}{P_{data}+P_G}</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708170505053.png" alt="image-20200708170505053" style="zoom:60%;"></p>
+<p>把$D^*(x)$代入objective function，可以得到</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&maxV(G,D)=V(G,D^*)\\&=E_{x\sim P_{data}}[log\frac{P_{data}}{P_{data}+P_G}]+E_{x\sim P_{G}}[log\frac{P_{G}}{P_{data}+P_G}]\\
+&=\int_x[P_{data}(x)log\frac{P_{data}}{P_{data}+P_G}+P_G(x)log\frac{P_{G}}{P_{data}+P_G}]dx
+\end{aligned}</script><p>对式子中log部分的分子分母同时除以2，把分子上的1/2提出来，可得</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&\quad maxV(G,D)\\
+&=-2log2+\int_x[P_{data}(x)log\frac{P_{data}}{(P_{data}+P_G)/2}+P_G(x)log\frac{P_{G}}{(P_{data}+P_G)/2}]dx\\
+&=-2log2+KL(P_{data}||\frac{P_{data}+P_G}{2})+KL(P_{G}||\frac{P_{data}+P_G}{2})\\
+&=-2log2+2JSD(P_{data}||P_G)\quad\quad(1)
+\end{aligned}</script><p>也就得到了我们的<span style="color: red"> Jensen-Shannon divergence</span>，即JSD。</p>
+<p>我们希望通过G得出的这个distribution $P_G(x)$，与目标$P_{data}(x)$可以越接近越好，即$P_G,P_{data}$之间的divergence可以越小越好，即</p>
+<script type="math/tex; mode=display">
+G^*=arg\mathop{\rm  min}_{G}Div(P_G,P_{data})</script><p>那么我们到底怎么算$P_G,P_{data}$之间的divergence $Div(P_G,P_{data})$呢？</p>
+<p>根据公式(1)，我们知道了JS divergence和$maxV(G,D)$之间的关系，是成正比的。那么现在我们找到D，使objective function取得最大值，这个最大值就是divergence。那么现在的式子就变成了，</p>
+<script type="math/tex; mode=display">
+G^*=arg\mathop{\rm  min}_{G}\mathop{\rm  max}_DV(G,D)</script><p>其中要最大化discriminator得出的分数，最小化generator生成的数据与$P_{data}$之间的差距。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708192757596.png" alt="image-20200708192757596" style="zoom:60%;"></p>
+<p>假设现在只有三个generator $G_1,G_2,G_3$可供选择，对应的三个objective function变化如上图所示，横坐标表示选择了不同的discriminator，纵坐标表示$V(G_i,D)$的值。第一幅图表示选择固定G1，变化discriminator，V的值的变化曲线。</p>
+<p>图中红色圆点所在的横坐标，表示$V(G_i,D)$值最大的位置，一共有三个。现在已经找到了使V最大的discriminator，接下来需要找使$max V(G,D)$最小的generator（$G_1,G_2,G_3$）。毫无疑问是第三幅图中的$G_3$，是可以使得$max V(G,D)$最小的generator。</p>
+<p>红色圆点的纵坐标$V(G_i,D)$表示$P_{G_i},P_{data}$之间的divergence，也是第三幅图中的divergence最小。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708192923990.png" alt="image-20200708192923990" style="zoom:60%;"></p>
+<p>其实GAN的两个训练步骤就是在解决这个最大最小化问题。</p>
+<h4 id="Algorithm"><a href="#Algorithm" class="headerlink" title="Algorithm"></a>Algorithm</h4><p>我们把目标式子简化一下，现在D是一个给定的值，可以让$V(G,D)$的值最大化，$\mathop{\rm  max}_DV(G,D)$可以表示为$L(G)$，即找到$G^*$，</p>
+<script type="math/tex; mode=display">
+G^*=arg\mathop{\rm  min}_{G}L(G)</script><p>先计算出gradient  $\frac{\partial L(G)}{\partial \theta_G}$，再来更新$\theta_G$的参数。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708201616936.png" alt="image-20200708201616936" style="zoom:60%;"></p>
+<p>Q：其中$L(G)=\mathop{\rm  max}_DV(G,D)$，我们可以对这个函数求微分吗 ？</p>
+<p>A：可以。如果现在有一个函数$f(x)=max\{f_1(x),f_2(x),f_3(x)\}$，其对应的函数图像如上图所示，是个分段函数。我们假设$f_1(x)$的函数值是最大的，那么$\frac{df(x)}{dx}=\frac{df_1(x)}{dx}$，梯度对应的是在该区域内，函数值最大的那个梯度。更次参数更新都要注意自己在哪个region内，不同的region求导的函数不一样。</p>
+<p>具体的算法流程如下：</p>
+<ul>
+<li>给定一个初始的generator $G_0$；</li>
+<li>找到$D_0^*$，使得$V(G_0,D)$的值最大化；</li>
+<li>得到$L(G)$之后，就可以对整个式子求微分，得出对应的梯度，更新generator的参数，就得到新的generator $G_1$；</li>
+</ul>
+<p>得到新的generator后，很可能已经进入了下一个region，因此还需要重新计算discriminator，</p>
+<ul>
+<li>此时objective function为$V(G_1,D)$，现在是$D_1^*$使V取得最大值；</li>
+<li>$L(G)=V(G_1,D_1^*)$，再更新generator的参数。</li>
+</ul>
+<p>……</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708203440933.png" alt="image-20200708203440933" style="zoom:60%;"></p>
+<p>更新参数这个过程到底是不是在减小JS divergence呢？</p>
+<p><span style="color: blue">（此处公式渲染错误，可去<a href="https://scarleatt.gitee.io/ML-notes/ML-notes-html/22_theory_behind_GAN.html" target="_blank" rel="noopener">这个网站</a>查看完整文章。）</span></p>
+<p>首先我们找到了$D_0^<em>$，使V取得最大值$V(G_0,D_0^</em>)$，也就是JS divergence取得最大值；在generator更新参数之后，objective function也发生了变化$V(G_0,D)\rightarrow V(G_1,D)$ ，$D_0^<em>$对应的$V(G_0,D_0^</em>)$并不是现在的最大值，而$D_1^<em>$对应的$V(G_0,D_1^</em>)$才是最大值。从图中可以看出，$V(G_0,D_1^<em>)&lt;V(G_0,D_0^</em>)$，对应的JS divergence反而减小了。</p>
+<p>如果generator的参数变化不大，即$D_0^<em>\approx D_1^</em>$，我们就可以把这个过程看作是在减小divergence。在实际的操作中，我们应该使G迭代的次数减少， 使D迭代的次数增加。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708205829068.png" alt="image-20200708205829068" style="zoom:60%;"></p>
+<h4 id="In-practice-…"><a href="#In-practice-…" class="headerlink" title="In practice …"></a>In practice …</h4><p>fix G的参数，得到G生成的图像$\{\tilde x^1,\tilde x^2,..,\tilde x^m\}$，再输入discriminator D，不断调整$\theta_d$，使得得到的分数越大越好，</p>
+<script type="math/tex; mode=display">
+\tilde V =\frac{1}{m}\sum_{i=1}^m logD(x^i)+\frac{1}{m}\sum_{i=1}^mlog(1-D(\tilde x^i))</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708212957397.png" alt="image-20200708212957397" style="zoom:60%;"></p>
+<p>这个discriminator其实就是在做binary classifier；</p>
+<p>这是整个算法的步骤：</p>
+<p>Learning D：首先从数据库中取出m个真实图片，再根据一个分布随机产生m个vector作为输入$\{z^1,z^2,..,z^m\}$，此时fix G的参数，得到G生成的图像$\{\tilde x^1,\tilde x^2,..,\tilde x^m\}$，再输入discriminator D，不断调整$\theta_d$，使得得到的分数越大越好。V的值最大的时候，divergence的值才越小。</p>
+<script type="math/tex; mode=display">
+\tilde V =\frac{1}{m}\sum_{i=1}^m logD(x^i)+\frac{1}{m}\sum_{i=1}^mlog(1-D(\tilde x^i))</script><p>其中$D(x^i)$表示真实图像所得到的分数，D的目标就是使真实图像获得的分数越大越好；而$D(\tilde x^i)$表示G生成的图像所得到的分数，应该越小越好，所以前面加了负号。求出梯度$\Delta \tilde V(\theta_d)$，再更新$\theta_d$的值，</p>
+<script type="math/tex; mode=display">
+\theta_d\leftarrow \theta_d+\eta\Delta \tilde V(\theta_d)</script><p>Learning G：把D训练好之后，我们就可以fix D，来训练generator G的参数。首先也需要从分布中随机生成一些噪声z，再输入G，$G(z^i)$再输入D，得到相对应的分数，G的目标是想办法骗过D，不断调整参数$\theta_g$，使下面的objective function最小化，<u>generator不能train太多次，通常update一次就好</u>。</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+\tilde V &=\frac{1}{m}\sum_{i=1}^m log(1-D(G(z^i)))
+\end{aligned}</script><p>求出梯度$\Delta \tilde V(\theta_g)$，再更新$\theta_g$的值，</p>
+<script type="math/tex; mode=display">
+\theta_g\leftarrow \theta_g-\eta\Delta \tilde V(\theta_g)</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708222236749.png" alt="image-20200708222236749" style="zoom:60%;"></p>
+<h4 id="Objective-Function-for-Generator-in-Real-Implementation"><a href="#Objective-Function-for-Generator-in-Real-Implementation" class="headerlink" title="Objective Function for Generator in Real Implementation"></a>Objective Function for Generator in Real Implementation</h4><p>实际上，我们使用$V=E_{x\sim P_G}[-log(D(x))]$，可以更方便进行code。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200708223556261.png" alt="image-20200708223556261" style="zoom:60%;"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/GAN/" rel="tag"># GAN</a>
+          
+            <a href="/tags/Maximum-Likelihood-Estimation/" rel="tag"># Maximum Likelihood Estimation</a>
+          
+            <a href="/tags/Minimize-KL-Divergence/" rel="tag"># Minimize KL Divergence</a>
+          
+            <a href="/tags/似然函数和KL散度的关系/" rel="tag"># 似然函数和KL散度的关系</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/06/CycleGAN/" rel="next" title="Unsupervised Conditional Generation">
+                <i class="fa fa-chevron-left"></i> Unsupervised Conditional Generation
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Scarleatt">
+            
+              <p class="site-author-name" itemprop="name">Scarleatt</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">91</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/scarleatt" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:fawnliu2333@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Generation"><span class="nav-number">1.</span> <span class="nav-text">Generation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Maximum-Likelihood-Estimation"><span class="nav-number">2.</span> <span class="nav-text">Maximum Likelihood Estimation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Minimize-KL-Divergence"><span class="nav-number">3.</span> <span class="nav-text">Minimize KL Divergence</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Generator"><span class="nav-number">4.</span> <span class="nav-text">Generator</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Discriminator"><span class="nav-number">5.</span> <span class="nav-text">Discriminator</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#V-G-D-和divergence之间的关系"><span class="nav-number">6.</span> <span class="nav-text">V(G,D)和divergence之间的关系</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Algorithm"><span class="nav-number">7.</span> <span class="nav-text">Algorithm</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#In-practice-…"><span class="nav-number">8.</span> <span class="nav-text">In practice …</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Objective-Function-for-Generator-in-Real-Implementation"><span class="nav-number">9.</span> <span class="nav-text">Objective Function for Generator in Real Implementation</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017-<span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Scarleatt</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">57.1k</span>
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

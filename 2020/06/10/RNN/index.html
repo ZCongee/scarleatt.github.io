@@ -4,10 +4,10 @@
 
 
 <html class="theme-next mist" lang="zh-Hans">
-<head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#222">
 
 
@@ -18,8 +18,8 @@
 
 
 
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
 
 
 
@@ -38,7 +38,7 @@
 
   
   
-  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
 
 
 
@@ -46,9 +46,9 @@
 
 
 
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
 
-<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
@@ -64,7 +64,7 @@
 
 
 
-  <meta name="keywords" content="Deep Learning,RNN,LSTM," />
+  <meta name="keywords" content="Deep Learning,RNN,LSTM,">
 
 
 
@@ -125,7 +125,7 @@
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200610163053020.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200610163303283.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200610164950240.png">
-<meta property="og:updated_time" content="2020-07-06T12:42:40.733Z">
+<meta property="og:updated_time" content="2020-07-06T12:42:40.734Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Recurrent Neural Network">
 <meta name="twitter:description" content="Example Application将Taipei作为向量的输入，由于RNN网络是有记忆的，因此可以根据输入来预测目的地dest，以及离开的时间  RNN ExampleRNN是一个有记忆的网络。对于输入的向量$(x_1,x_2)$，hidden neural的输入就包含store和input的neural，本次hidden neural的输出又作为下一次hidden neural的部分输入">
@@ -159,7 +159,7 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2020/06/10/RNN/"/>
+  <link rel="canonical" href="http://yoursite.com/2020/06/10/RNN/">
 
 
 
@@ -193,7 +193,7 @@
     
 
     <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
+      <a href="/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
         <span class="site-title">Scarleatt</span>
         <span class="logo-line-after"><i></i></span>
@@ -223,7 +223,7 @@
         <li class="menu-item menu-item-home">
           <a href="/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
             
             首页
           </a>
@@ -233,7 +233,7 @@
         <li class="menu-item menu-item-tags">
           <a href="/tags/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
             
             标签
           </a>
@@ -243,7 +243,7 @@
         <li class="menu-item menu-item-categories">
           <a href="/categories/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
             
             分类
           </a>
@@ -253,7 +253,7 @@
         <li class="menu-item menu-item-archives">
           <a href="/archives/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
             
             归档
           </a>
@@ -263,7 +263,7 @@
         <li class="menu-item menu-item-about">
           <a href="/about/" rel="section">
             
-              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
             
             关于
           </a>
@@ -276,7 +276,7 @@
             <a href="javascript:;" class="popup-trigger">
           
             
-              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
             
             搜索
           </a>
@@ -297,9 +297,7 @@
       <i class="fa fa-times-circle"></i>
     </span>
     <div class="local-search-input-wrapper">
-      <input autocomplete="off"
-             placeholder="搜索..." spellcheck="false"
-             type="text" id="local-search-input">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
     </div>
   </div>
   <div id="local-search-result"></div>
@@ -340,7 +338,7 @@
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Scarleatt">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content>
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
@@ -376,7 +374,7 @@
           </span>
 
           
-            <span class="post-category" >
+            <span class="post-category">
             
               <span class="post-meta-divider">|</span>
             
@@ -718,9 +716,7 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <img class="site-author-image" itemprop="image"
-                src="/images/avatar.gif"
-                alt="Scarleatt" />
+              <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Scarleatt">
             
               <p class="site-author-name" itemprop="name">Scarleatt</p>
               <p class="site-description motion-element" itemprop="description"></p>
@@ -733,7 +729,7 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-count">32</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -755,7 +751,7 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">88</span>
+                  <span class="site-state-item-count">91</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -804,7 +800,7 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-Application"><span class="nav-number">1.</span> <span class="nav-text">Example Application</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RNN-Example"><span class="nav-number">2.</span> <span class="nav-text">RNN Example</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Introduction"><span class="nav-number">3.</span> <span class="nav-text">Introduction</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Basic-Concept"><span class="nav-number">3.1.</span> <span class="nav-text">Basic Concept</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Of-course-it-can-be-deep-…"><span class="nav-number">3.2.</span> <span class="nav-text">Of course it can be deep …</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Elman-Network-amp-Jordan-Network"><span class="nav-number">3.3.</span> <span class="nav-text">Elman Network & Jordan Network</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Bidirectional-RNN"><span class="nav-number">3.4.</span> <span class="nav-text">Bidirectional RNN</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Long-Short-term-Memory-LSTM"><span class="nav-number">4.</span> <span class="nav-text">Long Short-term Memory (LSTM)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#three-gates"><span class="nav-number">4.1.</span> <span class="nav-text">three gates</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#formula"><span class="nav-number">4.2.</span> <span class="nav-text">formula</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Example"><span class="nav-number">4.3.</span> <span class="nav-text">Example</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Original-Network-vs-LSTM"><span class="nav-number">4.4.</span> <span class="nav-text">Original Network vs LSTM</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#LSTM-with-neural-network"><span class="nav-number">4.5.</span> <span class="nav-text">LSTM with neural network</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#LSTM-Extension"><span class="nav-number">4.6.</span> <span class="nav-text">LSTM Extension</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Learning"><span class="nav-number">5.</span> <span class="nav-text">Learning</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Problem"><span class="nav-number">5.1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Clipping"><span class="nav-number">5.2.</span> <span class="nav-text">Clipping</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Why？"><span class="nav-number">5.3.</span> <span class="nav-text">Why？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Helpful-Techniques"><span class="nav-number">5.4.</span> <span class="nav-text">Helpful Techniques</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#More-Applications-……"><span class="nav-number">6.</span> <span class="nav-text">More Applications ……</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Many-to-one"><span class="nav-number">6.1.</span> <span class="nav-text">Many to one</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Many-to-Many-Output-is-shorter"><span class="nav-number">6.2.</span> <span class="nav-text">Many to Many (Output is shorter)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Sequence-to-sequence-Auto-encoder-Text"><span class="nav-number">6.3.</span> <span class="nav-text">Sequence-to-sequence Auto-encoder - Text</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Sequence-to-sequence-Auto-encoder-Speech"><span class="nav-number">6.4.</span> <span class="nav-text">Sequence-to-sequence Auto-encoder - Speech</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-Application"><span class="nav-number">1.</span> <span class="nav-text">Example Application</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RNN-Example"><span class="nav-number">2.</span> <span class="nav-text">RNN Example</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Introduction"><span class="nav-number">3.</span> <span class="nav-text">Introduction</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Basic-Concept"><span class="nav-number">3.1.</span> <span class="nav-text">Basic Concept</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Of-course-it-can-be-deep-…"><span class="nav-number">3.2.</span> <span class="nav-text">Of course it can be deep …</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Elman-Network-amp-Jordan-Network"><span class="nav-number">3.3.</span> <span class="nav-text">Elman Network &amp; Jordan Network</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Bidirectional-RNN"><span class="nav-number">3.4.</span> <span class="nav-text">Bidirectional RNN</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Long-Short-term-Memory-LSTM"><span class="nav-number">4.</span> <span class="nav-text">Long Short-term Memory (LSTM)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#three-gates"><span class="nav-number">4.1.</span> <span class="nav-text">three gates</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#formula"><span class="nav-number">4.2.</span> <span class="nav-text">formula</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Example"><span class="nav-number">4.3.</span> <span class="nav-text">Example</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Original-Network-vs-LSTM"><span class="nav-number">4.4.</span> <span class="nav-text">Original Network vs LSTM</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#LSTM-with-neural-network"><span class="nav-number">4.5.</span> <span class="nav-text">LSTM with neural network</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#LSTM-Extension"><span class="nav-number">4.6.</span> <span class="nav-text">LSTM Extension</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Learning"><span class="nav-number">5.</span> <span class="nav-text">Learning</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Problem"><span class="nav-number">5.1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Clipping"><span class="nav-number">5.2.</span> <span class="nav-text">Clipping</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Why？"><span class="nav-number">5.3.</span> <span class="nav-text">Why？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Helpful-Techniques"><span class="nav-number">5.4.</span> <span class="nav-text">Helpful Techniques</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#More-Applications-……"><span class="nav-number">6.</span> <span class="nav-text">More Applications ……</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Many-to-one"><span class="nav-number">6.1.</span> <span class="nav-text">Many to one</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Many-to-Many-Output-is-shorter"><span class="nav-number">6.2.</span> <span class="nav-text">Many to Many (Output is shorter)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Sequence-to-sequence-Auto-encoder-Text"><span class="nav-number">6.3.</span> <span class="nav-text">Sequence-to-sequence Auto-encoder - Text</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Sequence-to-sequence-Auto-encoder-Speech"><span class="nav-number">6.4.</span> <span class="nav-text">Sequence-to-sequence Auto-encoder - Speech</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -838,7 +834,7 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">53.7k</span>
+    <span title="Site words total count">57.1k</span>
   
 </div>
 
