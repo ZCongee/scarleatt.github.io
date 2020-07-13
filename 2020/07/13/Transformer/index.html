@@ -64,7 +64,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="Deep Learning,">
 
 
 
@@ -75,13 +75,27 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Scarleatt">
-<meta property="og:url" content="http://yoursite.com/tags/模拟/index.html">
+<meta name="description" content="本文是对论文《Attention is all you need》的理解。transform模型不仅可以应用到NLP的机器翻译领域，还可以应用到其他非NLP领域，是非常有科研潜力的一个方向。 模型结构transform模型由多个encoder和decoder构成，如下图所示  EncoderEncoder由N=6个相同的layer组成，layer就是上图中左边的方框部分，左边的英文字母“Nx”表示">
+<meta name="keywords" content="Deep Learning">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Transformer详解">
+<meta property="og:url" content="http://yoursite.com/2020/07/13/Transformer/index.html">
 <meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="本文是对论文《Attention is all you need》的理解。transform模型不仅可以应用到NLP的机器翻译领域，还可以应用到其他非NLP领域，是非常有科研潜力的一个方向。 模型结构transform模型由多个encoder和decoder构成，如下图所示  EncoderEncoder由N=6个相同的layer组成，layer就是上图中左边的方框部分，左边的英文字母“Nx”表示">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712185243525.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712214746642.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712215525200.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712220405217.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712192858975-20200713101139647.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713120312773.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713100210115.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713101600838.png">
+<meta property="og:updated_time" content="2020-07-13T04:36:41.433Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Scarleatt">
+<meta name="twitter:title" content="Transformer详解">
+<meta name="twitter:description" content="本文是对论文《Attention is all you need》的理解。transform模型不仅可以应用到NLP的机器翻译领域，还可以应用到其他非NLP领域，是非常有科研潜力的一个方向。 模型结构transform模型由多个encoder和decoder构成，如下图所示  EncoderEncoder由N=6个相同的layer组成，layer就是上图中左边的方框部分，左边的英文字母“Nx”表示">
+<meta name="twitter:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712185243525.png">
 
 
 
@@ -111,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/tags/模拟/">
+  <link rel="canonical" href="http://yoursite.com/2020/07/13/Transformer/">
 
 
 
 
 
-  <title>标签: 模拟 | Scarleatt</title>
+  <title>Transformer详解 | Scarleatt</title>
   
 
 
@@ -136,7 +150,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -272,52 +286,245 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block tag">
+  <div id="posts" class="posts-expand">
+    
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>模拟<small>标签</small>
-        </h1>
-      </div>
+  
 
-      
-        
+  
+  
+  
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/13/Transformer/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2020/03/13/计算机体系结构的基础知识/" itemprop="url">
-              
-                <span itemprop="name">计算机体系结构的基础知识</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">Transformer详解</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2020-03-13T16:12:27+08:00" content="2020-03-13">
-          03-13
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-13T12:33:00+08:00">
+                2020-07-13
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Knowledge-Geaph/" itemprop="url" rel="index">
+                    <span itemprop="name">Knowledge Geaph</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.1k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  4
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文是对论文《Attention is all you need》的理解。transform模型不仅可以应用到NLP的机器翻译领域，还可以应用到其他非NLP领域，是非常有科研潜力的一个方向。</p>
+<h4 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h4><p>transform模型由多个encoder和decoder构成，如下图所示</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712185243525.png" alt="image-20200712185243525" style="zoom: 67%;"></p>
+<h4 id="Encoder"><a href="#Encoder" class="headerlink" title="Encoder"></a>Encoder</h4><p>Encoder由N=6个相同的layer组成，layer就是上图中左边的方框部分，左边的英文字母“Nx”表示layer的数量，这里N=6。每个layer都有两个sub-layer，即multi-head attention和position-wise feed-forward network。每个sub-layer还加入了residual connection和layer normalization，因此每个sub-layer的输出为</p>
+<script type="math/tex; mode=display">
+\rm sub\_layer_{output}=LayerNorm(x+Sublayer(x))</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712214746642.png" alt="image-20200712214746642" style="zoom:67%;"></p>
+<h4 id="Decoder"><a href="#Decoder" class="headerlink" title="Decoder"></a>Decoder</h4><p>Decoder也由6个相同的layer组成，layer就是上图的右边的方框部分，此时N=6。layer由3个sub-layer组成，除了encoder提到的两个sub-layer，还有Masked Multi-Head Attention。</p>
+<p>新加入的masked multi-head attention，可以保证对位置i的预测只依赖位置小于i的已知输出，不会接触到未来位置的信息。</p>
+<h4 id="Attention"><a href="#Attention" class="headerlink" title="Attention"></a>Attention</h4><p>attention有三个输入$Q,K,V$。计算attention的过程，即使用一个Query，计算它和每个Key的相似度作为权重，再对所有的Value进行加权求和。</p>
+<p>attention可以通过以下式子计算，先计算Q和K的点乘，再进行scale（除以$\sqrt{d_k}$），输入softmax函数，再与V进行点乘，即可得到输出。</p>
+<script type="math/tex; mode=display">
+{\rm Attention}(Q,K,V)={\rm softmax}(\frac{QK^T}{\sqrt{d_k}})V</script><p>我们把输入的embedding全都放到一个矩阵$X$内，矩阵的每一行表示输入序列的一个word，$W^Q,W^K,W^V$表示Q，K，V对应的权重矩阵，可以通过网络进行学习。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712215525200.png" alt="image-20200712215525200" style="zoom: 50%;"></p>
+<p>得到Q，K，V之后，就可以进行self-attention的计算，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712220405217.png" alt="image-20200712220405217" style="zoom: 50%;"></p>
+<p>Q1：为什么选择dot-product attention，而不是additive attention？</p>
+<p>A：dot-product attention可以使用高度优化过后的矩阵运算代码。</p>
+<p>Q2：为什么要除以$\sqrt{d_k}$这一项？</p>
+<p>A：（1）在$d_k$很小的时候，如果不进行scaling，dot-product attention和additive attention的performance相差不大；如果$d_k$值很大，那么点乘的值就会很大，不做scaling的话，效果就没有additive attention好。（2）如果$d_k$的值很大，点乘的结果也很大，输入softmax函数之后的梯度就会变得很小，不利于back propagation。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712192858975-20200713101139647.png" alt="image-20200712192858975"></p>
+<h4 id="Multi-Head-Attention"><a href="#Multi-Head-Attention" class="headerlink" title="Multi-Head Attention"></a>Multi-Head Attention</h4><p>multi-head attention则是将Q，K，V分别进行h次不同的<strong>线性变换</strong>，再把这些不同的attention结果连接起来，即</p>
+<script type="math/tex; mode=display">
+\rm MultiHead(Q,K,V)=Concat(head_1,..,head_h)W^O\\
+\quad head_i=Attention(QW_i^Q,KW_i^K,VW_i^V)</script><p>multi-head attention的流程图如下，1) input sequence为<span style="color: green">Thinking Machines</span>；2) embedding每个word，转化成vector；3) 分别计算8个attention head的Q，K，V；4) ；使用上一步的结果Q，K，V来计算attention的值；5) 将$Z^0,…,Z^7$的结果连接去来，形成一个大矩阵，再用这个大矩阵来乘矩阵$W^O$，得到最后的结果Z。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713120312773.png" alt="image-20200713120312773"></p>
+<h4 id="Positional-Encoding"><a href="#Positional-Encoding" class="headerlink" title="Positional Encoding"></a>Positional Encoding</h4><p>由于这个模型并没有包含RNN和CNN，并没有考虑输入序列的order，我们必须在embedding之后把序列的order也考虑进去，把位置信息positional encoding加上embedding，就得到了带位置信息的embedding。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713100210115.png" alt="image-20200713100210115"></p>
+<p>作者使用了不同频率的正弦和余弦函数来完成这项工作，</p>
+<script type="math/tex; mode=display">
+PE_{(pos,2i)}=sin(pos/10000^{2i/d_{model}})\\
+PE_{(pos,2i+1)}=cos(pos/10000^{2i/d_{model}})</script><p>其中pos就表示position，i表示dimension。positional encoding的每个维度都对应着一个正弦曲线。</p>
+<p>NLP任务还需要考虑到单词的相对位置，根据下列正余弦的变化公式，</p>
+<script type="math/tex; mode=display">
+\rm sin(\alpha+\beta)=sin\alpha cos\beta+cos\alpha sin\beta\\
+cos(\alpha+\beta)=cos\alpha cos\beta-sin\alpha sin\beta</script><p>可得出：现在对于固定的offset k，$PE_{pos+k}$可以表示成$PE_{pos}$的线性变换，</p>
+<h4 id="Residual-Connection"><a href="#Residual-Connection" class="headerlink" title="Residual Connection"></a>Residual Connection</h4><p>在每个encoder的sub-layer中，在layer normalization之后，都有一个residual connection。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713101600838.png" alt="image-20200713101600838" style="zoom:67%;"></p>
+<h4 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h4><p>优点：transform模型不仅可以应用到NLP的机器翻译领域，还可以应用到其他非NLP领域，是非常有科研潜力的一个方向。</p>
+<p>缺点：（1）没有使用RNN和CNN，使模型并不能捕捉一些局部特征，使用Transform+RNN+CNN效果可能会更好；（2）Transform丢失的位置信息在NLP其实是非常重要的，加入position encoding其实只是一个权宜之计，并不能从根本上改变transform的结构缺陷。</p>
+<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><ol>
+<li><a href="https://zhuanlan.zhihu.com/p/48508221" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/48508221</a></li>
+<li><p><a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-transformer/</a></p>
+</li>
+<li><p>Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need [C]//Advances in Neural Information Processing Systems. 2017: 5998-6008.</p>
+</li>
+</ol>
 
       
     </div>
+    
+    
+    
 
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/10/fGAN/" rel="next" title="fGAN">
+                <i class="fa fa-chevron-left"></i> fGAN
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -325,6 +532,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -345,8 +556,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -424,6 +644,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#模型结构"><span class="nav-number">1.</span> <span class="nav-text">模型结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Encoder"><span class="nav-number">2.</span> <span class="nav-text">Encoder</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Decoder"><span class="nav-number">3.</span> <span class="nav-text">Decoder</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Attention"><span class="nav-number">4.</span> <span class="nav-text">Attention</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Multi-Head-Attention"><span class="nav-number">5.</span> <span class="nav-text">Multi-Head Attention</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Positional-Encoding"><span class="nav-number">6.</span> <span class="nav-text">Positional Encoding</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Residual-Connection"><span class="nav-number">7.</span> <span class="nav-text">Residual Connection</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Summary"><span class="nav-number">8.</span> <span class="nav-text">Summary</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Reference"><span class="nav-number">9.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -570,6 +806,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
