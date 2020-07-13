@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next mist" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+
+
+
+
+  <meta name="keywords" content="Deep Learning,AutoEncoder,Denoising AutoEncoder,Transformer,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Autoregressive LM 与 Autoencoder LMAutoregressive语言模型：根据上文内容预测下一个可能跟随的单词，或者根据下文来预测前文的单词，但并不能同时根据上下文来预测单词。GPT是典型的自回归语言模型。ELMO虽然有两个方向，一个是自左向右的自回归语言模型，另一个是自右向左的自回归语言模型，由两个自回归语言模型组成，本质上还是自回归语言模型。  缺点：只能根据上">
+<meta name="keywords" content="Deep Learning,AutoEncoder,Denoising AutoEncoder,Transformer">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Bert模型精讲">
+<meta property="og:url" content="http://yoursite.com/2020/07/13/Bert/index.html">
+<meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="Autoregressive LM 与 Autoencoder LMAutoregressive语言模型：根据上文内容预测下一个可能跟随的单词，或者根据下文来预测前文的单词，但并不能同时根据上下文来预测单词。GPT是典型的自回归语言模型。ELMO虽然有两个方向，一个是自左向右的自回归语言模型，另一个是自右向左的自回归语言模型，由两个自回归语言模型组成，本质上还是自回归语言模型。  缺点：只能根据上">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712121526873.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712121915387.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/271419017086934.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712185243525.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713224006961.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713221407425.png">
+<meta property="og:updated_time" content="2020-07-13T15:18:17.361Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Bert模型精讲">
+<meta name="twitter:description" content="Autoregressive LM 与 Autoencoder LMAutoregressive语言模型：根据上文内容预测下一个可能跟随的单词，或者根据下文来预测前文的单词，但并不能同时根据上下文来预测单词。GPT是典型的自回归语言模型。ELMO虽然有两个方向，一个是自左向右的自回归语言模型，另一个是自右向左的自回归语言模型，由两个自回归语言模型组成，本质上还是自回归语言模型。  缺点：只能根据上">
+<meta name="twitter:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712121526873.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/07/13/Bert/">
+
+
+
+
+
+  <title>Bert模型精讲 | Scarleatt</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Scarleatt</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/13/Bert/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Bert模型精讲</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-13T23:12:50+08:00">
+                2020-07-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Knowledge-Graph/" itemprop="url" rel="index">
+                    <span itemprop="name">Knowledge Graph</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.1k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  7
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h4 id="Autoregressive-LM-与-Autoencoder-LM"><a href="#Autoregressive-LM-与-Autoencoder-LM" class="headerlink" title="Autoregressive LM 与 Autoencoder LM"></a>Autoregressive LM 与 Autoencoder LM</h4><p>Autoregressive语言模型：根据上文内容预测下一个可能跟随的单词，或者根据下文来预测前文的单词，但并不能同时根据上下文来预测单词。GPT是典型的自回归语言模型。ELMO虽然有两个方向，一个是自左向右的自回归语言模型，另一个是自右向左的自回归语言模型，由两个自回归语言模型组成，本质上还是自回归语言模型。</p>
+<ul>
+<li>缺点：只能根据上文或下文来预测单词，并不能同时依据上下文；</li>
+<li>优点：对生成类NLP任务有很大优势，比如机器翻译，就是从左向右的，并不需要同时根据上下文的内容进行判断。</li>
+</ul>
+<p>Autoencoder语言模型：在输入中随机Mask一些单词，使模型可以同时根据上下文的内容来预测这些被mask的单词。</p>
+<ul>
+<li>缺点：由于引入了Mask标记，而fine-tuning阶段并不能看到Mask标记，因此会造成预训练和fine-tune阶段不一致的问题；</li>
+<li>优点：可以很好地融入双向语言模型。</li>
+</ul>
+<h4 id="DAE与Masked-Language-Model"><a href="#DAE与Masked-Language-Model" class="headerlink" title="DAE与Masked Language Model"></a>DAE与Masked Language Model</h4><h5 id="AutoEncoder"><a href="#AutoEncoder" class="headerlink" title="AutoEncoder"></a>AutoEncoder</h5><p>对于输入大小为28×28的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简的特征；但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；那么我们现在就先来做一个decoder，把code恢复成一张image；</p>
+<p>decoder和encoder单独是没办法训练的，因为是无监督学习，因此现在我们将这两者一起学习，学习的目标是使input和output之间的差距越小越好。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712121526873.png" alt="image-20200712121526873" style="zoom:80%;"></p>
+<h5 id="Denoising-AutoEncoder（DAE）"><a href="#Denoising-AutoEncoder（DAE）" class="headerlink" title="Denoising AutoEncoder（DAE）"></a>Denoising AutoEncoder（DAE）</h5><p>为了缓解原来的autoencoder很容易<font color="red">过拟合</font>的问题，我们可以在输入中加入一些<font color="red">随机噪声</font>。对于原来的input x，我们先加入一些noise得到$x’$(破损数据)，进行encode之后再进行decode，使之和最早的input之间的差值最小；encoder现在不仅学习到了encode这件事，还学习到了把noise过滤掉这件事。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712121915387.png" alt="image-20200712121915387"></p>
+<p><strong>DAE模型的优势：</strong></p>
+<ul>
+<li><p>可以减小训练数据和测试数据之间的gap；</p>
+</li>
+<li><p>和非破损数据的训练相比，由于DAR在训练的时候不小心把输入的噪声也擦除了，因此破损数据训练出来的weight噪声比较小。</p>
+</li>
+</ul>
+<p>在下图中，左图为没有使用任何噪声的resulted filters，右图为使用了30%噪声的resulted filter，可以发现使用了噪声的autoencoder，其训练好的weight噪声要低很多。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/271419017086934.png" alt="271419017086934" style="zoom:50%;"></p>
+<h5 id="DAE-与-Masked-Language-Model"><a href="#DAE-与-Masked-Language-Model" class="headerlink" title="DAE 与 Masked Language Model"></a>DAE 与 Masked Language Model</h5><ul>
+<li>BERT是基于<strong>Transformer Encoder</strong>来构建的一种模型；</li>
+<li>BERT是基于<strong>DAE</strong>（Denoising Autoencoder，去噪自动编码器）的，这部分在BERT中被称为<strong>Masked Language Model</strong>；</li>
+<li>Masked Language Model并不是严格意义上的语言模型，这仅仅是训练语言模型的一种方式。BERT在输入中随机Mask一些单词，使模型可以同时根据上下文的内容来预测这些被mask的单词，这个过程其实就是DAE的过程（Mask标签就相当于加入的噪声，DAE要去掉这些噪声，并还原出原来的图像）。</li>
+</ul>
+<p>DAE的代码实现为：<a href="http://deeplearning.net/tutorial/dA.html" target="_blank" rel="noopener">http://deeplearning.net/tutorial/dA.html</a></p>
+<h4 id="Transformer模型回顾"><a href="#Transformer模型回顾" class="headerlink" title="Transformer模型回顾"></a>Transformer模型回顾</h4><p>详见<a href="https://scarleatt.github.io/2020/07/13/Transformer/" target="_blank" rel="noopener">https://scarleatt.github.io/2020/07/13/Transformer/</a></p>
+<h5 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h5><p>transform模型由多个encoder和decoder构成，如下图所示</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712185243525.png" alt="image-20200712185243525" style="zoom: 80%;"></p>
+<p><strong>Encoder</strong>由N=6个相同的layer组成，layer就是上图中左边的方框部分，左边的英文字母“Nx”表示layer的数量，这里N=6。每个layer都有两个sub-layer，即multi-head attention和position-wise feed-forward network。每个sub-layer还加入了residual connection和layer normalization，因此每个sub-layer的输出为</p>
+<script type="math/tex; mode=display">
+\rm sub\_layer_{output}=LayerNorm(x+Sublayer(x))</script><p><strong>Decoder</strong>也由6个相同的layer组成，layer就是上图的右边的方框部分，此时N=6。layer由3个sub-layer组成，除了encoder提到的两个sub-layer，还有Masked Multi-Head Attention。</p>
+<p>新加入的masked multi-head attention，在进行softmax之前对未来的position进行mask（设为-inf），可以保证对位置i的预测只依赖位置小于i的已知输出，不会接触到未来位置的信息</p>
+<ul>
+<li>输出：对应i位置的输出词的概率分布，如果词库中有一万个单词，输出的vector就是一万维；</li>
+<li>输入：encoder的输出 &amp; 对应i-1位置decoder的输出。中间的attention（masked）并不是self-attention，K，V来自encoder，Q来自上一位置decoder的输出；</li>
+<li>解码：编码可以并行计算，一次性全部encoding出来。但解码不是一次把所有的序列解出来，由于要用到上一个位置encoder的出书作为这次的query，因此解码是像rnn一样一个一个解出来的。</li>
+</ul>
+<h4 id="BERT模型"><a href="#BERT模型" class="headerlink" title="BERT模型"></a>BERT模型</h4><h5 id="模型结构-1"><a href="#模型结构-1" class="headerlink" title="模型结构"></a>模型结构</h5><p>Bert模型全称是BidirectionalEncoder Representations from Transformer，是基于Transformer中的encoder的双向结构。模型的主要创新点在pre-training上，包括Mask Language Model、Next Sentence Prediction，来分别捕捉词语和句子级别的representation。</p>
+<p>Bert的模型结构示意图如下图左1所示，是双向的，而GPT则是单向的；</p>
+<p>ELMo虽然也是双向的，但这两者的目标函数是不同的，ELMo的目标函数是两个$P(w_i|w_1,..,w_{i-1}),P(w_i|w_{i+1},…,w_n)$，是独立训练出两个不同的representation然后拼接；但Bert的目标函数是$P(w_i|w_1,..,w_n)$，包括两个方向的单词。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713224006961.png" alt></p>
+<h5 id="Pre-training"><a href="#Pre-training" class="headerlink" title="Pre-training"></a>Pre-training</h5><p><strong>Task #1: Mask LM</strong>   对于输入的一段文字，随机mask这句话中的几个词，要求根据剩余词汇来确定被mask的词。我们把要mask的长度定为15%，在被mask的文字中，80%采用[Mask]标记替换，10%采用任意词替换，剩余10%保持原词汇不变。</p>
+<p><strong>Task #2: Next Sentence Prediction</strong>   由于很多重要的下游任务，比如Question Answering (QA) 和 Natural Language Inference (NLI)，都需要理解两个句子之间的关系，因此增加了NSP这个预训练任务，使得模型可以理解两个句子之间的关系。在一篇文章里，我们选择了A和B两个句子，B有50%的几率是A的下一句（isNext），输入这两个句子，BERT模型来判断B是不是A的下一句。</p>
+<p>由于attention的计算开销是输入序列长度的平方，如果输入序列太长会影响整个模型的训练速度，因此90%的序列都选用seq_len=128来进行训练，剩下的10%都选用512的序列长度。</p>
+<h5 id="Fine-tuning"><a href="#Fine-tuning" class="headerlink" title="Fine-tuning"></a>Fine-tuning</h5><p>从头开始训练Bert模型的任务是非常艰巨的，google公布了在多种语言上预训练好的模型，我们可以在此基础上进行fine-tuning，比从头开始训练所需的计算量要小得多。对于特定的任务，Bert模型只需要添加一个输出层来进行微调即可。这些任务可以是问题解答、语言推理等。</p>
+<p>官网最开始提出的模型是文本分类，如果要用于其他任务，则需要进行一些改进，如图所示，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713221407425.png" alt="image-20200713221407425"></p>
+<p>可以调整的参数和取值范围有：</p>
+<ul>
+<li>Batch size: 16, 32</li>
+<li>Learning rate (Adam): 5e-5, 3e-5, 2e-5</li>
+<li>Number of epochs: 3, 4</li>
+</ul>
+<p>Q：为什么说Bert是双向的 ？</p>
+<p>A：由于输入的序列有部分是被mask了，由于Transformer的特性，模型会注意上下文所有的单词，即两个方向的单词，这就实现了双向表示，说明Bert是一个双向语言模型。</p>
+<h4 id="BERT在实际场景中的应用"><a href="#BERT在实际场景中的应用" class="headerlink" title="BERT在实际场景中的应用"></a>BERT在实际场景中的应用</h4><p>可以应用到：</p>
+<ul>
+<li>情感分类：质量问题分析；</li>
+<li>意图识别；</li>
+<li>问答匹配；</li>
+<li>命名实体识别。</li>
+</ul>
+<p>bert在实际场景中的使用：</p>
+<ul>
+<li>筛选训练数据，提出过短或过长的数据；</li>
+<li>尝试bert+conv，bert+conv+avg_max_pooling，bert_last_layer_concat等方式；</li>
+<li>针对本场景数据，进行少步数的进一步预训练。</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><ul>
+<li>引入了Masked LM，使用双向LM做模型预训练。</li>
+<li>为预训练引入了新目标NSP，它可以学习两个句子之间的关系。</li>
+<li>为下游任务引入了很通用的求解框架，不再为任务做模型定制。</li>
+<li>刷新了多项NLP任务的记录，引爆了NLP无监督预训练技术。</li>
+</ul>
+<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><ol>
+<li>帮助理解Transform模型中的attention机制，<a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-transformer/</a></li>
+<li><p>Bert模型的理解，<a href="https://zhuanlan.zhihu.com/p/46652512" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/46652512</a></p>
+</li>
+<li><p><a href="https://www.cnblogs.com/Milburn/p/12031501.html" target="_blank" rel="noopener">BERT模型图解</a></p>
+</li>
+<li><p><a href="https://www.bilibili.com/video/BV1M5411x7FZ?from=search&amp;seid=15336884376384843690" target="_blank" rel="noopener">Bert模型精讲</a></p>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/AutoEncoder/" rel="tag"># AutoEncoder</a>
+          
+            <a href="/tags/Denoising-AutoEncoder/" rel="tag"># Denoising AutoEncoder</a>
+          
+            <a href="/tags/Transformer/" rel="tag"># Transformer</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/13/Transformer/" rel="next" title="Self-Attention 与 Transformer模型">
+                <i class="fa fa-chevron-left"></i> Self-Attention 与 Transformer模型
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Scarleatt">
+            
+              <p class="site-author-name" itemprop="name">Scarleatt</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">35</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">98</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/scarleatt" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:fawnliu2333@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Autoregressive-LM-与-Autoencoder-LM"><span class="nav-number">1.</span> <span class="nav-text">Autoregressive LM 与 Autoencoder LM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DAE与Masked-Language-Model"><span class="nav-number">2.</span> <span class="nav-text">DAE与Masked Language Model</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#AutoEncoder"><span class="nav-number">2.1.</span> <span class="nav-text">AutoEncoder</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Denoising-AutoEncoder（DAE）"><span class="nav-number">2.2.</span> <span class="nav-text">Denoising AutoEncoder（DAE）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#DAE-与-Masked-Language-Model"><span class="nav-number">2.3.</span> <span class="nav-text">DAE 与 Masked Language Model</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Transformer模型回顾"><span class="nav-number">3.</span> <span class="nav-text">Transformer模型回顾</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#模型结构"><span class="nav-number">3.1.</span> <span class="nav-text">模型结构</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BERT模型"><span class="nav-number">4.</span> <span class="nav-text">BERT模型</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#模型结构-1"><span class="nav-number">4.1.</span> <span class="nav-text">模型结构</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Pre-training"><span class="nav-number">4.2.</span> <span class="nav-text">Pre-training</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Fine-tuning"><span class="nav-number">4.3.</span> <span class="nav-text">Fine-tuning</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BERT在实际场景中的应用"><span class="nav-number">5.</span> <span class="nav-text">BERT在实际场景中的应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Reference"><span class="nav-number">7.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017-<span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Scarleatt</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">62.1k</span>
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>

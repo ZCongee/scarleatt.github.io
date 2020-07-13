@@ -64,7 +64,7 @@
 
 
 
-  <meta name="keywords" content="Deep Learning,">
+  <meta name="keywords" content="Deep Learning,Transformer,Self-Attention,Sequence to Sequence,">
 
 
 
@@ -75,27 +75,32 @@
 
 
 
-<meta name="description" content="本文是对论文《Attention is all you need》的理解。transform模型不仅可以应用到NLP的机器翻译领域，还可以应用到其他非NLP领域，是非常有科研潜力的一个方向。 模型结构transform模型由多个encoder和decoder构成，如下图所示  EncoderEncoder由N=6个相同的layer组成，layer就是上图中左边的方框部分，左边的英文字母“Nx”表示">
-<meta name="keywords" content="Deep Learning">
+<meta name="description" content="本文是对论文《Attention is all you need》的理解。首先介绍了标准的attention机制，再介绍了transformer的encoder和decoder，以及self-attention。 标准attention机制下图中就表示了标准的attention机制。也可见sequence to sequence中有关attention机制的相关叙述。  根据下面这个公式，先计算Q">
+<meta name="keywords" content="Deep Learning,Transformer,Self-Attention,Sequence to Sequence">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Transformer详解">
+<meta property="og:title" content="Self-Attention 与 Transformer模型">
 <meta property="og:url" content="http://yoursite.com/2020/07/13/Transformer/index.html">
 <meta property="og:site_name" content="Scarleatt">
-<meta property="og:description" content="本文是对论文《Attention is all you need》的理解。transform模型不仅可以应用到NLP的机器翻译领域，还可以应用到其他非NLP领域，是非常有科研潜力的一个方向。 模型结构transform模型由多个encoder和decoder构成，如下图所示  EncoderEncoder由N=6个相同的layer组成，layer就是上图中左边的方框部分，左边的英文字母“Nx”表示">
+<meta property="og:description" content="本文是对论文《Attention is all you need》的理解。首先介绍了标准的attention机制，再介绍了transformer的encoder和decoder，以及self-attention。 标准attention机制下图中就表示了标准的attention机制。也可见sequence to sequence中有关attention机制的相关叙述。  根据下面这个公式，先计算Q">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713163711310.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713164825271.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712185243525.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712214746642.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/transformer_decoding_2.gif">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712215525200.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712220405217.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712192858975-20200713101139647.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713120312773.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713100210115.png">
-<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713101600838.png">
-<meta property="og:updated_time" content="2020-07-13T04:36:41.433Z">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713172314745.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713220311349.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713220419384.png">
+<meta property="og:updated_time" content="2020-07-13T14:09:01.026Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Transformer详解">
-<meta name="twitter:description" content="本文是对论文《Attention is all you need》的理解。transform模型不仅可以应用到NLP的机器翻译领域，还可以应用到其他非NLP领域，是非常有科研潜力的一个方向。 模型结构transform模型由多个encoder和decoder构成，如下图所示  EncoderEncoder由N=6个相同的layer组成，layer就是上图中左边的方框部分，左边的英文字母“Nx”表示">
-<meta name="twitter:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200712185243525.png">
+<meta name="twitter:title" content="Self-Attention 与 Transformer模型">
+<meta name="twitter:description" content="本文是对论文《Attention is all you need》的理解。首先介绍了标准的attention机制，再介绍了transformer的encoder和decoder，以及self-attention。 标准attention机制下图中就表示了标准的attention机制。也可见sequence to sequence中有关attention机制的相关叙述。  根据下面这个公式，先计算Q">
+<meta name="twitter:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200713163711310.png">
 
 
 
@@ -131,7 +136,7 @@
 
 
 
-  <title>Transformer详解 | Scarleatt</title>
+  <title>Self-Attention 与 Transformer模型 | Scarleatt</title>
   
 
 
@@ -317,7 +322,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Transformer详解</h1>
+          <h1 class="post-title" itemprop="name headline">Self-Attention 与 Transformer模型</h1>
         
 
         <div class="post-meta">
@@ -352,8 +357,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Knowledge-Geaph/" itemprop="url" rel="index">
-                    <span itemprop="name">Knowledge Geaph</span>
+                  <a href="/categories/Knowledge-Graph/" itemprop="url" rel="index">
+                    <span itemprop="name">Knowledge Graph</span>
                   </a>
                 </span>
 
@@ -383,7 +388,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  1.1k
+                  2k
                 </span>
               
 
@@ -399,7 +404,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  4
+                  8
                 </span>
               
             </div>
@@ -420,15 +425,39 @@
       
 
       
-        <p>本文是对论文《Attention is all you need》的理解。transform模型不仅可以应用到NLP的机器翻译领域，还可以应用到其他非NLP领域，是非常有科研潜力的一个方向。</p>
-<h4 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h4><p>transform模型由多个encoder和decoder构成，如下图所示</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712185243525.png" alt="image-20200712185243525" style="zoom: 67%;"></p>
+        <p>本文是对论文《Attention is all you need》的理解。首先介绍了标准的attention机制，再介绍了transformer的encoder和decoder，以及self-attention。</p>
+<h3 id="标准attention机制"><a href="#标准attention机制" class="headerlink" title="标准attention机制"></a>标准attention机制</h3><p>下图中就表示了标准的attention机制。也可见<a href="https://scarleatt.github.io/2020/06/28/seq2seq/" target="_blank" rel="noopener">sequence to sequence</a>中有关attention机制的相关叙述。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713163711310.png" alt="image-20200713163711310"></p>
+<p>根据下面这个公式，先计算Query和每个Key之间的相似度，再乘对应的value，就可以来计算出attention的值。</p>
+<script type="math/tex; mode=display">
+\rm Attention(Query,Source)=\sum_{i=1}^{L_x}Similarity(Query,Key_i)*Value_i</script><p>其中$L_x$表示source的长度，Query和每个Key之间的相似度也有不同的计算方法，</p>
+<p>点积：</p>
+<script type="math/tex; mode=display">
+\rm Similarity(Query,Key_i)=Query*Key_i</script><p>Cosine相似性:</p>
+<script type="math/tex; mode=display">
+\rm Similarity(Query,Key_i)=\frac{Query*Key_i}{||Query||\cdot ||Key_i||}</script><p>MLP网络：</p>
+<script type="math/tex; mode=display">
+\rm Similarity(Query,Key_i)=MLP(Query,Key_i)</script><p>下面我们将从三个阶段来详细介绍attention机制。</p>
+<p><strong>阶段1</strong>：根据Query和Key计算相似度Similarity，可以用上文介绍的三种方法，即求两者的点乘、计算两者的cosin相似度、根据神经网络来计算；我们把这一阶段算出来的$Key_i$与Query之间的相似度记为$\alpha_i$；</p>
+<p><strong>阶段2</strong>：把$\alpha_i$输入softmax函数，进行归一化，得到$\hat \alpha_i$；</p>
+<p><strong>阶段3</strong>：根据$\hat \alpha_i$和Value计算attention的值，即</p>
+<script type="math/tex; mode=display">
+\rm Attention(Query,Key,Value)=\sum_{i=1}^{L_x}\alpha_i\cdot Value_i</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713164825271.png" alt="image-20200713164825271"></p>
+<h3 id="Transformer"><a href="#Transformer" class="headerlink" title="Transformer"></a>Transformer</h3><h4 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h4><p>transform模型由多个encoder和decoder构成，如下图所示</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712185243525.png" alt="image-20200712185243525" style="zoom:80%;"></p>
 <h4 id="Encoder"><a href="#Encoder" class="headerlink" title="Encoder"></a>Encoder</h4><p>Encoder由N=6个相同的layer组成，layer就是上图中左边的方框部分，左边的英文字母“Nx”表示layer的数量，这里N=6。每个layer都有两个sub-layer，即multi-head attention和position-wise feed-forward network。每个sub-layer还加入了residual connection和layer normalization，因此每个sub-layer的输出为</p>
 <script type="math/tex; mode=display">
 \rm sub\_layer_{output}=LayerNorm(x+Sublayer(x))</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712214746642.png" alt="image-20200712214746642" style="zoom:67%;"></p>
 <h4 id="Decoder"><a href="#Decoder" class="headerlink" title="Decoder"></a>Decoder</h4><p>Decoder也由6个相同的layer组成，layer就是上图的右边的方框部分，此时N=6。layer由3个sub-layer组成，除了encoder提到的两个sub-layer，还有Masked Multi-Head Attention。</p>
-<p>新加入的masked multi-head attention，可以保证对位置i的预测只依赖位置小于i的已知输出，不会接触到未来位置的信息。</p>
-<h4 id="Attention"><a href="#Attention" class="headerlink" title="Attention"></a>Attention</h4><p>attention有三个输入$Q,K,V$。计算attention的过程，即使用一个Query，计算它和每个Key的相似度作为权重，再对所有的Value进行加权求和。</p>
+<p>新加入的masked multi-head attention，在进行softmax之前对未来的position进行mask（设为-inf），可以保证对位置i的预测只依赖位置小于i的已知输出，不会接触到未来位置的信息。</p>
+<ul>
+<li>输出：对应i位置的输出词的概率分布，如果词库中有一万个单词，输出的vector就是一万维；</li>
+<li>输入：encoder的输出 &amp; 对应i-1位置decoder的输出。中间的attention（masked）并不是self-attention，K，V来自encoder，Q来自上一位置decoder的输出；</li>
+<li>解码：编码可以并行计算，一次性全部encoding出来。但解码不是一次把所有的序列解出来，由于要用到上一个位置encoder的出书作为这次的query，因此解码是像rnn一样一个一个解出来的。</li>
+</ul>
+<p>动图演示，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/transformer_decoding_2.gif" alt="transformer_decoding_2"></p>
+<h4 id="Self-Attention"><a href="#Self-Attention" class="headerlink" title="Self-Attention"></a>Self-Attention</h4><p>attention有三个输入$Q,K,V$。<span style="color: red">对于self-attention来讲，Q，K，V三者都来自同一个输入向量X，只是将X进行了不同的线性变换（乘上不同的权重矩阵）。</span></p>
 <p>attention可以通过以下式子计算，先计算Q和K的点乘，再进行scale（除以$\sqrt{d_k}$），输入softmax函数，再与V进行点乘，即可得到输出。</p>
 <script type="math/tex; mode=display">
 {\rm Attention}(Q,K,V)={\rm softmax}(\frac{QK^T}{\sqrt{d_k}})V</script><p>我们把输入的embedding全都放到一个矩阵$X$内，矩阵的每一行表示输入序列的一个word，$W^Q,W^K,W^V$表示Q，K，V对应的权重矩阵，可以通过网络进行学习。</p>
@@ -455,17 +484,37 @@ PE_{(pos,2i+1)}=cos(pos/10000^{2i/d_{model}})</script><p>其中pos就表示posit
 <script type="math/tex; mode=display">
 \rm sin(\alpha+\beta)=sin\alpha cos\beta+cos\alpha sin\beta\\
 cos(\alpha+\beta)=cos\alpha cos\beta-sin\alpha sin\beta</script><p>可得出：现在对于固定的offset k，$PE_{pos+k}$可以表示成$PE_{pos}$的线性变换，</p>
-<h4 id="Residual-Connection"><a href="#Residual-Connection" class="headerlink" title="Residual Connection"></a>Residual Connection</h4><p>在每个encoder的sub-layer中，在layer normalization之后，都有一个residual connection。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713101600838.png" alt="image-20200713101600838" style="zoom:67%;"></p>
-<h4 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h4><p>优点：transform模型不仅可以应用到NLP的机器翻译领域，还可以应用到其他非NLP领域，是非常有科研潜力的一个方向。</p>
+<h4 id="Residual-Connection"><a href="#Residual-Connection" class="headerlink" title="Residual Connection"></a>Residual Connection</h4><p>在每个encoder的sub-layer中，都对应一个residual connection和layer normalization。</p>
+<p>下图中Add表示residual connection，是为了解决多层神经网络训练困难的问题，通过将前一层的信息无差地传递到下一层，可以有效地仅关注差异部分。</p>
+<p>Norm则表示Layer Normalization，通过对层的激活值的归一化，可以加速模型的训练过程，使其更快地收敛。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713172314745.png" alt="image-20200713172314745" style="zoom:67%;"></p>
+<h4 id="Layer-Normalization"><a href="#Layer-Normalization" class="headerlink" title="Layer Normalization"></a>Layer Normalization</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>输入x有m个batch，即$B=\{x_1,x_2,..,x_m\}$，每个$x_i$都有K个element，对每个batch进行layer Normalization，得到$B’=\{y_1,y_2,..,y_m\}$。</p>
+<p>对于其中的某个batch $x_i=\{x_{i,1},x_{i,2},…,x_{i,K}\}$，我们先求出其对应的均值和方差，即</p>
+<script type="math/tex; mode=display">
+\mu_i=\frac{1}{K}\sum_{k=1}^Kx_{i,k}\\
+\sigma_i^2=\frac{1}{K}\sum_{k=1}^K(x_{i,k}-\mu)^2</script><p>再进行归一化，参数$\epsilon$是为了解决分母突然为0的情况。</p>
+<script type="math/tex; mode=display">
+\hat x_{i,k}=\frac{x_{i,k}-\mu_i}{\sqrt{\sigma_i^2+\epsilon}}</script><p>经过缩放和转移的步骤，可得到最后的结果</p>
+<script type="math/tex; mode=display">
+y_i=\gamma \hat x_i+\beta=LN_{\gamma,\beta}(x_i)</script><p>对于输入的tensor的形状为$[m,H,W,C]$，m表示batch的数量，H和W表示输入数据的高度和宽度，C表示channel的数量。Layer Normalization是对每个channel进行归一化。</p>
+<h5 id="BN-vs-LN"><a href="#BN-vs-LN" class="headerlink" title="BN vs LN"></a>BN vs LN</h5><p>Batch Norm和Layer Norm的主要区别在于归一化的维度不一样，</p>
+<ul>
+<li>batchNorm是在batch上，对mHW做归一化；</li>
+<li>layerNorm是在channel方向上，对CHW做归一化。</li>
+</ul>
+<p>BN的具体做法就是对每一小批数据，在batch这个方向上做归一化。如下图所示：</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713220311349.png" alt="image-20200713220311349" style="zoom:100%;"></p>
+<p>而对于Layer Norm，则是在channel上</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713220419384.png" alt="image-20200713220419384"></p>
+<h3 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h3><p><strong>标准的attention和self-attention的主要区别</strong>在于：self-attention的Q，K，V都是由输入序列X经过线性变换所提取到的。</p>
+<p><strong>Transformer模型：</strong></p>
+<p>优点：transformer模型不仅可以应用到NLP的机器翻译领域，还可以应用到其他非NLP领域，是非常有科研潜力的一个方向。</p>
 <p>缺点：（1）没有使用RNN和CNN，使模型并不能捕捉一些局部特征，使用Transform+RNN+CNN效果可能会更好；（2）Transform丢失的位置信息在NLP其实是非常重要的，加入position encoding其实只是一个权宜之计，并不能从根本上改变transform的结构缺陷。</p>
-<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><ol>
-<li><a href="https://zhuanlan.zhihu.com/p/48508221" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/48508221</a></li>
-<li><p><a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-transformer/</a></p>
-</li>
-<li><p>Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need [C]//Advances in Neural Information Processing Systems. 2017: 5998-6008.</p>
-</li>
-</ol>
+<h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h3><p>[1] <a href="https://zhuanlan.zhihu.com/p/48508221" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/48508221</a></p>
+<p>[2] <a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-transformer/</a></p>
+<p>[3] Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need [C]//Advances in Neural Information Processing Systems. 2017: 5998-6008.</p>
+<p>[4] <a href="https://mp.weixin.qq.com/s?__biz=MzI5NDMzMjY1MA==&amp;mid=2247485591&amp;idx=1&amp;sn=ab8b2204f81e0a8de6d1882df9a9c2c0&amp;scene=21#wechat_redirect" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzI5NDMzMjY1MA==&amp;mid=2247485591&amp;idx=1&amp;sn=ab8b2204f81e0a8de6d1882df9a9c2c0&amp;scene=21#wechat_redirect</a></p>
+<p>[5] <a href="https://leimao.github.io/blog/Layer-Normalization/" target="_blank" rel="noopener">Layer Normalization</a></p>
 
       
     </div>
@@ -484,6 +533,12 @@ cos(\alpha+\beta)=cos\alpha cos\beta-sin\alpha sin\beta</script><p>可得出：�
         <div class="post-tags">
           
             <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/Transformer/" rel="tag"># Transformer</a>
+          
+            <a href="/tags/Self-Attention/" rel="tag"># Self-Attention</a>
+          
+            <a href="/tags/Sequence-to-Sequence/" rel="tag"># Sequence to Sequence</a>
           
         </div>
       
@@ -505,6 +560,10 @@ cos(\alpha+\beta)=cos\alpha cos\beta-sin\alpha sin\beta</script><p>可得出：�
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/07/13/Bert/" rel="prev" title="Bert模型精讲">
+                Bert模型精讲 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -583,7 +642,7 @@ cos(\alpha+\beta)=cos\alpha cos\beta-sin\alpha sin\beta</script><p>可得出：�
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">34</span>
+                  <span class="site-state-item-count">35</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -605,7 +664,7 @@ cos(\alpha+\beta)=cos\alpha cos\beta-sin\alpha sin\beta</script><p>可得出：�
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">94</span>
+                  <span class="site-state-item-count">98</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -654,7 +713,7 @@ cos(\alpha+\beta)=cos\alpha cos\beta-sin\alpha sin\beta</script><p>可得出：�
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#模型结构"><span class="nav-number">1.</span> <span class="nav-text">模型结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Encoder"><span class="nav-number">2.</span> <span class="nav-text">Encoder</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Decoder"><span class="nav-number">3.</span> <span class="nav-text">Decoder</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Attention"><span class="nav-number">4.</span> <span class="nav-text">Attention</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Multi-Head-Attention"><span class="nav-number">5.</span> <span class="nav-text">Multi-Head Attention</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Positional-Encoding"><span class="nav-number">6.</span> <span class="nav-text">Positional Encoding</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Residual-Connection"><span class="nav-number">7.</span> <span class="nav-text">Residual Connection</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Summary"><span class="nav-number">8.</span> <span class="nav-text">Summary</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Reference"><span class="nav-number">9.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#标准attention机制"><span class="nav-number">1.</span> <span class="nav-text">标准attention机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Transformer"><span class="nav-number">2.</span> <span class="nav-text">Transformer</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#模型结构"><span class="nav-number">2.1.</span> <span class="nav-text">模型结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Encoder"><span class="nav-number">2.2.</span> <span class="nav-text">Encoder</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Decoder"><span class="nav-number">2.3.</span> <span class="nav-text">Decoder</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Self-Attention"><span class="nav-number">2.4.</span> <span class="nav-text">Self-Attention</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Multi-Head-Attention"><span class="nav-number">2.5.</span> <span class="nav-text">Multi-Head Attention</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Positional-Encoding"><span class="nav-number">2.6.</span> <span class="nav-text">Positional Encoding</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Residual-Connection"><span class="nav-number">2.7.</span> <span class="nav-text">Residual Connection</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Layer-Normalization"><span class="nav-number">2.8.</span> <span class="nav-text">Layer Normalization</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Introduction"><span class="nav-number">2.8.1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#BN-vs-LN"><span class="nav-number">2.8.2.</span> <span class="nav-text">BN vs LN</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Summary"><span class="nav-number">3.</span> <span class="nav-text">Summary</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
             
 
           </div>
@@ -688,7 +747,7 @@ cos(\alpha+\beta)=cos\alpha cos\beta-sin\alpha sin\beta</script><p>可得出：�
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">59.2k</span>
+    <span title="Site words total count">62.1k</span>
   
 </div>
 
