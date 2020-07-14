@@ -99,9 +99,9 @@
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200714154701222.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200714155831975.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200714161350733.png">
-<meta property="og:image" content="http://yoursite.com/Users/liufang/Library/Application%20Support/typora-user-images/image-20200714161906413.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200714161906413.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200714163253851.png">
-<meta property="og:updated_time" content="2020-07-14T08:48:18.867Z">
+<meta property="og:updated_time" content="2020-07-14T11:14:45.376Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Wasserstein GAN (WGAN)">
 <meta name="twitter:description" content="本文主要介绍了WGAN的核心思想。由于JS divergence自身的限制，我们先改进了classifier的输出分数的分布，从sigmoid改成了linear，即LSGAN；还有另外一种改进方式，使用Wasserstein distance来衡量两个分布之间的差异，即WGAN。 JS divergence is not suitable在之前的文章中，我们使用了JS divergence来衡量$">
@@ -513,7 +513,7 @@ V(G,D)\approx\mathop{\rm max}_{D}\{E_{x\sim P_{data}}[D(x)]-E_{x\sim P_{G}}[D(x)
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200714161350733.png" alt="image-20200714161350733"></p>
 <h4 id="Energy-based-GAN-EBGAN"><a href="#Energy-based-GAN-EBGAN" class="headerlink" title="Energy-based GAN (EBGAN)"></a>Energy-based GAN (EBGAN)</h4><p>本来discriminator是一个binary classifier的架构，现在我们把它改成autoencoder，generator还是维持原来的架构。现在把generator生成的图像经过encoder和decoder，来计算reconstruction error，再乘上一个负号，就变成了现在discriminator的output。</p>
 <p>这样做就有一个好处。这个autoencoder可以是pre-training，提前训练好的，我们可以提前用很多真实的例子来训练这个autoencoder，并不需要使用到generator，就可以训练好discriminator。因此EBGAN的generator就可以跟快生成很清晰的图像。</p>
-<p><img src="/Users/liufang/Library/Application Support/typora-user-images/image-20200714161906413.png" alt="image-20200714161906413" style="zoom:67%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200714161906413.png" alt="image-20200714161906413" style="zoom:67%;"></p>
 <p>在训练EBGAN的时候，我们要让real data的discriminator得分越高越好，也就是reconstruction error要越小越好；让generated data得分越小越好，reconstruction error要越大越好。由于Hard to reconstruct，easy to destroy，那么对于generated data，如果generator直接生成noise，这时的error是最大的，得分也是最低的，但这并不是我们想要的结果。</p>
 <p>我们加入了一个额外的限制，对于generator生成的数据所对应的reconstruction error，设置一个margin，让这个error小于某个threshold就好，不用更小，这个margin是需要自己去调整的参数。</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200714163253851.png" alt="image-20200714163253851" style="zoom:67%;"></p>
@@ -566,6 +566,10 @@ V(G,D)\approx\mathop{\rm max}_{D}\{E_{x\sim P_{data}}[D(x)]-E_{x\sim P_{G}}[D(x)
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/07/14/GAN-feature-extraction/" rel="prev" title="Feature Extraction of GAN">
+                Feature Extraction of GAN <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -644,7 +648,7 @@ V(G,D)\approx\mathop{\rm max}_{D}\{E_{x\sim P_{data}}[D(x)]-E_{x\sim P_{G}}[D(x)
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">36</span>
+                  <span class="site-state-item-count">37</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -666,7 +670,7 @@ V(G,D)\approx\mathop{\rm max}_{D}\{E_{x\sim P_{data}}[D(x)]-E_{x\sim P_{G}}[D(x)
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">102</span>
+                  <span class="site-state-item-count">107</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -749,7 +753,7 @@ V(G,D)\approx\mathop{\rm max}_{D}\{E_{x\sim P_{data}}[D(x)]-E_{x\sim P_{G}}[D(x)
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">65.3k</span>
+    <span title="Site words total count">67.6k</span>
   
 </div>
 
