@@ -287,6 +287,189 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/29/generative-models/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2020/06/29/generative-models/" itemprop="url">Generative Models</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-29T20:30:43+08:00">
+                2020-06-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ML-notes/" itemprop="url" rel="index">
+                    <span itemprop="name">ML-notes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.3k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  8
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+          
+本文主要叙述了集中generative models，包括PixelRNN、VAE，GAN（生成对抗网络）；还叙述了auto-encoder和VAE的区别，以及VAE进行改进的地方，通过高斯混合模型来对VAE的原理进行了详细介绍。
+
+OverviewGenerative Models可以分为三大类：pixelRNN、autoencoder、GAN；
+现在machine可以对猫狗进行分类，在将来m
+          ...
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2020/06/29/generative-models/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/29/Deep-autoencoder/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -413,7 +596,8 @@
           
           Auto-encoder对于输入大小为$28\times28$的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简（compact）的特征；
 但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；
-那么
+那么我们现在就先来做一个decoder，把code恢复成一张image；
+decoder和encoder
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -595,7 +779,7 @@
           
 本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；
 
-Manifold Learning在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D
+Manifold Learning在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learn
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -779,7 +963,10 @@ Manifold Learning在高维空间里，距离该点很远的点很可能与这个
 Clustering
 先根据input之间的相似度建立一颗树，再用一条线切一刀，如果使用红色的线切，那么可以分为2个大类
 
-Distributed Represe
+Distributed Representation
+Dimension Reduction用2维就可以表示这些特征，并不需要用到3D
+
+
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -961,7 +1148,9 @@ Distributed Represe
           Generation可以generation文字，也可以generation图片
 
 如果想生成一张图片，我们可以把图片的每个pixel看成一个character，从而组成一个sentence，比如下图中蓝色pixel就表示blue，红色的pixel表示red,……
-接下来就可以用language m
+接下来就可以用language model来生成图片，最初时间步的输入是特殊字符BOS
+
+对于一般的generation，如下图的右上
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -1144,7 +1333,9 @@ Distributed Represe
 
 Outline
 Network PruningNetwork can be pruned
-Network Pruning对于训练好的n
+Network Pruning对于训练好的network，我们要判断其weight和neural的重要性：
+
+如果某个weight接近于0，那么
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -1326,7 +1517,7 @@ Network Pruning对于训练好的n
           Motivation
 What do we want to do?attack要做的事就是把找到原图片$x^0$对应的$x’$
 
-Loss Function for AttackTraining：network训练得出的结果$y^0$必须和$y^{true}$越接近越好，此时的loss functi
+Loss Function for AttackTraining：network训练得出的结果$y^0$必须和$y^{true}$越接近越好，此时的loss function为$L_{train}(\theta)=C(y^0,y^{true})$，输入的$x$是固定的，
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -1509,7 +1700,9 @@ Loss Function for AttackTraining：network训练得出的结果$y^0$必须和$y^
 
 Why we need Explainable ML?我们不仅需要机器结果的精确度，还需要进行模型诊断，看机器学习得怎么样；有的任务精确度很高，但实际上机器什么都没学到
 
-有模型诊断后，我们就可以根据模型诊断的结果再来调整
+有模型诊断后，我们就可以根据模型诊断的结果再来调整我们的模型
+Interpretable v.s. Powerful
+那么有没有model是Inter
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -1689,7 +1882,7 @@ Why we need Explainable ML?我们不仅需要机器结果的精确度，还需�
         
           
           Word Embedding如果使用1-of-N encoding，每个单词用一个vector表示，那么5个单词就需要5个vector；如果我们把同一个类别的单词都放到那个类里，即属于class1的单词有dog、cat、bird，属于动物类的单词，同理可以得出class2，class3；
-但只做cl
+但只做classify是不够的，这些class之间也有一些其他的联系；比如class1属于动物，class3属
           ...
           <!--noindex-->
           <div class="post-button text-center">
@@ -1873,192 +2066,11 @@ Why we need Explainable ML?我们不仅需要机器结果的精确度，还需�
 
 Q：Why semi-supervised learning helps ?
 
-A：如图所示，图
+A：如图所示，图中灰色圆点表示unlabeled data，其他圆点表示labeled data。如果没有unlab
           ...
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2020/06/10/semi-supervised/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/06/10/RNN/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Scarleatt">
-      <meta itemprop="description" content>
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Scarleatt">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2020/06/10/RNN/" itemprop="url">Recurrent Neural Network</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-10T17:00:29+08:00">
-                2020-06-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/ML-notes/" itemprop="url" rel="index">
-                    <span itemprop="name">ML-notes</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-            <div class="post-wordcount">
-              
-                
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">字数统计&#58;</span>
-                
-                <span title="字数统计">
-                  3.5k
-                </span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">
-                  14
-                </span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          Example Application将Taipei作为向量的输入，由于RNN网络是有记忆的，因此可以根据输入来预测目的地dest，以及离开的时间
-
-RNN ExampleRNN是一个有记忆的网络。对于输入的向量$(x_1,x_2)$，hidden neural的输入就包含store和input的n
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2020/06/10/RNN/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -2148,7 +2160,7 @@ RNN ExampleRNN是一个有记忆的网络。对于输入的向量$(x_1,x_2)$，h
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">35</span>
+                  <span class="site-state-item-count">36</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2170,7 +2182,7 @@ RNN ExampleRNN是一个有记忆的网络。对于输入的向量$(x_1,x_2)$，h
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">98</span>
+                  <span class="site-state-item-count">102</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -2237,7 +2249,7 @@ RNN ExampleRNN是一个有记忆的网络。对于输入的向量$(x_1,x_2)$，h
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">62.1k</span>
+    <span title="Site words total count">65.3k</span>
   
 </div>
 
