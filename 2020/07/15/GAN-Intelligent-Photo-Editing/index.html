@@ -64,7 +64,7 @@
 
 
 
-  <meta name="keywords" content="Hexo, NexT">
+  <meta name="keywords" content="Deep Learning,GAN,Autoencoder,Intelligent Photo Editing,">
 
 
 
@@ -75,13 +75,27 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Scarleatt">
-<meta property="og:url" content="http://yoursite.com/tags/CCF/index.html">
+<meta name="description" content="本文主要介绍了使用GAN来进行智能图像编辑，包括编辑原图像，Image super resolution和Image Completion等。 Modifying Input Codegenerator的输入是一个vector，输出一张人脸。input的vector的每个维度都表示某种特征，我们现在要做的就是根据生成的图像，来反推出输入vector的每个dimension表示什么特征。  GAN+">
+<meta name="keywords" content="Deep Learning,GAN,Autoencoder,Intelligent Photo Editing">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Intelligent Photo Editing">
+<meta property="og:url" content="http://yoursite.com/2020/07/15/GAN-Intelligent-Photo-Editing/index.html">
 <meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="本文主要介绍了使用GAN来进行智能图像编辑，包括编辑原图像，Image super resolution和Image Completion等。 Modifying Input Codegenerator的输入是一个vector，输出一张人脸。input的vector的每个维度都表示某种特征，我们现在要做的就是根据生成的图像，来反推出输入vector的每个dimension表示什么特征。  GAN+">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200715094805474.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200715095135708.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200715100537911.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200715102116230.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200715103603424.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200715104644372.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200715102031232.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200715105653264.png">
+<meta property="og:updated_time" content="2020-07-15T03:04:03.371Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Scarleatt">
+<meta name="twitter:title" content="Intelligent Photo Editing">
+<meta name="twitter:description" content="本文主要介绍了使用GAN来进行智能图像编辑，包括编辑原图像，Image super resolution和Image Completion等。 Modifying Input Codegenerator的输入是一个vector，输出一张人脸。input的vector的每个维度都表示某种特征，我们现在要做的就是根据生成的图像，来反推出输入vector的每个dimension表示什么特征。  GAN+">
+<meta name="twitter:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200715094805474.png">
 
 
 
@@ -111,13 +125,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/tags/CCF/">
+  <link rel="canonical" href="http://yoursite.com/2020/07/15/GAN-Intelligent-Photo-Editing/">
 
 
 
 
 
-  <title>标签: CCF | Scarleatt</title>
+  <title>Intelligent Photo Editing | Scarleatt</title>
   
 
 
@@ -136,7 +150,7 @@
     
   
 
-  <div class="container sidebar-position-left ">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -272,52 +286,238 @@
           <div id="content" class="content">
             
 
-  
-  
-  
-  <div class="post-block tag">
+  <div id="posts" class="posts-expand">
+    
 
-    <div id="posts" class="posts-collapse">
-      <div class="collection-title">
-        <h1>CCF<small>标签</small>
-        </h1>
-      </div>
+  
 
-      
-        
+  
+  
+  
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/15/GAN-Intelligent-Photo-Editing/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2017/12/02/CCF-JSON查询/" itemprop="url">
-              
-                <span itemprop="name">CCF-JSON查询</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">Intelligent Photo Editing</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated" datetime="2017-12-02T12:43:00+08:00" content="2017-12-02">
-          12-02
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-15T11:00:49+08:00">
+                2020-07-15
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ML-notes/" itemprop="url" rel="index">
+                    <span itemprop="name">ML-notes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.1k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  3
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文主要介绍了使用GAN来进行智能图像编辑，包括编辑原图像，Image super resolution和Image Completion等。</p>
+<h4 id="Modifying-Input-Code"><a href="#Modifying-Input-Code" class="headerlink" title="Modifying Input Code"></a>Modifying Input Code</h4><p>generator的输入是一个vector，输出一张人脸。input的vector的每个维度都表示某种特征，我们现在要做的就是根据生成的图像，来反推出输入vector的每个dimension表示什么特征。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715094805474.png" alt="image-20200715094805474" style="zoom:67%;"></p>
+<h4 id="GAN-Autoencoder"><a href="#GAN-Autoencoder" class="headerlink" title="GAN+Autoencoder"></a>GAN+Autoencoder</h4><p>我们可以收集一堆有label的数据，这个label可以表示这个图像具有的特征是金发、年轻、男性、女性等。</p>
+<p>但现在有一个问题，根据给出的image，我们并不知道其输入的随机vector是什么。我们可以学习另外一个encoder，这个encoder和generator就组成了一个autoencoder。</p>
+<p>为了学习出输入的vector，我们需要固定generator的参数，可以用discriminator的参数来初始化encoder的参数，再来学习encoder。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715095135708.png" alt="image-20200715095135708" style="zoom:67%;"></p>
+<h4 id="Attribute-Representation"><a href="#Attribute-Representation" class="headerlink" title="Attribute Representation"></a>Attribute Representation</h4><p>encoder训练完成后，我们就可以知道图像x对应的vector z是什么，什么样的vector可以生成这张图像。</p>
+<p>在下图中，我们算出每个短发图像的vector之后，再做一个平均，就可以知道短发图像的vector；把长发图像的vector做一个平均，就可以得到长发图像的vector。把这两个vector相减得到$z_{long}$，就可以知道要做什么样的变化，使短发的脸变成长发的脸。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715100537911.png" alt="image-20200715100537911" style="zoom:67%;"></p>
+<p>现在我们有一张短发的图像x，把它输入encoder得到code，把这个code和$z_{long}$相加，就可以得到长发脸的vector $z’$，把这个vector再输入generator，就可以得到长发脸的图像$Gen(z’)$。</p>
+<p>那么现在对于随机输入的一张图像，我们把其code再加上我们想要的特征向量(比如$z_{long}$)，就可以得到我们想要的特征图的输出。</p>
+<p>智能的ps演示，<a href="https://www.youtube.com/watch?v=9c4z6YsBGQ0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=9c4z6YsBGQ0</a></p>
+<p>那么这种智能的ps是怎么作用的呢？</p>
+<h4 id="Photo-Editing"><a href="#Photo-Editing" class="headerlink" title="Photo Editing"></a><strong>Photo Editing</strong></h4><h5 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h5><p>首先需要训练一个generator，在不同的latent space上sample出不同的点，generator就可以生成对应的商品。</p>
+<p>那么刚才那个智能的ps中，对原图进行小小的修改就可以变成一件新的商品，这个是怎么完成的呢？</p>
+<p>首先需要对输入的商品图像进行反推，反推出在这个code space上的位置，在这个基础上，再进行变化。在满足使用者给出的constrain后，就可以产生一张新的图。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715102116230.png" alt="image-20200715102116230" style="zoom:67%;"></p>
+<h5 id="Back-to-z"><a href="#Back-to-z" class="headerlink" title="Back to z"></a>Back to z</h5><p>我们首先需要完成的事，根据输入的图像反推出对应的code。有以下三种方式。</p>
+<p><strong>Method 1</strong>  当成一个optimization problem，找到对应的$z^*$，使其对应的generator的输出和原图之间的差值最小化，loss function可以有很多种，可以是计算像素级的差值，也可以使用其他的classifier网络，让这两者的embedding越接近越好。</p>
+<script type="math/tex; mode=display">
+z^*=arg\mathop{\rm min}_zL(G(z),x^T)</script><p><strong>Method 2</strong> 使用一个autoencoder ，使input和output越接近越好。</p>
+<p><strong>Method 3</strong> 结合了前两个方法，第一个方法要用到gradient descent，可能会遇到local minimal这个问题，给z不同的初始化值，最后得到的结果很可能是不一样的。因此我们可以用autoencoder得到的z来作为方法1的初始值，再来进行优化调整。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715103603424.png" alt="image-20200715103603424" style="zoom:67%;"></p>
+<h5 id="Editing-Photos"><a href="#Editing-Photos" class="headerlink" title="Editing Photos"></a>Editing Photos</h5><p>从图像反推出z之后，我们还需要求解另外一个optimization problem。</p>
+<p>把z输入generator之后，产生image的还需要满足一个额外的constrain $U(G(z))$；新的图像和原来的图像应该越接近越好，原来是黑色的鞋子，现在我们希望新图像还是鞋子，不能差太多；discriminator还需要检测生成的新图像是不是realistic；</p>
+<script type="math/tex; mode=display">
+z^*=arg\mathop{\rm min}_z U(G(z))+\lambda_1||z-z_0||^2-\lambda_2D(G(z))</script><p>求解这个optimization problem，找到满足这些constrain的$z^*$。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715104644372.png" alt="image-20200715104644372" style="zoom:67%;"></p>
+<h4 id="Image-super-resolution"><a href="#Image-super-resolution" class="headerlink" title="Image super resolution"></a>Image super resolution</h4><p>GAN也可以进行Image super resolution，输入一张模糊的图，输出一张清晰的图。可以发现使用GAN的结果，更加清晰了。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715102031232.png" alt="image-20200715102031232" style="zoom:67%;"></p>
+<h4 id="Image-Completion"><a href="#Image-Completion" class="headerlink" title="Image Completion"></a>Image Completion</h4><p>我们可以把图像的某部分挖空，机器要来恢复这部分被挖空的图像。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715105653264.png" alt="image-20200715105653264" style="zoom:67%;"></p>
 
       
     </div>
+    
+    
+    
 
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/GAN/" rel="tag"># GAN</a>
+          
+            <a href="/tags/Autoencoder/" rel="tag"># Autoencoder</a>
+          
+            <a href="/tags/Intelligent-Photo-Editing/" rel="tag"># Intelligent Photo Editing</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/14/GAN-feature-extraction/" rel="next" title="Feature Extraction of GAN">
+                <i class="fa fa-chevron-left"></i> Feature Extraction of GAN
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -325,6 +525,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -345,8 +549,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -424,6 +637,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Modifying-Input-Code"><span class="nav-number">1.</span> <span class="nav-text">Modifying Input Code</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#GAN-Autoencoder"><span class="nav-number">2.</span> <span class="nav-text">GAN+Autoencoder</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Attribute-Representation"><span class="nav-number">3.</span> <span class="nav-text">Attribute Representation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Photo-Editing"><span class="nav-number">4.</span> <span class="nav-text">Photo Editing</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Basic-Idea"><span class="nav-number">4.1.</span> <span class="nav-text">Basic Idea</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Back-to-z"><span class="nav-number">4.2.</span> <span class="nav-text">Back to z</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Editing-Photos"><span class="nav-number">4.3.</span> <span class="nav-text">Editing Photos</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Image-super-resolution"><span class="nav-number">5.</span> <span class="nav-text">Image super resolution</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Image-Completion"><span class="nav-number">6.</span> <span class="nav-text">Image Completion</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -570,6 +799,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
