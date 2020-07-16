@@ -94,7 +94,7 @@
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200706162852240.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200706163814535.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200706164130509.png">
-<meta property="og:image" content="http://yoursite.com/Users/liufang/Library/Application%20Support/typora-user-images/image-20200706164451665.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200706164451665.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200706165503010.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200706182808106.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200706183118051.png">
@@ -104,7 +104,7 @@
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200706194620613.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200706200901735.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200706202208008.png">
-<meta property="og:updated_time" content="2020-07-06T12:31:44.657Z">
+<meta property="og:updated_time" content="2020-07-16T11:59:34.914Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Unsupervised Conditional Generation">
 <meta name="twitter:description" content="在以前的文章中，我们提到过CGAN，训练数据包括图像和其对应的文字描述，是一种监督学习的方法。本文将叙述一种使用CGAN进行无监督学习的方法，主要包括两大类的方法：Direct Transformation和Projection to Common Space。 Unsupervised Conditional Generation如果现在有一张真实的风景照X，还有一张图像是梵谷的画作Y，那么我们">
@@ -473,7 +473,7 @@
 <p>(b) 还需要学习一个generator，输入是一张图像和目标domain，即你想让input转化成哪一个domain，生成一个Fake Image；</p>
 <p>(c) 把生成的图像再输入同一个generator，目标domain也作为输入，生成一张新的图像（reconstructed image），我们希望reconstructed image和input image之间越接近越好；</p>
 <p>(d) 把Fake Image再输入discriminator，看到底是不是符合要求的图像。</p>
-<p><img src="/Users/liufang/Library/Application Support/typora-user-images/image-20200706164451665.png" alt="image-20200706164451665"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200706164451665.png" alt="image-20200706164451665"></p>
 <p>下图是一个更加realistic的展示。domain可以有多个，所以用一串编码表示，比如现在输入图像的domain是Brown、Young，对应的编码为00101，记作CelevA label。</p>
 <p>(a) 现在把一张图像输入discriminator，来判断到底是不是真实的图像，且输出domain对应的代号；(b) 把input image和target domain label（10011，Black、Male、Young）输入generator；(c) 把上一部生成的图像再输入同一个generator，让其生成00101（brown、young）的图像output，我们希望input和output越接近越好；(d) 把第一次generator生成的图像输入discriminator，看是不是realistic的图像，且输出对应的domain代号。</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200706165503010.png" alt="image-20200706165503010"></p>
@@ -628,7 +628,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">39</span>
+                  <span class="site-state-item-count">40</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -650,7 +650,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">110</span>
+                  <span class="site-state-item-count">115</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -733,7 +733,7 @@
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">69.1k</span>
+    <span title="Site words total count">74.7k</span>
   
 </div>
 
