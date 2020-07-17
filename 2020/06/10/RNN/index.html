@@ -93,6 +93,8 @@
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200609172301903.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200609172444143.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200609173058539.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200717221753851.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200717222433437.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200609175328153.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200609181527674.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200609223053105.png">
@@ -106,6 +108,8 @@
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200610101406355.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200610102846836.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200610103840723.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200717221422068.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200717221403866.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200610112127379.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200610112423397.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200610112627265.png">
@@ -125,7 +129,7 @@
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200610163053020.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200610163303283.png">
 <meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200610164950240.png">
-<meta property="og:updated_time" content="2020-07-17T05:47:47.840Z">
+<meta property="og:updated_time" content="2020-07-17T14:29:01.281Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Recurrent Neural Network">
 <meta name="twitter:description" content="Example Application将Taipei作为向量的输入，由于RNN网络是有记忆的，因此可以根据输入来预测目的地dest，以及离开的时间  RNN ExampleRNN是一个有记忆的网络。对于输入的向量$(x_1,x_2)$，hidden neural的输入就包含store和input的neural，本次hidden neural的输出又作为下一次hidden neural的部分输入">
@@ -417,7 +421,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  3.5k
+                  3.9k
                 </span>
               
 
@@ -433,7 +437,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  14
+                  15
                 </span>
               
             </div>
@@ -482,6 +486,12 @@
 <h5 id="Bidirectional-RNN"><a href="#Bidirectional-RNN" class="headerlink" title="Bidirectional RNN"></a>Bidirectional RNN</h5><p>RNN不仅可以是单向的，也可以是双向的，可以train一个正向的network，也同时是train一个逆向的network。如下图所示，input sequence为$…,x^t,x^{t+1},x^{t+2},…$，正向和逆向hidden neural的输出同时作为output neural的输入，从而输出target的值$…,y^t,y^{t+1},y^{t+2},…$</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200609173058539.png" alt="image-20200609173058539" style="zoom:50%;"></p>
 <p>这种双向的RNN对我们的训练是有好处的。对于图中的output $y^{t+1}$，如果只是单向RNN，那么$y^{t+1}$只可以看到$x^1,…,x^{t+1}$的值；但现在是双向的RNN，$y^{t+1}$不仅可以看到$x^1,…,x^{t+1}$的值，还可以看到$x^{t+2},…$到句尾的值，<u>即整个input sequence的值都可以被双向的RNN看到，从而得出更好的训练结果</u></p>
+<h4 id="The-Problem-of-Long-Term-Dependencies"><a href="#The-Problem-of-Long-Term-Dependencies" class="headerlink" title="The Problem of Long-Term Dependencies"></a>The Problem of Long-Term Dependencies</h4><p>在某些情况下，某些词比如$h^3$只和最近的某些输入$x_0,x_1$有关。比如我们要给予当前输入的序列来预测下一个可能的输出，输入序列是“the clouds are in the ”，我们想要预测下一个词是“sky”，即“the clouds are in the _sky_”，我们根据最近的信息“cloud”就可以推测出来，并不需要其他的上下文信息；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717221753851.png" alt="image-20200717221753851"></p>
+<p>但现实生活中还有很多情况，根据最近的信息无法进行预测，还要结合更早输入的信息。比如输入的序列是“I grew up in France… I speak fluent ”，我希望预测出“<em>French</em>”，即“I  grew up in France… I speak fluent <em>French</em>”。由于France和French之间有很多其他的句子，RNN无法处理这个问题。</p>
+<p>Q：为什么RNN无法处理这个问题？</p>
+<p>A：序列后面的梯度很难反向传播到前面的序列，就产生了梯度消失问题。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717222433437.png" alt="image-20200717222433437"></p>
 <h4 id="Long-Short-term-Memory-LSTM"><a href="#Long-Short-term-Memory-LSTM" class="headerlink" title="Long Short-term Memory (LSTM)"></a>Long Short-term Memory (LSTM)</h4><h5 id="three-gates"><a href="#three-gates" class="headerlink" title="three gates"></a>three gates</h5><p>下图中的neural有4个input和1个output，一共有三个gate：</p>
 <ul>
 <li>Input Gate：决定其他neural的值是否可以输入这个neural；是否可以输入由neural的学习情况而定</li>
@@ -535,7 +545,22 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610102846836.png" alt="image-20200610102846836" style="zoom:50%;"></p>
 <h5 id="LSTM-Extension"><a href="#LSTM-Extension" class="headerlink" title="LSTM Extension"></a>LSTM Extension</h5><p>下图展示了两个LSTM cell的extension，在时间点t进行的计算，不仅要包括 $x^{t+1}$，还要包括上个时间点中lstm cell算出的值，即memory cell的输出$c^t$，以及$c^t$再输入activation function的输出值$h(c^t)$</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610103840723.png" alt="image-20200610103840723" style="zoom:50%;"></p>
-<h4 id="Learning"><a href="#Learning" class="headerlink" title="Learning"></a>Learning</h4><p>Training Sentences为”arrive Taipei on November 2nd”，当Taipei输入时，必须要先计算出前一层hidden layer的输出值</p>
+<h4 id="RNN-vs-LSTM"><a href="#RNN-vs-LSTM" class="headerlink" title="RNN vs LSTM"></a>RNN vs LSTM</h4><p><span style="color: red">传统的RNN和LSTM的区别：</span></p>
+<ul>
+<li>传统的RNN通常是直接覆盖的形式，当前时间点的计算结果直接覆盖上一个时间节点的计算结果，可以处理短期依赖问题，无法处理长期依赖问题；</li>
+<li>LSTM通常采用了“累加”的形式，上一个时间节点的计算结果会影响之后的计算结果，并不是直接覆盖；可以处理短期和长期依赖问题。</li>
+<li>对比两者的参数更新公式，</li>
+</ul>
+<p>首先是<strong>传统的RNN</strong>，网络单元结构示意图，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717221422068.png" alt="image-20200717221422068" style="zoom:67%;"></p>
+<p>参数更新公式如下，RNN本时刻的隐藏层信息只来源于当前输入和上一时刻的隐藏层信息，没有记忆功能。</p>
+<script type="math/tex; mode=display">
+h_t=tanh(W_h\cdot [h_{t-1},x_t]+b_h)</script><p>对于<strong>LSTM</strong>而言，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717221403866.png" alt="image-20200717221403866" style="zoom:67%;"></p>
+<p>参数更新公式如下，</p>
+<script type="math/tex; mode=display">
+c'=g(z)f(z_i)+cf(z_f)\\
+a=h(c')f(z_0)</script><h4 id="Learning"><a href="#Learning" class="headerlink" title="Learning"></a>Learning</h4><p>Training Sentences为”arrive Taipei on November 2nd”，当Taipei输入时，必须要先计算出前一层hidden layer的输出值</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610112127379.png" alt="image-20200610112127379" style="zoom:50%;"></p>
 <p>RNN的训练也是前向和逆向传播，其中逆向传播算法为Backpropagation through time（BPTT），也有一个参数更新公式</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610112423397.png" alt="image-20200610112423397" style="zoom:50%;"></p>
@@ -556,12 +581,7 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
 <p>因此，RNN不好训练的原因并不是因为activation function的影响，而是由于weight在high frequency地被使用，weight在不同的位置、不同的时间点是会被反复地使用的</p>
 <h5 id="Helpful-Techniques"><a href="#Helpful-Techniques" class="headerlink" title="Helpful Techniques"></a>Helpful Techniques</h5><p><strong>LSTM</strong>可以让error surface不那么崎岖，可以把一些很平坦的地方拿掉，使error surface不再有那么平坦的地方，这时可以把learning rate设置得小一些，<u>可以解决gradient vanishing问题</u></p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610120736515.png" alt="image-20200610120736515" style="zoom:50%;"></p>
-<p>传统的RNN和LSTM的区别：</p>
-<ul>
-<li>传统的RNN通常是直接覆盖的形式，当前时间点的计算结果直接覆盖上一个时间节点的计算结果；</li>
-<li>LSTM通常采用了“累加”的形式，上一个时间节点的计算结果会影响之后的计算结果，并不是直接覆盖。</li>
-</ul>
-<p>LSTM可以解决gradient vanishing的原因：</p>
+<p><span style="color: red">LSTM可以解决gradient vanishing的原因：</span></p>
 <ul>
 <li>当前的input和memory里的值是“累加”的；</li>
 <li>如果forget gate是打开的状态，上一个时间点的memory会对当前时间点造成影响，这个影响会一直持续下去</li>
@@ -604,6 +624,7 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
 <p>这个RNN的encoder和decoder是一起 train，其中任何一个都是没办法单独训练的，一起train就有一个target</p>
 <p>将speech转化为vector之后，再进行可视化</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610164950240.png" alt="image-20200610164950240" style="zoom:50%;"></p>
+<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><p><a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/" target="_blank" rel="noopener">https://colah.github.io/posts/2015-08-Understanding-LSTMs/</a></p>
 
       
     </div>
@@ -800,7 +821,7 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-Application"><span class="nav-number">1.</span> <span class="nav-text">Example Application</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RNN-Example"><span class="nav-number">2.</span> <span class="nav-text">RNN Example</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Introduction"><span class="nav-number">3.</span> <span class="nav-text">Introduction</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Basic-Concept"><span class="nav-number">3.1.</span> <span class="nav-text">Basic Concept</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Of-course-it-can-be-deep-…"><span class="nav-number">3.2.</span> <span class="nav-text">Of course it can be deep …</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Elman-Network-amp-Jordan-Network"><span class="nav-number">3.3.</span> <span class="nav-text">Elman Network &amp; Jordan Network</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Bidirectional-RNN"><span class="nav-number">3.4.</span> <span class="nav-text">Bidirectional RNN</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Long-Short-term-Memory-LSTM"><span class="nav-number">4.</span> <span class="nav-text">Long Short-term Memory (LSTM)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#three-gates"><span class="nav-number">4.1.</span> <span class="nav-text">three gates</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#formula"><span class="nav-number">4.2.</span> <span class="nav-text">formula</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Example"><span class="nav-number">4.3.</span> <span class="nav-text">Example</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Original-Network-vs-LSTM"><span class="nav-number">4.4.</span> <span class="nav-text">Original Network vs LSTM</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#LSTM-with-neural-network"><span class="nav-number">4.5.</span> <span class="nav-text">LSTM with neural network</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#LSTM-Extension"><span class="nav-number">4.6.</span> <span class="nav-text">LSTM Extension</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Learning"><span class="nav-number">5.</span> <span class="nav-text">Learning</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Problem"><span class="nav-number">5.1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Clipping"><span class="nav-number">5.2.</span> <span class="nav-text">Clipping</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Why？"><span class="nav-number">5.3.</span> <span class="nav-text">Why？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Helpful-Techniques"><span class="nav-number">5.4.</span> <span class="nav-text">Helpful Techniques</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#More-Applications-……"><span class="nav-number">6.</span> <span class="nav-text">More Applications ……</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Many-to-one"><span class="nav-number">6.1.</span> <span class="nav-text">Many to one</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Many-to-Many-Output-is-shorter"><span class="nav-number">6.2.</span> <span class="nav-text">Many to Many (Output is shorter)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Sequence-to-sequence-Auto-encoder-Text"><span class="nav-number">6.3.</span> <span class="nav-text">Sequence-to-sequence Auto-encoder - Text</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Sequence-to-sequence-Auto-encoder-Speech"><span class="nav-number">6.4.</span> <span class="nav-text">Sequence-to-sequence Auto-encoder - Speech</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Example-Application"><span class="nav-number">1.</span> <span class="nav-text">Example Application</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RNN-Example"><span class="nav-number">2.</span> <span class="nav-text">RNN Example</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Introduction"><span class="nav-number">3.</span> <span class="nav-text">Introduction</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Basic-Concept"><span class="nav-number">3.1.</span> <span class="nav-text">Basic Concept</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Of-course-it-can-be-deep-…"><span class="nav-number">3.2.</span> <span class="nav-text">Of course it can be deep …</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Elman-Network-amp-Jordan-Network"><span class="nav-number">3.3.</span> <span class="nav-text">Elman Network &amp; Jordan Network</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Bidirectional-RNN"><span class="nav-number">3.4.</span> <span class="nav-text">Bidirectional RNN</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#The-Problem-of-Long-Term-Dependencies"><span class="nav-number">4.</span> <span class="nav-text">The Problem of Long-Term Dependencies</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Long-Short-term-Memory-LSTM"><span class="nav-number">5.</span> <span class="nav-text">Long Short-term Memory (LSTM)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#three-gates"><span class="nav-number">5.1.</span> <span class="nav-text">three gates</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#formula"><span class="nav-number">5.2.</span> <span class="nav-text">formula</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Example"><span class="nav-number">5.3.</span> <span class="nav-text">Example</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Original-Network-vs-LSTM"><span class="nav-number">5.4.</span> <span class="nav-text">Original Network vs LSTM</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#LSTM-with-neural-network"><span class="nav-number">5.5.</span> <span class="nav-text">LSTM with neural network</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#LSTM-Extension"><span class="nav-number">5.6.</span> <span class="nav-text">LSTM Extension</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RNN-vs-LSTM"><span class="nav-number">6.</span> <span class="nav-text">RNN vs LSTM</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Learning"><span class="nav-number">7.</span> <span class="nav-text">Learning</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Problem"><span class="nav-number">7.1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Clipping"><span class="nav-number">7.2.</span> <span class="nav-text">Clipping</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Why？"><span class="nav-number">7.3.</span> <span class="nav-text">Why？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Helpful-Techniques"><span class="nav-number">7.4.</span> <span class="nav-text">Helpful Techniques</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#More-Applications-……"><span class="nav-number">8.</span> <span class="nav-text">More Applications ……</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Many-to-one"><span class="nav-number">8.1.</span> <span class="nav-text">Many to one</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Many-to-Many-Output-is-shorter"><span class="nav-number">8.2.</span> <span class="nav-text">Many to Many (Output is shorter)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Sequence-to-sequence-Auto-encoder-Text"><span class="nav-number">8.3.</span> <span class="nav-text">Sequence-to-sequence Auto-encoder - Text</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Sequence-to-sequence-Auto-encoder-Speech"><span class="nav-number">8.4.</span> <span class="nav-text">Sequence-to-sequence Auto-encoder - Speech</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Reference"><span class="nav-number">9.</span> <span class="nav-text">Reference</span></a></li></ol></div>
             
 
           </div>
@@ -834,7 +855,7 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
     
       <span class="post-meta-item-text">Site words total count&#58;</span>
     
-    <span title="Site words total count">76.8k</span>
+    <span title="Site words total count">77.2k</span>
   
 </div>
 

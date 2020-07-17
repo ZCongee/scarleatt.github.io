@@ -267,6 +267,81 @@ w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="https://gitee.com/scarle
       </tags>
   </entry>
   <entry>
+    <title>CCF-JSON查询</title>
+    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
+    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
+<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</span><br><span class="line">    <span class="keyword">int</span> n, m;</span><br><span class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</span><br><span class="line">    getchar();</span><br><span class="line">    <span class="keyword">while</span> (n--) &#123;</span><br><span class="line">        <span class="built_in">string</span> temp;</span><br><span class="line">        getline(<span class="built_in">cin</span>, temp);</span><br><span class="line">        json += temp;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</span><br><span class="line">    <span class="built_in">string</span> preHost;</span><br><span class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</span><br><span class="line">    <span class="built_in">string</span> key, value;</span><br><span class="line">    <span class="built_in">string</span> now_key;</span><br><span class="line">    <span class="built_in">string</span> temp_key;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</span><br><span class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</span><br><span class="line">            isvalue = <span class="literal">true</span>;</span><br><span class="line">            iskey = <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</span><br><span class="line">            isstring = <span class="literal">false</span>;</span><br><span class="line">            pre.push_back(key);</span><br><span class="line">            temp_key = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</span><br><span class="line">                    temp_key += pre[j];</span><br><span class="line">                    temp_key += <span class="string">"."</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</span><br><span class="line">            &#125;</span><br><span class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</span><br><span class="line">            preHost += key;</span><br><span class="line">            preHost += <span class="string">"."</span>;</span><br><span class="line">            key = <span class="string">""</span>;</span><br><span class="line">            iskey = <span class="literal">true</span>;</span><br><span class="line">            isvalue = <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</span><br><span class="line">            isvalue = <span class="literal">false</span>;</span><br><span class="line">            iskey = <span class="literal">true</span>;</span><br><span class="line">            i++;</span><br><span class="line">            temp_key = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</span><br><span class="line">                    temp_key += pre[j];</span><br><span class="line">                    temp_key += <span class="string">"."</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            temp_key+=key;</span><br><span class="line">            all[temp_key] = value;</span><br><span class="line"></span><br><span class="line">            preHost = <span class="string">""</span>;</span><br><span class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</span><br><span class="line">                pre.pop_back();</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</span><br><span class="line">            isvalue = <span class="literal">false</span>;</span><br><span class="line">            iskey = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">            temp_key = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</span><br><span class="line">                    temp_key += pre[j];</span><br><span class="line">                    temp_key += <span class="string">"."</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            temp_key+=key;</span><br><span class="line">            all[temp_key] = value;</span><br><span class="line"></span><br><span class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</span><br><span class="line">            isstring = <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</span><br><span class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</span><br><span class="line">        <span class="built_in">string</span> temp;</span><br><span class="line">        getline(<span class="built_in">cin</span>, temp);</span><br><span class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      <categories>
+        <category>CCF Answer</category>
+      </categories>
+      <tags>
+        <tag>CCF</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Conditional GAN (CGAN)</title>
+    <url>/2020/07/05/CGAN/</url>
+    <content><![CDATA[<p>对于一般的GAN，都是随机生成一个vector，然后输入GAN，再生成一张image，但我们并不能控制output。对于本文要讲述的CGAN，我们则可以操控其输出的结果。</p>
+<h4 id="Text-to-Image"><a href="#Text-to-Image" class="headerlink" title="Text-to-Image"></a>Text-to-Image</h4><p>对于传统的监督学习的方法，训练数据集是一些带有描述的图片，网络的input是一段文字，output则是一张图片，我们希望输出的图片和target越接近越好。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705145505825.png" alt="image-20200705145505825" style="zoom:60%;"></p>
+<p>如果现在网络的输入文字是“train”，网络会觉得正面的火车是对的，侧面的火车也是对的，网络最后会取这些值的一个平均值，因此会得到一个非常模糊的火车图片。</p>
+<h4 id="Conditional-GAN"><a href="#Conditional-GAN" class="headerlink" title="Conditional GAN"></a>Conditional GAN</h4><p>现在我们使用CGAN来完成这个任务。CGAN现在的generator的输入不仅有z，还有一个condition c（“train”），G的输出为$x=G(z,c)$；</p>
+<p>这时我们还使用原来的Discriminator，把x输入D，D可以对其进行评价分数scalar，对真实的图像输出为1，生成的图像输出为0。</p>
+<p>那么现在就出现了一个新问题，G可以完全不管输入的condition，只生成高质量的、接近真实的图像即可。比如我们把condition设置为“dog”，G如果生成一只猫的图像，这个图像很接近真实图像，那么就可以骗过discriminator。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705150242620.png" alt="image-20200705150242620" style="zoom:60%;"></p>
+<p>因此，这里的discriminator也要做出改变，需要把condition也作为D的其中一个输入。</p>
+<p>那么现在D输出的分数就有两部分组成：（1）x的真实性；（2）x是不是满足condition的条件。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
+<p>给低分0的两个case：（1）如果给出了正确的文字，但生成了模糊的图像；（2）虽然生成了清晰的图像，但和随机输入的文字（condition）是不匹配的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705151419726.png" alt="image-20200705151419726" style="zoom:60%;"></p>
+<p>这里是具体的算法。</p>
+<p>Learning D：输入是文字和图像的pair，即$\{(c^1,x^1),…,(c^m,x^m)\}$，从（高斯）分布中取出noise $\{z^1,z^2…,z^m\}$，输入G，得到生成的图像 $\tilde x^i=G(c^i,z^i)$；从database中取出m个真实的图像数据 $\{\hat x^1,…,\hat x^m\}$，再输入discriminator D，不断调整$\theta_d$，使得得到的分数越大越好，</p>
+<script type="math/tex; mode=display">
+\tilde V =\frac{1}{m}\sum_{i=1}^m logD(c^i,x^i)+\frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\tilde x^i))
++ \frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\hat x^i))</script><p>其中$D(c^i,x^i)$表示真实图像所得到的分数，D的目标就是使真实图像获得的分数越大越好；而$D(c^i,\tilde x^i)$表示G生成的图像所得到的分数，应该越小越好，所以前面加了负号；而$D(c^i,\hat x^i)$表示生成了清晰的图像，但和condition不匹配，所以前面加了负号。后两个case都是给低分的情况。</p>
+<p>其他过程和之前的GAN差别不大，主要是计算低分数的情况多了一个case。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705153051152.png" alt="image-20200705153051152" style="zoom:67%;"></p>
+<h4 id="Conditional-GAN-Discriminator"><a href="#Conditional-GAN-Discriminator" class="headerlink" title="Conditional GAN - Discriminator"></a>Conditional GAN - Discriminator</h4><p>对于一般的discriminator架构，输入为图像和文字，输出为两部分的分数（x的真实性、x和condition是不是match）。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705154525712.png" alt="image-20200705154525712" style="zoom:60%;"></p>
+<p>有学者在其他论文中也提出了其他架构，而且效果还不错。首先有object输入<span style="color: green">network</span>，得出第一个分数，表示x是否真实；<span style="color: green">network</span>还会输出一个embedding，再和condition结合，输入<span style="color: blue">network</span>后得到另外一个分数，表示x和c是否match。</p>
+<p>选择第一种架构方法有一个缺点。前文我们提到CGAN会给低分的两种case：x和condition是match的，但生成的图像不好；x和condition是不match的，但生成的图像质量高。如果我们使用第一种架构，网络会比较confused，网络并不知道分数低的原因到底是哪一种case，有可能是图像不够realistic，也有可能是和condition不够match。但<span style="color: red">对于第二种架构，网络则可以清楚地知道到底是因为哪个原因导致的低分。</span></p>
+<p>下面是结果的展示，输入文字condition，输出对应的图像。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705191337832.png" alt="image-20200705191337832" style="zoom:60%;"></p>
+<h4 id="Stack-GAN"><a href="#Stack-GAN" class="headerlink" title="Stack GAN"></a>Stack GAN</h4><p>首先输入一段文字，这些文字先经过embedding的过程，再经过conditioning augmentation的过程（加入噪声），输入generator之后，会生成一张图像（$64\times 64$）；discriminator再来判断这个生成的image和输入的文字是不是match的；</p>
+<p>这里还有第二个generator，输入为刚才$64\times64$的图像和文字的embedding结果；再生成一张$256\times256$的图像；再把新生成的图像输入discriminator，看到底是不是realistic。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705191647515.png" alt="image-20200705191647515" style="zoom: 100%;"></p>
+<h4 id="Image-to-image"><a href="#Image-to-image" class="headerlink" title="Image-to-image"></a>Image-to-image</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>CGAN不仅可以输入一段文字产生一张图像，也可以是image-to-image，比如把简单的几何模型转化为真实的房屋模型，把灰度图转化为彩色图，</p>
+<p><img src="/2020/07/05/CGAN/image-20200705193817063.png" alt="image-20200705193817063"></p>
+<p>如果使用传统的监督学习的方法来完成这个任务，首先需要收集训练数据（几何模型图、对应的真实房屋图），训练network，output是一张图片，我们希望输出的图片和target越接近越好。由于network会产生多种多样的房子，最后的结果会取一个平均值，因此会产生一个非常模糊的图像。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705194028821.png" alt="image-20200705194028821" style="zoom:60%;"></p>
+<p>我们可以使用GAN来完成这个任务。首先把从distribution中sample出来的z和结构图作为G的输入，G会生成一张新的Image；再把Image和原来的结构图（一个pair）输入D，会输出一个分数scalar。可以发现GAN生成的图要相对清晰很多。</p>
+<p>但我们这时发现了一个新问题，GAN产生了一些原来的结构图中没有的东西，比如在图的左上角，产生了一个像是窗户或者天线的东西。这时我们可以加入一个新的constrain（真实的房屋图），希望generator产生的image和训练数据集中对应的图像也越靠近越好。</p>
+<p>这时generator的目标就有两个：产生出足够清晰可以骗过D的图像；产生的新图像和原来的target要接近。这样就会产生结果很好的图（GAN+close），图足够清晰，也不会产生一些奇怪的东西。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705195049882.png" alt="image-20200705195049882" style="zoom:60%;"></p>
+<h5 id="Patch-GAN"><a href="#Patch-GAN" class="headerlink" title="Patch GAN"></a>Patch GAN</h5><p>现在要生成的是一张很大的图像，如果这时discriminator的输入还是一整张大的图像，那么D要对其进行评分，就肯定需要更多的参数，很有可能产生overfiting或者训练所需的时间会很长。</p>
+<p>在这篇论文中，作者也对discriminator的设计进行了变化。discriminator只需要检查图中的一小部分，对这一小块图片来输出评价分数 。区域的大小也是需要调整的参数之一。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705200803367.png" alt="image-20200705200803367" style="zoom:60%;"></p>
+<h4 id="Speech-Enhancement"><a href="#Speech-Enhancement" class="headerlink" title="Speech Enhancement"></a>Speech Enhancement</h4><p>如果我们使用传统的深度学习方法来做语音增强，首先需要把纯净语音加上一些noise再输入CNN，不断地训练CNN，使其能够输出去噪后的纯净语音。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705201419793.png" alt="image-20200705201419793" style="zoom:60%;"></p>
+<p>直接产生同样会有语音频谱图比较模糊的情况，我们在这里也可以使用CGAN算法。</p>
+<p>输入为带noise的语音信号，G的输出为增强语音，增强语音和纯净语音之间应该越接近越好。discriminator的输入为增强语音和带噪语音，输出评价分数，看这个output是不是clean的，还要看output和noise这个pair是不是match的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705201744963.png" alt="image-20200705201744963" style="zoom:60%;"></p>
+<h4 id="Video-Generation"><a href="#Video-Generation" class="headerlink" title="Video Generation"></a>Video Generation</h4><p>输入一段video，让generator预测下一步会发生什么，产生对应的video；discriminator要同时考虑generator的input和output，可以把它们接到一起，变成一段完整的影片，让discriminator来判断到底是不是一个合理的影片。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705202357625.png" alt="image-20200705202357625" style="zoom:60%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Conditional GAN</tag>
+        <tag>CGAN</tag>
+        <tag>Speech Enhancement</tag>
+        <tag>Video Generation</tag>
+        <tag>Patch GAN</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Bert模型精讲</title>
     <url>/2020/07/13/Bert/</url>
     <content><![CDATA[<h4 id="Autoregressive-LM-与-Autoencoder-LM"><a href="#Autoregressive-LM-与-Autoencoder-LM" class="headerlink" title="Autoregressive LM 与 Autoencoder LM"></a>Autoregressive LM 与 Autoencoder LM</h4><p>Autoregressive语言模型：根据上文内容预测下一个可能跟随的单词，或者根据下文来预测前文的单词，但并不能同时根据上下文来预测单词。GPT是典型的自回归语言模型。ELMO虽然有两个方向，一个是自左向右的自回归语言模型，另一个是自右向左的自回归语言模型，由两个自回归语言模型组成，本质上还是自回归语言模型。</p>
@@ -366,81 +441,6 @@ w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="https://gitee.com/scarle
         <tag>AutoEncoder</tag>
         <tag>Denoising AutoEncoder</tag>
         <tag>Transformer</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>CCF-JSON查询</title>
-    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
-    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
-<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</span><br><span class="line">    <span class="keyword">int</span> n, m;</span><br><span class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</span><br><span class="line">    getchar();</span><br><span class="line">    <span class="keyword">while</span> (n--) &#123;</span><br><span class="line">        <span class="built_in">string</span> temp;</span><br><span class="line">        getline(<span class="built_in">cin</span>, temp);</span><br><span class="line">        json += temp;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</span><br><span class="line">    <span class="built_in">string</span> preHost;</span><br><span class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</span><br><span class="line">    <span class="built_in">string</span> key, value;</span><br><span class="line">    <span class="built_in">string</span> now_key;</span><br><span class="line">    <span class="built_in">string</span> temp_key;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</span><br><span class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</span><br><span class="line">            isvalue = <span class="literal">true</span>;</span><br><span class="line">            iskey = <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</span><br><span class="line">            isstring = <span class="literal">false</span>;</span><br><span class="line">            pre.push_back(key);</span><br><span class="line">            temp_key = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</span><br><span class="line">                    temp_key += pre[j];</span><br><span class="line">                    temp_key += <span class="string">"."</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</span><br><span class="line">            &#125;</span><br><span class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</span><br><span class="line">            preHost += key;</span><br><span class="line">            preHost += <span class="string">"."</span>;</span><br><span class="line">            key = <span class="string">""</span>;</span><br><span class="line">            iskey = <span class="literal">true</span>;</span><br><span class="line">            isvalue = <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</span><br><span class="line">            isvalue = <span class="literal">false</span>;</span><br><span class="line">            iskey = <span class="literal">true</span>;</span><br><span class="line">            i++;</span><br><span class="line">            temp_key = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</span><br><span class="line">                    temp_key += pre[j];</span><br><span class="line">                    temp_key += <span class="string">"."</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            temp_key+=key;</span><br><span class="line">            all[temp_key] = value;</span><br><span class="line"></span><br><span class="line">            preHost = <span class="string">""</span>;</span><br><span class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</span><br><span class="line">                pre.pop_back();</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</span><br><span class="line">            isvalue = <span class="literal">false</span>;</span><br><span class="line">            iskey = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">            temp_key = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</span><br><span class="line">                    temp_key += pre[j];</span><br><span class="line">                    temp_key += <span class="string">"."</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            temp_key+=key;</span><br><span class="line">            all[temp_key] = value;</span><br><span class="line"></span><br><span class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</span><br><span class="line">            isstring = <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</span><br><span class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</span><br><span class="line">        <span class="built_in">string</span> temp;</span><br><span class="line">        getline(<span class="built_in">cin</span>, temp);</span><br><span class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>CCF Answer</category>
-      </categories>
-      <tags>
-        <tag>CCF</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Conditional GAN (CGAN)</title>
-    <url>/2020/07/05/CGAN/</url>
-    <content><![CDATA[<p>对于一般的GAN，都是随机生成一个vector，然后输入GAN，再生成一张image，但我们并不能控制output。对于本文要讲述的CGAN，我们则可以操控其输出的结果。</p>
-<h4 id="Text-to-Image"><a href="#Text-to-Image" class="headerlink" title="Text-to-Image"></a>Text-to-Image</h4><p>对于传统的监督学习的方法，训练数据集是一些带有描述的图片，网络的input是一段文字，output则是一张图片，我们希望输出的图片和target越接近越好。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705145505825.png" alt="image-20200705145505825" style="zoom:60%;"></p>
-<p>如果现在网络的输入文字是“train”，网络会觉得正面的火车是对的，侧面的火车也是对的，网络最后会取这些值的一个平均值，因此会得到一个非常模糊的火车图片。</p>
-<h4 id="Conditional-GAN"><a href="#Conditional-GAN" class="headerlink" title="Conditional GAN"></a>Conditional GAN</h4><p>现在我们使用CGAN来完成这个任务。CGAN现在的generator的输入不仅有z，还有一个condition c（“train”），G的输出为$x=G(z,c)$；</p>
-<p>这时我们还使用原来的Discriminator，把x输入D，D可以对其进行评价分数scalar，对真实的图像输出为1，生成的图像输出为0。</p>
-<p>那么现在就出现了一个新问题，G可以完全不管输入的condition，只生成高质量的、接近真实的图像即可。比如我们把condition设置为“dog”，G如果生成一只猫的图像，这个图像很接近真实图像，那么就可以骗过discriminator。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705150242620.png" alt="image-20200705150242620" style="zoom:60%;"></p>
-<p>因此，这里的discriminator也要做出改变，需要把condition也作为D的其中一个输入。</p>
-<p>那么现在D输出的分数就有两部分组成：（1）x的真实性；（2）x是不是满足condition的条件。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
-<p>给低分0的两个case：（1）如果给出了正确的文字，但生成了模糊的图像；（2）虽然生成了清晰的图像，但和随机输入的文字（condition）是不匹配的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705151419726.png" alt="image-20200705151419726" style="zoom:60%;"></p>
-<p>这里是具体的算法。</p>
-<p>Learning D：输入是文字和图像的pair，即$\{(c^1,x^1),…,(c^m,x^m)\}$，从（高斯）分布中取出noise $\{z^1,z^2…,z^m\}$，输入G，得到生成的图像 $\tilde x^i=G(c^i,z^i)$；从database中取出m个真实的图像数据 $\{\hat x^1,…,\hat x^m\}$，再输入discriminator D，不断调整$\theta_d$，使得得到的分数越大越好，</p>
-<script type="math/tex; mode=display">
-\tilde V =\frac{1}{m}\sum_{i=1}^m logD(c^i,x^i)+\frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\tilde x^i))
-+ \frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\hat x^i))</script><p>其中$D(c^i,x^i)$表示真实图像所得到的分数，D的目标就是使真实图像获得的分数越大越好；而$D(c^i,\tilde x^i)$表示G生成的图像所得到的分数，应该越小越好，所以前面加了负号；而$D(c^i,\hat x^i)$表示生成了清晰的图像，但和condition不匹配，所以前面加了负号。后两个case都是给低分的情况。</p>
-<p>其他过程和之前的GAN差别不大，主要是计算低分数的情况多了一个case。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705153051152.png" alt="image-20200705153051152" style="zoom:67%;"></p>
-<h4 id="Conditional-GAN-Discriminator"><a href="#Conditional-GAN-Discriminator" class="headerlink" title="Conditional GAN - Discriminator"></a>Conditional GAN - Discriminator</h4><p>对于一般的discriminator架构，输入为图像和文字，输出为两部分的分数（x的真实性、x和condition是不是match）。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705154525712.png" alt="image-20200705154525712" style="zoom:60%;"></p>
-<p>有学者在其他论文中也提出了其他架构，而且效果还不错。首先有object输入<span style="color: green">network</span>，得出第一个分数，表示x是否真实；<span style="color: green">network</span>还会输出一个embedding，再和condition结合，输入<span style="color: blue">network</span>后得到另外一个分数，表示x和c是否match。</p>
-<p>选择第一种架构方法有一个缺点。前文我们提到CGAN会给低分的两种case：x和condition是match的，但生成的图像不好；x和condition是不match的，但生成的图像质量高。如果我们使用第一种架构，网络会比较confused，网络并不知道分数低的原因到底是哪一种case，有可能是图像不够realistic，也有可能是和condition不够match。但<span style="color: red">对于第二种架构，网络则可以清楚地知道到底是因为哪个原因导致的低分。</span></p>
-<p>下面是结果的展示，输入文字condition，输出对应的图像。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705191337832.png" alt="image-20200705191337832" style="zoom:60%;"></p>
-<h4 id="Stack-GAN"><a href="#Stack-GAN" class="headerlink" title="Stack GAN"></a>Stack GAN</h4><p>首先输入一段文字，这些文字先经过embedding的过程，再经过conditioning augmentation的过程（加入噪声），输入generator之后，会生成一张图像（$64\times 64$）；discriminator再来判断这个生成的image和输入的文字是不是match的；</p>
-<p>这里还有第二个generator，输入为刚才$64\times64$的图像和文字的embedding结果；再生成一张$256\times256$的图像；再把新生成的图像输入discriminator，看到底是不是realistic。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705191647515.png" alt="image-20200705191647515" style="zoom: 100%;"></p>
-<h4 id="Image-to-image"><a href="#Image-to-image" class="headerlink" title="Image-to-image"></a>Image-to-image</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>CGAN不仅可以输入一段文字产生一张图像，也可以是image-to-image，比如把简单的几何模型转化为真实的房屋模型，把灰度图转化为彩色图，</p>
-<p><img src="/2020/07/05/CGAN/image-20200705193817063.png" alt="image-20200705193817063"></p>
-<p>如果使用传统的监督学习的方法来完成这个任务，首先需要收集训练数据（几何模型图、对应的真实房屋图），训练network，output是一张图片，我们希望输出的图片和target越接近越好。由于network会产生多种多样的房子，最后的结果会取一个平均值，因此会产生一个非常模糊的图像。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705194028821.png" alt="image-20200705194028821" style="zoom:60%;"></p>
-<p>我们可以使用GAN来完成这个任务。首先把从distribution中sample出来的z和结构图作为G的输入，G会生成一张新的Image；再把Image和原来的结构图（一个pair）输入D，会输出一个分数scalar。可以发现GAN生成的图要相对清晰很多。</p>
-<p>但我们这时发现了一个新问题，GAN产生了一些原来的结构图中没有的东西，比如在图的左上角，产生了一个像是窗户或者天线的东西。这时我们可以加入一个新的constrain（真实的房屋图），希望generator产生的image和训练数据集中对应的图像也越靠近越好。</p>
-<p>这时generator的目标就有两个：产生出足够清晰可以骗过D的图像；产生的新图像和原来的target要接近。这样就会产生结果很好的图（GAN+close），图足够清晰，也不会产生一些奇怪的东西。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705195049882.png" alt="image-20200705195049882" style="zoom:60%;"></p>
-<h5 id="Patch-GAN"><a href="#Patch-GAN" class="headerlink" title="Patch GAN"></a>Patch GAN</h5><p>现在要生成的是一张很大的图像，如果这时discriminator的输入还是一整张大的图像，那么D要对其进行评分，就肯定需要更多的参数，很有可能产生overfiting或者训练所需的时间会很长。</p>
-<p>在这篇论文中，作者也对discriminator的设计进行了变化。discriminator只需要检查图中的一小部分，对这一小块图片来输出评价分数 。区域的大小也是需要调整的参数之一。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705200803367.png" alt="image-20200705200803367" style="zoom:60%;"></p>
-<h4 id="Speech-Enhancement"><a href="#Speech-Enhancement" class="headerlink" title="Speech Enhancement"></a>Speech Enhancement</h4><p>如果我们使用传统的深度学习方法来做语音增强，首先需要把纯净语音加上一些noise再输入CNN，不断地训练CNN，使其能够输出去噪后的纯净语音。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705201419793.png" alt="image-20200705201419793" style="zoom:60%;"></p>
-<p>直接产生同样会有语音频谱图比较模糊的情况，我们在这里也可以使用CGAN算法。</p>
-<p>输入为带noise的语音信号，G的输出为增强语音，增强语音和纯净语音之间应该越接近越好。discriminator的输入为增强语音和带噪语音，输出评价分数，看这个output是不是clean的，还要看output和noise这个pair是不是match的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705201744963.png" alt="image-20200705201744963" style="zoom:60%;"></p>
-<h4 id="Video-Generation"><a href="#Video-Generation" class="headerlink" title="Video Generation"></a>Video Generation</h4><p>输入一段video，让generator预测下一步会发生什么，产生对应的video；discriminator要同时考虑generator的input和output，可以把它们接到一起，变成一段完整的影片，让discriminator来判断到底是不是一个合理的影片。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705202357625.png" alt="image-20200705202357625" style="zoom:60%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Conditional GAN</tag>
-        <tag>CGAN</tag>
-        <tag>Speech Enhancement</tag>
-        <tag>Video Generation</tag>
-        <tag>Patch GAN</tag>
       </tags>
   </entry>
   <entry>
@@ -627,68 +627,6 @@ u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\
       </tags>
   </entry>
   <entry>
-    <title>Deep Autoencoder</title>
-    <url>/2020/06/29/Deep-autoencoder/</url>
-    <content><![CDATA[<h4 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h4><p>对于输入大小为$28\times28$的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简（compact）的特征；</p>
-<p>但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；</p>
-<p>那么我们现在就先来做一个decoder，把code恢复成一张image；</p>
-<p>decoder和encoder单独是没办法训练的，因为是无监督学习，因此现在我们将这两者一起学习</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629094326636.png" alt="image-20200629094326636" style="zoom:50%;"></p>
-<h4 id="Recap-PCA"><a href="#Recap-PCA" class="headerlink" title="Recap: PCA"></a>Recap: PCA</h4><p>这里先回顾一下<a href="https://scarleatt.github.io/2020/06/28/dimension-reduction/" target="_blank" rel="noopener">PCA</a>，对于输入的图像$x$为$784$维，经过PCA降维，可以降低到324维的图像$\hat x$，在encoder和decoder的学习过程中，应达到的目标是最小化$(x-\hat x)^2$，这个结构可以看成是具有一个hidden layer的network</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629100232021.png" alt="image-20200629100232021" style="zoom:50%;"></p>
-<h4 id="Deep-Auto-encoder"><a href="#Deep-Auto-encoder" class="headerlink" title="Deep Auto-encoder"></a>Deep Auto-encoder</h4><h5 id="Structure"><a href="#Structure" class="headerlink" title="Structure"></a>Structure</h5><p>中间的hidden layer也可以不止一个，也可以是多个的hidden layer，这种结构就称作deep auto-encoder</p>
-<p><span style="color: red">注：encoder和decoder的结构不一定非得是对称的。</span></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629101531636.png" alt="image-20200629101531636" style="zoom:50%;"></p>
-<h5 id="PCA-vs-Deep-Auto-encoder"><a href="#PCA-vs-Deep-Auto-encoder" class="headerlink" title="PCA. vs Deep Auto-encoder"></a>PCA. vs Deep Auto-encoder</h5><p>对于下图中的图像(0,1,2,3,4)，如果我们使用PCA，只有中间一个hidden layer，先从784维降到30维，再从30维恢复到784维，可以发现图像变得比较模糊；</p>
-<p>如果使用deep auto-encoder，先从784到1000，1000到500，500到250，250到300，再使用类似的encoder恢复图像，可以发现结果图像非常清晰</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629101748853.png" alt="image-20200629101748853" style="zoom:50%;"></p>
-<p>如果我们先使用PCA进行降维，把原图从784降到2维，对二维的数据进行可视化，可以发现不同的digit（不同的颜色代表不同的数字）都叠在一起了；</p>
-<p>如果使用deep autoencoder，可以发现这个数字都是分开的</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629102817764.png" alt="image-20200629102817764" style="zoom:50%;"></p>
-<h4 id="Text-Retrieval"><a href="#Text-Retrieval" class="headerlink" title="Text Retrieval"></a>Text Retrieval</h4><p>下图中蓝色的圆点都表示一个document，我们将输入的query也加入这个document，再计算查询的词汇query和每个document之间的inner product或similarity等，距离最近的document，similarity的值是最大的，因此会retrieval距离红色箭头最近的其他两个蓝色箭头</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629103259176.png" alt="image-20200629103259176" style="zoom:50%;"></p>
-<p>还有另外一种方法，使用一个vector来表示所有的词汇，vector对应的值就是每个character出现的次数；但这种方式没有考虑原来的语义顺序，每个character都是independent的</p>
-<p>在下图中，假设bag里面有2000个词汇，把输入的document或query变成对应的vector，再输入相应的encoder，降维成2维，对这二维的数据进行可视化，如右图所示，不同的颜色代表不同的document；</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629104843900.png" alt="image-20200629104843900" style="zoom:50%;"></p>
-<p>如果我们现在输入一个query，再降维到二维，可以发现和图中对应的document是有关的，我们就可以看到query所属的类别是Energy market</p>
-<p>但用LSA就得不到对应的结果</p>
-<h4 id="Similar-Image-Search"><a href="#Similar-Image-Search" class="headerlink" title="Similar Image Search"></a>Similar Image Search</h4><p>以图找图，如果我们只是做pixel上的相似程度，那么我们可以得到以下的结果，迈克杰克逊和马蹄铁也很像，这显然不符合常理</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110009994.png" alt="image-20200629110009994" style="zoom:50%;"></p>
-<p>我们可以把输入的image经过deep auto-encoder，变成一个code，再去做搜寻；由于auto-encoder是unsupervised learning，收集多少数据都行，不缺数据</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110134069.png" alt="image-20200629110134069" style="zoom:50%;"></p>
-<p>用deep auto-encoder来找类似迈克杰克逊，也可以得到更好的结果（至少全是人脸 ）</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110527622.png" alt="image-20200629110527622" style="zoom:50%;"></p>
-<h4 id="Pre-training-DNN"><a href="#Pre-training-DNN" class="headerlink" title="Pre-training DNN"></a>Pre-training DNN</h4><p>autoencoder也可以用到network的pre-training过程，来初始化所需要的weight；在下图中，如果我们要对第一个hidden layer的weight进行初始化，那么我们可以使用autoencoder，先将784维到1000维，再进行reconstruct，使1000维降到784维，来使$x,\hat x$之间的差值最小</p>
-<p>但这样可能会出现一个问题，由于1000维比784维更高维，autoencoder很可能将input直接embed到1000维里，再进行恢复，这样很可能network什么都没有学到；</p>
-<p>对于这个问题，我们可以把1000维再加上一个regularization，比如L1，这1000维的数据中有某些维必须是为0的，这样就可以避免autoencoder直接将input进行embed</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110742780.png" alt="image-20200629110742780" style="zoom:50%;"></p>
-<p>我们可以学习这样的一个autoencoder，先将input转化成一个1000维的vector，再把这个vector转化为<span style="color: green">1000维的code</span>，再把这个code转化为1000维的vector；使input和output越接近越好，<strong>把$W^2$的值保存下来</strong>，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629111953318.png" alt="image-20200629111953318" style="zoom:50%;"></p>
-<p>再继续下一个layer，使用第三个autoencoder</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629112400780.png" alt="image-20200629112400780" style="zoom:50%;"></p>
-<p>学习到$W^1,W^2,W^3$之后，就把这个weight作为初始值，$W^4$则进行random init，再使用<span style="color: red">back propagation</span>进行fine-tune</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629112513885.png" alt="image-20200629112513885" style="zoom:50%;"></p>
-<p><span style="color: red">如果我们有大量的unlabeled data，labeled data只有很小一部分，那么我们就可以通过这种无监督学习的方式来初始化weight，再使用剩下的label data来对network进行fine-tune即可</span></p>
-<h4 id="De-noising-auto-encoder"><a href="#De-noising-auto-encoder" class="headerlink" title="De-noising auto-encoder"></a>De-noising auto-encoder</h4><p>对于原来的input x，我们先加入一些noise得到$x’$，进行encode之后再进行decode，使之和最早的input之间的差值最小；encoder现在不仅学习到了encode这件事，还学习到了把noise过滤掉这件事</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629113151447.png" alt="image-20200629113151447" style="zoom:50%;"></p>
-<h4 id="Auto-encoder-for-CNN"><a href="#Auto-encoder-for-CNN" class="headerlink" title="Auto-encoder for CNN"></a>Auto-encoder for CNN</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629114519998.png" alt="image-20200629114519998" style="zoom:50%;"></p>
-<h5 id="CNN-Unpooling"><a href="#CNN-Unpooling" class="headerlink" title="CNN -Unpooling"></a>CNN -Unpooling</h5><p>在pooling时，会选择四个方框中的最大值，并记住最大值的location；</p>
-<p>在upooling时，就会用到上面的location</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629114730398.png" alt="image-20200629114730398" style="zoom:50%;"></p>
-<h5 id="Deconvolution"><a href="#Deconvolution" class="headerlink" title="Deconvolution"></a>Deconvolution</h5><p>Deconvolution其实就是在做convolution，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629114919151.png" alt="image-20200629114919151" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Deep Autoencoder</tag>
-        <tag>Autoencoder</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Tips for Training DNN</title>
     <url>/2020/06/07/DNN-tip/</url>
     <content><![CDATA[<blockquote>
@@ -861,6 +799,163 @@ L2:\ w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><ul>
       </tags>
   </entry>
   <entry>
+    <title>Deep Autoencoder</title>
+    <url>/2020/06/29/Deep-autoencoder/</url>
+    <content><![CDATA[<h4 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h4><p>对于输入大小为$28\times28$的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简（compact）的特征；</p>
+<p>但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；</p>
+<p>那么我们现在就先来做一个decoder，把code恢复成一张image；</p>
+<p>decoder和encoder单独是没办法训练的，因为是无监督学习，因此现在我们将这两者一起学习</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629094326636.png" alt="image-20200629094326636" style="zoom:50%;"></p>
+<h4 id="Recap-PCA"><a href="#Recap-PCA" class="headerlink" title="Recap: PCA"></a>Recap: PCA</h4><p>这里先回顾一下<a href="https://scarleatt.github.io/2020/06/28/dimension-reduction/" target="_blank" rel="noopener">PCA</a>，对于输入的图像$x$为$784$维，经过PCA降维，可以降低到324维的图像$\hat x$，在encoder和decoder的学习过程中，应达到的目标是最小化$(x-\hat x)^2$，这个结构可以看成是具有一个hidden layer的network</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629100232021.png" alt="image-20200629100232021" style="zoom:50%;"></p>
+<h4 id="Deep-Auto-encoder"><a href="#Deep-Auto-encoder" class="headerlink" title="Deep Auto-encoder"></a>Deep Auto-encoder</h4><h5 id="Structure"><a href="#Structure" class="headerlink" title="Structure"></a>Structure</h5><p>中间的hidden layer也可以不止一个，也可以是多个的hidden layer，这种结构就称作deep auto-encoder</p>
+<p><span style="color: red">注：encoder和decoder的结构不一定非得是对称的。</span></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629101531636.png" alt="image-20200629101531636" style="zoom:50%;"></p>
+<h5 id="PCA-vs-Deep-Auto-encoder"><a href="#PCA-vs-Deep-Auto-encoder" class="headerlink" title="PCA. vs Deep Auto-encoder"></a>PCA. vs Deep Auto-encoder</h5><p>对于下图中的图像(0,1,2,3,4)，如果我们使用PCA，只有中间一个hidden layer，先从784维降到30维，再从30维恢复到784维，可以发现图像变得比较模糊；</p>
+<p>如果使用deep auto-encoder，先从784到1000，1000到500，500到250，250到300，再使用类似的encoder恢复图像，可以发现结果图像非常清晰</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629101748853.png" alt="image-20200629101748853" style="zoom:50%;"></p>
+<p>如果我们先使用PCA进行降维，把原图从784降到2维，对二维的数据进行可视化，可以发现不同的digit（不同的颜色代表不同的数字）都叠在一起了；</p>
+<p>如果使用deep autoencoder，可以发现这个数字都是分开的</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629102817764.png" alt="image-20200629102817764" style="zoom:50%;"></p>
+<h4 id="Text-Retrieval"><a href="#Text-Retrieval" class="headerlink" title="Text Retrieval"></a>Text Retrieval</h4><p>下图中蓝色的圆点都表示一个document，我们将输入的query也加入这个document，再计算查询的词汇query和每个document之间的inner product或similarity等，距离最近的document，similarity的值是最大的，因此会retrieval距离红色箭头最近的其他两个蓝色箭头</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629103259176.png" alt="image-20200629103259176" style="zoom:50%;"></p>
+<p>还有另外一种方法，使用一个vector来表示所有的词汇，vector对应的值就是每个character出现的次数；但这种方式没有考虑原来的语义顺序，每个character都是independent的</p>
+<p>在下图中，假设bag里面有2000个词汇，把输入的document或query变成对应的vector，再输入相应的encoder，降维成2维，对这二维的数据进行可视化，如右图所示，不同的颜色代表不同的document；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629104843900.png" alt="image-20200629104843900" style="zoom:50%;"></p>
+<p>如果我们现在输入一个query，再降维到二维，可以发现和图中对应的document是有关的，我们就可以看到query所属的类别是Energy market</p>
+<p>但用LSA就得不到对应的结果</p>
+<h4 id="Similar-Image-Search"><a href="#Similar-Image-Search" class="headerlink" title="Similar Image Search"></a>Similar Image Search</h4><p>以图找图，如果我们只是做pixel上的相似程度，那么我们可以得到以下的结果，迈克杰克逊和马蹄铁也很像，这显然不符合常理</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110009994.png" alt="image-20200629110009994" style="zoom:50%;"></p>
+<p>我们可以把输入的image经过deep auto-encoder，变成一个code，再去做搜寻；由于auto-encoder是unsupervised learning，收集多少数据都行，不缺数据</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110134069.png" alt="image-20200629110134069" style="zoom:50%;"></p>
+<p>用deep auto-encoder来找类似迈克杰克逊，也可以得到更好的结果（至少全是人脸 ）</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110527622.png" alt="image-20200629110527622" style="zoom:50%;"></p>
+<h4 id="Pre-training-DNN"><a href="#Pre-training-DNN" class="headerlink" title="Pre-training DNN"></a>Pre-training DNN</h4><p>autoencoder也可以用到network的pre-training过程，来初始化所需要的weight；在下图中，如果我们要对第一个hidden layer的weight进行初始化，那么我们可以使用autoencoder，先将784维到1000维，再进行reconstruct，使1000维降到784维，来使$x,\hat x$之间的差值最小</p>
+<p>但这样可能会出现一个问题，由于1000维比784维更高维，autoencoder很可能将input直接embed到1000维里，再进行恢复，这样很可能network什么都没有学到；</p>
+<p>对于这个问题，我们可以把1000维再加上一个regularization，比如L1，这1000维的数据中有某些维必须是为0的，这样就可以避免autoencoder直接将input进行embed</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110742780.png" alt="image-20200629110742780" style="zoom:50%;"></p>
+<p>我们可以学习这样的一个autoencoder，先将input转化成一个1000维的vector，再把这个vector转化为<span style="color: green">1000维的code</span>，再把这个code转化为1000维的vector；使input和output越接近越好，<strong>把$W^2$的值保存下来</strong>，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629111953318.png" alt="image-20200629111953318" style="zoom:50%;"></p>
+<p>再继续下一个layer，使用第三个autoencoder</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629112400780.png" alt="image-20200629112400780" style="zoom:50%;"></p>
+<p>学习到$W^1,W^2,W^3$之后，就把这个weight作为初始值，$W^4$则进行random init，再使用<span style="color: red">back propagation</span>进行fine-tune</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629112513885.png" alt="image-20200629112513885" style="zoom:50%;"></p>
+<p><span style="color: red">如果我们有大量的unlabeled data，labeled data只有很小一部分，那么我们就可以通过这种无监督学习的方式来初始化weight，再使用剩下的label data来对network进行fine-tune即可</span></p>
+<h4 id="De-noising-auto-encoder"><a href="#De-noising-auto-encoder" class="headerlink" title="De-noising auto-encoder"></a>De-noising auto-encoder</h4><p>对于原来的input x，我们先加入一些noise得到$x’$，进行encode之后再进行decode，使之和最早的input之间的差值最小；encoder现在不仅学习到了encode这件事，还学习到了把noise过滤掉这件事</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629113151447.png" alt="image-20200629113151447" style="zoom:50%;"></p>
+<h4 id="Auto-encoder-for-CNN"><a href="#Auto-encoder-for-CNN" class="headerlink" title="Auto-encoder for CNN"></a>Auto-encoder for CNN</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629114519998.png" alt="image-20200629114519998" style="zoom:50%;"></p>
+<h5 id="CNN-Unpooling"><a href="#CNN-Unpooling" class="headerlink" title="CNN -Unpooling"></a>CNN -Unpooling</h5><p>在pooling时，会选择四个方框中的最大值，并记住最大值的location；</p>
+<p>在upooling时，就会用到上面的location</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629114730398.png" alt="image-20200629114730398" style="zoom:50%;"></p>
+<h5 id="Deconvolution"><a href="#Deconvolution" class="headerlink" title="Deconvolution"></a>Deconvolution</h5><p>Deconvolution其实就是在做convolution，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629114919151.png" alt="image-20200629114919151" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Deep Autoencoder</tag>
+        <tag>Autoencoder</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Explainable Machine Learning</title>
+    <url>/2020/06/12/Explainable-AI/</url>
+    <content><![CDATA[<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p>机器不仅要告诉我们结果cat，还要告诉我们为什么 </p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611112308714.png" alt="image-20200611112308714" style="zoom:50%;"></p>
+<h5 id="Why-we-need-Explainable-ML"><a href="#Why-we-need-Explainable-ML" class="headerlink" title="Why we need Explainable ML?"></a>Why we need Explainable ML?</h5><p><u>我们不仅需要机器结果的精确度，还需要进行模型诊断，看机器学习得怎么样；有的任务精确度很高，但实际上机器什么都没学到</u></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611112911240.png" alt="image-20200611112911240" style="zoom:50%;"></p>
+<p>有模型诊断后，我们就可以根据模型诊断的结果再来调整我们的模型</p>
+<h5 id="Interpretable-v-s-Powerful"><a href="#Interpretable-v-s-Powerful" class="headerlink" title="Interpretable v.s. Powerful"></a>Interpretable v.s. Powerful</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611195115774.png" alt="image-20200611195115774" style="zoom:50%;"></p>
+<p>那么有没有model是Interpretable，也是powerful的呢 ？</p>
+<p>决策树可以interpretable，也是比较powerful的；对于第一个分支节点，“这些动物呼吸空气吗？”，就包含了interpretable的信息</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611195220007.png" alt="image-20200611195220007" style="zoom:50%;"></p>
+<p>当分支特别多的时候，决策树的表现也会很差</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611195426930.png" alt="image-20200611195426930" style="zoom:50%;"></p>
+<h4 id="Local-Explanation"><a href="#Local-Explanation" class="headerlink" title="Local Explanation"></a>Local Explanation</h4><h5 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h5><p>对于输入的x，我们将其分成components $\{x_1,…,x_n,…x_N\}$，每个component由一个像素，或者一小块组成</p>
+<p>我们现在的目标是知道每个component对making the decision的重要性有多少，那么我们可以通过remove或者modify其中一个component的值，看此时的decision会有什么变化</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611200230303.png" alt="image-20200611200230303" style="zoom:50%;"></p>
+<p>把灰色方块放到图像中，覆盖图像的一小部分；如果我们把灰色方块放到下图中的红色区域，那么对解释的结果影响不大，第一幅图还是一只狗</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611200829405.png" alt="image-20200611200829405" style="zoom:50%;"></p>
+<p>还有另一种方法</p>
+<p>对于输入的$\{x_1,…,x_n,..,x_N\}$，对于其中的某个关键的pixel $x_n$加上$\Delta x$，这个pixel对我们识别这是不是一只狗具有很重要的作用</p>
+<p>那么我们就可以用$\frac{\Delta y}{\Delta x}$来表示这个小小的扰动对y的影响，可以通过$\frac{\partial y_k}{\partial x_n}$来进行计算，表示$y_k$对$x_n$的偏微分，最后取绝对值，表示某一个pixel对现在y影响的大小</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611214135944.png" alt="image-20200611214135944" style="zoom:50%;"></p>
+<p>在上图中，下半部分由3幅图saliency map，亮度越大，绝对值就越大，亮度越大的地方就表示该pixel对结果的影响越大</p>
+<h5 id="Limitation-of-Gradient-based-Approaches"><a href="#Limitation-of-Gradient-based-Approaches" class="headerlink" title="Limitation of Gradient based Approaches"></a>Limitation of Gradient based Approaches</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611220206992.png" alt="image-20200611220206992" style="zoom:50%;"></p>
+<h5 id="Attack-Interpretation"><a href="#Attack-Interpretation" class="headerlink" title="Attack Interpretation"></a>Attack Interpretation</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611221032938.png" alt="image-20200611221032938" style="zoom:50%;"></p>
+<h4 id="Global-Explanation"><a href="#Global-Explanation" class="headerlink" title="Global Explanation"></a>Global Explanation</h4><p>Interprete the whole Model</p>
+<h5 id="Activation-Minimization-review"><a href="#Activation-Minimization-review" class="headerlink" title="Activation Minimization (review)"></a><strong>Activation Minimization</strong> (review)</h5><p>让我们先review一下activation minimization，现在我们的目标是找到一个$x^*$，使得输出的值$y_i$最大</p>
+<p>我们可以加入一些噪声，加上噪声后人并不能识别出来，但机器可以识别出来，看出来下图中的噪声是0 1 2 3 4 5 6 7 8</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611221428166.png" alt="image-20200611221428166" style="zoom:50%;"></p>
+<p>之前我们的目标是找到一个image，使得输出的y达到最大值；现在我们的目标不仅是找到x使输出y达到最大值，还需要把image变得更像是一个digit，不像左边那个图，几乎全部的像素点都是白色，右边的图只有和输出的digit相关的pixel才是白色</p>
+<p>这里我们通过加入了一个新的限制$R(x)$来实现，可以表示图像和digit的相似度</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611223152859.png" alt="image-20200611223152859" style="zoom:50%;"></p>
+<h5 id="Constraint-from-Generator"><a href="#Constraint-from-Generator" class="headerlink" title="Constraint from Generator"></a>Constraint from Generator</h5><p>如下图所示，我们输入一个低维的vector z到generator里面，输出Image x；</p>
+<p>现在我们将生成的Image x再输入Image classifier，输出分类结果$y_i$，那么我们现在的目标就是找到$z^*$，使得属于那个类别的可能性$y_i$最大</p>
+<script type="math/tex; mode=display">
+z^*=arg \ max y_i</script><p>找到最好的$z^<em>$，再输入Generator，根据$x^</em>=G(z^<em>)$得出$x^</em>$，产生一个好的Image</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612105833703.png" alt="image-20200612105833703" style="zoom:50%;"></p>
+<p>结果展示。现在你问机器蚂蚁长什么样子呢？机器就会给你画一堆蚂蚁的图片出来，再放到classifier里面，得出分类结果到底是火山还是蚂蚁</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612113355921.png" alt="image-20200612113355921" style="zoom:50%;"></p>
+<h4 id="Using-a-model-to-explain-another"><a href="#Using-a-model-to-explain-another" class="headerlink" title="Using a model to explain another"></a>Using a model to explain another</h4><p>现在我们使用一个interpretable model来模仿另外一个uninterpretable model；下图中的Black Box为uninterpretable model，比如Neural Network，蓝色方框是一个interpretable model，比如Linear model；现在我们的目标是使用相同的输入$x^1,x^2,…,x^N$，使linear model和Neural Network有相近的输出</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612155736839.png" alt="image-20200612155736839" style="zoom:50%;"></p>
+<p>实际上并不能使用linear model来模拟整个neural network，但可以用来模拟其中一个local region</p>
+<h5 id="Local-Interpretable-Model-Agnostic-Explanations-LIME"><a href="#Local-Interpretable-Model-Agnostic-Explanations-LIME" class="headerlink" title="Local Interpretable Model-Agnostic Explanations (LIME)"></a>Local Interpretable Model-Agnostic Explanations (LIME)</h5><p><strong>General</strong></p>
+<p>下图中input为x，output为y，都是一维的，表示Black Box中x和y的关系，由于我们并不能用linear model来模拟整个neural network，但可以用来模拟其中一个local region</p>
+<ol>
+<li><p>首先给出要explain的point，代入black box里面</p>
+</li>
+<li><p>在第三个蓝色point（我们想要模拟的区域）周围sample附近的point，nearby的区域不同，结果也会不同</p>
+</li>
+<li><p>使用linear model来模拟neural network在这个区域的行为</p>
+</li>
+<li><p>得知了该区域的linear model之后，我们就可以知道在该区域x和y的关系，即x越大，y越小，也就interpret了原来的neural network在这部分区域的行为</p>
+</li>
+</ol>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612161607923.png" alt="image-20200612161607923" style="zoom:50%;"></p>
+<p>那么到底什么算是nearby呢？<u>用不同的方法进行sample，结果不太一样。</u>对于下图中的region，可以看到离第三个蓝色point的距离很远，取得的效果就非常不好了</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612163829515.png" alt="image-20200612163829515" style="zoom:50%;"></p>
+<p><strong>LIME-Image</strong></p>
+<p>刚才说了general的情况，下面我们讲解LIME应用于image的情况</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612164116470.png" alt="image-20200612164116470" style="zoom:50%;"></p>
+<ol>
+<li>首先需要一张需要解释的image；为什么这张图片可以被classify为树蛙？</li>
+<li>sample at the nearby：首先把image分成多个segment，再随机去掉图中的一些segment，就得到了不同的新图片，这些新的图片就是sample的结果；再把这些新生成的图片输入black box，得到新图片是frog的可能性；</li>
+<li>fit with linear model：即找到一个linear model来fit第3步输出的结果；先extract生成的新图片的特征，再把这些特征输入linear model；</li>
+</ol>
+<p>Q：那么如何将image转化为一个vector呢？</p>
+<p>A：这里我们将image中的每个segment使用$x_i$来表示，其中$i=1,…,m,…,M$，M为segment的数量；$x_i$为1，表示当前segment被deleted，如果为0，表示exist；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612165520599.png" alt="image-20200612165520599" style="zoom:50%;"></p>
+<p>4.$\ $Interpret the model：对于学习出来的linear model，我们就可以对其进行interpret；首先需要将$x_i$和y的关系用一个公式表示出来，即</p>
+<script type="math/tex; mode=display">
+y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情况：</p>
+<ul>
+<li>$w_m\approx 0$，segment $x_m$被认为对分类为frog没有影响；</li>
+<li>$w_m&gt; 0$， $x_m$对图片分类为frog是有正面的影响的；</li>
+<li>$w_m&lt;0$， 看到这个segment，反而会让机器认为图片不是frog</li>
+</ul>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612170336857.png" alt="image-20200612170336857" style="zoom:50%;"></p>
+<h5 id="Decision-Tree"><a href="#Decision-Tree" class="headerlink" title="Decision Tree"></a>Decision Tree</h5><p>如果我们用不限制深度的decision tree，那么我们就可以使用decision tree来模拟black box（neural network），使两者的输出相近</p>
+<p>但decision tree的深度不可能是没有限制的。这里我们设neural network的参数为$\theta$，decision tree的参数为$T_\theta$，使用$O(T_\theta)$来表示$T_\theta$的复杂度，复杂度可以用$T_\theta$的深度来表示，也可以用neural的个数来表示；<u>现在我们的目标不仅是使两者输出相近，还需要使$O(T_\theta)$的值最小化</u></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612171916382.png" alt="image-20200612171916382" style="zoom:50%;"></p>
+<p>那么我们如何来实现使$O(T_\theta)$越小越好呢？</p>
+<p>如下图所示，我们首先训练一个network，这个network可以很容易地被decision tree解释，使decision tree的复杂度没有那么高；这里我们加入了一个正则项$\lambda O(T_\theta)$，在训练network的同时，不仅要最小化loss function，还需要使$O(T_\theta)$的值尽量小，这时需要找到的network参数为$\theta^*$，</p>
+<script type="math/tex; mode=display">
+\theta^*=arg\ {\rm min}\ L(\theta) + \lambda O(T_\theta)</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612172838929.png" alt="image-20200612172838929" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>explainable machine learning</tag>
+        <tag>LIME</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Evaluation of Generative Models</title>
     <url>/2020/07/17/GAN-evalution/</url>
     <content><![CDATA[<p>本文主要叙述了几种评价GAN生成结果好坏的方法。首先叙述了使用传统的likelihood，由于传统的likelihood方法有一些局限性，本文接着使用了Inception Score的思想，来对GAN进行评价。</p>
@@ -980,101 +1075,6 @@ z^*=arg\mathop{\rm min}_z U(G(z))+\lambda_1||z-z_0||^2-\lambda_2D(G(z))</script>
         <tag>GAN</tag>
         <tag>Autoencoder</tag>
         <tag>Intelligent Photo Editing</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Explainable Machine Learning</title>
-    <url>/2020/06/12/Explainable-AI/</url>
-    <content><![CDATA[<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p>机器不仅要告诉我们结果cat，还要告诉我们为什么 </p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611112308714.png" alt="image-20200611112308714" style="zoom:50%;"></p>
-<h5 id="Why-we-need-Explainable-ML"><a href="#Why-we-need-Explainable-ML" class="headerlink" title="Why we need Explainable ML?"></a>Why we need Explainable ML?</h5><p><u>我们不仅需要机器结果的精确度，还需要进行模型诊断，看机器学习得怎么样；有的任务精确度很高，但实际上机器什么都没学到</u></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611112911240.png" alt="image-20200611112911240" style="zoom:50%;"></p>
-<p>有模型诊断后，我们就可以根据模型诊断的结果再来调整我们的模型</p>
-<h5 id="Interpretable-v-s-Powerful"><a href="#Interpretable-v-s-Powerful" class="headerlink" title="Interpretable v.s. Powerful"></a>Interpretable v.s. Powerful</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611195115774.png" alt="image-20200611195115774" style="zoom:50%;"></p>
-<p>那么有没有model是Interpretable，也是powerful的呢 ？</p>
-<p>决策树可以interpretable，也是比较powerful的；对于第一个分支节点，“这些动物呼吸空气吗？”，就包含了interpretable的信息</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611195220007.png" alt="image-20200611195220007" style="zoom:50%;"></p>
-<p>当分支特别多的时候，决策树的表现也会很差</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611195426930.png" alt="image-20200611195426930" style="zoom:50%;"></p>
-<h4 id="Local-Explanation"><a href="#Local-Explanation" class="headerlink" title="Local Explanation"></a>Local Explanation</h4><h5 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h5><p>对于输入的x，我们将其分成components $\{x_1,…,x_n,…x_N\}$，每个component由一个像素，或者一小块组成</p>
-<p>我们现在的目标是知道每个component对making the decision的重要性有多少，那么我们可以通过remove或者modify其中一个component的值，看此时的decision会有什么变化</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611200230303.png" alt="image-20200611200230303" style="zoom:50%;"></p>
-<p>把灰色方块放到图像中，覆盖图像的一小部分；如果我们把灰色方块放到下图中的红色区域，那么对解释的结果影响不大，第一幅图还是一只狗</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611200829405.png" alt="image-20200611200829405" style="zoom:50%;"></p>
-<p>还有另一种方法</p>
-<p>对于输入的$\{x_1,…,x_n,..,x_N\}$，对于其中的某个关键的pixel $x_n$加上$\Delta x$，这个pixel对我们识别这是不是一只狗具有很重要的作用</p>
-<p>那么我们就可以用$\frac{\Delta y}{\Delta x}$来表示这个小小的扰动对y的影响，可以通过$\frac{\partial y_k}{\partial x_n}$来进行计算，表示$y_k$对$x_n$的偏微分，最后取绝对值，表示某一个pixel对现在y影响的大小</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611214135944.png" alt="image-20200611214135944" style="zoom:50%;"></p>
-<p>在上图中，下半部分由3幅图saliency map，亮度越大，绝对值就越大，亮度越大的地方就表示该pixel对结果的影响越大</p>
-<h5 id="Limitation-of-Gradient-based-Approaches"><a href="#Limitation-of-Gradient-based-Approaches" class="headerlink" title="Limitation of Gradient based Approaches"></a>Limitation of Gradient based Approaches</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611220206992.png" alt="image-20200611220206992" style="zoom:50%;"></p>
-<h5 id="Attack-Interpretation"><a href="#Attack-Interpretation" class="headerlink" title="Attack Interpretation"></a>Attack Interpretation</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611221032938.png" alt="image-20200611221032938" style="zoom:50%;"></p>
-<h4 id="Global-Explanation"><a href="#Global-Explanation" class="headerlink" title="Global Explanation"></a>Global Explanation</h4><p>Interprete the whole Model</p>
-<h5 id="Activation-Minimization-review"><a href="#Activation-Minimization-review" class="headerlink" title="Activation Minimization (review)"></a><strong>Activation Minimization</strong> (review)</h5><p>让我们先review一下activation minimization，现在我们的目标是找到一个$x^*$，使得输出的值$y_i$最大</p>
-<p>我们可以加入一些噪声，加上噪声后人并不能识别出来，但机器可以识别出来，看出来下图中的噪声是0 1 2 3 4 5 6 7 8</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611221428166.png" alt="image-20200611221428166" style="zoom:50%;"></p>
-<p>之前我们的目标是找到一个image，使得输出的y达到最大值；现在我们的目标不仅是找到x使输出y达到最大值，还需要把image变得更像是一个digit，不像左边那个图，几乎全部的像素点都是白色，右边的图只有和输出的digit相关的pixel才是白色</p>
-<p>这里我们通过加入了一个新的限制$R(x)$来实现，可以表示图像和digit的相似度</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611223152859.png" alt="image-20200611223152859" style="zoom:50%;"></p>
-<h5 id="Constraint-from-Generator"><a href="#Constraint-from-Generator" class="headerlink" title="Constraint from Generator"></a>Constraint from Generator</h5><p>如下图所示，我们输入一个低维的vector z到generator里面，输出Image x；</p>
-<p>现在我们将生成的Image x再输入Image classifier，输出分类结果$y_i$，那么我们现在的目标就是找到$z^*$，使得属于那个类别的可能性$y_i$最大</p>
-<script type="math/tex; mode=display">
-z^*=arg \ max y_i</script><p>找到最好的$z^<em>$，再输入Generator，根据$x^</em>=G(z^<em>)$得出$x^</em>$，产生一个好的Image</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612105833703.png" alt="image-20200612105833703" style="zoom:50%;"></p>
-<p>结果展示。现在你问机器蚂蚁长什么样子呢？机器就会给你画一堆蚂蚁的图片出来，再放到classifier里面，得出分类结果到底是火山还是蚂蚁</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612113355921.png" alt="image-20200612113355921" style="zoom:50%;"></p>
-<h4 id="Using-a-model-to-explain-another"><a href="#Using-a-model-to-explain-another" class="headerlink" title="Using a model to explain another"></a>Using a model to explain another</h4><p>现在我们使用一个interpretable model来模仿另外一个uninterpretable model；下图中的Black Box为uninterpretable model，比如Neural Network，蓝色方框是一个interpretable model，比如Linear model；现在我们的目标是使用相同的输入$x^1,x^2,…,x^N$，使linear model和Neural Network有相近的输出</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612155736839.png" alt="image-20200612155736839" style="zoom:50%;"></p>
-<p>实际上并不能使用linear model来模拟整个neural network，但可以用来模拟其中一个local region</p>
-<h5 id="Local-Interpretable-Model-Agnostic-Explanations-LIME"><a href="#Local-Interpretable-Model-Agnostic-Explanations-LIME" class="headerlink" title="Local Interpretable Model-Agnostic Explanations (LIME)"></a>Local Interpretable Model-Agnostic Explanations (LIME)</h5><p><strong>General</strong></p>
-<p>下图中input为x，output为y，都是一维的，表示Black Box中x和y的关系，由于我们并不能用linear model来模拟整个neural network，但可以用来模拟其中一个local region</p>
-<ol>
-<li><p>首先给出要explain的point，代入black box里面</p>
-</li>
-<li><p>在第三个蓝色point（我们想要模拟的区域）周围sample附近的point，nearby的区域不同，结果也会不同</p>
-</li>
-<li><p>使用linear model来模拟neural network在这个区域的行为</p>
-</li>
-<li><p>得知了该区域的linear model之后，我们就可以知道在该区域x和y的关系，即x越大，y越小，也就interpret了原来的neural network在这部分区域的行为</p>
-</li>
-</ol>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612161607923.png" alt="image-20200612161607923" style="zoom:50%;"></p>
-<p>那么到底什么算是nearby呢？<u>用不同的方法进行sample，结果不太一样。</u>对于下图中的region，可以看到离第三个蓝色point的距离很远，取得的效果就非常不好了</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612163829515.png" alt="image-20200612163829515" style="zoom:50%;"></p>
-<p><strong>LIME-Image</strong></p>
-<p>刚才说了general的情况，下面我们讲解LIME应用于image的情况</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612164116470.png" alt="image-20200612164116470" style="zoom:50%;"></p>
-<ol>
-<li>首先需要一张需要解释的image；为什么这张图片可以被classify为树蛙？</li>
-<li>sample at the nearby：首先把image分成多个segment，再随机去掉图中的一些segment，就得到了不同的新图片，这些新的图片就是sample的结果；再把这些新生成的图片输入black box，得到新图片是frog的可能性；</li>
-<li>fit with linear model：即找到一个linear model来fit第3步输出的结果；先extract生成的新图片的特征，再把这些特征输入linear model；</li>
-</ol>
-<p>Q：那么如何将image转化为一个vector呢？</p>
-<p>A：这里我们将image中的每个segment使用$x_i$来表示，其中$i=1,…,m,…,M$，M为segment的数量；$x_i$为1，表示当前segment被deleted，如果为0，表示exist；</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612165520599.png" alt="image-20200612165520599" style="zoom:50%;"></p>
-<p>4.$\ $Interpret the model：对于学习出来的linear model，我们就可以对其进行interpret；首先需要将$x_i$和y的关系用一个公式表示出来，即</p>
-<script type="math/tex; mode=display">
-y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情况：</p>
-<ul>
-<li>$w_m\approx 0$，segment $x_m$被认为对分类为frog没有影响；</li>
-<li>$w_m&gt; 0$， $x_m$对图片分类为frog是有正面的影响的；</li>
-<li>$w_m&lt;0$， 看到这个segment，反而会让机器认为图片不是frog</li>
-</ul>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612170336857.png" alt="image-20200612170336857" style="zoom:50%;"></p>
-<h5 id="Decision-Tree"><a href="#Decision-Tree" class="headerlink" title="Decision Tree"></a>Decision Tree</h5><p>如果我们用不限制深度的decision tree，那么我们就可以使用decision tree来模拟black box（neural network），使两者的输出相近</p>
-<p>但decision tree的深度不可能是没有限制的。这里我们设neural network的参数为$\theta$，decision tree的参数为$T_\theta$，使用$O(T_\theta)$来表示$T_\theta$的复杂度，复杂度可以用$T_\theta$的深度来表示，也可以用neural的个数来表示；<u>现在我们的目标不仅是使两者输出相近，还需要使$O(T_\theta)$的值最小化</u></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612171916382.png" alt="image-20200612171916382" style="zoom:50%;"></p>
-<p>那么我们如何来实现使$O(T_\theta)$越小越好呢？</p>
-<p>如下图所示，我们首先训练一个network，这个network可以很容易地被decision tree解释，使decision tree的复杂度没有那么高；这里我们加入了一个正则项$\lambda O(T_\theta)$，在训练network的同时，不仅要最小化loss function，还需要使$O(T_\theta)$的值尽量小，这时需要找到的network参数为$\theta^*$，</p>
-<script type="math/tex; mode=display">
-\theta^*=arg\ {\rm min}\ L(\theta) + \lambda O(T_\theta)</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200612172838929.png" alt="image-20200612172838929" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>explainable machine learning</tag>
-        <tag>LIME</tag>
       </tags>
   </entry>
   <entry>
@@ -1746,33 +1746,6 @@ P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p>
       </tags>
   </entry>
   <entry>
-    <title>Mac安装Pytorch</title>
-    <url>/2020/03/29/Mac%E5%AE%89%E8%A3%85Pytorch/</url>
-    <content><![CDATA[<p>先创建一个名为<code>pytorch</code>的虚拟环境，</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda create -n pytorch python=3.7 numpy matplotlib pandas jupyter notebook</span><br></pre></td></tr></table></figure>
-<p>激活虚拟环境</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda activate pytorch</span><br></pre></td></tr></table></figure>
-<p>去官网选择合适的pytorch版本的安装命令<a href="https://pytorch.org/get-started/locally/" target="_blank" rel="noopener">https://pytorch.org/get-started/locally/</a></p>
-<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329101220290.png" alt="image-20200329101220290"></p>
-<p>复制到命令行下，回车运行</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda install pytorch torchvision -c pytorch</span><br></pre></td></tr></table></figure>
-<p>会出现以下报错信息：</p>
-<p><strong>CondaHTTPError: HTTP 000 CONNECTION FAILED for url</strong></p>
-<p><strong>解决方法：添加镜像站到Anaconda</strong></p>
- <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</span><br><span class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</span><br><span class="line">conda config --set show_channel_urls yes</span><br><span class="line"></span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/</span><br></pre></td></tr></table></figure>
-<p>再把官网安装命令的<code>-c pytorch</code>去掉，运行以下命令</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda install pytorch torchvision</span><br></pre></td></tr></table></figure>
-<p>检测pytorch是否安装成功，命令行运行</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">jupyter notebook</span><br></pre></td></tr></table></figure>
-<p>运行测试代码，出现以下结果，则说明安装成功</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line">torch.FloatTensor([<span class="number">5</span>, <span class="number">3</span>, <span class="number">5</span>])</span><br></pre></td></tr></table></figure>
-<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329102655979.png" alt="image-20200329102655979"></p>
-]]></content>
-      <tags>
-        <tag>Pytorch</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Recurrent Neural Network</title>
     <url>/2020/06/10/RNN/</url>
     <content><![CDATA[<h4 id="Example-Application"><a href="#Example-Application" class="headerlink" title="Example Application"></a>Example Application</h4><p>将Taipei作为向量的输入，由于RNN网络是有记忆的，因此可以根据输入来预测目的地dest，以及离开的时间</p>
@@ -1803,6 +1776,12 @@ P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p>
 <h5 id="Bidirectional-RNN"><a href="#Bidirectional-RNN" class="headerlink" title="Bidirectional RNN"></a>Bidirectional RNN</h5><p>RNN不仅可以是单向的，也可以是双向的，可以train一个正向的network，也同时是train一个逆向的network。如下图所示，input sequence为$…,x^t,x^{t+1},x^{t+2},…$，正向和逆向hidden neural的输出同时作为output neural的输入，从而输出target的值$…,y^t,y^{t+1},y^{t+2},…$</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200609173058539.png" alt="image-20200609173058539" style="zoom:50%;"></p>
 <p>这种双向的RNN对我们的训练是有好处的。对于图中的output $y^{t+1}$，如果只是单向RNN，那么$y^{t+1}$只可以看到$x^1,…,x^{t+1}$的值；但现在是双向的RNN，$y^{t+1}$不仅可以看到$x^1,…,x^{t+1}$的值，还可以看到$x^{t+2},…$到句尾的值，<u>即整个input sequence的值都可以被双向的RNN看到，从而得出更好的训练结果</u></p>
+<h4 id="The-Problem-of-Long-Term-Dependencies"><a href="#The-Problem-of-Long-Term-Dependencies" class="headerlink" title="The Problem of Long-Term Dependencies"></a>The Problem of Long-Term Dependencies</h4><p>在某些情况下，某些词比如$h^3$只和最近的某些输入$x_0,x_1$有关。比如我们要给予当前输入的序列来预测下一个可能的输出，输入序列是“the clouds are in the ”，我们想要预测下一个词是“sky”，即“the clouds are in the _sky_”，我们根据最近的信息“cloud”就可以推测出来，并不需要其他的上下文信息；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717221753851.png" alt="image-20200717221753851"></p>
+<p>但现实生活中还有很多情况，根据最近的信息无法进行预测，还要结合更早输入的信息。比如输入的序列是“I grew up in France… I speak fluent ”，我希望预测出“<em>French</em>”，即“I  grew up in France… I speak fluent <em>French</em>”。由于France和French之间有很多其他的句子，RNN无法处理这个问题。</p>
+<p>Q：为什么RNN无法处理这个问题？</p>
+<p>A：序列后面的梯度很难反向传播到前面的序列，就产生了梯度消失问题。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717222433437.png" alt="image-20200717222433437"></p>
 <h4 id="Long-Short-term-Memory-LSTM"><a href="#Long-Short-term-Memory-LSTM" class="headerlink" title="Long Short-term Memory (LSTM)"></a>Long Short-term Memory (LSTM)</h4><h5 id="three-gates"><a href="#three-gates" class="headerlink" title="three gates"></a>three gates</h5><p>下图中的neural有4个input和1个output，一共有三个gate：</p>
 <ul>
 <li>Input Gate：决定其他neural的值是否可以输入这个neural；是否可以输入由neural的学习情况而定</li>
@@ -1856,7 +1835,22 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610102846836.png" alt="image-20200610102846836" style="zoom:50%;"></p>
 <h5 id="LSTM-Extension"><a href="#LSTM-Extension" class="headerlink" title="LSTM Extension"></a>LSTM Extension</h5><p>下图展示了两个LSTM cell的extension，在时间点t进行的计算，不仅要包括 $x^{t+1}$，还要包括上个时间点中lstm cell算出的值，即memory cell的输出$c^t$，以及$c^t$再输入activation function的输出值$h(c^t)$</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610103840723.png" alt="image-20200610103840723" style="zoom:50%;"></p>
-<h4 id="Learning"><a href="#Learning" class="headerlink" title="Learning"></a>Learning</h4><p>Training Sentences为”arrive Taipei on November 2nd”，当Taipei输入时，必须要先计算出前一层hidden layer的输出值</p>
+<h4 id="RNN-vs-LSTM"><a href="#RNN-vs-LSTM" class="headerlink" title="RNN vs LSTM"></a>RNN vs LSTM</h4><p><span style="color: red">传统的RNN和LSTM的区别：</span></p>
+<ul>
+<li>传统的RNN通常是直接覆盖的形式，当前时间点的计算结果直接覆盖上一个时间节点的计算结果，可以处理短期依赖问题，无法处理长期依赖问题；</li>
+<li>LSTM通常采用了“累加”的形式，上一个时间节点的计算结果会影响之后的计算结果，并不是直接覆盖；可以处理短期和长期依赖问题。</li>
+<li>对比两者的参数更新公式，</li>
+</ul>
+<p>首先是<strong>传统的RNN</strong>，网络单元结构示意图，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717221422068.png" alt="image-20200717221422068" style="zoom:67%;"></p>
+<p>参数更新公式如下，RNN本时刻的隐藏层信息只来源于当前输入和上一时刻的隐藏层信息，没有记忆功能。</p>
+<script type="math/tex; mode=display">
+h_t=tanh(W_h\cdot [h_{t-1},x_t]+b_h)</script><p>对于<strong>LSTM</strong>而言，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717221403866.png" alt="image-20200717221403866" style="zoom:67%;"></p>
+<p>参数更新公式如下，</p>
+<script type="math/tex; mode=display">
+c'=g(z)f(z_i)+cf(z_f)\\
+a=h(c')f(z_0)</script><h4 id="Learning"><a href="#Learning" class="headerlink" title="Learning"></a>Learning</h4><p>Training Sentences为”arrive Taipei on November 2nd”，当Taipei输入时，必须要先计算出前一层hidden layer的输出值</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610112127379.png" alt="image-20200610112127379" style="zoom:50%;"></p>
 <p>RNN的训练也是前向和逆向传播，其中逆向传播算法为Backpropagation through time（BPTT），也有一个参数更新公式</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610112423397.png" alt="image-20200610112423397" style="zoom:50%;"></p>
@@ -1877,12 +1871,7 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
 <p>因此，RNN不好训练的原因并不是因为activation function的影响，而是由于weight在high frequency地被使用，weight在不同的位置、不同的时间点是会被反复地使用的</p>
 <h5 id="Helpful-Techniques"><a href="#Helpful-Techniques" class="headerlink" title="Helpful Techniques"></a>Helpful Techniques</h5><p><strong>LSTM</strong>可以让error surface不那么崎岖，可以把一些很平坦的地方拿掉，使error surface不再有那么平坦的地方，这时可以把learning rate设置得小一些，<u>可以解决gradient vanishing问题</u></p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610120736515.png" alt="image-20200610120736515" style="zoom:50%;"></p>
-<p>传统的RNN和LSTM的区别：</p>
-<ul>
-<li>传统的RNN通常是直接覆盖的形式，当前时间点的计算结果直接覆盖上一个时间节点的计算结果；</li>
-<li>LSTM通常采用了“累加”的形式，上一个时间节点的计算结果会影响之后的计算结果，并不是直接覆盖。</li>
-</ul>
-<p>LSTM可以解决gradient vanishing的原因：</p>
+<p><span style="color: red">LSTM可以解决gradient vanishing的原因：</span></p>
 <ul>
 <li>当前的input和memory里的值是“累加”的；</li>
 <li>如果forget gate是打开的状态，上一个时间点的memory会对当前时间点造成影响，这个影响会一直持续下去</li>
@@ -1925,6 +1914,7 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
 <p>这个RNN的encoder和decoder是一起 train，其中任何一个都是没办法单独训练的，一起train就有一个target</p>
 <p>将speech转化为vector之后，再进行可视化</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610164950240.png" alt="image-20200610164950240" style="zoom:50%;"></p>
+<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><p><a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/" target="_blank" rel="noopener">https://colah.github.io/posts/2015-08-Understanding-LSTMs/</a></p>
 ]]></content>
       <categories>
         <category>ML-notes</category>
@@ -1933,6 +1923,33 @@ a=h(c')f(z_0)=7</script><p><img src="https://gitee.com/scarleatt/image/raw/maste
         <tag>Deep Learning</tag>
         <tag>RNN</tag>
         <tag>LSTM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mac安装Pytorch</title>
+    <url>/2020/03/29/Mac%E5%AE%89%E8%A3%85Pytorch/</url>
+    <content><![CDATA[<p>先创建一个名为<code>pytorch</code>的虚拟环境，</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda create -n pytorch python=3.7 numpy matplotlib pandas jupyter notebook</span><br></pre></td></tr></table></figure>
+<p>激活虚拟环境</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda activate pytorch</span><br></pre></td></tr></table></figure>
+<p>去官网选择合适的pytorch版本的安装命令<a href="https://pytorch.org/get-started/locally/" target="_blank" rel="noopener">https://pytorch.org/get-started/locally/</a></p>
+<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329101220290.png" alt="image-20200329101220290"></p>
+<p>复制到命令行下，回车运行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda install pytorch torchvision -c pytorch</span><br></pre></td></tr></table></figure>
+<p>会出现以下报错信息：</p>
+<p><strong>CondaHTTPError: HTTP 000 CONNECTION FAILED for url</strong></p>
+<p><strong>解决方法：添加镜像站到Anaconda</strong></p>
+ <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</span><br><span class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</span><br><span class="line">conda config --set show_channel_urls yes</span><br><span class="line"></span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/</span><br></pre></td></tr></table></figure>
+<p>再把官网安装命令的<code>-c pytorch</code>去掉，运行以下命令</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda install pytorch torchvision</span><br></pre></td></tr></table></figure>
+<p>检测pytorch是否安装成功，命令行运行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">jupyter notebook</span><br></pre></td></tr></table></figure>
+<p>运行测试代码，出现以下结果，则说明安装成功</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line">torch.FloatTensor([<span class="number">5</span>, <span class="number">3</span>, <span class="number">5</span>])</span><br></pre></td></tr></table></figure>
+<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329102655979.png" alt="image-20200329102655979"></p>
+]]></content>
+      <tags>
+        <tag>Pytorch</tag>
       </tags>
   </entry>
   <entry>
@@ -2786,6 +2803,55 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
       </tags>
   </entry>
   <entry>
+    <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
+    <url>/2020/06/28/t-SNE/</url>
+    <content><![CDATA[<blockquote>
+<p>本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；</p>
+</blockquote>
+<h4 id="Manifold-Learning"><a href="#Manifold-Learning" class="headerlink" title="Manifold Learning"></a>Manifold Learning</h4><p>在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learning 任务</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628202133893.png" alt="image-20200628202133893" style="zoom:50%;"></p>
+<h4 id="Locally-Linear-Embedding-LLE"><a href="#Locally-Linear-Embedding-LLE" class="headerlink" title="Locally Linear Embedding (LLE)"></a>Locally Linear Embedding (LLE)</h4><p>用$w_{ij}$表示$x_i,x_j$之间的联系，先找到使得$\sum_i ||x^i-\sum_jw_{ij}x^j||_2$最小化的$w_{ij}$，再根据这个$w_{ij}$来找到降维的结果$z_i,z_j$</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628202738023.png" alt="image-20200628202738023" style="zoom:50%;"></p>
+<p>如果并不知道之前的$x_i,x_j$，那么就可以用LLE这种方法，也可以得出$z_i,z_j$</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628203501209.png" alt="image-20200628203501209" style="zoom:50%;"></p>
+<h4 id="Laplacian-Eigenmaps"><a href="#Laplacian-Eigenmaps" class="headerlink" title="Laplacian Eigenmaps"></a>Laplacian Eigenmaps</h4><p>Review: 在之前的semi-supervised learning中，如果$x^1,x^2$在一个high density region内是相近的，那么我们就可以认为$\hat y^1,\hat y^2$也有类似的表现</p>
+<p>如果$y^i,y^j$是connected的，那么其$w_{ij}$就是对应的相似度；如果没有connect，其$w_{ij}$就是0</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628204015777.png" alt="image-20200628204015777" style="zoom:50%;"></p>
+<p>我们也可以得出类似smoothness的式子，计算$z^i,z^j$之间的smoothness</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628205136836.png" alt="image-20200628205136836" style="zoom:50%;"></p>
+<p>那么我们现在的目标就是找到$z^i,z^j$，来使S达到最小值，还需要有一些额外的constrains</p>
+<p>现在我们对z加入一些constrains，如果降维后z的维数是M，那么我们就不希望取出来的这些点还生活在比M还低维的空间里面；我们现在希望把塞进高维空间的低维空间展开，我们就不希望展开之后的点在一个更低维的空间里面</p>
+<h4 id="T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><a href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE" class="headerlink" title="T-distributed Stochastic Neighbor Embedding (t-SNE)"></a>T-distributed Stochastic Neighbor Embedding (t-SNE)</h4><p>对于之前的LLE方法，类似的data之间是很close的，<u>但不同类别之间的data却没有分开，是叠成一团的</u></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628210651621.png" alt="image-20200628210651621" style="zoom:50%;"></p>
+<p><strong>为了找到对应的$z^i,z^j$</strong>，先计算$x^i,x^j$之间的相似度$S(x^i,x^j)$，再得出一个分布 $P(x^j|x^i)$；还要计算$z^i,z^j$之间的相似度$S’(z^i,z^j)$，得出分布$Q(z^j|z^i)$；</p>
+<p>这两个分布应该越接近越好，使用L来表示</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628211215304.png" alt="image-20200628211215304" style="zoom:50%;"></p>
+<p>可以使用gradient descent，有了L函数，再分别对$z^i,z^j$求偏微分即可</p>
+<p>但t-SNE要对所有的point之间都求similarity，因此计算量比较大，在数据量很大的情况下电脑的计算速度会非常慢</p>
+<p>因此，对于很高的dimensions，通常先做降维（PCA），比如可以降维到50维，再使用t-SNE降到2维</p>
+<p><span style="color: red">通常我们使用t-SNE来对高维的数据进行可视化</span></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628211326492.png" alt="image-20200628211326492" style="zoom:50%;"></p>
+<p>在上图中，红色曲线表示SNE，蓝色曲线表示t-SNE，纵轴表示distribution；如果我们想要维持相同的distribution，即在同一个水平线上，就达到了如图所示的效果；相同的几率，t-SNE的$||z^i-z^j||_2$之间的距离越大</p>
+<p>如果本来就离得很近，那么经过t-SNE之间的距离还是很小；如果本来就离得很远，那么从原来的distribution拉到t-SNE之后，距离会更远；</p>
+<p>到实际的例子中，<span style="color: red">如果本来是同一个类别的data，由于这些data之间的距离很近，不会收到t-SNE很大的影响；但如果是属于不同类别的data，距离是比较远的，t-SNE会放大这种距离</span></p>
+<p>对于下图中的MNIST，先使用PCA进行降维，再进行可视化，就可以得到下图中的good visualization</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628213646582.png" alt="image-20200628213646582" style="zoom:50%;"></p>
+<p>下图中有一个更加直观的例子，使用t-SNE算法，运用gradient descent的思想，不同类别的data之间的距离会越来越大</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628214657615.png" alt="image-20200628214657615" style="zoom:50%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628214721028.png" alt="image-20200628214721028" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Dimension Reduction</tag>
+        <tag>LLE</tag>
+        <tag>t-SNE</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Sequence to Sequence</title>
     <url>/2020/06/28/seq2seq/</url>
     <content><![CDATA[<h4 id="Generation"><a href="#Generation" class="headerlink" title="Generation"></a>Generation</h4><p>可以generation文字，也可以generation图片</p>
@@ -2910,55 +2976,6 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
       <tags>
         <tag>Deep Learning</tag>
         <tag>Sequence to Sequence</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
-    <url>/2020/06/28/t-SNE/</url>
-    <content><![CDATA[<blockquote>
-<p>本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；</p>
-</blockquote>
-<h4 id="Manifold-Learning"><a href="#Manifold-Learning" class="headerlink" title="Manifold Learning"></a>Manifold Learning</h4><p>在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learning 任务</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628202133893.png" alt="image-20200628202133893" style="zoom:50%;"></p>
-<h4 id="Locally-Linear-Embedding-LLE"><a href="#Locally-Linear-Embedding-LLE" class="headerlink" title="Locally Linear Embedding (LLE)"></a>Locally Linear Embedding (LLE)</h4><p>用$w_{ij}$表示$x_i,x_j$之间的联系，先找到使得$\sum_i ||x^i-\sum_jw_{ij}x^j||_2$最小化的$w_{ij}$，再根据这个$w_{ij}$来找到降维的结果$z_i,z_j$</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628202738023.png" alt="image-20200628202738023" style="zoom:50%;"></p>
-<p>如果并不知道之前的$x_i,x_j$，那么就可以用LLE这种方法，也可以得出$z_i,z_j$</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628203501209.png" alt="image-20200628203501209" style="zoom:50%;"></p>
-<h4 id="Laplacian-Eigenmaps"><a href="#Laplacian-Eigenmaps" class="headerlink" title="Laplacian Eigenmaps"></a>Laplacian Eigenmaps</h4><p>Review: 在之前的semi-supervised learning中，如果$x^1,x^2$在一个high density region内是相近的，那么我们就可以认为$\hat y^1,\hat y^2$也有类似的表现</p>
-<p>如果$y^i,y^j$是connected的，那么其$w_{ij}$就是对应的相似度；如果没有connect，其$w_{ij}$就是0</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628204015777.png" alt="image-20200628204015777" style="zoom:50%;"></p>
-<p>我们也可以得出类似smoothness的式子，计算$z^i,z^j$之间的smoothness</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628205136836.png" alt="image-20200628205136836" style="zoom:50%;"></p>
-<p>那么我们现在的目标就是找到$z^i,z^j$，来使S达到最小值，还需要有一些额外的constrains</p>
-<p>现在我们对z加入一些constrains，如果降维后z的维数是M，那么我们就不希望取出来的这些点还生活在比M还低维的空间里面；我们现在希望把塞进高维空间的低维空间展开，我们就不希望展开之后的点在一个更低维的空间里面</p>
-<h4 id="T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><a href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE" class="headerlink" title="T-distributed Stochastic Neighbor Embedding (t-SNE)"></a>T-distributed Stochastic Neighbor Embedding (t-SNE)</h4><p>对于之前的LLE方法，类似的data之间是很close的，<u>但不同类别之间的data却没有分开，是叠成一团的</u></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628210651621.png" alt="image-20200628210651621" style="zoom:50%;"></p>
-<p><strong>为了找到对应的$z^i,z^j$</strong>，先计算$x^i,x^j$之间的相似度$S(x^i,x^j)$，再得出一个分布 $P(x^j|x^i)$；还要计算$z^i,z^j$之间的相似度$S’(z^i,z^j)$，得出分布$Q(z^j|z^i)$；</p>
-<p>这两个分布应该越接近越好，使用L来表示</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628211215304.png" alt="image-20200628211215304" style="zoom:50%;"></p>
-<p>可以使用gradient descent，有了L函数，再分别对$z^i,z^j$求偏微分即可</p>
-<p>但t-SNE要对所有的point之间都求similarity，因此计算量比较大，在数据量很大的情况下电脑的计算速度会非常慢</p>
-<p>因此，对于很高的dimensions，通常先做降维（PCA），比如可以降维到50维，再使用t-SNE降到2维</p>
-<p><span style="color: red">通常我们使用t-SNE来对高维的数据进行可视化</span></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628211326492.png" alt="image-20200628211326492" style="zoom:50%;"></p>
-<p>在上图中，红色曲线表示SNE，蓝色曲线表示t-SNE，纵轴表示distribution；如果我们想要维持相同的distribution，即在同一个水平线上，就达到了如图所示的效果；相同的几率，t-SNE的$||z^i-z^j||_2$之间的距离越大</p>
-<p>如果本来就离得很近，那么经过t-SNE之间的距离还是很小；如果本来就离得很远，那么从原来的distribution拉到t-SNE之后，距离会更远；</p>
-<p>到实际的例子中，<span style="color: red">如果本来是同一个类别的data，由于这些data之间的距离很近，不会收到t-SNE很大的影响；但如果是属于不同类别的data，距离是比较远的，t-SNE会放大这种距离</span></p>
-<p>对于下图中的MNIST，先使用PCA进行降维，再进行可视化，就可以得到下图中的good visualization</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628213646582.png" alt="image-20200628213646582" style="zoom:50%;"></p>
-<p>下图中有一个更加直观的例子，使用t-SNE算法，运用gradient descent的思想，不同类别的data之间的距离会越来越大</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628214657615.png" alt="image-20200628214657615" style="zoom:50%;"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628214721028.png" alt="image-20200628214721028" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Dimension Reduction</tag>
-        <tag>LLE</tag>
-        <tag>t-SNE</tag>
       </tags>
   </entry>
   <entry>
