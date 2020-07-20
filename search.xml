@@ -201,68 +201,6 @@ x^*=arg\mathop{min}_\limits {d(x^0,x')\leq\epsilon}L(x')</script><p>这里我们
       </tags>
   </entry>
   <entry>
-    <title>Conditional GAN (CGAN)</title>
-    <url>/2020/07/05/CGAN/</url>
-    <content><![CDATA[<p>对于一般的GAN，都是随机生成一个vector，然后输入GAN，再生成一张image，但我们并不能控制output。对于本文要讲述的CGAN，我们则可以操控其输出的结果。</p>
-<h4 id="Text-to-Image"><a href="#Text-to-Image" class="headerlink" title="Text-to-Image"></a>Text-to-Image</h4><p>对于传统的监督学习的方法，训练数据集是一些带有描述的图片，网络的input是一段文字，output则是一张图片，我们希望输出的图片和target越接近越好。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705145505825.png" alt="image-20200705145505825" style="zoom:60%;"></p>
-<p>如果现在网络的输入文字是“train”，网络会觉得正面的火车是对的，侧面的火车也是对的，网络最后会取这些值的一个平均值，因此会得到一个非常模糊的火车图片。</p>
-<h4 id="Conditional-GAN"><a href="#Conditional-GAN" class="headerlink" title="Conditional GAN"></a>Conditional GAN</h4><p>现在我们使用CGAN来完成这个任务。CGAN现在的generator的输入不仅有z，还有一个condition c（“train”），G的输出为$x=G(z,c)$；</p>
-<p>这时我们还使用原来的Discriminator，把x输入D，D可以对其进行评价分数scalar，对真实的图像输出为1，生成的图像输出为0。</p>
-<p>那么现在就出现了一个新问题，G可以完全不管输入的condition，只生成高质量的、接近真实的图像即可。比如我们把condition设置为“dog”，G如果生成一只猫的图像，这个图像很接近真实图像，那么就可以骗过discriminator。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705150242620.png" alt="image-20200705150242620" style="zoom:60%;"></p>
-<p>因此，这里的discriminator也要做出改变，需要把condition也作为D的其中一个输入。</p>
-<p>那么现在D输出的分数就有两部分组成：（1）x的真实性；（2）x是不是满足condition的条件。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
-<p>给低分0的两个case：（1）如果给出了正确的文字，但生成了模糊的图像；（2）虽然生成了清晰的图像，但和随机输入的文字（condition）是不匹配的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705151419726.png" alt="image-20200705151419726" style="zoom:60%;"></p>
-<p>这里是具体的算法。</p>
-<p>Learning D：输入是文字和图像的pair，即$\{(c^1,x^1),…,(c^m,x^m)\}$，从（高斯）分布中取出noise $\{z^1,z^2…,z^m\}$，输入G，得到生成的图像 $\tilde x^i=G(c^i,z^i)$；从database中取出m个真实的图像数据 $\{\hat x^1,…,\hat x^m\}$，再输入discriminator D，不断调整$\theta_d$，使得得到的分数越大越好，</p>
-<script type="math/tex; mode=display">
-\tilde V =\frac{1}{m}\sum_{i=1}^m logD(c^i,x^i)+\frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\tilde x^i))
-+ \frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\hat x^i))</script><p>其中$D(c^i,x^i)$表示真实图像所得到的分数，D的目标就是使真实图像获得的分数越大越好；而$D(c^i,\tilde x^i)$表示G生成的图像所得到的分数，应该越小越好，所以前面加了负号；而$D(c^i,\hat x^i)$表示生成了清晰的图像，但和condition不匹配，所以前面加了负号。后两个case都是给低分的情况。</p>
-<p>其他过程和之前的GAN差别不大，主要是计算低分数的情况多了一个case。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705153051152.png" alt="image-20200705153051152" style="zoom:67%;"></p>
-<h4 id="Conditional-GAN-Discriminator"><a href="#Conditional-GAN-Discriminator" class="headerlink" title="Conditional GAN - Discriminator"></a>Conditional GAN - Discriminator</h4><p>对于一般的discriminator架构，输入为图像和文字，输出为两部分的分数（x的真实性、x和condition是不是match）。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705154525712.png" alt="image-20200705154525712" style="zoom:60%;"></p>
-<p>有学者在其他论文中也提出了其他架构，而且效果还不错。首先有object输入<span style="color: green">network</span>，得出第一个分数，表示x是否真实；<span style="color: green">network</span>还会输出一个embedding，再和condition结合，输入<span style="color: blue">network</span>后得到另外一个分数，表示x和c是否match。</p>
-<p>选择第一种架构方法有一个缺点。前文我们提到CGAN会给低分的两种case：x和condition是match的，但生成的图像不好；x和condition是不match的，但生成的图像质量高。如果我们使用第一种架构，网络会比较confused，网络并不知道分数低的原因到底是哪一种case，有可能是图像不够realistic，也有可能是和condition不够match。但<span style="color: red">对于第二种架构，网络则可以清楚地知道到底是因为哪个原因导致的低分。</span></p>
-<p>下面是结果的展示，输入文字condition，输出对应的图像。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705191337832.png" alt="image-20200705191337832" style="zoom:60%;"></p>
-<h4 id="Stack-GAN"><a href="#Stack-GAN" class="headerlink" title="Stack GAN"></a>Stack GAN</h4><p>首先输入一段文字，这些文字先经过embedding的过程，再经过conditioning augmentation的过程（加入噪声），输入generator之后，会生成一张图像（$64\times 64$）；discriminator再来判断这个生成的image和输入的文字是不是match的；</p>
-<p>这里还有第二个generator，输入为刚才$64\times64$的图像和文字的embedding结果；再生成一张$256\times256$的图像；再把新生成的图像输入discriminator，看到底是不是realistic。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705191647515.png" alt="image-20200705191647515" style="zoom: 100%;"></p>
-<h4 id="Image-to-image"><a href="#Image-to-image" class="headerlink" title="Image-to-image"></a>Image-to-image</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>CGAN不仅可以输入一段文字产生一张图像，也可以是image-to-image，比如把简单的几何模型转化为真实的房屋模型，把灰度图转化为彩色图，</p>
-<p><img src="/2020/07/05/CGAN/image-20200705193817063.png" alt="image-20200705193817063"></p>
-<p>如果使用传统的监督学习的方法来完成这个任务，首先需要收集训练数据（几何模型图、对应的真实房屋图），训练network，output是一张图片，我们希望输出的图片和target越接近越好。由于network会产生多种多样的房子，最后的结果会取一个平均值，因此会产生一个非常模糊的图像。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705194028821.png" alt="image-20200705194028821" style="zoom:60%;"></p>
-<p>我们可以使用GAN来完成这个任务。首先把从distribution中sample出来的z和结构图作为G的输入，G会生成一张新的Image；再把Image和原来的结构图（一个pair）输入D，会输出一个分数scalar。可以发现GAN生成的图要相对清晰很多。</p>
-<p>但我们这时发现了一个新问题，GAN产生了一些原来的结构图中没有的东西，比如在图的左上角，产生了一个像是窗户或者天线的东西。这时我们可以加入一个新的constrain（真实的房屋图），希望generator产生的image和训练数据集中对应的图像也越靠近越好。</p>
-<p>这时generator的目标就有两个：产生出足够清晰可以骗过D的图像；产生的新图像和原来的target要接近。这样就会产生结果很好的图（GAN+close），图足够清晰，也不会产生一些奇怪的东西。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705195049882.png" alt="image-20200705195049882" style="zoom:60%;"></p>
-<h5 id="Patch-GAN"><a href="#Patch-GAN" class="headerlink" title="Patch GAN"></a>Patch GAN</h5><p>现在要生成的是一张很大的图像，如果这时discriminator的输入还是一整张大的图像，那么D要对其进行评分，就肯定需要更多的参数，很有可能产生overfiting或者训练所需的时间会很长。</p>
-<p>在这篇论文中，作者也对discriminator的设计进行了变化。discriminator只需要检查图中的一小部分，对这一小块图片来输出评价分数 。区域的大小也是需要调整的参数之一。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705200803367.png" alt="image-20200705200803367" style="zoom:60%;"></p>
-<h4 id="Speech-Enhancement"><a href="#Speech-Enhancement" class="headerlink" title="Speech Enhancement"></a>Speech Enhancement</h4><p>如果我们使用传统的深度学习方法来做语音增强，首先需要把纯净语音加上一些noise再输入CNN，不断地训练CNN，使其能够输出去噪后的纯净语音。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705201419793.png" alt="image-20200705201419793" style="zoom:60%;"></p>
-<p>直接产生同样会有语音频谱图比较模糊的情况，我们在这里也可以使用CGAN算法。</p>
-<p>输入为带noise的语音信号，G的输出为增强语音，增强语音和纯净语音之间应该越接近越好。discriminator的输入为增强语音和带噪语音，输出评价分数，看这个output是不是clean的，还要看output和noise这个pair是不是match的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705201744963.png" alt="image-20200705201744963" style="zoom:60%;"></p>
-<h4 id="Video-Generation"><a href="#Video-Generation" class="headerlink" title="Video Generation"></a>Video Generation</h4><p>输入一段video，让generator预测下一步会发生什么，产生对应的video；discriminator要同时考虑generator的input和output，可以把它们接到一起，变成一段完整的影片，让discriminator来判断到底是不是一个合理的影片。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705202357625.png" alt="image-20200705202357625" style="zoom:60%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Conditional GAN</tag>
-        <tag>CGAN</tag>
-        <tag>Speech Enhancement</tag>
-        <tag>Video Generation</tag>
-        <tag>Patch GAN</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Backpropagation</title>
     <url>/2020/06/06/Backpropagation/</url>
     <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>这里我们再回顾一下gradient descent，对于网络中的参数$w_1,w_2,…,b_1,b_2,…$，通过求出相对应的梯度$\Delta L(\theta)$，再根据梯度更新网络结构中的参数</p>
@@ -444,52 +382,65 @@ w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="https://gitee.com/scarle
       </tags>
   </entry>
   <entry>
-    <title>Classification</title>
-    <url>/2020/06/05/Classification/</url>
-    <content><![CDATA[<p>考虑到宝可梦的两个属性（<strong>Defense</strong>、<strong>SP Defense</strong>），将输入的宝可梦进行属性分类（Water、Normal）</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605204445258.png" alt="image-20200605204445258" style="zoom:50%;"></p>
-<h4 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a>Gaussian Distribution</h4><p>假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605202837571.png" alt="image-20200605202837571" style="zoom:50%;"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605204129951.png" alt="image-20200605204129951" style="zoom:50%;"></p>
-<h4 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a>Maximum Likelihood</h4><p>第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\mu,\sum)$的表达式，其中$\mu=\mu^<em>,\sum=\sum^</em>$时，函数L得到最大值</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605203041766.png" alt="image-20200605203041766" style="zoom:50%;"></p>
-<p>这里我们假设有两个类别，其参数和分布如下，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605210600803.png" alt="image-20200605210600803" style="zoom:50%;"></p>
-<p>输入样例x是Class 1:Water的概率为，</p>
+    <title>Conditional GAN (CGAN)</title>
+    <url>/2020/07/05/CGAN/</url>
+    <content><![CDATA[<p>对于一般的GAN，都是随机生成一个vector，然后输入GAN，再生成一张image，但我们并不能控制output。对于本文要讲述的CGAN，我们则可以操控其输出的结果。</p>
+<h4 id="Text-to-Image"><a href="#Text-to-Image" class="headerlink" title="Text-to-Image"></a>Text-to-Image</h4><p>对于传统的监督学习的方法，训练数据集是一些带有描述的图片，网络的input是一段文字，output则是一张图片，我们希望输出的图片和target越接近越好。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705145505825.png" alt="image-20200705145505825" style="zoom:60%;"></p>
+<p>如果现在网络的输入文字是“train”，网络会觉得正面的火车是对的，侧面的火车也是对的，网络最后会取这些值的一个平均值，因此会得到一个非常模糊的火车图片。</p>
+<h4 id="Conditional-GAN"><a href="#Conditional-GAN" class="headerlink" title="Conditional GAN"></a>Conditional GAN</h4><p>现在我们使用CGAN来完成这个任务。CGAN现在的generator的输入不仅有z，还有一个condition c（“train”），G的输出为$x=G(z,c)$；</p>
+<p>这时我们还使用原来的Discriminator，把x输入D，D可以对其进行评价分数scalar，对真实的图像输出为1，生成的图像输出为0。</p>
+<p>那么现在就出现了一个新问题，G可以完全不管输入的condition，只生成高质量的、接近真实的图像即可。比如我们把condition设置为“dog”，G如果生成一只猫的图像，这个图像很接近真实图像，那么就可以骗过discriminator。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705150242620.png" alt="image-20200705150242620" style="zoom:60%;"></p>
+<p>因此，这里的discriminator也要做出改变，需要把condition也作为D的其中一个输入。</p>
+<p>那么现在D输出的分数就有两部分组成：（1）x的真实性；（2）x是不是满足condition的条件。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
+<p>给低分0的两个case：（1）如果给出了正确的文字，但生成了模糊的图像；（2）虽然生成了清晰的图像，但和随机输入的文字（condition）是不匹配的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705151419726.png" alt="image-20200705151419726" style="zoom:60%;"></p>
+<p>这里是具体的算法。</p>
+<p>Learning D：输入是文字和图像的pair，即$\{(c^1,x^1),…,(c^m,x^m)\}$，从（高斯）分布中取出noise $\{z^1,z^2…,z^m\}$，输入G，得到生成的图像 $\tilde x^i=G(c^i,z^i)$；从database中取出m个真实的图像数据 $\{\hat x^1,…,\hat x^m\}$，再输入discriminator D，不断调整$\theta_d$，使得得到的分数越大越好，</p>
 <script type="math/tex; mode=display">
-P(C_1|x)=\frac{P(x|C_1)P(C_1)}{P(x)}=\frac{P(x|C_1)P(C_1)}
-{P(x|C_1)P(C_1)+P(x|C_2)P(C_2)}</script><p>再代入相应的表达式，其中$P(x|C_1)=f_{\mu^1,\sum^1},P(x|C_2)=f_{\mu^2,\sum^2}$，即可算出x为C1的概率，如果算出这个概率大于0.5，我们就可以认为x的属性为C1</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605212347236.png" alt="image-20200605212347236" style="zoom:50%;"></p>
-<p>但这样子算出来的分类精确度很低，只有47%，就算加入其他的属性，精确度也只提高到了54%</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605214028329.png" alt="image-20200605214028329" style="zoom:50%;"></p>
-<h4 id="Modifying-Model"><a href="#Modifying-Model" class="headerlink" title="Modifying Model"></a>Modifying Model</h4><p>由于上面模型的精确度都不高，所以在此我们对模型进行了修改，模型的参数就只有三个，$\mu^1,\mu^2,\sum=\sum^1=\sum^2$</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605214245755.png" alt="image-20200605214245755" style="zoom:50%;"></p>
-<p>对于Water属性的宝可梦对应参数为$\mu^1$，Normal属性的宝可梦为$\mu^2$，共同属性为$\sum$，这时对应的最大似然函数为$L(\mu^1,\mu^2,\sum)$，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605214446675.png" alt="image-20200605214446675" style="zoom:50%;"></p>
-<p>修改后的模型准确率可以达到54%，如果加入更多的属性，准确率可以提高到73%</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605215021833.png" alt="image-20200605215021833" style="zoom:50%;"></p>
-<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><p>这里再回忆一下三个步骤：<br>（1）Function Set，计算分类为该类的概率$P(C_1|x)$，如果大于0.5，则认为类别为1，否则为类别2<br>（2）找出相对应的$\mu,\sum$，使得似然函数L取得最大值；<br>（3）得出使似然函数最大化的参数，$\mu^<em>,\sum^</em>$，</p>
-<script type="math/tex; mode=display">
-u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\mu^*)(x^n-\mu^*)^T</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605220705405.png" alt="image-20200605220705405" style="zoom:50%;"></p>
-<h4 id="Probability-Distribution"><a href="#Probability-Distribution" class="headerlink" title="Probability Distribution"></a>Probability Distribution</h4><p>这里我们所使用的概率分布是</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605221617855.png" alt="image-20200605221617855" style="zoom:50%;"></p>
-<p>下面开始公式推导，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605221733838.png" alt="image-20200605221733838" style="zoom:50%;"></p>
-<p>得出了我们的Sigmoid函数，$\sigma(z)$的函数图像为s型，值域范围为[0,1]，将z化简，并代入$P(C_i)=\frac{N_i}{N_1+N_2}$ (i=1,2)，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605221911457.png" alt="image-20200605221911457" style="zoom:50%;"></p>
-<p>将$P(x|C_1),P(x|C_2)$的表达式代入$ln\frac{P(x|C_1)}{P(x|C_2)}$，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605222200879.png" alt="image-20200605222200879" style="zoom:50%;"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605223207505.png" alt="image-20200605223207505" style="zoom:50%;"></p>
-<p>再进行进一步化简，带入$\sum^1=\sum^2=\sum$，我们可以得出z的简易表达式$z=w\cdot x + b$，可得出$P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)$。当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605223410530.png" alt="image-20200605223410530" style="zoom:50%;"></p>
+\tilde V =\frac{1}{m}\sum_{i=1}^m logD(c^i,x^i)+\frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\tilde x^i))
++ \frac{1}{m}\sum_{i=1}^mlog(1-D(c^i,\hat x^i))</script><p>其中$D(c^i,x^i)$表示真实图像所得到的分数，D的目标就是使真实图像获得的分数越大越好；而$D(c^i,\tilde x^i)$表示G生成的图像所得到的分数，应该越小越好，所以前面加了负号；而$D(c^i,\hat x^i)$表示生成了清晰的图像，但和condition不匹配，所以前面加了负号。后两个case都是给低分的情况。</p>
+<p>其他过程和之前的GAN差别不大，主要是计算低分数的情况多了一个case。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705153051152.png" alt="image-20200705153051152" style="zoom:67%;"></p>
+<h4 id="Conditional-GAN-Discriminator"><a href="#Conditional-GAN-Discriminator" class="headerlink" title="Conditional GAN - Discriminator"></a>Conditional GAN - Discriminator</h4><p>对于一般的discriminator架构，输入为图像和文字，输出为两部分的分数（x的真实性、x和condition是不是match）。如果这个图片和文字是match的，而且图片很接近真实图像，D就会给这个图像一个高分。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705154525712.png" alt="image-20200705154525712" style="zoom:60%;"></p>
+<p>有学者在其他论文中也提出了其他架构，而且效果还不错。首先有object输入<span style="color: green">network</span>，得出第一个分数，表示x是否真实；<span style="color: green">network</span>还会输出一个embedding，再和condition结合，输入<span style="color: blue">network</span>后得到另外一个分数，表示x和c是否match。</p>
+<p>选择第一种架构方法有一个缺点。前文我们提到CGAN会给低分的两种case：x和condition是match的，但生成的图像不好；x和condition是不match的，但生成的图像质量高。如果我们使用第一种架构，网络会比较confused，网络并不知道分数低的原因到底是哪一种case，有可能是图像不够realistic，也有可能是和condition不够match。但<span style="color: red">对于第二种架构，网络则可以清楚地知道到底是因为哪个原因导致的低分。</span></p>
+<p>下面是结果的展示，输入文字condition，输出对应的图像。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705191337832.png" alt="image-20200705191337832" style="zoom:60%;"></p>
+<h4 id="Stack-GAN"><a href="#Stack-GAN" class="headerlink" title="Stack GAN"></a>Stack GAN</h4><p>首先输入一段文字，这些文字先经过embedding的过程，再经过conditioning augmentation的过程（加入噪声），输入generator之后，会生成一张图像（$64\times 64$）；discriminator再来判断这个生成的image和输入的文字是不是match的；</p>
+<p>这里还有第二个generator，输入为刚才$64\times64$的图像和文字的embedding结果；再生成一张$256\times256$的图像；再把新生成的图像输入discriminator，看到底是不是realistic。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705191647515.png" alt="image-20200705191647515" style="zoom: 100%;"></p>
+<h4 id="Image-to-image"><a href="#Image-to-image" class="headerlink" title="Image-to-image"></a>Image-to-image</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>CGAN不仅可以输入一段文字产生一张图像，也可以是image-to-image，比如把简单的几何模型转化为真实的房屋模型，把灰度图转化为彩色图，</p>
+<p><img src="/2020/07/05/CGAN/image-20200705193817063.png" alt="image-20200705193817063"></p>
+<p>如果使用传统的监督学习的方法来完成这个任务，首先需要收集训练数据（几何模型图、对应的真实房屋图），训练network，output是一张图片，我们希望输出的图片和target越接近越好。由于network会产生多种多样的房子，最后的结果会取一个平均值，因此会产生一个非常模糊的图像。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705194028821.png" alt="image-20200705194028821" style="zoom:60%;"></p>
+<p>我们可以使用GAN来完成这个任务。首先把从distribution中sample出来的z和结构图作为G的输入，G会生成一张新的Image；再把Image和原来的结构图（一个pair）输入D，会输出一个分数scalar。可以发现GAN生成的图要相对清晰很多。</p>
+<p>但我们这时发现了一个新问题，GAN产生了一些原来的结构图中没有的东西，比如在图的左上角，产生了一个像是窗户或者天线的东西。这时我们可以加入一个新的constrain（真实的房屋图），希望generator产生的image和训练数据集中对应的图像也越靠近越好。</p>
+<p>这时generator的目标就有两个：产生出足够清晰可以骗过D的图像；产生的新图像和原来的target要接近。这样就会产生结果很好的图（GAN+close），图足够清晰，也不会产生一些奇怪的东西。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705195049882.png" alt="image-20200705195049882" style="zoom:60%;"></p>
+<h5 id="Patch-GAN"><a href="#Patch-GAN" class="headerlink" title="Patch GAN"></a>Patch GAN</h5><p>现在要生成的是一张很大的图像，如果这时discriminator的输入还是一整张大的图像，那么D要对其进行评分，就肯定需要更多的参数，很有可能产生overfiting或者训练所需的时间会很长。</p>
+<p>在这篇论文中，作者也对discriminator的设计进行了变化。discriminator只需要检查图中的一小部分，对这一小块图片来输出评价分数 。区域的大小也是需要调整的参数之一。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705200803367.png" alt="image-20200705200803367" style="zoom:60%;"></p>
+<h4 id="Speech-Enhancement"><a href="#Speech-Enhancement" class="headerlink" title="Speech Enhancement"></a>Speech Enhancement</h4><p>如果我们使用传统的深度学习方法来做语音增强，首先需要把纯净语音加上一些noise再输入CNN，不断地训练CNN，使其能够输出去噪后的纯净语音。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705201419793.png" alt="image-20200705201419793" style="zoom:60%;"></p>
+<p>直接产生同样会有语音频谱图比较模糊的情况，我们在这里也可以使用CGAN算法。</p>
+<p>输入为带noise的语音信号，G的输出为增强语音，增强语音和纯净语音之间应该越接近越好。discriminator的输入为增强语音和带噪语音，输出评价分数，看这个output是不是clean的，还要看output和noise这个pair是不是match的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705201744963.png" alt="image-20200705201744963" style="zoom:60%;"></p>
+<h4 id="Video-Generation"><a href="#Video-Generation" class="headerlink" title="Video Generation"></a>Video Generation</h4><p>输入一段video，让generator预测下一步会发生什么，产生对应的video；discriminator要同时考虑generator的input和output，可以把它们接到一起，变成一段完整的影片，让discriminator来判断到底是不是一个合理的影片。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705202357625.png" alt="image-20200705202357625" style="zoom:60%;"></p>
 ]]></content>
       <categories>
         <category>ML-notes</category>
       </categories>
       <tags>
         <tag>Deep Learning</tag>
-        <tag>classification</tag>
-        <tag>sigmoid function</tag>
+        <tag>Conditional GAN</tag>
+        <tag>CGAN</tag>
+        <tag>Speech Enhancement</tag>
+        <tag>Video Generation</tag>
+        <tag>Patch GAN</tag>
       </tags>
   </entry>
   <entry>
@@ -542,6 +493,55 @@ H/W=\frac{(h/w - F+2P)}{S}+1</script><p>这里引入了keras，先介绍几个�
       <tags>
         <tag>Deep Learning</tag>
         <tag>CNN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Classification</title>
+    <url>/2020/06/05/Classification/</url>
+    <content><![CDATA[<p>考虑到宝可梦的两个属性（<strong>Defense</strong>、<strong>SP Defense</strong>），将输入的宝可梦进行属性分类（Water、Normal）</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605204445258.png" alt="image-20200605204445258" style="zoom:50%;"></p>
+<h4 id="Gaussian-Distribution"><a href="#Gaussian-Distribution" class="headerlink" title="Gaussian Distribution"></a>Gaussian Distribution</h4><p>假设图中的点服从高斯分布，由于只考虑了两个属性，$\mu$为一个二维向量，则有高斯分布公式，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605202837571.png" alt="image-20200605202837571" style="zoom:50%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605204129951.png" alt="image-20200605204129951" style="zoom:50%;"></p>
+<h4 id="Maximum-Likelihood"><a href="#Maximum-Likelihood" class="headerlink" title="Maximum Likelihood"></a>Maximum Likelihood</h4><p>第i个example的概率密度函数为$f_{\mu,\sum}(x^i)$，可得出最大似然函数$L(\mu,\sum)$的表达式，其中$\mu=\mu^<em>,\sum=\sum^</em>$时，函数L得到最大值</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605203041766.png" alt="image-20200605203041766" style="zoom:50%;"></p>
+<p>这里我们假设有两个类别，其参数和分布如下，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605210600803.png" alt="image-20200605210600803" style="zoom:50%;"></p>
+<p>输入样例x是Class 1:Water的概率为，</p>
+<script type="math/tex; mode=display">
+P(C_1|x)=\frac{P(x|C_1)P(C_1)}{P(x)}=\frac{P(x|C_1)P(C_1)}
+{P(x|C_1)P(C_1)+P(x|C_2)P(C_2)}</script><p>再代入相应的表达式，其中$P(x|C_1)=f_{\mu^1,\sum^1},P(x|C_2)=f_{\mu^2,\sum^2}$，即可算出x为C1的概率，如果算出这个概率大于0.5，我们就可以认为x的属性为C1</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605212347236.png" alt="image-20200605212347236" style="zoom:50%;"></p>
+<p>但这样子算出来的分类精确度很低，只有47%，就算加入其他的属性，精确度也只提高到了54%</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605214028329.png" alt="image-20200605214028329" style="zoom:50%;"></p>
+<h4 id="Modifying-Model"><a href="#Modifying-Model" class="headerlink" title="Modifying Model"></a>Modifying Model</h4><p>由于上面模型的精确度都不高，所以在此我们对模型进行了修改，模型的参数就只有三个，$\mu^1,\mu^2,\sum=\sum^1=\sum^2$</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605214245755.png" alt="image-20200605214245755" style="zoom:50%;"></p>
+<p>对于Water属性的宝可梦对应参数为$\mu^1$，Normal属性的宝可梦为$\mu^2$，共同属性为$\sum$，这时对应的最大似然函数为$L(\mu^1,\mu^2,\sum)$，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605214446675.png" alt="image-20200605214446675" style="zoom:50%;"></p>
+<p>修改后的模型准确率可以达到54%，如果加入更多的属性，准确率可以提高到73%</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605215021833.png" alt="image-20200605215021833" style="zoom:50%;"></p>
+<h4 id="Three-Steps"><a href="#Three-Steps" class="headerlink" title="Three Steps"></a>Three Steps</h4><p>这里再回忆一下三个步骤：<br>（1）Function Set，计算分类为该类的概率$P(C_1|x)$，如果大于0.5，则认为类别为1，否则为类别2<br>（2）找出相对应的$\mu,\sum$，使得似然函数L取得最大值；<br>（3）得出使似然函数最大化的参数，$\mu^<em>,\sum^</em>$，</p>
+<script type="math/tex; mode=display">
+u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\mu^*)(x^n-\mu^*)^T</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605220705405.png" alt="image-20200605220705405" style="zoom:50%;"></p>
+<h4 id="Probability-Distribution"><a href="#Probability-Distribution" class="headerlink" title="Probability Distribution"></a>Probability Distribution</h4><p>这里我们所使用的概率分布是</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605221617855.png" alt="image-20200605221617855" style="zoom:50%;"></p>
+<p>下面开始公式推导，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605221733838.png" alt="image-20200605221733838" style="zoom:50%;"></p>
+<p>得出了我们的Sigmoid函数，$\sigma(z)$的函数图像为s型，值域范围为[0,1]，将z化简，并代入$P(C_i)=\frac{N_i}{N_1+N_2}$ (i=1,2)，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605221911457.png" alt="image-20200605221911457" style="zoom:50%;"></p>
+<p>将$P(x|C_1),P(x|C_2)$的表达式代入$ln\frac{P(x|C_1)}{P(x|C_2)}$，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605222200879.png" alt="image-20200605222200879" style="zoom:50%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605223207505.png" alt="image-20200605223207505" style="zoom:50%;"></p>
+<p>再进行进一步化简，带入$\sum^1=\sum^2=\sum$，我们可以得出z的简易表达式$z=w\cdot x + b$，可得出$P(C_1|x)=\sigma(z)=\sigma(w\cdot x+b)$。当得出$N_1,N_2,\mu^1,\mu^2,\sum$时，就可以计算出w和b的值。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200605223410530.png" alt="image-20200605223410530" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>classification</tag>
+        <tag>sigmoid function</tag>
       </tags>
   </entry>
   <entry>
@@ -956,70 +956,41 @@ y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情�
       </tags>
   </entry>
   <entry>
-    <title>Evaluation of Generative Models</title>
-    <url>/2020/07/17/GAN-evalution/</url>
-    <content><![CDATA[<p>本文主要叙述了几种评价GAN生成结果好坏的方法。首先叙述了使用传统的likelihood，由于传统的likelihood方法有一些局限性，本文接着使用了Inception Score的思想，来对GAN进行评价。</p>
-<h4 id="Likelihood"><a href="#Likelihood" class="headerlink" title="Likelihood"></a>Likelihood</h4><p>对于传统的评价generator生成结果的方法，是计算每个结果产生的likelihood。</p>
-<ul>
-<li>先从真实数据的distribution中sample出$\{x^1,x^2,…x^m\}$；</li>
-<li>把$x^i$代入现在的已知的distribution $P_G(x^i;\theta)$，表示$x^i$是从现在这个distribution中sample出来的概率；</li>
-<li>把这些概率相乘，得到似然函数L；最后找到对应的参数$\theta$，使似然函数取得最大值。</li>
-</ul>
+    <title>Intelligent Photo Editing</title>
+    <url>/2020/07/15/GAN-Intelligent-Photo-Editing/</url>
+    <content><![CDATA[<p>本文主要介绍了使用GAN来进行智能图像编辑，包括编辑原图像，Image super resolution和Image Completion等。</p>
+<h4 id="Modifying-Input-Code"><a href="#Modifying-Input-Code" class="headerlink" title="Modifying Input Code"></a>Modifying Input Code</h4><p>generator的输入是一个vector，输出一张人脸。input的vector的每个维度都表示某种特征，我们现在要做的就是根据生成的图像，来反推出输入vector的每个dimension表示什么特征。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715094805474.png" alt="image-20200715094805474" style="zoom:67%;"></p>
+<h4 id="GAN-Autoencoder"><a href="#GAN-Autoencoder" class="headerlink" title="GAN+Autoencoder"></a>GAN+Autoencoder</h4><p>我们可以收集一堆有label的数据，这个label可以表示这个图像具有的特征是金发、年轻、男性、女性等。</p>
+<p>但现在有一个问题，根据给出的image，我们并不知道其输入的随机vector是什么。我们可以学习另外一个encoder，这个encoder和generator就组成了一个autoencoder。</p>
+<p>为了学习出输入的vector，我们需要固定generator的参数，可以用discriminator的参数来初始化encoder的参数，再来学习encoder。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715095135708.png" alt="image-20200715095135708" style="zoom:67%;"></p>
+<h4 id="Attribute-Representation"><a href="#Attribute-Representation" class="headerlink" title="Attribute Representation"></a>Attribute Representation</h4><p>encoder训练完成后，我们就可以知道图像x对应的vector z是什么，什么样的vector可以生成这张图像。</p>
+<p>在下图中，我们算出每个短发图像的vector之后，再做一个平均，就可以知道短发图像的vector；把长发图像的vector做一个平均，就可以得到长发图像的vector。把这两个vector相减得到$z_{long}$，就可以知道要做什么样的变化，使短发的脸变成长发的脸。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715100537911.png" alt="image-20200715100537911" style="zoom:67%;"></p>
+<p>现在我们有一张短发的图像x，把它输入encoder得到code，把这个code和$z_{long}$相加，就可以得到长发脸的vector $z’$，把这个vector再输入generator，就可以得到长发脸的图像$Gen(z’)$。</p>
+<p>那么现在对于随机输入的一张图像，我们把其code再加上我们想要的特征向量(比如$z_{long}$)，就可以得到我们想要的特征图的输出。</p>
+<p>智能的ps演示，<a href="https://www.youtube.com/watch?v=9c4z6YsBGQ0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=9c4z6YsBGQ0</a></p>
+<p>那么这种智能的ps是怎么作用的呢？</p>
+<h4 id="Photo-Editing"><a href="#Photo-Editing" class="headerlink" title="Photo Editing"></a><strong>Photo Editing</strong></h4><h5 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h5><p>首先需要训练一个generator，在不同的latent space上sample出不同的点，generator就可以生成对应的商品。</p>
+<p>那么刚才那个智能的ps中，对原图进行小小的修改就可以变成一件新的商品，这个是怎么完成的呢？</p>
+<p>首先需要对输入的商品图像进行反推，反推出在这个code space上的位置，在这个基础上，再进行变化。在满足使用者给出的constrain后，就可以产生一张新的图。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715102116230.png" alt="image-20200715102116230" style="zoom:67%;"></p>
+<h5 id="Back-to-z"><a href="#Back-to-z" class="headerlink" title="Back to z"></a>Back to z</h5><p>我们首先需要完成的事，根据输入的图像反推出对应的code。有以下三种方式。</p>
+<p><strong>Method 1</strong>  当成一个optimization problem，找到对应的$z^*$，使其对应的generator的输出和原图之间的差值最小化，loss function可以有很多种，可以是计算像素级的差值，也可以使用其他的classifier网络，让这两者的embedding越接近越好。</p>
 <script type="math/tex; mode=display">
-L=\frac{1}{N}\sum_{i}logP_G(x^i;\theta)</script><p>这个likelihood就可以用来评价generator的好坏，如果likelihood很高，表示这个generator有很高的几率可以产生真实数据，就是一个好的generator。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717141511915.png" alt="image-20200717141511915" style="zoom:67%;"></p>
-<p>现在会遇到一个新问题。我们没有办法计算$P_G(x^i)$，训练好的generator就可以看作是一个network，这个network可以实现输入一个vector，然后输出一张图像，但没有办法算出generator产生某个特定图像的几率。generator虽然可以产生图像，但没有办法产生特定的图像。</p>
-<p>如果generator是一个gaussian mixture model，我们就可以算出这个likelihood；但现在是复杂的模型，并不能计算likelihood；</p>
-<h5 id="Likelihood-Kernel-Density-Estimation"><a href="#Likelihood-Kernel-Density-Estimation" class="headerlink" title="Likelihood - Kernel Density Estimation"></a>Likelihood - Kernel Density Estimation</h5><p>我们可以尝试 Kernel Density Estimation来计算likelihood。</p>
-<p>首先让generator产生很多data，然后我们再使用多个gaussian distribution来逼近这些data。如果现在是图像问题，先让generator生成很多图像（高维的vector），把这些vector当作gaussian model的mean，每个mean都有一个固定的variance；把这些gaussian model都融合起来，就得到了一个gaussian mixture model;</p>
-<p><a href="https://scarleatt.github.io/2020/06/29/generative-models/" target="_blank" rel="noopener"><strong>Gaussian Mixture Model</strong>：</a>如果现在有m个gaussian model，其中$P(m)$表示选择该对应model的可能性，$P(x|m)$表示在选定了第k个model后，该mode产生x的概率，即</p>
+z^*=arg\mathop{\rm min}_zL(G(z),x^T)</script><p><strong>Method 2</strong> 使用一个autoencoder ，使input和output越接近越好。</p>
+<p><strong>Method 3</strong> 结合了前两个方法，第一个方法要用到gradient descent，可能会遇到local minimal这个问题，给z不同的初始化值，最后得到的结果很可能是不一样的。因此我们可以用autoencoder得到的z来作为方法1的初始值，再来进行优化调整。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715103603424.png" alt="image-20200715103603424" style="zoom:67%;"></p>
+<h5 id="Editing-Photos"><a href="#Editing-Photos" class="headerlink" title="Editing Photos"></a>Editing Photos</h5><p>从图像反推出z之后，我们还需要求解另外一个optimization problem。</p>
+<p>把z输入generator之后，产生image的还需要满足一个额外的constrain $U(G(z))$；新的图像和原来的图像应该越接近越好，原来是黑色的鞋子，现在我们希望新图像还是鞋子，不能差太多；discriminator还需要检测生成的新图像是不是realistic；</p>
 <script type="math/tex; mode=display">
-P(x)=\sum_mP(m)P(x|m)</script><p>那么现在我们就有了分布$P_G$的近似分布$P(x)$，那么我们就可以计算$P_G$产生真实数据$x^i$的概率$P_G(x^i)$了，我们也可以继续计算likelihood。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717152812318.png" alt="image-20200717152812318" style="zoom:67%;"></p>
-<h5 id="Likelihood-v-s-Quality"><a href="#Likelihood-v-s-Quality" class="headerlink" title="Likelihood v.s. Quality"></a>Likelihood v.s. Quality</h5><p>就算我们真的算出了这个likelihood，这个likelihood也并不一定就代表了generator的quality，很可能会出现以下两种情况：</p>
-<ul>
-<li><p>low likelihood，很可能产生high quality的图像。在下图中，很可能generator生成了很接近真实图像的动漫头像，但这时我们要来计算likelihood，生成图像和真实图像很可能差别很大，那么generator生成数据库中的真实图像的可能性就很小，即$P_G(x^i)=0$；</p>
-</li>
-<li><p>high likelihood，很可能产生low quality的图像。下图中有两个generator，算出来的likelihood值分别为$L_1,L_2$。generator 1生成的图像质量很高，且和数据库中真实的图像也很接近，我们可以先算出这个likelihood，</p>
-</li>
-</ul>
-<script type="math/tex; mode=display">
-L_1=\frac{1}{N}\sum_{i}logP_G(x^i)</script><p>对于generator 2生成的图像，有0.99的概率生成模糊的图像，有0.01的概率生成真实的清晰图像。相对于generator 1而言，$P_G(x^i)$减小了100倍，</p>
-<script type="math/tex; mode=display">
-L_2=\frac{1}{N}\sum_{i}log\frac{P_G(x^i)}{100}=-log100+\frac{1}{N}\sum_{i}logP_G(x^i)</script><p>其中$log100$的值接近4.6，但likelihood的值算出来的值一般都是几百的，generator 1和2的likelihood算出来其实差别不大。但其实这两个generator的差别很大，generator 1比2要好一百倍，只是likelihood的值算出来差别不大而已。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717152908621.png" alt="image-20200717152908621" style="zoom:67%;"></p>
-<p>因此，likelihood的值与generator的好坏其实是没有必然联系的。</p>
-<h4 id="Objective-Evaluation"><a href="#Objective-Evaluation" class="headerlink" title="Objective Evaluation"></a>Objective Evaluation</h4><p>我们可以用一个训练好的classifier来判断生成结果的好坏，加入我们现在在做人脸生成问题，我们就可以用人脸识别程序来判断，如果能进行识别，就说明生成的结果还不错。这个classifier是训练好的，比如VGG。</p>
-<p>在下图中，generator生成了一张图像x，我们把x输入这个classifier，会输出对应类别的distribution，即x属于class 1，2，3的概率。如果这个分布产生的概率越集中（某个类别概率很大，其他类别概率很小），就表示generator产生的图像品质很高，classifier可以很自信地进行分类；</p>
-<p>很可能generator就只能产生那个类别的清晰图像而已，产生的其他类别图像质量都很差，这并不是我们想要的结果。因此，我们不仅仅衡量输出概率的distribution，还需要从diverse的方向来衡量；</p>
-<p>那么什么叫从diverse的方向来衡量呢？</p>
-<p>现在让generator生成一堆图像，这里用三张不同的图像作为例子，把这些图像输入CNN，得到三个不同的distribution，再分别求三个distribution中属于同一类别概率的平均值。如果平均值的分布比较uniform，就表示每一种class都有可能被产生，就表示是diverse的；如果平均完之后的值有的很大，是某一个class的概率特别高，model就比较倾向于产生这个类别的事物，就说明output不够diverse。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717155627711.png" alt="image-20200717155627711" style="zoom:67%;"></p>
-<p>现在对于我们的模型就有两个要求，</p>
-<ul>
-<li><strong>图片质量</strong>：classifier得出的distribution要足够sharp、集中，classifier可以很自信地确定x是属于哪个类别；这可以用条件概率$P(y|x)$来表示，越大越好；</li>
-<li><strong>图片多样性</strong>：生成的图像还要足够diverse，标签的分布要均匀，因为我们不希望生成的图像都是属于某一个类别的；这可以用$p(y)$来表示。</li>
-</ul>
-<p>有了这些限制之后，就可以定义对应的score，我们这里使用的是inception network来进行evaluation，对应的分数是inception score，</p>
-<script type="math/tex; mode=display">
-{\rm Inception\ score}=\sum_x\sum_yP(y|x)logP(y|x)-\sum_yP(y)logP(y)</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717182906616.png" alt="image-20200717182906616" style="zoom:67%;"></p>
-<h4 id="We-don’t-want-memory-GAN"><a href="#We-don’t-want-memory-GAN" class="headerlink" title="We don’t want memory GAN."></a>We don’t want memory GAN.</h4><p>在训练GAN的时候，还有另外一个问题，有时候计算generator生成的图像特别清晰，这个结果也不见得是好的。因为很可能generator只是记住了training data中的某几张图像而已，而我们希望生成的图像不是database里面的，而是有创造性的图像。</p>
-<p>那么我们怎么知道生成的图像是不是database里面的呢？要一张一张去对比吗？</p>
-<p>我们可以在generator每生成一张图像的时候，都自动和database里面的每张图像进行对比，可以进行pixel-level的相似度对比；</p>
-<p>但只进行pixel-level的相似度对比是远远不够的。在下图中，有一只羊的图像，每一条曲线都代表一张图像，纵坐标表示database中的图和羊的近似程度，横坐标表示把羊图像向左移动的pixel数目。如果往左边移动一个pixel，发现这张图像还是和原来的图像最接近；如果移动两个pixel，最像的图片就变成了下图中红色方框内的图像，对应图中的红色曲线</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717195325432.png" alt="image-20200717195325432" style="zoom:67%;"></p>
-<h4 id="Mode-Dropping"><a href="#Mode-Dropping" class="headerlink" title="Mode Dropping"></a>Mode Dropping</h4><p>在训练GAN的时候，很可能会出现mode dropping，生成的图像出现多样性不够的问题。</p>
-<p>对于DCGAN（Deep Convolutional GAN），我们怎么检测其生成的人脸是多样性的呢？</p>
-<p>首先DCGAN产生很多张image，看这些生成的image中有没有非常像的，是人都可以辨识出来的。对于判断是不是同一张人脸，可以使用下列论文中提到的方法，先把DCGAN生成的图像丢到一个classifier里面，如果机器认为这是同一张图像，人再来进行观察，看是不是同一张图像。</p>
-<p>那么DCGAN到底可以产生多少张不一样的image呢？</p>
-<p>现在我们sample出400张image出来，如果有50%的概率，可以从400张image里面找出2张相同的人脸；我们就可以根据这个数据来反推到底产生了多少不同的人脸</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717200642896.png" alt="image-20200717200642896" style="zoom:50%;"></p>
-<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><ol>
-<li><p>Lucas Theis, Aäron van den Oord, Matthias Bethge, “A note on the evaluation of generative models”, arXiv preprint, 2015</p>
-</li>
-<li><p><a href="https://blog.csdn.net/qq_27261889/article/details/86483505" target="_blank" rel="noopener">【深度理解】如何评价GAN网络的好坏？IS（inception score）和FID（Fréchet Inception Distance）</a></p>
-</li>
-</ol>
+z^*=arg\mathop{\rm min}_z U(G(z))+\lambda_1||z-z_0||^2-\lambda_2D(G(z))</script><p>求解这个optimization problem，找到满足这些constrain的$z^*$。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715104644372.png" alt="image-20200715104644372" style="zoom:67%;"></p>
+<h4 id="Image-super-resolution"><a href="#Image-super-resolution" class="headerlink" title="Image super resolution"></a>Image super resolution</h4><p>GAN也可以进行Image super resolution，输入一张模糊的图，输出一张清晰的图。可以发现使用GAN的结果，更加清晰了。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715102031232.png" alt="image-20200715102031232" style="zoom:67%;"></p>
+<h4 id="Image-Completion"><a href="#Image-Completion" class="headerlink" title="Image Completion"></a>Image Completion</h4><p>我们可以把图像的某部分挖空，机器要来恢复这部分被挖空的图像。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715105653264.png" alt="image-20200715105653264" style="zoom:67%;"></p>
 ]]></content>
       <categories>
         <category>ML-notes</category>
@@ -1027,7 +998,8 @@ L_2=\frac{1}{N}\sum_{i}log\frac{P_G(x^i)}{100}=-log100+\frac{1}{N}\sum_{i}logP_G
       <tags>
         <tag>Deep Learning</tag>
         <tag>GAN</tag>
-        <tag>Inception Score</tag>
+        <tag>Autoencoder</tag>
+        <tag>Intelligent Photo Editing</tag>
       </tags>
   </entry>
   <entry>
@@ -1120,41 +1092,70 @@ L_2=\frac{1}{N}\sum_{i}log\frac{P_G(x^i)}{100}=-log100+\frac{1}{N}\sum_{i}logP_G
       </tags>
   </entry>
   <entry>
-    <title>Intelligent Photo Editing</title>
-    <url>/2020/07/15/GAN-Intelligent-Photo-Editing/</url>
-    <content><![CDATA[<p>本文主要介绍了使用GAN来进行智能图像编辑，包括编辑原图像，Image super resolution和Image Completion等。</p>
-<h4 id="Modifying-Input-Code"><a href="#Modifying-Input-Code" class="headerlink" title="Modifying Input Code"></a>Modifying Input Code</h4><p>generator的输入是一个vector，输出一张人脸。input的vector的每个维度都表示某种特征，我们现在要做的就是根据生成的图像，来反推出输入vector的每个dimension表示什么特征。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715094805474.png" alt="image-20200715094805474" style="zoom:67%;"></p>
-<h4 id="GAN-Autoencoder"><a href="#GAN-Autoencoder" class="headerlink" title="GAN+Autoencoder"></a>GAN+Autoencoder</h4><p>我们可以收集一堆有label的数据，这个label可以表示这个图像具有的特征是金发、年轻、男性、女性等。</p>
-<p>但现在有一个问题，根据给出的image，我们并不知道其输入的随机vector是什么。我们可以学习另外一个encoder，这个encoder和generator就组成了一个autoencoder。</p>
-<p>为了学习出输入的vector，我们需要固定generator的参数，可以用discriminator的参数来初始化encoder的参数，再来学习encoder。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715095135708.png" alt="image-20200715095135708" style="zoom:67%;"></p>
-<h4 id="Attribute-Representation"><a href="#Attribute-Representation" class="headerlink" title="Attribute Representation"></a>Attribute Representation</h4><p>encoder训练完成后，我们就可以知道图像x对应的vector z是什么，什么样的vector可以生成这张图像。</p>
-<p>在下图中，我们算出每个短发图像的vector之后，再做一个平均，就可以知道短发图像的vector；把长发图像的vector做一个平均，就可以得到长发图像的vector。把这两个vector相减得到$z_{long}$，就可以知道要做什么样的变化，使短发的脸变成长发的脸。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715100537911.png" alt="image-20200715100537911" style="zoom:67%;"></p>
-<p>现在我们有一张短发的图像x，把它输入encoder得到code，把这个code和$z_{long}$相加，就可以得到长发脸的vector $z’$，把这个vector再输入generator，就可以得到长发脸的图像$Gen(z’)$。</p>
-<p>那么现在对于随机输入的一张图像，我们把其code再加上我们想要的特征向量(比如$z_{long}$)，就可以得到我们想要的特征图的输出。</p>
-<p>智能的ps演示，<a href="https://www.youtube.com/watch?v=9c4z6YsBGQ0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=9c4z6YsBGQ0</a></p>
-<p>那么这种智能的ps是怎么作用的呢？</p>
-<h4 id="Photo-Editing"><a href="#Photo-Editing" class="headerlink" title="Photo Editing"></a><strong>Photo Editing</strong></h4><h5 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h5><p>首先需要训练一个generator，在不同的latent space上sample出不同的点，generator就可以生成对应的商品。</p>
-<p>那么刚才那个智能的ps中，对原图进行小小的修改就可以变成一件新的商品，这个是怎么完成的呢？</p>
-<p>首先需要对输入的商品图像进行反推，反推出在这个code space上的位置，在这个基础上，再进行变化。在满足使用者给出的constrain后，就可以产生一张新的图。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715102116230.png" alt="image-20200715102116230" style="zoom:67%;"></p>
-<h5 id="Back-to-z"><a href="#Back-to-z" class="headerlink" title="Back to z"></a>Back to z</h5><p>我们首先需要完成的事，根据输入的图像反推出对应的code。有以下三种方式。</p>
-<p><strong>Method 1</strong>  当成一个optimization problem，找到对应的$z^*$，使其对应的generator的输出和原图之间的差值最小化，loss function可以有很多种，可以是计算像素级的差值，也可以使用其他的classifier网络，让这两者的embedding越接近越好。</p>
+    <title>Evaluation of Generative Models</title>
+    <url>/2020/07/17/GAN-evalution/</url>
+    <content><![CDATA[<p>本文主要叙述了几种评价GAN生成结果好坏的方法。首先叙述了使用传统的likelihood，由于传统的likelihood方法有一些局限性，本文接着使用了Inception Score的思想，来对GAN进行评价。</p>
+<h4 id="Likelihood"><a href="#Likelihood" class="headerlink" title="Likelihood"></a>Likelihood</h4><p>对于传统的评价generator生成结果的方法，是计算每个结果产生的likelihood。</p>
+<ul>
+<li>先从真实数据的distribution中sample出$\{x^1,x^2,…x^m\}$；</li>
+<li>把$x^i$代入现在的已知的distribution $P_G(x^i;\theta)$，表示$x^i$是从现在这个distribution中sample出来的概率；</li>
+<li>把这些概率相乘，得到似然函数L；最后找到对应的参数$\theta$，使似然函数取得最大值。</li>
+</ul>
 <script type="math/tex; mode=display">
-z^*=arg\mathop{\rm min}_zL(G(z),x^T)</script><p><strong>Method 2</strong> 使用一个autoencoder ，使input和output越接近越好。</p>
-<p><strong>Method 3</strong> 结合了前两个方法，第一个方法要用到gradient descent，可能会遇到local minimal这个问题，给z不同的初始化值，最后得到的结果很可能是不一样的。因此我们可以用autoencoder得到的z来作为方法1的初始值，再来进行优化调整。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715103603424.png" alt="image-20200715103603424" style="zoom:67%;"></p>
-<h5 id="Editing-Photos"><a href="#Editing-Photos" class="headerlink" title="Editing Photos"></a>Editing Photos</h5><p>从图像反推出z之后，我们还需要求解另外一个optimization problem。</p>
-<p>把z输入generator之后，产生image的还需要满足一个额外的constrain $U(G(z))$；新的图像和原来的图像应该越接近越好，原来是黑色的鞋子，现在我们希望新图像还是鞋子，不能差太多；discriminator还需要检测生成的新图像是不是realistic；</p>
+L=\frac{1}{N}\sum_{i}logP_G(x^i;\theta)</script><p>这个likelihood就可以用来评价generator的好坏，如果likelihood很高，表示这个generator有很高的几率可以产生真实数据，就是一个好的generator。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717141511915.png" alt="image-20200717141511915" style="zoom:67%;"></p>
+<p>现在会遇到一个新问题。我们没有办法计算$P_G(x^i)$，训练好的generator就可以看作是一个network，这个network可以实现输入一个vector，然后输出一张图像，但没有办法算出generator产生某个特定图像的几率。generator虽然可以产生图像，但没有办法产生特定的图像。</p>
+<p>如果generator是一个gaussian mixture model，我们就可以算出这个likelihood；但现在是复杂的模型，并不能计算likelihood；</p>
+<h5 id="Likelihood-Kernel-Density-Estimation"><a href="#Likelihood-Kernel-Density-Estimation" class="headerlink" title="Likelihood - Kernel Density Estimation"></a>Likelihood - Kernel Density Estimation</h5><p>我们可以尝试 Kernel Density Estimation来计算likelihood。</p>
+<p>首先让generator产生很多data，然后我们再使用多个gaussian distribution来逼近这些data。如果现在是图像问题，先让generator生成很多图像（高维的vector），把这些vector当作gaussian model的mean，每个mean都有一个固定的variance；把这些gaussian model都融合起来，就得到了一个gaussian mixture model;</p>
+<p><a href="https://scarleatt.github.io/2020/06/29/generative-models/" target="_blank" rel="noopener"><strong>Gaussian Mixture Model</strong>：</a>如果现在有m个gaussian model，其中$P(m)$表示选择该对应model的可能性，$P(x|m)$表示在选定了第k个model后，该mode产生x的概率，即</p>
 <script type="math/tex; mode=display">
-z^*=arg\mathop{\rm min}_z U(G(z))+\lambda_1||z-z_0||^2-\lambda_2D(G(z))</script><p>求解这个optimization problem，找到满足这些constrain的$z^*$。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715104644372.png" alt="image-20200715104644372" style="zoom:67%;"></p>
-<h4 id="Image-super-resolution"><a href="#Image-super-resolution" class="headerlink" title="Image super resolution"></a>Image super resolution</h4><p>GAN也可以进行Image super resolution，输入一张模糊的图，输出一张清晰的图。可以发现使用GAN的结果，更加清晰了。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715102031232.png" alt="image-20200715102031232" style="zoom:67%;"></p>
-<h4 id="Image-Completion"><a href="#Image-Completion" class="headerlink" title="Image Completion"></a>Image Completion</h4><p>我们可以把图像的某部分挖空，机器要来恢复这部分被挖空的图像。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715105653264.png" alt="image-20200715105653264" style="zoom:67%;"></p>
+P(x)=\sum_mP(m)P(x|m)</script><p>那么现在我们就有了分布$P_G$的近似分布$P(x)$，那么我们就可以计算$P_G$产生真实数据$x^i$的概率$P_G(x^i)$了，我们也可以继续计算likelihood。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717152812318.png" alt="image-20200717152812318" style="zoom:67%;"></p>
+<h5 id="Likelihood-v-s-Quality"><a href="#Likelihood-v-s-Quality" class="headerlink" title="Likelihood v.s. Quality"></a>Likelihood v.s. Quality</h5><p>就算我们真的算出了这个likelihood，这个likelihood也并不一定就代表了generator的quality，很可能会出现以下两种情况：</p>
+<ul>
+<li><p>low likelihood，很可能产生high quality的图像。在下图中，很可能generator生成了很接近真实图像的动漫头像，但这时我们要来计算likelihood，生成图像和真实图像很可能差别很大，那么generator生成数据库中的真实图像的可能性就很小，即$P_G(x^i)=0$；</p>
+</li>
+<li><p>high likelihood，很可能产生low quality的图像。下图中有两个generator，算出来的likelihood值分别为$L_1,L_2$。generator 1生成的图像质量很高，且和数据库中真实的图像也很接近，我们可以先算出这个likelihood，</p>
+</li>
+</ul>
+<script type="math/tex; mode=display">
+L_1=\frac{1}{N}\sum_{i}logP_G(x^i)</script><p>对于generator 2生成的图像，有0.99的概率生成模糊的图像，有0.01的概率生成真实的清晰图像。相对于generator 1而言，$P_G(x^i)$减小了100倍，</p>
+<script type="math/tex; mode=display">
+L_2=\frac{1}{N}\sum_{i}log\frac{P_G(x^i)}{100}=-log100+\frac{1}{N}\sum_{i}logP_G(x^i)</script><p>其中$log100$的值接近4.6，但likelihood的值算出来的值一般都是几百的，generator 1和2的likelihood算出来其实差别不大。但其实这两个generator的差别很大，generator 1比2要好一百倍，只是likelihood的值算出来差别不大而已。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717152908621.png" alt="image-20200717152908621" style="zoom:67%;"></p>
+<p>因此，likelihood的值与generator的好坏其实是没有必然联系的。</p>
+<h4 id="Objective-Evaluation"><a href="#Objective-Evaluation" class="headerlink" title="Objective Evaluation"></a>Objective Evaluation</h4><p>我们可以用一个训练好的classifier来判断生成结果的好坏，加入我们现在在做人脸生成问题，我们就可以用人脸识别程序来判断，如果能进行识别，就说明生成的结果还不错。这个classifier是训练好的，比如VGG。</p>
+<p>在下图中，generator生成了一张图像x，我们把x输入这个classifier，会输出对应类别的distribution，即x属于class 1，2，3的概率。如果这个分布产生的概率越集中（某个类别概率很大，其他类别概率很小），就表示generator产生的图像品质很高，classifier可以很自信地进行分类；</p>
+<p>很可能generator就只能产生那个类别的清晰图像而已，产生的其他类别图像质量都很差，这并不是我们想要的结果。因此，我们不仅仅衡量输出概率的distribution，还需要从diverse的方向来衡量；</p>
+<p>那么什么叫从diverse的方向来衡量呢？</p>
+<p>现在让generator生成一堆图像，这里用三张不同的图像作为例子，把这些图像输入CNN，得到三个不同的distribution，再分别求三个distribution中属于同一类别概率的平均值。如果平均值的分布比较uniform，就表示每一种class都有可能被产生，就表示是diverse的；如果平均完之后的值有的很大，是某一个class的概率特别高，model就比较倾向于产生这个类别的事物，就说明output不够diverse。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717155627711.png" alt="image-20200717155627711" style="zoom:67%;"></p>
+<p>现在对于我们的模型就有两个要求，</p>
+<ul>
+<li><strong>图片质量</strong>：classifier得出的distribution要足够sharp、集中，classifier可以很自信地确定x是属于哪个类别；这可以用条件概率$P(y|x)$来表示，越大越好；</li>
+<li><strong>图片多样性</strong>：生成的图像还要足够diverse，标签的分布要均匀，因为我们不希望生成的图像都是属于某一个类别的；这可以用$p(y)$来表示。</li>
+</ul>
+<p>有了这些限制之后，就可以定义对应的score，我们这里使用的是inception network来进行evaluation，对应的分数是inception score，</p>
+<script type="math/tex; mode=display">
+{\rm Inception\ score}=\sum_x\sum_yP(y|x)logP(y|x)-\sum_yP(y)logP(y)</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717182906616.png" alt="image-20200717182906616" style="zoom:67%;"></p>
+<h4 id="We-don’t-want-memory-GAN"><a href="#We-don’t-want-memory-GAN" class="headerlink" title="We don’t want memory GAN."></a>We don’t want memory GAN.</h4><p>在训练GAN的时候，还有另外一个问题，有时候计算generator生成的图像特别清晰，这个结果也不见得是好的。因为很可能generator只是记住了training data中的某几张图像而已，而我们希望生成的图像不是database里面的，而是有创造性的图像。</p>
+<p>那么我们怎么知道生成的图像是不是database里面的呢？要一张一张去对比吗？</p>
+<p>我们可以在generator每生成一张图像的时候，都自动和database里面的每张图像进行对比，可以进行pixel-level的相似度对比；</p>
+<p>但只进行pixel-level的相似度对比是远远不够的。在下图中，有一只羊的图像，每一条曲线都代表一张图像，纵坐标表示database中的图和羊的近似程度，横坐标表示把羊图像向左移动的pixel数目。如果往左边移动一个pixel，发现这张图像还是和原来的图像最接近；如果移动两个pixel，最像的图片就变成了下图中红色方框内的图像，对应图中的红色曲线</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717195325432.png" alt="image-20200717195325432" style="zoom:67%;"></p>
+<h4 id="Mode-Dropping"><a href="#Mode-Dropping" class="headerlink" title="Mode Dropping"></a>Mode Dropping</h4><p>在训练GAN的时候，很可能会出现mode dropping，生成的图像出现多样性不够的问题。</p>
+<p>对于DCGAN（Deep Convolutional GAN），我们怎么检测其生成的人脸是多样性的呢？</p>
+<p>首先DCGAN产生很多张image，看这些生成的image中有没有非常像的，是人都可以辨识出来的。对于判断是不是同一张人脸，可以使用下列论文中提到的方法，先把DCGAN生成的图像丢到一个classifier里面，如果机器认为这是同一张图像，人再来进行观察，看是不是同一张图像。</p>
+<p>那么DCGAN到底可以产生多少张不一样的image呢？</p>
+<p>现在我们sample出400张image出来，如果有50%的概率，可以从400张image里面找出2张相同的人脸；我们就可以根据这个数据来反推到底产生了多少不同的人脸</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717200642896.png" alt="image-20200717200642896" style="zoom:50%;"></p>
+<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><ol>
+<li><p>Lucas Theis, Aäron van den Oord, Matthias Bethge, “A note on the evaluation of generative models”, arXiv preprint, 2015</p>
+</li>
+<li><p><a href="https://blog.csdn.net/qq_27261889/article/details/86483505" target="_blank" rel="noopener">【深度理解】如何评价GAN网络的好坏？IS（inception score）和FID（Fréchet Inception Distance）</a></p>
+</li>
+</ol>
 ]]></content>
       <categories>
         <category>ML-notes</category>
@@ -1162,8 +1163,7 @@ z^*=arg\mathop{\rm min}_z U(G(z))+\lambda_1||z-z_0||^2-\lambda_2D(G(z))</script>
       <tags>
         <tag>Deep Learning</tag>
         <tag>GAN</tag>
-        <tag>Autoencoder</tag>
-        <tag>Intelligent Photo Editing</tag>
+        <tag>Inception Score</tag>
       </tags>
   </entry>
   <entry>
@@ -1658,68 +1658,6 @@ logP_\theta(x^i|c^i)=logP(x_1^i|c^i)+logP(x_2^i|c^i,x_1^i)+logP(x_3^i|c^i,x_{1:2
       </tags>
   </entry>
   <entry>
-    <title>Mac安装Pytorch</title>
-    <url>/2020/03/29/Mac%E5%AE%89%E8%A3%85Pytorch/</url>
-    <content><![CDATA[<p>先创建一个名为<code>pytorch</code>的虚拟环境，</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda create -n pytorch python=3.7 numpy matplotlib pandas jupyter notebook</span><br></pre></td></tr></table></figure>
-<p>激活虚拟环境</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda activate pytorch</span><br></pre></td></tr></table></figure>
-<p>去官网选择合适的pytorch版本的安装命令<a href="https://pytorch.org/get-started/locally/" target="_blank" rel="noopener">https://pytorch.org/get-started/locally/</a></p>
-<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329101220290.png" alt="image-20200329101220290"></p>
-<p>复制到命令行下，回车运行</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda install pytorch torchvision -c pytorch</span><br></pre></td></tr></table></figure>
-<p>会出现以下报错信息：</p>
-<p><strong>CondaHTTPError: HTTP 000 CONNECTION FAILED for url</strong></p>
-<p><strong>解决方法：添加镜像站到Anaconda</strong></p>
- <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</span><br><span class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</span><br><span class="line">conda config --set show_channel_urls yes</span><br><span class="line"></span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/</span><br></pre></td></tr></table></figure>
-<p>再把官网安装命令的<code>-c pytorch</code>去掉，运行以下命令</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda install pytorch torchvision</span><br></pre></td></tr></table></figure>
-<p>检测pytorch是否安装成功，命令行运行</p>
-<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">jupyter notebook</span><br></pre></td></tr></table></figure>
-<p>运行测试代码，出现以下结果，则说明安装成功</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line">torch.FloatTensor([<span class="number">5</span>, <span class="number">3</span>, <span class="number">5</span>])</span><br></pre></td></tr></table></figure>
-<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329102655979.png" alt="image-20200329102655979"></p>
-]]></content>
-      <tags>
-        <tag>Pytorch</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>RDF+SPARQL对比</title>
-    <url>/2020/07/15/RDF-SPARQL/</url>
-    <content><![CDATA[<h5 id="RDF语义模型-–-关系显式定义"><a href="#RDF语义模型-–-关系显式定义" class="headerlink" title="RDF语义模型 – 关系显式定义"></a>RDF语义模型 – 关系显式定义</h5><p>RDF模型关系是显式定义的，比如我们现在有以下信息，</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Tencent located_in Shengzhen </span><br><span class="line">Shengzhen located_in China</span><br></pre></td></tr></table></figure>
-<p>还需要对$located_in$这个属性进行定义，我们将其定义为可传递的，即</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">located_in type transitiveProperty</span><br></pre></td></tr></table></figure>
-<p>我们可以从这些信息中进行推理，推理出Tencent和China的关系，即</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Tencent located_in China</span><br></pre></td></tr></table></figure>
-<p>如果现在问一个问题“In which country is Tencent located?”，RDF语义模型可以很快给出答案，“In China”。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715171338405.png" alt="image-20200715171338405" style="zoom:100%;"></p>
-<h5 id="关系模型-–-关系隐式声明"><a href="#关系模型-–-关系隐式声明" class="headerlink" title="关系模型 – 关系隐式声明"></a>关系模型 – 关系隐式声明</h5><p>但对于关系模型，关系则是隐式声明的。如果我们要回答问题“In which country is Tencent located?”，则需要用三个数据库（Company，City，Company_city），在查询时则需要将三个表连接起来，最后才能得出答案“In China”。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715171833261.png" alt="image-20200715171833261" style="zoom:100%;"></p>
-<h5 id="当数据发生了变更-–-语义模型如何应对"><a href="#当数据发生了变更-–-语义模型如何应对" class="headerlink" title="当数据发生了变更 – 语义模型如何应对"></a>当数据发生了变更 – 语义模型如何应对</h5><p>如果数据发生了变化，比如加入了新城市Guangzhou与Shengzhen、China的关系，现在的数据就变成了</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Tencent located_in Shengzhen </span><br><span class="line">Shengzhen loacted_in Guangdong </span><br><span class="line">Guangdong located_in China</span><br></pre></td></tr></table></figure>
-<p>对于RDF语义模型，我们可以推理出新的信息，即</p>
-<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Shengzhen located_in China </span><br><span class="line">Tencent located_in China</span><br></pre></td></tr></table></figure>
-<p>回答问题“In which country is Tencent located?”，也可以很轻松地得出来答案“In China”</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715172137411.png" alt="image-20200715172137411"></p>
-<p>对于关系模型，我们就会发现之前的三张表不能用了，需要换成4张表，即Company，State，Company_City，City_State，这时原来的sql查询语句也不能继续使用了。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715173517113.png" alt="image-20200715173517113"></p>
-<h5 id="数据的智能性如何体现"><a href="#数据的智能性如何体现" class="headerlink" title="数据的智能性如何体现?"></a>数据的智能性如何体现?</h5><p>左图表示关系数据，智能性更多体现在应用的代码（sql code）上；</p>
-<p>右图为加入了知识图谱的推理，关系显式地被表现出来，对图加一些点和边也很容易；在我们使用RDFS时，也会加入一些新的词汇（本体、属性等），这些词汇本身就有一定的推理能力，也就形成了更加智能的数据。对这些智能的数据也可以再进一步推理。</p>
-<p>知识图谱的查询是蕴含在推理过程中的。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715173710175.png" alt="image-20200715173710175"></p>
-]]></content>
-      <categories>
-        <category>Knowledge Graph</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Knowledge Graph</tag>
-        <tag>RDF</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Logistic Regression</title>
     <url>/2020/06/06/Logistic-Regression/</url>
     <content><![CDATA[<h4 id="Review"><a href="#Review" class="headerlink" title="Review"></a>Review</h4><p>我们可以得出z的简易表达式$z=w\cdot x + b$，可得出</p>
@@ -1953,6 +1891,68 @@ a=h(c')f(z_0)</script><h4 id="Learning"><a href="#Learning" class="headerlink" t
       </tags>
   </entry>
   <entry>
+    <title>Mac安装Pytorch</title>
+    <url>/2020/03/29/Mac%E5%AE%89%E8%A3%85Pytorch/</url>
+    <content><![CDATA[<p>先创建一个名为<code>pytorch</code>的虚拟环境，</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda create -n pytorch python=3.7 numpy matplotlib pandas jupyter notebook</span><br></pre></td></tr></table></figure>
+<p>激活虚拟环境</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda activate pytorch</span><br></pre></td></tr></table></figure>
+<p>去官网选择合适的pytorch版本的安装命令<a href="https://pytorch.org/get-started/locally/" target="_blank" rel="noopener">https://pytorch.org/get-started/locally/</a></p>
+<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329101220290.png" alt="image-20200329101220290"></p>
+<p>复制到命令行下，回车运行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda install pytorch torchvision -c pytorch</span><br></pre></td></tr></table></figure>
+<p>会出现以下报错信息：</p>
+<p><strong>CondaHTTPError: HTTP 000 CONNECTION FAILED for url</strong></p>
+<p><strong>解决方法：添加镜像站到Anaconda</strong></p>
+ <figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/main/</span><br><span class="line">conda config --add channels http://mirror.tuna.tsinghua.edu.cn/anaconda/pkgs/free/</span><br><span class="line">conda config --set show_channel_urls yes</span><br><span class="line"></span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/ </span><br><span class="line">conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/</span><br></pre></td></tr></table></figure>
+<p>再把官网安装命令的<code>-c pytorch</code>去掉，运行以下命令</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">conda install pytorch torchvision</span><br></pre></td></tr></table></figure>
+<p>检测pytorch是否安装成功，命令行运行</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">jupyter notebook</span><br></pre></td></tr></table></figure>
+<p>运行测试代码，出现以下结果，则说明安装成功</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line">torch.FloatTensor([<span class="number">5</span>, <span class="number">3</span>, <span class="number">5</span>])</span><br></pre></td></tr></table></figure>
+<p><img src="/2020/03/29/Mac安装Pytorch/image-20200329102655979.png" alt="image-20200329102655979"></p>
+]]></content>
+      <tags>
+        <tag>Pytorch</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>RDF+SPARQL对比</title>
+    <url>/2020/07/15/RDF-SPARQL/</url>
+    <content><![CDATA[<h5 id="RDF语义模型-–-关系显式定义"><a href="#RDF语义模型-–-关系显式定义" class="headerlink" title="RDF语义模型 – 关系显式定义"></a>RDF语义模型 – 关系显式定义</h5><p>RDF模型关系是显式定义的，比如我们现在有以下信息，</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Tencent located_in Shengzhen </span><br><span class="line">Shengzhen located_in China</span><br></pre></td></tr></table></figure>
+<p>还需要对$located_in$这个属性进行定义，我们将其定义为可传递的，即</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">located_in type transitiveProperty</span><br></pre></td></tr></table></figure>
+<p>我们可以从这些信息中进行推理，推理出Tencent和China的关系，即</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Tencent located_in China</span><br></pre></td></tr></table></figure>
+<p>如果现在问一个问题“In which country is Tencent located?”，RDF语义模型可以很快给出答案，“In China”。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715171338405.png" alt="image-20200715171338405" style="zoom:100%;"></p>
+<h5 id="关系模型-–-关系隐式声明"><a href="#关系模型-–-关系隐式声明" class="headerlink" title="关系模型 – 关系隐式声明"></a>关系模型 – 关系隐式声明</h5><p>但对于关系模型，关系则是隐式声明的。如果我们要回答问题“In which country is Tencent located?”，则需要用三个数据库（Company，City，Company_city），在查询时则需要将三个表连接起来，最后才能得出答案“In China”。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715171833261.png" alt="image-20200715171833261" style="zoom:100%;"></p>
+<h5 id="当数据发生了变更-–-语义模型如何应对"><a href="#当数据发生了变更-–-语义模型如何应对" class="headerlink" title="当数据发生了变更 – 语义模型如何应对"></a>当数据发生了变更 – 语义模型如何应对</h5><p>如果数据发生了变化，比如加入了新城市Guangzhou与Shengzhen、China的关系，现在的数据就变成了</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Tencent located_in Shengzhen </span><br><span class="line">Shengzhen loacted_in Guangdong </span><br><span class="line">Guangdong located_in China</span><br></pre></td></tr></table></figure>
+<p>对于RDF语义模型，我们可以推理出新的信息，即</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Shengzhen located_in China </span><br><span class="line">Tencent located_in China</span><br></pre></td></tr></table></figure>
+<p>回答问题“In which country is Tencent located?”，也可以很轻松地得出来答案“In China”</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715172137411.png" alt="image-20200715172137411"></p>
+<p>对于关系模型，我们就会发现之前的三张表不能用了，需要换成4张表，即Company，State，Company_City，City_State，这时原来的sql查询语句也不能继续使用了。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715173517113.png" alt="image-20200715173517113"></p>
+<h5 id="数据的智能性如何体现"><a href="#数据的智能性如何体现" class="headerlink" title="数据的智能性如何体现?"></a>数据的智能性如何体现?</h5><p>左图表示关系数据，智能性更多体现在应用的代码（sql code）上；</p>
+<p>右图为加入了知识图谱的推理，关系显式地被表现出来，对图加一些点和边也很容易；在我们使用RDFS时，也会加入一些新的词汇（本体、属性等），这些词汇本身就有一定的推理能力，也就形成了更加智能的数据。对这些智能的数据也可以再进一步推理。</p>
+<p>知识图谱的查询是蕴含在推理过程中的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715173710175.png" alt="image-20200715173710175"></p>
+]]></content>
+      <categories>
+        <category>Knowledge Graph</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Knowledge Graph</tag>
+        <tag>RDF</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Self-Attention与Transformer模型</title>
     <url>/2020/07/13/Transformer/</url>
     <content><![CDATA[<p>本文是对论文《Attention is all you need》的理解。首先介绍了标准的attention机制，再介绍了transformer的encoder和decoder，以及self-attention。</p>
@@ -2057,6 +2057,62 @@ y_i=\gamma \hat x_i+\beta=LN_{\gamma,\beta}(x_i)</script><p>对于输入的tenso
       </tags>
   </entry>
   <entry>
+    <title>Word Embedding</title>
+    <url>/2020/06/11/Word-Embedding/</url>
+    <content><![CDATA[<h4 id="Word-Embedding"><a href="#Word-Embedding" class="headerlink" title="Word Embedding"></a>Word Embedding</h4><p>如果使用1-of-N encoding，每个单词用一个vector表示，那么5个单词就需要5个vector；如果我们把同一个类别的单词都放到那个类里，即属于class1的单词有dog、cat、bird，属于动物类的单词，同理可以得出class2，class3；</p>
+<p>但只做classify是不够的，这些class之间也有一些其他的联系；比如class1属于动物，class3属于植物，他们都是生物，只做classify并不能体现这种联系；</p>
+<p>现在我们把每个word都project到一个两个dimension上， 水平的dimension可以是表示生物（class1，class3）和其他类别class2之间的差距，竖直的dimension可以是会动（class2，class3）的和不会动class1之间的差距；</p>
+<p>如果现在有10w个单词，1-of-N encoding就需要10w个vector，但word embedding可能只需要50维左右，就可以表示这些所有的word。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611094055907.png" alt="image-20200611094055907" style="zoom:50%;"></p>
+<p>word2vec是一个无监督学习问题，如果network的input为“Apple”，要输出其对应的vector </p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611095916810.png" alt="image-20200611095916810" style="zoom:50%;"></p>
+<p>下面我们将叙述生成词向量的两种主要手段。</p>
+<h4 id="Count-based"><a href="#Count-based" class="headerlink" title="Count based"></a>Count based</h4><p>基于计数的方法，记录文本中词的出现次数。如果两个单词$w_i,w_j$常常一起出现，那么我们就认为其对应的vector $V(w_i),V(w_j)$之间就是非常接近的。</p>
+<p>用$N_{i,j}$表示$w_i,w_j$在同一个document中出现的次数，那么我们希望找到对应的$V(w_i),V(w_j)$，其做inner product的值和这个次数越接近越好。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611102225747.png" alt="image-20200611102225747" style="zoom:50%;"></p>
+<h4 id="Prediction-based"><a href="#Prediction-based" class="headerlink" title="Prediction-based"></a>Prediction-based</h4><p>基于预测的方法，即可以通过上下文预测中心词，也可以通过中心词预测上下文。中心词即我们要预测的词。在下文中，$w_i$是我们要预测的值，$…,w_{i-2},w_{i-1}$就是其对应的上下文；</p>
+<p>现在我们把$w_{i-1}$的one-hot encoding作为网络的输入，网络的输出为每个词作为下一个词$w_i$输出的概率，如果词袋中有10w个词，那么输出的维度就对应为10w维。</p>
+<p>把网络中第一个hidden layer的input拿出来，即$z=(z_1,z_2,…)^T$；如果输入为不同1-of-N encoding，那么对应的z也是不一样的。我们就可以用z来代表一个word，即z就是我们要寻找的word vector $V(w)$。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611102755128.png" alt="image-20200611102755128" style="zoom: 40%;"></p>
+<p>如果现在有两个training text，“蔡英文 宣誓就职”、“马英九 宣誓就职”，如果输入的1-of-N encoding是“蔡英文”或“马英九”，那么我们希望在网络的输出概率中，“宣誓就职”的概率是最大的。同理我们也可以把网络的第一个hidden layer的输入作为z，就是我们要寻找的word vector $V(w)$。</p>
+<p>这时我们就需要中间的hidden layer来做这样一件事，如果输入为不同的词汇（“蔡英文”，“马英九”），那么我们希望中间的hidden layer可以把不同的词汇project到相同的空间，这样网络的输出才可能都是“宣誓就职”对应的概率最大。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705122246038.png" alt="image-20200705122246038" style="zoom:50%;"></p>
+<h5 id="Sharing-weight"><a href="#Sharing-weight" class="headerlink" title="Sharing weight"></a><strong>Sharing weight</strong></h5><p>只考虑前面的一个词汇，来预测下一个词汇会很难，我们可以考虑前面的几个词汇。现在我们来叙述考虑前两个词汇的结果。</p>
+<p>现在我们并不能像之间的neural network那样，所有的输入都连成一个vector作为输入。但实际上，我们希望不同的one-hot vector的同一维度之间是tie在一起的。即$w_{i-1},w_{i-2}$的第一维对应$z_1$，其对应的weight是一样的；同理$w_{i-1},w_{i-2}$的第二维对应$z_1$，其对应的weight是一样的，……</p>
+<p>Q：为什么不同的one-hot vector的同一维度之间是tie在一起的呢？</p>
+<p>A：我们现在把同一个word放到$w_{i-1},w_{i-2}$的位置， 如果每一维对应的weight都不一样，那么实际上就输入了两个vector。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611103812991.png" alt="image-20200611103812991" style="zoom:50%;"></p>
+<p>如果我们设置$x_{i-1},x_{i-2}$的长度都是$|V|$，$z$的长度是$|Z|$，那么</p>
+<script type="math/tex; mode=display">
+z=W_1x_{i-2}+W_2x_{i-1}</script><p>其中$W_1=W_2=W$，那么$z=W(x_{i-2}+x_{i-1})$，也就得到了word vector $V(w)$，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611104833054.png" alt="image-20200611104833054" style="zoom:50%;"></p>
+<p>那么在实际的网络训练中，我们如何保证$W_1=W_2$呢？</p>
+<p>首先需要将$w_1,w_2$初始化为相同的值，那么</p>
+<script type="math/tex; mode=display">
+w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}\\
+w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}</script><p>由于gradient的值不同，$w_1,w_2$在更新一次参数之后就不相等了，必须保证每次更新之后的值还是一样的，因此</p>
+<script type="math/tex; mode=display">
+w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}-\eta \frac{\partial C}{\partial w_j}\\
+w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}-\eta \frac{\partial C}{\partial w_i}</script><p>这样每次更新的值都一样的，也就保证了$w_1=w_2$</p>
+<h5 id="Training"><a href="#Training" class="headerlink" title="Training"></a><strong>Training</strong></h5><p>对于输入“潮水、退了”，我们希望network的输出和“就”越接近越好，即最小化cross entropy</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611103701528.png" alt="image-20200611103701528" style="zoom:50%;"></p>
+<h5 id="Various-Architectures"><a href="#Various-Architectures" class="headerlink" title="Various Architectures"></a>Various Architectures</h5><p>CBOW：根据上下文的词汇$w_{i-1},w_{i+1}$来预测中心词$w_i$;</p>
+<p>Skip-gram：根据中心词$w_i$来预测上下文$w_{i-1},w_{i+1}$。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611110004840.png" alt="image-20200611110004840" style="zoom:50%;"></p>
+<h5 id="Result"><a href="#Result" class="headerlink" title="Result"></a>Result</h5><p>vec(Rome) - vec(Italy) $\approx$ vec(Berlin) - vec(Germany)，Italy和Rome之间有is-capital-of的关系，这种关系也恰好在Madrid和Spain之间出现。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611110430525.png" alt="image-20200611110430525" style="zoom:50%;"></p>
+<p>如果现在有人问机器一个问题，Rome和Italy之间的关系就像是Berlin和什么的关系？我们就可以通过计算vec(Berlin) $\approx$ vec(Rome) - vec(Italy)  + vec(Germany)得出结果。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705125922175.png" alt="image-20200705125922175" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>word embedding</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Wasserstein GAN (WGAN)</title>
     <url>/2020/07/14/WGAN/</url>
     <content><![CDATA[<p>本文主要介绍了WGAN的核心思想。由于JS divergence自身的限制，我们先改进了classifier的输出分数的分布，从sigmoid改成了linear，即LSGAN；还有另外一种改进方式，使用Wasserstein distance来衡量两个分布之间的差异，即WGAN。</p>
@@ -2157,68 +2213,6 @@ V(G,D)\approx\mathop{\rm max}_{D}\{E_{x\sim P_{data}}[D(x)]-E_{x\sim P_{G}}[D(x)
         <tag>Earth Mover’s Distance</tag>
         <tag>Lipschitz Function</tag>
         <tag>EBGAN</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>fGAN</title>
-    <url>/2020/07/10/fGAN/</url>
-    <content><![CDATA[<h4 id="f-divergence"><a href="#f-divergence" class="headerlink" title="f-divergence"></a>f-divergence</h4><p>$p(x),q(x)$分别表示x从分布P，Q中sample出来的概率。f可以是不同的函数，必须是凸函数，且$f(1)=0$。f-divergence的式子如下，可以表示P和Q之间的差异，</p>
-<script type="math/tex; mode=display">
-D_f(P||Q)=\int_x q(x)f\left(\frac{p(x)}{q(x)}\right)dx</script><p>那么为什么这个式子可以表示P和Q之间的差异呢？</p>
-<p>如果现在$q(x)=p(x)$，那么$D_f(P||Q)=0$，表示q和p之间的距离为0.</p>
-<p>如果q和p有一些很小的差距，算出来的divergence就大于0.</p>
-<script type="math/tex; mode=display">
-\int_x q(x)f\left(\frac{p(x)}{q(x)}\right)dx=0\geq  f\left(\int_x q(x)\frac{p(x)}{q(x)}dx\right)=f(1)=0</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710155622091.png" alt="image-20200710155622091" style="zoom:60%;"></p>
-<p>如果$f(x)=xlogx$，那么$D_f(P||Q)$就是KL divergence；</p>
-<p>如果$f(x)=-logx$，那么$D_f(P||Q)$就是Reverse divergence；</p>
-<p>如果$f(x)=(x-1)^2$，那么$D_f(P||Q)$就是Chi Square；</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710162446585.png" alt="image-20200710162446585" style="zoom:60%;"></p>
-<h4 id="Fenchel-Conjugate"><a href="#Fenchel-Conjugate" class="headerlink" title="Fenchel Conjugate"></a>Fenchel Conjugate</h4><p>每个凸函数都有一个Conjugate function $f^*$，是由x和$f(x)$导出来的。对于值的计算，我们可以通过穷举所有t的值代入，看到底哪个t可以使$xt-f(x)$的值最大。即</p>
-<script type="math/tex; mode=display">
-f^*(t)=\mathop{\rm max}_{x\in dom(f)}\{xt-f(x\}</script><p>对于值的计算来举一个例子，当$t=t_1$时，</p>
-<script type="math/tex; mode=display">
-f^*(t)=\mathop{\rm max}_{x\in dom(f)}\{xt_1-f(x\}</script><p>这时$x$的取值范围为$x=\{x_1,x_2,x_3\}$，代入x的值，计算$x_1t_1-f(x_1),x_2t_1-f(x_2),x_3t_1-f(x_3)$的值，$f^*(t)$即为三者最大；</p>
-<p>代入$t_2$的值来计算$f^(t_2)$的值；</p>
-<p>……</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710162725028.png" alt="image-20200710162725028" style="zoom:60%;"></p>
-<p>这样每个t值都带进去算很麻烦，因此出现了第二种方案，把$xt-f(x)$用图形描述出来。找出这些直线的upper bound，可以发现$f^*(t)$是凸函数。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710164729970.png" alt="image-20200710164729970" style="zoom:60%;"></p>
-<p>现在假设$f(x)=xlogx$，代入$xt-f(x)$计算，画出$x=\{0.1,1,10,…\}$时的函数图像，并找出这些直线的upper bound，如下图所示，如果进行了很多次运算，这些直线的upper bound和$f^*(t)=exp(t-1)$的图像很接近。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710165445558.png" alt="image-20200710165445558" style="zoom:60%;"></p>
-<p>下图是这个过程具体的证明，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710165854738.png" alt="image-20200710165854738" style="zoom:60%;"></p>
-<h4 id="Connection-with-GAN"><a href="#Connection-with-GAN" class="headerlink" title="Connection with GAN"></a><strong>Connection with GAN</strong></h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710170013115.png" alt="image-20200710170013115" style="zoom:60%;"></p>
-<p>$f(x)$与$f^*(x)$互为Conjugate function。把$x=\frac{p(x)}{q(x)}$代入，得</p>
-<script type="math/tex; mode=display">
-D_f(P||Q)=\int_x q(x)f\left\{\mathop{\rm max}_{x\in dom(f)}\{\frac{p(x)}{q(x)}t-f^*(t)\}\right\}dx</script><p>我们现在可以用一个discriminator D，来帮助我们求解这个max的问题，输入为x，输出就是满足条件的t，就不用穷举所有的t才能找到我们的最优解。如果用$D(x)$来替代x，就可以表示$D_f(P||Q)$的lower bound，即</p>
-<script type="math/tex; mode=display">
-\begin{aligned}
-D_f(P||Q)&\geq\int_x q(x)f\left(\frac{p(x)}{q(x)}D(x)-f^*(D(x))\right)dx\\
-&=\int_xp(x)D(x)dx-\int_xq(x)f^*(D(x))dx
-\end{aligned}</script><p>如果随便找一个D，最后得出来的值肯定比divergence的值小；但如果是找一个最优（max）的D，预测出来的t就是最准的，就可以使结果逼近divergence，即</p>
-<script type="math/tex; mode=display">
-D_f(P||Q)\approx \mathop{\rm max}_D\int_xp(x)D(x)dx-\int_xq(x)f^*(D(x))dx</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710173339038.png" alt="image-20200710173339038" style="zoom:60%;"></p>
-<p>$V(G,D)$可以有不同的形式，不同的divergence就有不同的$V(G,D)$。</p>
-<p>下图中列出了不同的divergence和generator。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710173859040.png" alt="image-20200710173859040"></p>
-<p>可以用不同的divergence又有什么优点呢？</p>
-<h4 id="Mode-Collapse"><a href="#Mode-Collapse" class="headerlink" title="Mode Collapse"></a>Mode Collapse</h4><p>当我们在训练GAN的时候，可能会遇到mode collapse，real data的distribution是非常宽泛的，但generated data的distribution可能会非常小。比如我们在生成二次元人物的时候，可能会出现下图中的结果，某张特定的人脸开始蔓延，变得到处都是，同一张人脸会不断反复地出现。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710174639258.png" alt="image-20200710174639258" style="zoom: 50%;"></p>
-<h4 id="Mode-Dropping"><a href="#Mode-Dropping" class="headerlink" title="Mode Dropping"></a>Mode Dropping</h4><p>mode dropping的情况比mode collapse要稍微简单一点，现在real data有两种不同的distribution，而generator只会产生一种distribution的数据。</p>
-<p>Generator第一次会先产生一些白皮肤的人，再进行一次generator，会产生一些黄皮肤的人，再进行一次generator，会产生一些黑皮肤的人。每次只产生一种分布的数据。</p>
-<p><img src="/Users/liufang/Library/Application Support/typora-user-images/image-20200710175725435.png" alt="image-20200710175725435" style="zoom: 50%;"></p>
-<p>会出现这个问题，一个很可能的原因就是divergence选得不好。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710175856174.png" alt="image-20200710175856174" style="zoom: 50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>GAN</tag>
-        <tag>fGAN</tag>
-        <tag>f-divergence</tag>
-        <tag>Fenchel Conjugate</tag>
       </tags>
   </entry>
   <entry>
@@ -2335,59 +2329,65 @@ W=\begin{pmatrix}
       </tags>
   </entry>
   <entry>
-    <title>Word Embedding</title>
-    <url>/2020/06/11/Word-Embedding/</url>
-    <content><![CDATA[<h4 id="Word-Embedding"><a href="#Word-Embedding" class="headerlink" title="Word Embedding"></a>Word Embedding</h4><p>如果使用1-of-N encoding，每个单词用一个vector表示，那么5个单词就需要5个vector；如果我们把同一个类别的单词都放到那个类里，即属于class1的单词有dog、cat、bird，属于动物类的单词，同理可以得出class2，class3；</p>
-<p>但只做classify是不够的，这些class之间也有一些其他的联系；比如class1属于动物，class3属于植物，他们都是生物，只做classify并不能体现这种联系；</p>
-<p>现在我们把每个word都project到一个两个dimension上， 水平的dimension可以是表示生物（class1，class3）和其他类别class2之间的差距，竖直的dimension可以是会动（class2，class3）的和不会动class1之间的差距；</p>
-<p>如果现在有10w个单词，1-of-N encoding就需要10w个vector，但word embedding可能只需要50维左右，就可以表示这些所有的word。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611094055907.png" alt="image-20200611094055907" style="zoom:50%;"></p>
-<p>word2vec是一个无监督学习问题，如果network的input为“Apple”，要输出其对应的vector </p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611095916810.png" alt="image-20200611095916810" style="zoom:50%;"></p>
-<p>下面我们将叙述生成词向量的两种主要手段。</p>
-<h4 id="Count-based"><a href="#Count-based" class="headerlink" title="Count based"></a>Count based</h4><p>基于计数的方法，记录文本中词的出现次数。如果两个单词$w_i,w_j$常常一起出现，那么我们就认为其对应的vector $V(w_i),V(w_j)$之间就是非常接近的。</p>
-<p>用$N_{i,j}$表示$w_i,w_j$在同一个document中出现的次数，那么我们希望找到对应的$V(w_i),V(w_j)$，其做inner product的值和这个次数越接近越好。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611102225747.png" alt="image-20200611102225747" style="zoom:50%;"></p>
-<h4 id="Prediction-based"><a href="#Prediction-based" class="headerlink" title="Prediction-based"></a>Prediction-based</h4><p>基于预测的方法，即可以通过上下文预测中心词，也可以通过中心词预测上下文。中心词即我们要预测的词。在下文中，$w_i$是我们要预测的值，$…,w_{i-2},w_{i-1}$就是其对应的上下文；</p>
-<p>现在我们把$w_{i-1}$的one-hot encoding作为网络的输入，网络的输出为每个词作为下一个词$w_i$输出的概率，如果词袋中有10w个词，那么输出的维度就对应为10w维。</p>
-<p>把网络中第一个hidden layer的input拿出来，即$z=(z_1,z_2,…)^T$；如果输入为不同1-of-N encoding，那么对应的z也是不一样的。我们就可以用z来代表一个word，即z就是我们要寻找的word vector $V(w)$。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611102755128.png" alt="image-20200611102755128" style="zoom: 40%;"></p>
-<p>如果现在有两个training text，“蔡英文 宣誓就职”、“马英九 宣誓就职”，如果输入的1-of-N encoding是“蔡英文”或“马英九”，那么我们希望在网络的输出概率中，“宣誓就职”的概率是最大的。同理我们也可以把网络的第一个hidden layer的输入作为z，就是我们要寻找的word vector $V(w)$。</p>
-<p>这时我们就需要中间的hidden layer来做这样一件事，如果输入为不同的词汇（“蔡英文”，“马英九”），那么我们希望中间的hidden layer可以把不同的词汇project到相同的空间，这样网络的输出才可能都是“宣誓就职”对应的概率最大。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705122246038.png" alt="image-20200705122246038" style="zoom:50%;"></p>
-<h5 id="Sharing-weight"><a href="#Sharing-weight" class="headerlink" title="Sharing weight"></a><strong>Sharing weight</strong></h5><p>只考虑前面的一个词汇，来预测下一个词汇会很难，我们可以考虑前面的几个词汇。现在我们来叙述考虑前两个词汇的结果。</p>
-<p>现在我们并不能像之间的neural network那样，所有的输入都连成一个vector作为输入。但实际上，我们希望不同的one-hot vector的同一维度之间是tie在一起的。即$w_{i-1},w_{i-2}$的第一维对应$z_1$，其对应的weight是一样的；同理$w_{i-1},w_{i-2}$的第二维对应$z_1$，其对应的weight是一样的，……</p>
-<p>Q：为什么不同的one-hot vector的同一维度之间是tie在一起的呢？</p>
-<p>A：我们现在把同一个word放到$w_{i-1},w_{i-2}$的位置， 如果每一维对应的weight都不一样，那么实际上就输入了两个vector。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611103812991.png" alt="image-20200611103812991" style="zoom:50%;"></p>
-<p>如果我们设置$x_{i-1},x_{i-2}$的长度都是$|V|$，$z$的长度是$|Z|$，那么</p>
+    <title>fGAN</title>
+    <url>/2020/07/10/fGAN/</url>
+    <content><![CDATA[<h4 id="f-divergence"><a href="#f-divergence" class="headerlink" title="f-divergence"></a>f-divergence</h4><p>$p(x),q(x)$分别表示x从分布P，Q中sample出来的概率。f可以是不同的函数，必须是凸函数，且$f(1)=0$。f-divergence的式子如下，可以表示P和Q之间的差异，</p>
 <script type="math/tex; mode=display">
-z=W_1x_{i-2}+W_2x_{i-1}</script><p>其中$W_1=W_2=W$，那么$z=W(x_{i-2}+x_{i-1})$，也就得到了word vector $V(w)$，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611104833054.png" alt="image-20200611104833054" style="zoom:50%;"></p>
-<p>那么在实际的网络训练中，我们如何保证$W_1=W_2$呢？</p>
-<p>首先需要将$w_1,w_2$初始化为相同的值，那么</p>
+D_f(P||Q)=\int_x q(x)f\left(\frac{p(x)}{q(x)}\right)dx</script><p>那么为什么这个式子可以表示P和Q之间的差异呢？</p>
+<p>如果现在$q(x)=p(x)$，那么$D_f(P||Q)=0$，表示q和p之间的距离为0.</p>
+<p>如果q和p有一些很小的差距，算出来的divergence就大于0.</p>
 <script type="math/tex; mode=display">
-w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}\\
-w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}</script><p>由于gradient的值不同，$w_1,w_2$在更新一次参数之后就不相等了，必须保证每次更新之后的值还是一样的，因此</p>
+\int_x q(x)f\left(\frac{p(x)}{q(x)}\right)dx=0\geq  f\left(\int_x q(x)\frac{p(x)}{q(x)}dx\right)=f(1)=0</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710155622091.png" alt="image-20200710155622091" style="zoom:60%;"></p>
+<p>如果$f(x)=xlogx$，那么$D_f(P||Q)$就是KL divergence；</p>
+<p>如果$f(x)=-logx$，那么$D_f(P||Q)$就是Reverse divergence；</p>
+<p>如果$f(x)=(x-1)^2$，那么$D_f(P||Q)$就是Chi Square；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710162446585.png" alt="image-20200710162446585" style="zoom:60%;"></p>
+<h4 id="Fenchel-Conjugate"><a href="#Fenchel-Conjugate" class="headerlink" title="Fenchel Conjugate"></a>Fenchel Conjugate</h4><p>每个凸函数都有一个Conjugate function $f^*$，是由x和$f(x)$导出来的。对于值的计算，我们可以通过穷举所有t的值代入，看到底哪个t可以使$xt-f(x)$的值最大。即</p>
 <script type="math/tex; mode=display">
-w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}-\eta \frac{\partial C}{\partial w_j}\\
-w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}-\eta \frac{\partial C}{\partial w_i}</script><p>这样每次更新的值都一样的，也就保证了$w_1=w_2$</p>
-<h5 id="Training"><a href="#Training" class="headerlink" title="Training"></a><strong>Training</strong></h5><p>对于输入“潮水、退了”，我们希望network的输出和“就”越接近越好，即最小化cross entropy</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611103701528.png" alt="image-20200611103701528" style="zoom:50%;"></p>
-<h5 id="Various-Architectures"><a href="#Various-Architectures" class="headerlink" title="Various Architectures"></a>Various Architectures</h5><p>CBOW：根据上下文的词汇$w_{i-1},w_{i+1}$来预测中心词$w_i$;</p>
-<p>Skip-gram：根据中心词$w_i$来预测上下文$w_{i-1},w_{i+1}$。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611110004840.png" alt="image-20200611110004840" style="zoom:50%;"></p>
-<h5 id="Result"><a href="#Result" class="headerlink" title="Result"></a>Result</h5><p>vec(Rome) - vec(Italy) $\approx$ vec(Berlin) - vec(Germany)，Italy和Rome之间有is-capital-of的关系，这种关系也恰好在Madrid和Spain之间出现。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611110430525.png" alt="image-20200611110430525" style="zoom:50%;"></p>
-<p>如果现在有人问机器一个问题，Rome和Italy之间的关系就像是Berlin和什么的关系？我们就可以通过计算vec(Berlin) $\approx$ vec(Rome) - vec(Italy)  + vec(Germany)得出结果。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705125922175.png" alt="image-20200705125922175" style="zoom:50%;"></p>
+f^*(t)=\mathop{\rm max}_{x\in dom(f)}\{xt-f(x\}</script><p>对于值的计算来举一个例子，当$t=t_1$时，</p>
+<script type="math/tex; mode=display">
+f^*(t)=\mathop{\rm max}_{x\in dom(f)}\{xt_1-f(x\}</script><p>这时$x$的取值范围为$x=\{x_1,x_2,x_3\}$，代入x的值，计算$x_1t_1-f(x_1),x_2t_1-f(x_2),x_3t_1-f(x_3)$的值，$f^*(t)$即为三者最大；</p>
+<p>代入$t_2$的值来计算$f^(t_2)$的值；</p>
+<p>……</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710162725028.png" alt="image-20200710162725028" style="zoom:60%;"></p>
+<p>这样每个t值都带进去算很麻烦，因此出现了第二种方案，把$xt-f(x)$用图形描述出来。找出这些直线的upper bound，可以发现$f^*(t)$是凸函数。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710164729970.png" alt="image-20200710164729970" style="zoom:60%;"></p>
+<p>现在假设$f(x)=xlogx$，代入$xt-f(x)$计算，画出$x=\{0.1,1,10,…\}$时的函数图像，并找出这些直线的upper bound，如下图所示，如果进行了很多次运算，这些直线的upper bound和$f^*(t)=exp(t-1)$的图像很接近。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710165445558.png" alt="image-20200710165445558" style="zoom:60%;"></p>
+<p>下图是这个过程具体的证明，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710165854738.png" alt="image-20200710165854738" style="zoom:60%;"></p>
+<h4 id="Connection-with-GAN"><a href="#Connection-with-GAN" class="headerlink" title="Connection with GAN"></a><strong>Connection with GAN</strong></h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710170013115.png" alt="image-20200710170013115" style="zoom:60%;"></p>
+<p>$f(x)$与$f^*(x)$互为Conjugate function。把$x=\frac{p(x)}{q(x)}$代入，得</p>
+<script type="math/tex; mode=display">
+D_f(P||Q)=\int_x q(x)f\left\{\mathop{\rm max}_{x\in dom(f)}\{\frac{p(x)}{q(x)}t-f^*(t)\}\right\}dx</script><p>我们现在可以用一个discriminator D，来帮助我们求解这个max的问题，输入为x，输出就是满足条件的t，就不用穷举所有的t才能找到我们的最优解。如果用$D(x)$来替代x，就可以表示$D_f(P||Q)$的lower bound，即</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+D_f(P||Q)&\geq\int_x q(x)f\left(\frac{p(x)}{q(x)}D(x)-f^*(D(x))\right)dx\\
+&=\int_xp(x)D(x)dx-\int_xq(x)f^*(D(x))dx
+\end{aligned}</script><p>如果随便找一个D，最后得出来的值肯定比divergence的值小；但如果是找一个最优（max）的D，预测出来的t就是最准的，就可以使结果逼近divergence，即</p>
+<script type="math/tex; mode=display">
+D_f(P||Q)\approx \mathop{\rm max}_D\int_xp(x)D(x)dx-\int_xq(x)f^*(D(x))dx</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710173339038.png" alt="image-20200710173339038" style="zoom:60%;"></p>
+<p>$V(G,D)$可以有不同的形式，不同的divergence就有不同的$V(G,D)$。</p>
+<p>下图中列出了不同的divergence和generator。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710173859040.png" alt="image-20200710173859040"></p>
+<p>可以用不同的divergence又有什么优点呢？</p>
+<h4 id="Mode-Collapse"><a href="#Mode-Collapse" class="headerlink" title="Mode Collapse"></a>Mode Collapse</h4><p>当我们在训练GAN的时候，可能会遇到mode collapse，real data的distribution是非常宽泛的，但generated data的distribution可能会非常小。比如我们在生成二次元人物的时候，可能会出现下图中的结果，某张特定的人脸开始蔓延，变得到处都是，同一张人脸会不断反复地出现。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710174639258.png" alt="image-20200710174639258" style="zoom: 50%;"></p>
+<h4 id="Mode-Dropping"><a href="#Mode-Dropping" class="headerlink" title="Mode Dropping"></a>Mode Dropping</h4><p>mode dropping的情况比mode collapse要稍微简单一点，现在real data有两种不同的distribution，而generator只会产生一种distribution的数据。</p>
+<p>Generator第一次会先产生一些白皮肤的人，再进行一次generator，会产生一些黄皮肤的人，再进行一次generator，会产生一些黑皮肤的人。每次只产生一种分布的数据。</p>
+<p><img src="/Users/liufang/Library/Application Support/typora-user-images/image-20200710175725435.png" alt="image-20200710175725435" style="zoom: 50%;"></p>
+<p>会出现这个问题，一个很可能的原因就是divergence选得不好。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200710175856174.png" alt="image-20200710175856174" style="zoom: 50%;"></p>
 ]]></content>
       <categories>
         <category>ML-notes</category>
       </categories>
       <tags>
         <tag>Deep Learning</tag>
-        <tag>word embedding</tag>
+        <tag>GAN</tag>
+        <tag>fGAN</tag>
+        <tag>f-divergence</tag>
+        <tag>Fenchel Conjugate</tag>
       </tags>
   </entry>
   <entry>
@@ -2503,6 +2503,218 @@ KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href=
       </tags>
   </entry>
   <entry>
+    <title>Network Compression</title>
+    <url>/2020/06/27/network-conpression/</url>
+    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
+<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
+<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
+<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
+<ul>
+<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
+<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
+</ul>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
+<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
+<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
+<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
+<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="noopener">大的network更容易optimize</a></p>
+<p><strong>Lottery Ticket Hypothesis</strong></p>
+<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
+<ul>
+<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
+</li>
+<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
+</li>
+</ul>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
+<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
+<p><strong>Rethinking the Value of Network Pruning</strong></p>
+<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
+<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
+<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
+<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
+<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
+<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
+<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
+<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
+<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
+<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
+<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
+<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
+<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
+<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
+<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
+<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
+<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
+<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
+<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>network compression</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>基于知识图谱和GCN的应用和开发</title>
+    <url>/2020/07/03/knowledge-graph/</url>
+    <content><![CDATA[<h4 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h4><p>深度学习的主要思想有三个：</p>
+<ul>
+<li><p>权重分配；</p>
+</li>
+<li><p>层级结构：每一层训练的结果都依赖于上一层；</p>
+</li>
+<li><p>欧几里得空间数据：比如图像数据，可以通过二维坐标(x,y)进行表示，语音信号是一个一维的数据，围棋的话也是一个二维数据，目前的大多数数据都是可以用欧几里得空间数据进行表示的，即可以投影到坐标轴上</p>
+</li>
+</ul>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702101528758-20200706215024224.png" alt="image-20200702101528758"></p>
+<p>但在实际生活中，有很多数据并不能用欧几里得数据来进行表示，比如在微信上，每个人都相当于一个节点，朋友之间的关系相当于是一条边，相当于图，没有任何的空间信息，是<u>非欧几里得的空间结构</u>（eg. 社交网络、科学网络等） </p>
+<p>那要怎么对这类信息进行训练呢？传统的深度学习方法（CNN和RNN等）并没有办法训练这类数据，因此就产生了图卷积（GCN）</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702103428339.png" alt="image-20200702103428339"></p>
+<h4 id="图卷积背景和基本框架"><a href="#图卷积背景和基本框架" class="headerlink" title="图卷积背景和基本框架"></a>图卷积背景和基本框架</h4><h5 id="图卷积发展历史"><a href="#图卷积发展历史" class="headerlink" title="图卷积发展历史"></a>图卷积发展历史</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702104325966.png" alt="image-20200702104325966"></p>
+<h5 id="邻接矩阵"><a href="#邻接矩阵" class="headerlink" title="邻接矩阵"></a>邻接矩阵</h5><p>无向图的邻接矩阵是对角矩阵</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702104743073.png" alt="image-20200702104743073"></p>
+<h5 id="图卷积基本框架"><a href="#图卷积基本框架" class="headerlink" title="图卷积基本框架"></a>图卷积基本框架</h5><p>在下图中，A为邻接矩阵，H为特征矩阵（$N\times F$），，N为节点个数，F表示每个节点的特征数；比如我们每个人在社交网络中都是一个节点，也有一些对应的特征，名字、年龄、出生日期，这些特征就构成了这个特征矩阵$N\times F$；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702104938456.png" alt="image-20200702104938456"></p>
+<p>在这个基本框架中，input为邻接矩阵A，第一个hidden layer把特征矩阵点乘到每一个节点上进行训练，再进入下一层，再进行点乘，…，一直不断重复这个过程。每次训练更新的参数是特征矩阵，最后的output和input是一样的，图结构没有发生变化，但特征矩阵达到了收敛（基本上不会发生变化），最后再对图中的每个节点进行分类；</p>
+<p><span style="color: red">把节点和特征矩阵进行点乘，就实现了信息在节点和社区间进行传递</span></p>
+<h4 id="图卷积"><a href="#图卷积" class="headerlink" title="图卷积"></a>图卷积</h4><p>那么下面我们将具体介绍节点和特征矩阵是怎样进行点乘的，怎样一步步进行训练。</p>
+<h5 id="回顾CNN"><a href="#回顾CNN" class="headerlink" title="回顾CNN"></a>回顾CNN</h5><p>我们先回顾一下CNN是如何做卷积操作的，如下图所示，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702110939157.png" alt="image-20200702110939157"></p>
+<h5 id="图卷积-1"><a href="#图卷积-1" class="headerlink" title="图卷积"></a>图卷积</h5><p>这是卷积操作的参数更新公式，</p>
+<script type="math/tex; mode=display">
+h_i^{l+1}=\sigma(W_0^{(l)}h_0^{(l)}+W_1^{(l)}h_1^{(l)}+\cdot\cdot\cdot+W_8^{(l)}h_8^{(l)})</script><p>图卷积相比较于卷积，在$h_0^{(l)}W_0^{(l)}$的基础上，多了邻接矩阵的信息$\frac{1}{c_{ij}}h_j^{(l)}$，<span style="color: red">权重矩阵W也没有卷积操作那么重要</span>，其参数更新公式为，</p>
+<script type="math/tex; mode=display">
+h_i^{l+1}=\sigma(h_0^{(l)}W_0^{(l)} + 
+\sum_{j\in N_i} \frac{1}{c_{ij}}h_j^{(l)}W_1^{(l)})</script><p>更新参数的时候，通过周围的节点来更新该节点（下图中红色节点），与该节点不直接相连的节点无关</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702111915112.png" alt="image-20200702111915112"></p>
+<p>那么我们就可以通过以下公式来更新特征矩阵，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde AH^{(l)}W^{(l)})</script><p>其中A为邻接矩阵，H为特征矩阵，W为权重矩阵，本次的特征矩阵$H^{(l+1)}$根据上一次的特征矩阵$H^{(l)}$生成；</p>
+<p>如果只根据邻接矩阵来更新H，会出现一些问题：</p>
+<ul>
+<li>无法提取自身信息，邻接矩阵对角线上的元素始终是0（如果没有自环），自身的信息在训练过程中是无法考虑进去的；</li>
+<li>$\tilde A$没有归一化</li>
+</ul>
+<p>我们需要把参数更新公式进行一些变化，首先解决邻接矩阵对角线元素为0的问题，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma((\tilde D-\tilde A)H^{(l)}W^{(l)})</script><p><span style="color: red">其中</span>矩阵$\tilde D$是一个对角矩阵（degree matrix），对角线上的数值表示了每个节点所相连的边数。</p>
+<p>归一化处理主要列出两种方式，要根据不同的输入数据来进行选择，其中第一种归一化方式比较常用</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)\\
+H^{(l+1)}=\sigma(\tilde D^{-1}(\tilde D-\tilde A)\tilde H^{(l)}W^{(l)})</script><h5 id="图卷积的计算"><a href="#图卷积的计算" class="headerlink" title="图卷积的计算"></a>图卷积的计算</h5><p>下面我们将一个具体的例子来讲述公式(1),</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702114057283.png" alt="image-20200702114057283"></p>
+<p>在上图中，degree matrix表示了每个节点所相连的边数，比如2表示1号节点相连的边有2条，该对角矩阵也就是前文提到的$\tilde D$，$(\tilde D-\tilde A)$就是laplacian matrix；</p>
+<p>我们将特征矩阵$H_0$和权重矩阵W进行随机初始化，再代入公式(1)，即可得出训练完成的结果$H_N$，再求出每一列的最大值，即MaxValue$(H(i))=[1,1,4,1,1,4]$，即分类结果，其中第1，2，4，5个节点分类为1，第3，6个节点分类为4，把整个图的节点分成了两类；</p>
+<p>那么为什么可以这样分类呢？我们可以回到原图labeled graph中，节点1，2，5相当于是一个全连接图，可以当作一个类别，而节点4，5都和三个节点相连，有三条边，也可以当作是一个类别；节点3，6就没有前几个节点那样关系比较紧密，因此被分成了第二个类别</p>
+<p>我们可以得出以下两点：</p>
+<ul>
+<li>对于随机产生的特征矩阵，依靠图自身的结构，就可以得到一个很好的分类效果；</li>
+<li>在这个例子中，进行10次运算，特征矩阵就收敛了，收敛速度非常快</li>
+</ul>
+<p>再来回顾下这个核心公式，所有的图卷积的变化和应用都离不开这个公式。W不那么重要，特征矩阵$H^{(l)}$表示每个人根据自己的实际特征来进行特征提取；邻接矩阵$\tilde A$表示每个人（节点）之间的关系，关系不一样就会构建出不同的图</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)</script><p><span style="color: red">那么我们要在图卷积进行创新的话，就只有改变邻接矩阵A和特征矩阵H，即如何新建这个图、如何提取这个特征；由于机器学习和深度学习技术的不断发展，特征提取的方法已经非常成熟，<u>关键的创新点还是如何新建这个图</u></span></p>
+<h5 id="边信息嵌入"><a href="#边信息嵌入" class="headerlink" title="边信息嵌入"></a>边信息嵌入</h5><p>图中的边信息有时候是包含权重的，我们也应该把边的信息值也考虑进去，即把原图转化为一个线图；在下图中，原图中节点为i，j，m，边为a，b，c，转化为线图后，节点变成a，b，c，边为i，j，m，把边变成了点，把点变成了边</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702122014466.png" alt="image-20200702122014466"></p>
+<p>经过两次不同的输入$h_{(i,j)}^l,h_j^{l+1}$，分别对应原图和线图，这样训练就可以把边的信息也整合进去</p>
+<h5 id="Example-1-半监督图分类"><a href="#Example-1-半监督图分类" class="headerlink" title="Example 1: 半监督图分类"></a>Example 1: 半监督图分类</h5><p>在下图中，黑色圈点表示已经知道了分类的类别，其他的没有被黑色线条包围的点表示没有进行分类，目标是预测未分类的节点的类别，这里我们还定义了一个损失函数L，Z表示GCN的输出结果（上文的公式(1)）</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702123720321.png" alt="image-20200702123720321"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124159182.png" alt="image-20200702124159182"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124253302.png" alt="image-20200702124253302"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124330022.png" alt="image-20200702124330022"></p>
+<p>得到实验结果，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124418966.png" alt="image-20200702124418966"></p>
+<h5 id="Example-2-科学家网络"><a href="#Example-2-科学家网络" class="headerlink" title="Example 2: 科学家网络"></a>Example 2: 科学家网络</h5><p>每篇论文都会有一个题目，互相引用这篇论文则会形成一个关系，我们的任务是根据论文的题目来预测论文的类别（统计、物理、数学）</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124600168.png" alt="image-20200702124600168"></p>
+<p>这个例子只用了2层的GCN，其中$\hat AXW^{(0)}$表示第一层，$\hat A \ {\rm ReLU}(\hat AXW^{(0)})W^{(1)}$表示第二层，再输入softmax函数，整个训练过程更新的参数是X，从表格中的数据也可以看出，GCN取得了非常不错的效果</p>
+<h4 id="基于知识图谱的图卷积"><a href="#基于知识图谱的图卷积" class="headerlink" title="基于知识图谱的图卷积"></a>基于知识图谱的图卷积</h4><h5 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h5><blockquote>
+<p>知识图谱是Google用于增强其搜索引擎功能的知识库。本质上, 知识图谱旨在描述真实世界中存在的各种实体或概念及其关系,其构成一张巨大的语义网络图，节点表示实体或概念，边则由属性或关系构成。现在的知识图谱已被用来泛指各种大规模的知识库。 </p>
+</blockquote>
+<p>如果你输入搜索引擎中国这个词，相应的会出来中国的一些特征，比如中国的城市、国土面积、人口等；中国和国家都可以看作是图中的一个节点，中国和国家的关系就可以看作是一条边</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702145803375.png" alt="image-20200702145803375"></p>
+<h5 id="图卷积：知识图谱"><a href="#图卷积：知识图谱" class="headerlink" title="图卷积：知识图谱"></a>图卷积：知识图谱</h5><p>先把数据用图表示出来，用户为U，实体为V，$y_{uv}=1$则表示用户u和实体v之间有联系，比如我对电影很感兴趣；每个实体u之间会有关系r，比如电影和教父；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702150629999.png" alt="image-20200702150629999"></p>
+<p>将图卷积应用到知识图谱，可以用以下公式来进行更新，不断更新特征矩阵H直至其收敛即可，</p>
+<script type="math/tex; mode=display">
+H^{(l+1)}=\sigma(\tilde D_u^{-\frac{1}{2}}\tilde A_u\tilde D_u^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad</script><p>那么我们怎么把实体推荐给用户呢？我们又怎么知道用户是不是对这个实体感兴趣呢？</p>
+<p>（1）我们可以针对每个用户再新建一个图，先引入一个函数$S_u(\cdot)$，表示这条边（关系）对用户的重要性；</p>
+<p>（2）再把原来的实体矩阵变成一个有权重的矩阵，比如边$r_1$输入函数$S_u(\cdot)$，得到$S_u(r_1)$，就是新的关系值。<u>每个用户都有一个邻接矩阵，再对每个用户的邻接矩阵进行训练，就可以得出用户到底对哪个电影感兴趣</u>；</p>
+<p>（3）图卷积；</p>
+<p>（4）<strong>标签顺滑</strong>，比如对于一个动物，机器可以很自信地确定这个动物到底是猫还是狗，输出值只有0或者1；由于机器过于自信，可能会导致很多额外的误差，我们现在就可以把这个值改成0.1或者0.9，就可以得到更好的结果。</p>
+<p>总结：先新建一个图（knowledge graph，KG），再把用户对感兴趣的实体新建一个权重矩阵，再进行图卷积和标签顺滑。那么现在我们的损失函数就有了一些小变化，结合了图卷积和标签顺滑，即</p>
+<script type="math/tex; mode=display">
+L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702153035542.png" alt="image-20200702153035542"></p>
+<p>下面我们将简要叙述这个训练的过程，图中的水平虚线表示decision boundary：</p>
+<p>（a）其中蓝色的点表示用户感兴趣的点（observed）；在其下方有一些其他的点（unobserved），我们希望把黄色的点（被黄色方框围住）就推荐给用户，让用户去选择，而剩下蓝色的点，则是用户不感兴趣的，不推荐给用户；</p>
+<p>（b）一共要进行两层的训练，对于第一层的训练结果，我们现在把其中两个黄色的点就推荐给用户了；</p>
+<p>（c）对于第二层的训练结果，就把其中的三个点推荐给用户了，但最左端的点也在decision boundary之上，也会被推荐给用户，模型在训练过程中会存在一定的误差，</p>
+<p>（d）这里就开始对第二个用户的模型进行训练；</p>
+<p>（e）这是加入了标签顺滑（label smoothing）的结果，推荐会更加精准，在图中，我们可以看到用户不感兴趣的点进行下移，用户感兴趣的点（a图中的黄色方框部分）则上移，尽量移到decision boundary之上</p>
+<h5 id="Label-Smoothing-Regularization"><a href="#Label-Smoothing-Regularization" class="headerlink" title="Label Smoothing Regularization"></a>Label Smoothing Regularization</h5><p>（1）在下图的能量方程中，$l_u(e_i)$表示用户u是否对实体$e_i$感兴趣（值为0或1），能量方程可以把相同的label保存下来，把不同的label就去掉了；（2）再找到使得能量方程取得最小值的$l_u^<em>$；（3）再通过KL距离函数求得$y_{uv}$和$\hat l_u^</em>(v)$之间的相似度，也是求最小值，可得$R(A)$，再代入损失函数</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702155919603.png" alt="image-20200702155919603"></p>
+<p>$\lambda$可以不断做调整，来找到损失函数的最小值</p>
+<h5 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h5><p>输入为知识图谱G，新建一个邻接矩阵M后；（2）再把用户对感兴趣的实体新建一个权重矩阵（输入mapping函数S），再进行图卷积更新特征矩阵，即$e_u^{(i)}\leftarrow \sigma (\cdot)$；（3）标签顺滑，更新$l_u^{(i)}(e)$，再代入损失函数中的 J；不断地进行这个过程，只到损失函数收敛为止</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702162309077.png" alt="image-20200702162309077"></p>
+<h5 id="结果演示"><a href="#结果演示" class="headerlink" title="结果演示"></a>结果演示</h5><p>下图是几种推荐算法的比较，推荐给用户Top-K的实体，看最后的准确率如何，可以发现GCN的结构取得了非常不错的效果。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702163653325.png" alt="image-20200702163653325"></p>
+<p>下面是一些可视化的对比，图1是推荐食物，可以看到GCN的结构取得了很好的效果；图2表示取不同的$\lambda$，得到的$R(A_u)$的值；图三对比了不同算法的运行速度，可以看到KGCN用时最少，速度最快</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702163938245.png" alt="image-20200702163938245"></p>
+<h4 id="研究方向"><a href="#研究方向" class="headerlink" title="研究方向"></a>研究方向</h4><h5 id="人体姿势识别"><a href="#人体姿势识别" class="headerlink" title="人体姿势识别"></a>人体姿势识别</h5><p> 人体的关节就可以看作是一个节点，关节之间的骨骼就可以看作是边，结合起来就是一张图；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702165243019.png" alt="image-20200702165243019"></p>
+<p>核心框架：输入为一个视频，视频的每个时间序列都是一张图像，每一帧的视频取出来就是一张图像；把每一帧的图像先构建成一个骨骼和关节点图，再通过时间的顺序把每一帧对应的关节点都连接起来，形成一张大图，再输入GCN进行训练，通过分类器识别出这是一个跑步的动作。</p>
+<p>在上图中的左下角中，横轴表示每一帧的骨骼图，纵轴表示时间，把相应的骨骼节点连接起来，变成一张大图，再输入GCN进行训练。</p>
+<p>下图为实验结果，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702170313601.png" alt="image-20200702170313601"></p>
+<h5 id="超图"><a href="#超图" class="headerlink" title="超图"></a>超图</h5><p>超图是图的一个基本概念，下图中的图有8个点，选择不同的点，可以有多种排列组合。如果选一个点，一共有个点可以选择，那么就有8种（$C_n^1$）组合。如果我选两个点，比如$n_3,n_8$，这两个点构成一个子图，就有6种（$C_n^2$）组合。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702170734267.png" alt="image-20200702170734267"></p>
+<p>选出不同的点后，得到不同的邻接矩阵，再进行训练。每一层选出不同组合的邻接矩阵再输入GCN进行图卷积。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703093426889.png" alt="image-20200703093426889"></p>
+<p>超图卷积的核心公式就是下图中的公式(11)</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703093638629.png" alt="image-20200703093638629"></p>
+<h5 id="图构建"><a href="#图构建" class="headerlink" title="图构建"></a>图构建</h5><p>对于给定的数据，新建图之后再输入GCN进行分类，我们要怎么画成一张图呢？</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703093921828.png" alt="image-20200703093921828"></p>
+<p>在上图中，observed dynamics表示5个分子的运动轨迹图，我们的目标是构建新图，并预测分子的下一步轨迹；对于人体的动作，我们也得通过学习才能知道，到底是以左手还是右手为重心。</p>
+<p>在下图中，展示了图构建的大概过程，编码器和解码器都是GCNs。对于编码器部分，先进行了从边到节点($v\rightarrow e$)的过程，再从节点到边($e\rightarrow v$)，再从边到节点($v\rightarrow e$)；对于解码器，先从边到点，再从点到边，进行图卷积，最后再进行分类，得到下一步的运动轨迹。</p>
+<p>其中x表示节点，z表示x这个点与i、j相连的概率，z是一个概率分布。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703095234400.png" alt="image-20200703095234400"></p>
+<p>预测下一步运动轨迹：在下图中，我们可以看出预测图和真实值之间差距并不大，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703100157533.png" alt="image-20200703100157533"></p>
+<h5 id="子图嵌入"><a href="#子图嵌入" class="headerlink" title="子图嵌入"></a>子图嵌入</h5><p>在原来的GCN中，我们每次只会考虑一个点；如果我们现在把多个点（关联性很大的点）表示成一个点，再输入GCN，效果会不会更好呢？这也是一个很火的研究方向。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703101250920.png" alt="image-20200703101250920"></p>
+<h4 id="场景应用"><a href="#场景应用" class="headerlink" title="场景应用"></a>场景应用</h4><h5 id="用户推荐系统"><a href="#用户推荐系统" class="headerlink" title="用户推荐系统"></a>用户推荐系统</h5><p>在搜索中推荐相关联的朋友给你。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703102812106.png" alt="image-20200703102812106"></p>
+<h5 id="舆情监控和控制"><a href="#舆情监控和控制" class="headerlink" title="舆情监控和控制"></a>舆情监控和控制</h5><p>每个国家都需要舆情监控，比如关于假消息和真消息的分类或者监控，在网络传播过程中找到假消息源，进行封锁等，用GCN都可以起到很好的作用。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703102736481.png" alt="image-20200703102736481"></p>
+<h5 id="自动驾驶"><a href="#自动驾驶" class="headerlink" title="自动驾驶"></a>自动驾驶</h5><p>所有的车都有一个车载系统，每个车载系统之间进行联网，就可以构成非常大的图。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703102850234.png" alt="image-20200703102850234"></p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703103300945.png" alt="image-20200703103300945"></p>
+<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><p>本文是观看杨栋老师在B上讲解的直播课程《基于知识图谱和图卷积神经网络的应用和开发》的笔记，直播地址：<a href="https://live.bilibili.com/11869202" target="_blank" rel="noopener">https://live.bilibili.com/11869202</a> ，贪心科技官网录播回放：<a href="https://www.greedyai.com/course/139" target="_blank" rel="noopener">https://www.greedyai.com/course/139</a></p>
+]]></content>
+      <categories>
+        <category>Knowledge Graph</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>知识图谱</tag>
+        <tag>GCN</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Semi-supervised</title>
     <url>/2020/06/10/semi-supervised/</url>
     <content><![CDATA[<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200610195909860.png" alt="image-20200610195909860" style="zoom:50%;"></p>
@@ -2588,73 +2800,6 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
         <tag>Deep Learning</tag>
         <tag>semi-supervised</tag>
         <tag>smoothness</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Network Compression</title>
-    <url>/2020/06/27/network-conpression/</url>
-    <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102237291.png" alt="image-20200627102237291" style="zoom:50%;"></p>
-<h4 id="Outline"><a href="#Outline" class="headerlink" title="Outline"></a>Outline</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102418338.png" alt="image-20200627102418338" style="zoom:50%;"></p>
-<h4 id="Network-Pruning"><a href="#Network-Pruning" class="headerlink" title="Network Pruning"></a>Network Pruning</h4><h5 id="Network-can-be-pruned"><a href="#Network-can-be-pruned" class="headerlink" title="Network can be pruned"></a>Network can be pruned</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102602673.png" alt="image-20200627102602673" style="zoom:50%;"></p>
-<h5 id="Network-Pruning-1"><a href="#Network-Pruning-1" class="headerlink" title="Network Pruning"></a>Network Pruning</h5><p>对于训练好的network，我们要判断其weight和neural的重要性：</p>
-<ul>
-<li>如果某个weight接近于0，那么我们可以认为这个neural是不那么重要的，是可以pruning的；如果是某个很正或很负的值，该weight就被认为对该network很重要；</li>
-<li>如果某个neural在给定的dataset下的输出都是0，那么我们就可以认为该neural是不那么重要的</li>
-</ul>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627102810722.png" alt="image-20200627102810722" style="zoom:50%;"></p>
-<p>在评估出weight和neural的重要性后，再进行排序，来移除一些不那么重要的weight和neural，这样network就会变得smaller，但network的精确度也会随之降低，因此还需要进行fine-tuning</p>
-<p>最好是每次都进行小部分的remove，再进行fine-tuing，如果一次性remove很多，network的精确度也不会再恢复</p>
-<h5 id="Why-Pruning"><a href="#Why-Pruning" class="headerlink" title="Why Pruning?"></a>Why Pruning?</h5><p>Q：为什么不直接train一个小的network呢？</p>
-<p>A：小的network比较难train，<a href="https://www.youtube.com/watch?v=_VuWvQUMQVk" target="_blank" rel="noopener">大的network更容易optimize</a></p>
-<p><strong>Lottery Ticket Hypothesis</strong></p>
-<p>我们先对一个network进行初始化（<span style="color: red">红色的weight</span>），再得到训练好的network（<span style="color: purple">紫色的weight</span>），再进行pruned，得到一个pruned network</p>
-<ul>
-<li><p>如果我们使用pruned network的结构，再进行random init（<span style="color: green">绿色的weight</span>），会发现这个network不能train下去</p>
-</li>
-<li><p>如果我们使用pruned network的结构，再使用original random init（<span style="color: red">红色的weight</span>），会发现network可以得到很好的结果</p>
-</li>
-</ul>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627104519698.png" alt="image-20200627104519698" style="zoom:50%;"></p>
-<p>作者就说train这个network就像买大乐透一样，有的random可以tranin起来，有的不可以</p>
-<p><strong>Rethinking the Value of Network Pruning</strong></p>
-<p>Scratch-E/B表示使用real random initialization，并不是使用original random initialization，也可以得到比fine-tuing之后更好的结果</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627105605249.png" alt="image-20200627105605249" style="zoom:50%;"></p>
-<h5 id="Pratical-Issue"><a href="#Pratical-Issue" class="headerlink" title="Pratical Issue"></a>Pratical Issue</h5><p>如果我们现在进行weight pruning，进行weight pruning之后的network会变得不规则，有些neural有2个weight，有些neural有4个weight，这样的network是不好implement出来的；</p>
-<p>GPU对矩阵运算进行加速，但现在我们的weight是不规则的，并不能使用GPU加速；</p>
-<p>实做的方法是将pruning的weight写成0，仍然在做矩阵运算，仍然可以使用GPU进行加速；但这样也会带来一个新的问题，我们并没有将这些weight给pruning掉，只是将它写成0了而已</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627110043391.png" alt="image-20200627110043391" style="zoom:50%;"></p>
-<p>实际上做weight pruning是很麻烦的，通常我们都进行neuron pruning，可以更好地进行implement，也很容易进行speedup</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627111357372.png" alt="image-20200627111357372" style="zoom:50%;"></p>
-<h4 id="Knowledge-Distillation"><a href="#Knowledge-Distillation" class="headerlink" title="Knowledge Distillation"></a>Knowledge Distillation</h4><h5 id="Student-and-Teacher"><a href="#Student-and-Teacher" class="headerlink" title="Student and Teacher"></a>Student and Teacher</h5><p>我们可以使用一个small network（student）来学习teacher net的输出分布（1:0.7…），并计算两者之间的cross-entropy，使其最小化，从而可以使两者的输出分布相近</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627111854934.png" alt="image-20200627111854934" style="zoom:50%;"></p>
-<p>Q：那么我们为什么要让student跟着teacher去学习呢？</p>
-<p>A：teacher提供了比label data更丰富的资料，比如teacher net不仅给出了输入图片和1很像的结果，还说明了1和7长得很像，1和9长得很像；因此，student跟着teacher net学习，是可以得到更多的information的</p>
-<h5 id="Ensemble"><a href="#Ensemble" class="headerlink" title="Ensemble"></a>Ensemble</h5><p>在kaggle上打比赛，很多人的做法是将多个model进行ensemble，通常可以得到更好的精度。但在实际生活中，设备往往放不下这么多的model，这时我们就可以使用Knowledge Distillation的思想，使用student net来对teacher进行学习，在实际的应用中，我们只需要student net的model就好</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627112630920.png" alt="image-20200627112630920" style="zoom:50%;"></p>
-<h5 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627113311508.png" alt="image-20200627113311508" style="zoom:50%;"></p>
-<h4 id="Parameter-Quantization"><a href="#Parameter-Quantization" class="headerlink" title="Parameter Quantization"></a>Parameter Quantization</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627114647806.png" alt="image-20200627114647806" style="zoom:50%;"></p>
-<h4 id="Architecture-Design（most）"><a href="#Architecture-Design（most）" class="headerlink" title="Architecture Design（most）"></a>Architecture Design（most）</h4><h5 id="Low-rank-approximation"><a href="#Low-rank-approximation" class="headerlink" title="Low rank approximation"></a>Low rank approximation</h5><p>中间插入一个linear层，大小为K，那么也可以减少需要训练的参数</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627115631787.png" alt="image-20200627115631787" style="zoom:50%;"></p>
-<h5 id="Review-Standard-CNN"><a href="#Review-Standard-CNN" class="headerlink" title="Review: Standard CNN"></a><strong>Review: Standard CNN</strong></h5><p>每个filter要处理所有的channel</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627120134937.png" alt="image-20200627120134937" style="zoom:50%;"></p>
-<h5 id="Depthwise-Separable-Convolution"><a href="#Depthwise-Separable-Convolution" class="headerlink" title="Depthwise Separable Convolution"></a><strong>Depthwise Separable Convolution</strong></h5><p>每个filter只处理一个channel，不同channel之间不会相互影响</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627120350081.png" alt="image-20200627120350081" style="zoom:50%;"></p>
-<p>和一般的convolution是一样的，有4个filter，就有4个不同的matrix</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627120519412.png" alt="image-20200627120519412" style="zoom:50%;"></p>
-<p>第一步用到的参数量为$3\times3\times2=18$，第二步用到的参数量为$2\times4=8$，一共有26个参数</p>
-<h5 id="Standard-CNN-vs-Depthwise-Separable-Convolution"><a href="#Standard-CNN-vs-Depthwise-Separable-Convolution" class="headerlink" title="Standard CNN vs Depthwise Separable Convolution"></a>Standard CNN vs <strong>Depthwise Separable Convolution</strong></h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627121053539.png" alt="image-20200627121053539" style="zoom:50%;"></p>
-<p>对于普通的卷积，需要的参数量为$(k\times k\times I)\times O$；对于Depthwise Separable Convolution，需要的参数量为$k\times k\times I+I\times O$</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627121419582.png" alt="image-20200627121419582" style="zoom:50%;"></p>
-<h4 id="Dynamic-Computation"><a href="#Dynamic-Computation" class="headerlink" title="Dynamic Computation"></a>Dynamic Computation</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627122127490.png" alt="image-20200627122127490" style="zoom:50%;"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200627122144833.png" alt="image-20200627122144833" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>network compression</tag>
       </tags>
   </entry>
   <entry>
@@ -2929,151 +3074,6 @@ P(x,y)=\frac{exp(w\cdot \phi (x,y))}{R}</script><p>在CRF中，我们选择$P(y|
       </tags>
   </entry>
   <entry>
-    <title>基于知识图谱和GCN的应用和开发</title>
-    <url>/2020/07/03/knowledge-graph/</url>
-    <content><![CDATA[<h4 id="深度学习"><a href="#深度学习" class="headerlink" title="深度学习"></a>深度学习</h4><p>深度学习的主要思想有三个：</p>
-<ul>
-<li><p>权重分配；</p>
-</li>
-<li><p>层级结构：每一层训练的结果都依赖于上一层；</p>
-</li>
-<li><p>欧几里得空间数据：比如图像数据，可以通过二维坐标(x,y)进行表示，语音信号是一个一维的数据，围棋的话也是一个二维数据，目前的大多数数据都是可以用欧几里得空间数据进行表示的，即可以投影到坐标轴上</p>
-</li>
-</ul>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702101528758-20200706215024224.png" alt="image-20200702101528758"></p>
-<p>但在实际生活中，有很多数据并不能用欧几里得数据来进行表示，比如在微信上，每个人都相当于一个节点，朋友之间的关系相当于是一条边，相当于图，没有任何的空间信息，是<u>非欧几里得的空间结构</u>（eg. 社交网络、科学网络等） </p>
-<p>那要怎么对这类信息进行训练呢？传统的深度学习方法（CNN和RNN等）并没有办法训练这类数据，因此就产生了图卷积（GCN）</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702103428339.png" alt="image-20200702103428339"></p>
-<h4 id="图卷积背景和基本框架"><a href="#图卷积背景和基本框架" class="headerlink" title="图卷积背景和基本框架"></a>图卷积背景和基本框架</h4><h5 id="图卷积发展历史"><a href="#图卷积发展历史" class="headerlink" title="图卷积发展历史"></a>图卷积发展历史</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702104325966.png" alt="image-20200702104325966"></p>
-<h5 id="邻接矩阵"><a href="#邻接矩阵" class="headerlink" title="邻接矩阵"></a>邻接矩阵</h5><p>无向图的邻接矩阵是对角矩阵</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702104743073.png" alt="image-20200702104743073"></p>
-<h5 id="图卷积基本框架"><a href="#图卷积基本框架" class="headerlink" title="图卷积基本框架"></a>图卷积基本框架</h5><p>在下图中，A为邻接矩阵，H为特征矩阵（$N\times F$），，N为节点个数，F表示每个节点的特征数；比如我们每个人在社交网络中都是一个节点，也有一些对应的特征，名字、年龄、出生日期，这些特征就构成了这个特征矩阵$N\times F$；</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702104938456.png" alt="image-20200702104938456"></p>
-<p>在这个基本框架中，input为邻接矩阵A，第一个hidden layer把特征矩阵点乘到每一个节点上进行训练，再进入下一层，再进行点乘，…，一直不断重复这个过程。每次训练更新的参数是特征矩阵，最后的output和input是一样的，图结构没有发生变化，但特征矩阵达到了收敛（基本上不会发生变化），最后再对图中的每个节点进行分类；</p>
-<p><span style="color: red">把节点和特征矩阵进行点乘，就实现了信息在节点和社区间进行传递</span></p>
-<h4 id="图卷积"><a href="#图卷积" class="headerlink" title="图卷积"></a>图卷积</h4><p>那么下面我们将具体介绍节点和特征矩阵是怎样进行点乘的，怎样一步步进行训练。</p>
-<h5 id="回顾CNN"><a href="#回顾CNN" class="headerlink" title="回顾CNN"></a>回顾CNN</h5><p>我们先回顾一下CNN是如何做卷积操作的，如下图所示，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702110939157.png" alt="image-20200702110939157"></p>
-<h5 id="图卷积-1"><a href="#图卷积-1" class="headerlink" title="图卷积"></a>图卷积</h5><p>这是卷积操作的参数更新公式，</p>
-<script type="math/tex; mode=display">
-h_i^{l+1}=\sigma(W_0^{(l)}h_0^{(l)}+W_1^{(l)}h_1^{(l)}+\cdot\cdot\cdot+W_8^{(l)}h_8^{(l)})</script><p>图卷积相比较于卷积，在$h_0^{(l)}W_0^{(l)}$的基础上，多了邻接矩阵的信息$\frac{1}{c_{ij}}h_j^{(l)}$，<span style="color: red">权重矩阵W也没有卷积操作那么重要</span>，其参数更新公式为，</p>
-<script type="math/tex; mode=display">
-h_i^{l+1}=\sigma(h_0^{(l)}W_0^{(l)} + 
-\sum_{j\in N_i} \frac{1}{c_{ij}}h_j^{(l)}W_1^{(l)})</script><p>更新参数的时候，通过周围的节点来更新该节点（下图中红色节点），与该节点不直接相连的节点无关</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702111915112.png" alt="image-20200702111915112"></p>
-<p>那么我们就可以通过以下公式来更新特征矩阵，</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde AH^{(l)}W^{(l)})</script><p>其中A为邻接矩阵，H为特征矩阵，W为权重矩阵，本次的特征矩阵$H^{(l+1)}$根据上一次的特征矩阵$H^{(l)}$生成；</p>
-<p>如果只根据邻接矩阵来更新H，会出现一些问题：</p>
-<ul>
-<li>无法提取自身信息，邻接矩阵对角线上的元素始终是0（如果没有自环），自身的信息在训练过程中是无法考虑进去的；</li>
-<li>$\tilde A$没有归一化</li>
-</ul>
-<p>我们需要把参数更新公式进行一些变化，首先解决邻接矩阵对角线元素为0的问题，</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma((\tilde D-\tilde A)H^{(l)}W^{(l)})</script><p><span style="color: red">其中</span>矩阵$\tilde D$是一个对角矩阵（degree matrix），对角线上的数值表示了每个节点所相连的边数。</p>
-<p>归一化处理主要列出两种方式，要根据不同的输入数据来进行选择，其中第一种归一化方式比较常用</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)\\
-H^{(l+1)}=\sigma(\tilde D^{-1}(\tilde D-\tilde A)\tilde H^{(l)}W^{(l)})</script><h5 id="图卷积的计算"><a href="#图卷积的计算" class="headerlink" title="图卷积的计算"></a>图卷积的计算</h5><p>下面我们将一个具体的例子来讲述公式(1),</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702114057283.png" alt="image-20200702114057283"></p>
-<p>在上图中，degree matrix表示了每个节点所相连的边数，比如2表示1号节点相连的边有2条，该对角矩阵也就是前文提到的$\tilde D$，$(\tilde D-\tilde A)$就是laplacian matrix；</p>
-<p>我们将特征矩阵$H_0$和权重矩阵W进行随机初始化，再代入公式(1)，即可得出训练完成的结果$H_N$，再求出每一列的最大值，即MaxValue$(H(i))=[1,1,4,1,1,4]$，即分类结果，其中第1，2，4，5个节点分类为1，第3，6个节点分类为4，把整个图的节点分成了两类；</p>
-<p>那么为什么可以这样分类呢？我们可以回到原图labeled graph中，节点1，2，5相当于是一个全连接图，可以当作一个类别，而节点4，5都和三个节点相连，有三条边，也可以当作是一个类别；节点3，6就没有前几个节点那样关系比较紧密，因此被分成了第二个类别</p>
-<p>我们可以得出以下两点：</p>
-<ul>
-<li>对于随机产生的特征矩阵，依靠图自身的结构，就可以得到一个很好的分类效果；</li>
-<li>在这个例子中，进行10次运算，特征矩阵就收敛了，收敛速度非常快</li>
-</ul>
-<p>再来回顾下这个核心公式，所有的图卷积的变化和应用都离不开这个公式。W不那么重要，特征矩阵$H^{(l)}$表示每个人根据自己的实际特征来进行特征提取；邻接矩阵$\tilde A$表示每个人（节点）之间的关系，关系不一样就会构建出不同的图</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde D^{-\frac{1}{2}}(\tilde D-\tilde A)\tilde D^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad (1)</script><p><span style="color: red">那么我们要在图卷积进行创新的话，就只有改变邻接矩阵A和特征矩阵H，即如何新建这个图、如何提取这个特征；由于机器学习和深度学习技术的不断发展，特征提取的方法已经非常成熟，<u>关键的创新点还是如何新建这个图</u></span></p>
-<h5 id="边信息嵌入"><a href="#边信息嵌入" class="headerlink" title="边信息嵌入"></a>边信息嵌入</h5><p>图中的边信息有时候是包含权重的，我们也应该把边的信息值也考虑进去，即把原图转化为一个线图；在下图中，原图中节点为i，j，m，边为a，b，c，转化为线图后，节点变成a，b，c，边为i，j，m，把边变成了点，把点变成了边</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702122014466.png" alt="image-20200702122014466"></p>
-<p>经过两次不同的输入$h_{(i,j)}^l,h_j^{l+1}$，分别对应原图和线图，这样训练就可以把边的信息也整合进去</p>
-<h5 id="Example-1-半监督图分类"><a href="#Example-1-半监督图分类" class="headerlink" title="Example 1: 半监督图分类"></a>Example 1: 半监督图分类</h5><p>在下图中，黑色圈点表示已经知道了分类的类别，其他的没有被黑色线条包围的点表示没有进行分类，目标是预测未分类的节点的类别，这里我们还定义了一个损失函数L，Z表示GCN的输出结果（上文的公式(1)）</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702123720321.png" alt="image-20200702123720321"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124159182.png" alt="image-20200702124159182"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124253302.png" alt="image-20200702124253302"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124330022.png" alt="image-20200702124330022"></p>
-<p>得到实验结果，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124418966.png" alt="image-20200702124418966"></p>
-<h5 id="Example-2-科学家网络"><a href="#Example-2-科学家网络" class="headerlink" title="Example 2: 科学家网络"></a>Example 2: 科学家网络</h5><p>每篇论文都会有一个题目，互相引用这篇论文则会形成一个关系，我们的任务是根据论文的题目来预测论文的类别（统计、物理、数学）</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702124600168.png" alt="image-20200702124600168"></p>
-<p>这个例子只用了2层的GCN，其中$\hat AXW^{(0)}$表示第一层，$\hat A \ {\rm ReLU}(\hat AXW^{(0)})W^{(1)}$表示第二层，再输入softmax函数，整个训练过程更新的参数是X，从表格中的数据也可以看出，GCN取得了非常不错的效果</p>
-<h4 id="基于知识图谱的图卷积"><a href="#基于知识图谱的图卷积" class="headerlink" title="基于知识图谱的图卷积"></a>基于知识图谱的图卷积</h4><h5 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h5><blockquote>
-<p>知识图谱是Google用于增强其搜索引擎功能的知识库。本质上, 知识图谱旨在描述真实世界中存在的各种实体或概念及其关系,其构成一张巨大的语义网络图，节点表示实体或概念，边则由属性或关系构成。现在的知识图谱已被用来泛指各种大规模的知识库。 </p>
-</blockquote>
-<p>如果你输入搜索引擎中国这个词，相应的会出来中国的一些特征，比如中国的城市、国土面积、人口等；中国和国家都可以看作是图中的一个节点，中国和国家的关系就可以看作是一条边</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702145803375.png" alt="image-20200702145803375"></p>
-<h5 id="图卷积：知识图谱"><a href="#图卷积：知识图谱" class="headerlink" title="图卷积：知识图谱"></a>图卷积：知识图谱</h5><p>先把数据用图表示出来，用户为U，实体为V，$y_{uv}=1$则表示用户u和实体v之间有联系，比如我对电影很感兴趣；每个实体u之间会有关系r，比如电影和教父；</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702150629999.png" alt="image-20200702150629999"></p>
-<p>将图卷积应用到知识图谱，可以用以下公式来进行更新，不断更新特征矩阵H直至其收敛即可，</p>
-<script type="math/tex; mode=display">
-H^{(l+1)}=\sigma(\tilde D_u^{-\frac{1}{2}}\tilde A_u\tilde D_u^{-\frac{1}{2}}H^{(l)}W^{(l)}) \quad\quad</script><p>那么我们怎么把实体推荐给用户呢？我们又怎么知道用户是不是对这个实体感兴趣呢？</p>
-<p>（1）我们可以针对每个用户再新建一个图，先引入一个函数$S_u(\cdot)$，表示这条边（关系）对用户的重要性；</p>
-<p>（2）再把原来的实体矩阵变成一个有权重的矩阵，比如边$r_1$输入函数$S_u(\cdot)$，得到$S_u(r_1)$，就是新的关系值。<u>每个用户都有一个邻接矩阵，再对每个用户的邻接矩阵进行训练，就可以得出用户到底对哪个电影感兴趣</u>；</p>
-<p>（3）图卷积；</p>
-<p>（4）<strong>标签顺滑</strong>，比如对于一个动物，机器可以很自信地确定这个动物到底是猫还是狗，输出值只有0或者1；由于机器过于自信，可能会导致很多额外的误差，我们现在就可以把这个值改成0.1或者0.9，就可以得到更好的结果。</p>
-<p>总结：先新建一个图（knowledge graph，KG），再把用户对感兴趣的实体新建一个权重矩阵，再进行图卷积和标签顺滑。那么现在我们的损失函数就有了一些小变化，结合了图卷积和标签顺滑，即</p>
-<script type="math/tex; mode=display">
-L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702153035542.png" alt="image-20200702153035542"></p>
-<p>下面我们将简要叙述这个训练的过程，图中的水平虚线表示decision boundary：</p>
-<p>（a）其中蓝色的点表示用户感兴趣的点（observed）；在其下方有一些其他的点（unobserved），我们希望把黄色的点（被黄色方框围住）就推荐给用户，让用户去选择，而剩下蓝色的点，则是用户不感兴趣的，不推荐给用户；</p>
-<p>（b）一共要进行两层的训练，对于第一层的训练结果，我们现在把其中两个黄色的点就推荐给用户了；</p>
-<p>（c）对于第二层的训练结果，就把其中的三个点推荐给用户了，但最左端的点也在decision boundary之上，也会被推荐给用户，模型在训练过程中会存在一定的误差，</p>
-<p>（d）这里就开始对第二个用户的模型进行训练；</p>
-<p>（e）这是加入了标签顺滑（label smoothing）的结果，推荐会更加精准，在图中，我们可以看到用户不感兴趣的点进行下移，用户感兴趣的点（a图中的黄色方框部分）则上移，尽量移到decision boundary之上</p>
-<h5 id="Label-Smoothing-Regularization"><a href="#Label-Smoothing-Regularization" class="headerlink" title="Label Smoothing Regularization"></a>Label Smoothing Regularization</h5><p>（1）在下图的能量方程中，$l_u(e_i)$表示用户u是否对实体$e_i$感兴趣（值为0或1），能量方程可以把相同的label保存下来，把不同的label就去掉了；（2）再找到使得能量方程取得最小值的$l_u^<em>$；（3）再通过KL距离函数求得$y_{uv}$和$\hat l_u^</em>(v)$之间的相似度，也是求最小值，可得$R(A)$，再代入损失函数</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702155919603.png" alt="image-20200702155919603"></p>
-<p>$\lambda$可以不断做调整，来找到损失函数的最小值</p>
-<h5 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h5><p>输入为知识图谱G，新建一个邻接矩阵M后；（2）再把用户对感兴趣的实体新建一个权重矩阵（输入mapping函数S），再进行图卷积更新特征矩阵，即$e_u^{(i)}\leftarrow \sigma (\cdot)$；（3）标签顺滑，更新$l_u^{(i)}(e)$，再代入损失函数中的 J；不断地进行这个过程，只到损失函数收敛为止</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702162309077.png" alt="image-20200702162309077"></p>
-<h5 id="结果演示"><a href="#结果演示" class="headerlink" title="结果演示"></a>结果演示</h5><p>下图是几种推荐算法的比较，推荐给用户Top-K的实体，看最后的准确率如何，可以发现GCN的结构取得了非常不错的效果。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702163653325.png" alt="image-20200702163653325"></p>
-<p>下面是一些可视化的对比，图1是推荐食物，可以看到GCN的结构取得了很好的效果；图2表示取不同的$\lambda$，得到的$R(A_u)$的值；图三对比了不同算法的运行速度，可以看到KGCN用时最少，速度最快</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702163938245.png" alt="image-20200702163938245"></p>
-<h4 id="研究方向"><a href="#研究方向" class="headerlink" title="研究方向"></a>研究方向</h4><h5 id="人体姿势识别"><a href="#人体姿势识别" class="headerlink" title="人体姿势识别"></a>人体姿势识别</h5><p> 人体的关节就可以看作是一个节点，关节之间的骨骼就可以看作是边，结合起来就是一张图；</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702165243019.png" alt="image-20200702165243019"></p>
-<p>核心框架：输入为一个视频，视频的每个时间序列都是一张图像，每一帧的视频取出来就是一张图像；把每一帧的图像先构建成一个骨骼和关节点图，再通过时间的顺序把每一帧对应的关节点都连接起来，形成一张大图，再输入GCN进行训练，通过分类器识别出这是一个跑步的动作。</p>
-<p>在上图中的左下角中，横轴表示每一帧的骨骼图，纵轴表示时间，把相应的骨骼节点连接起来，变成一张大图，再输入GCN进行训练。</p>
-<p>下图为实验结果，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702170313601.png" alt="image-20200702170313601"></p>
-<h5 id="超图"><a href="#超图" class="headerlink" title="超图"></a>超图</h5><p>超图是图的一个基本概念，下图中的图有8个点，选择不同的点，可以有多种排列组合。如果选一个点，一共有个点可以选择，那么就有8种（$C_n^1$）组合。如果我选两个点，比如$n_3,n_8$，这两个点构成一个子图，就有6种（$C_n^2$）组合。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702170734267.png" alt="image-20200702170734267"></p>
-<p>选出不同的点后，得到不同的邻接矩阵，再进行训练。每一层选出不同组合的邻接矩阵再输入GCN进行图卷积。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703093426889.png" alt="image-20200703093426889"></p>
-<p>超图卷积的核心公式就是下图中的公式(11)</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703093638629.png" alt="image-20200703093638629"></p>
-<h5 id="图构建"><a href="#图构建" class="headerlink" title="图构建"></a>图构建</h5><p>对于给定的数据，新建图之后再输入GCN进行分类，我们要怎么画成一张图呢？</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703093921828.png" alt="image-20200703093921828"></p>
-<p>在上图中，observed dynamics表示5个分子的运动轨迹图，我们的目标是构建新图，并预测分子的下一步轨迹；对于人体的动作，我们也得通过学习才能知道，到底是以左手还是右手为重心。</p>
-<p>在下图中，展示了图构建的大概过程，编码器和解码器都是GCNs。对于编码器部分，先进行了从边到节点($v\rightarrow e$)的过程，再从节点到边($e\rightarrow v$)，再从边到节点($v\rightarrow e$)；对于解码器，先从边到点，再从点到边，进行图卷积，最后再进行分类，得到下一步的运动轨迹。</p>
-<p>其中x表示节点，z表示x这个点与i、j相连的概率，z是一个概率分布。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703095234400.png" alt="image-20200703095234400"></p>
-<p>预测下一步运动轨迹：在下图中，我们可以看出预测图和真实值之间差距并不大，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703100157533.png" alt="image-20200703100157533"></p>
-<h5 id="子图嵌入"><a href="#子图嵌入" class="headerlink" title="子图嵌入"></a>子图嵌入</h5><p>在原来的GCN中，我们每次只会考虑一个点；如果我们现在把多个点（关联性很大的点）表示成一个点，再输入GCN，效果会不会更好呢？这也是一个很火的研究方向。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703101250920.png" alt="image-20200703101250920"></p>
-<h4 id="场景应用"><a href="#场景应用" class="headerlink" title="场景应用"></a>场景应用</h4><h5 id="用户推荐系统"><a href="#用户推荐系统" class="headerlink" title="用户推荐系统"></a>用户推荐系统</h5><p>在搜索中推荐相关联的朋友给你。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703102812106.png" alt="image-20200703102812106"></p>
-<h5 id="舆情监控和控制"><a href="#舆情监控和控制" class="headerlink" title="舆情监控和控制"></a>舆情监控和控制</h5><p>每个国家都需要舆情监控，比如关于假消息和真消息的分类或者监控，在网络传播过程中找到假消息源，进行封锁等，用GCN都可以起到很好的作用。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703102736481.png" alt="image-20200703102736481"></p>
-<h5 id="自动驾驶"><a href="#自动驾驶" class="headerlink" title="自动驾驶"></a>自动驾驶</h5><p>所有的车都有一个车载系统，每个车载系统之间进行联网，就可以构成非常大的图。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703102850234.png" alt="image-20200703102850234"></p>
-<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200703103300945.png" alt="image-20200703103300945"></p>
-<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><p>本文是观看杨栋老师在B上讲解的直播课程《基于知识图谱和图卷积神经网络的应用和开发》的笔记，直播地址：<a href="https://live.bilibili.com/11869202" target="_blank" rel="noopener">https://live.bilibili.com/11869202</a> ，贪心科技官网录播回放：<a href="https://www.greedyai.com/course/139" target="_blank" rel="noopener">https://www.greedyai.com/course/139</a></p>
-]]></content>
-      <categories>
-        <category>Knowledge Graph</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>知识图谱</tag>
-        <tag>GCN</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
     <url>/2020/06/28/t-SNE/</url>
     <content><![CDATA[<blockquote>
@@ -3120,6 +3120,110 @@ L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="https://gitee.com/scarleatt
         <tag>Dimension Reduction</tag>
         <tag>LLE</tag>
         <tag>t-SNE</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Transfer Learning</title>
+    <url>/2020/07/20/transfer-learning/</url>
+    <content><![CDATA[<blockquote>
+<p>本文主要针对source和target data的不同情况，介绍了几种主要的transfer learning的方式，包括Fine-tuning、Multitask learning、domain-adversarial training、zero-shot learning。</p>
+</blockquote>
+<p>如果现在没有和我们任务直接相关的数据，比如我们要做的任务是猫狗分类，很可能手头只有elephant和tiger的数据集，是不同标签的；也有可能是动漫的cat/dog数据，和真实数据集的domain不一样。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720142155947.png" alt="image-20200720142155947" style="zoom:67%;"></p>
+<p>那么这些不相关的数据，会对我们的任务是有帮助的吗？</p>
+<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>现在有一些data是和我们的任务有关的，是target data，有一些data是和我们的任务无关的，是source data；target data和source data可能是有label的，也可能是没有label的，我们也将分为这四种情况来进行讨论。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720180422641.png" alt="image-20200720180422641" style="zoom:67%;"></p>
+<p>如果target data和source data都是有label的，那么我们就可以进行model fine-tuning。</p>
+<h4 id="Model-Fine-tuning"><a href="#Model-Fine-tuning" class="headerlink" title="Model Fine-tuning"></a>Model Fine-tuning</h4><p>现在我们只有很小一部分target data $(x^t,y^t)$，但却有很多的source data $(x^s,y^s)$；如果target data只有少量的几个example，那么我们就可以称作是<strong>one-shot learning</strong>。</p>
+<p>我们可以针对这样的task举一个例子，speaker adaption，任务是辨识某一个人的声音，但只有这个人的少量audio data，但我们有很多其他人的audio data；</p>
+<p>为了解决这个task，我们可以先使用source data来训练一个model，然后再用target data来进行fine-tuning；即把source data训练的model当成一个初始值，再用我们source data来进行训练任务。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720143147319.png" alt="image-20200720143147319" style="zoom:67%;"></p>
+<p>但对这个模型进行训练的时候我们必须非常小心，由于target data的数量太少了，必须要注意overfitting问题。</p>
+<p>我们在训练过程中加入一些小技巧，conservative training、layer transfer。</p>
+<h5 id="Conservative-Training"><a href="#Conservative-Training" class="headerlink" title="Conservative Training"></a>Conservative Training</h5><p>现在有大量的source data，即很多其他人的audio data，用这些data来训练一个model；把这个训练好的model来作为另外一个model的初始值，再用target data来进行训练；</p>
+<p>为了防止overfitting，我们需要加上一些constrain。在看到同一个data的时候，我们希望这两个model的output越接近越好；或者这两个model的参数之间的差距也要越小越好，可以计算这两者之间的L2-norm。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720143243580.png" alt="image-20200720143243580" style="zoom:67%;"></p>
+<h5 id="Layer-Transfer"><a href="#Layer-Transfer" class="headerlink" title="Layer Transfer"></a>Layer Transfer</h5><p>首先用source data训练好一个model，把这个model中的其中几个layer的参数拿出来，到新的model里面去；</p>
+<p>再用target data来训练没有复制过去的layer（rest layer），target data只需要训练非常少的参数，因此就可以避免overfitting；</p>
+<p>如果target data足够多，也可以直接直接对整个network进行fine-tuning。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720153717937.png" alt="image-20200720153717937" style="zoom:67%;"></p>
+<p>对于不同的task，需要copy的layer也是不同的。比如Image相关的任务，通常都是copy前几层的参数，因为前几层都是在做一些比较基础的工作，类似于有没有直线，有没有简单的几何图形。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720154835368.png" alt="image-20200720154835368" style="zoom:67%;"></p>
+<p>下面是Image使用Layer transfer进行的实验，source data包括500个类别，target data包括也包括500个其他的类别，数据来自imagenet；下图中横轴表示copy的层数，纵轴表示copy这几个layer，再用target data来进行训练所能达到的准确度accuracy；</p>
+<p>红色的曲线（only train the rest layer）：首先用source data训练好model，copy其中的某几个layer之后，只用target data训练剩下没copy的layer；随着copy的层数不断增多，可以从图中看到训练的准确度是在不断下降的；只有copy前面几个layer，performance稍微有些进步；</p>
+<p>橙色的曲线（fine-tune the whole network）：现在我们不只是用target data来训练剩下的layer，而是对整个network进行fine-tuning，可以发现随着copy的layer数量越多，模型准确度越高；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720155321103.png" alt="image-20200720155321103" style="zoom:67%;"></p>
+<p>下图中红色的曲线和上图中红色曲线相对应，只训练剩下的layer，纵轴表示source和target data之间的相关程度。从图中我们可以看出，如果source和target data差别很大，在做transfer learning的时候performance会下降很多；但如果只copy 前几个layer，performance就掉得不会太多。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720161214747.png" alt="image-20200720161214747" style="zoom:67%;"></p>
+<h4 id="Multitask-Learning"><a href="#Multitask-Learning" class="headerlink" title="Multitask Learning"></a>Multitask Learning</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>在进行fine-tunign时，我们更多关心的是target对应的准确率，并不太关心source的准确率；而multitask learning则是两者的准确率都考虑进来了。</p>
+<p>有两个不同的task A，B，这两个task所使用的input feature都是一样的，前几层的网络结构也是一样的；但在之后的某个层就分叉了，Task A会用到部分output，Task B会用到另外一部分的output；</p>
+<p>这样做的其中一个好处就是，我们会用task A和B的data一起来对前几个layer进行训练，这几个layer很可能有更好的performance；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720162244439.png" alt="image-20200720162244439" style="zoom:67%;"></p>
+<p>即使这两个task的前几个input层的layer都不一样，只有中间某些layer是可以共用的，我们也可以使用transfer learning的思想。</p>
+<h5 id="Multilingual-Speech-Recognition"><a href="#Multilingual-Speech-Recognition" class="headerlink" title="Multilingual Speech Recognition"></a>Multilingual Speech Recognition</h5><p>Multitask Learning有一个很成功的应用，即Multilingual Speech Recognition（多语音辨识）；</p>
+<p>现在我们有一堆多种语言的语音数据，我们要对这些audio进行语音辨识。我们可以训练一个model，来同时对这五种语言进行辨识，这个model的前面几个layer都是共用参数的，只有后面几个layer的参数不一样。因为都是人类说的语言，所以前几层可以共用参数。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720163332515.png" alt="image-20200720163332515" style="zoom:67%;"></p>
+<h4 id="Domain-adversarial-training"><a href="#Domain-adversarial-training" class="headerlink" title="Domain-adversarial training"></a>Domain-adversarial training</h4><p>如果现在target data是unlabeled，而source data是labeled，我们可以通过Domain-adversarial training来进行transfer learning。</p>
+<p>在下图中，source data是带label的，是来自MNIST的数据，$(x^s,y^s)$是training data；target data是没有label的，来自MNIST-M，$(x^t)$是testing data；这两者是mismatch的；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720180600188.png" alt="image-20200720180600188" style="zoom:67%;"></p>
+<p>那么我们怎么让在MNIST上训练出来的model，应用到MNIST-M（背景五颜六色）上呢？</p>
+<p>如果直接把MNIST-M中的某个图像x输入训练好的network，然后输出对应的classification，效果会非常不好；我们可以把这整个network的前几层看作是在extract feature，后面几层看作是在进行classification；</p>
+<p>在下图中，我们把extract出来的feature做一个可视化的展示，如果把MNIST的数据输入进去，即图中蓝色的点，会发现有10个cluster，classifier可以根据这些feature进行分类；但如果把MNIST-M输入network，会变成图中红色的点，是没有规则的，classifier并不能根据这些feature进行分类。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720181241730.png" alt="image-20200720181241730" style="zoom:67%;"></p>
+<p>针对这个问题，我们可以对网络结构进行改进；</p>
+<p>我们可以通过network中的feature extractor，即Domain-adversarial training，把domain的这些特性给消掉。不同的domain不应该像上图那样分成两群，而应该被混在一起；</p>
+<p>为了训练这个feature extractor，我们可以把提取出来的feature输入一个classifier，提取出来的feature要想办法骗过classifier；如果把extractor看作是generator，那么classifier就可以看作是discriminator，和起来就可以看作是GAN；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720182043251.png" alt="image-20200720182043251" style="zoom:67%;"></p>
+<p>但骗过这个classifier太简单了，feature只要全都是0，就可以骗过这个classifier；</p>
+<p>因此这个feature不仅要能骗过classifier，还需要保留原来digit的特性；如果输入label predictor，也需要做的好，要能输出对应的label（0～9）；</p>
+<p>这个feature extractor需要满足两个条件，Maximize <strong>label</strong> classification accuracy + minimize <strong>domain</strong> classification accuracy，这也就是Domain-adversarial training中adversarial的由来。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720190801381.png" alt="image-20200720190801381" style="zoom:67%;"></p>
+<p>虽然Domain-adversarial training原理很简单，但训练起来还是很麻烦的</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720191620557.png" alt="image-20200720191620557" style="zoom:67%;"></p>
+<p>这里就是论文中的实验结果，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720191716307.png" alt="image-20200720191716307" style="zoom:67%;"></p>
+<h4 id="Zero-shot-learning"><a href="#Zero-shot-learning" class="headerlink" title="Zero-shot learning"></a>Zero-shot learning</h4><p>在Zero-shot learning里面，training和testing data的task是不一样的；比如source data是要进来猫狗分类的数据，但testing data却只有草泥马，这是在training data中没有的类别</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720192119360.png" alt="image-20200720192119360" style="zoom:67%;"></p>
+<p>在语音辨识领域，如果我们并不知道所有可能的source data，我们如何来进行辨识呢？</p>
+<p>我们对这个问题进行了转化，不是要辨识一段语音属于哪一个word，而是要辨识语音属于哪一个“音标”，即把辨识的单位变成“音标”。还需要建立表示“音标”和word之间转换关系的表格，当我们辨识出“音标”之后，查表就可以得到对应的word。就算有一段语音没有在training data中出现过，我们也可以先辨识出其对应的“音标”，再得到具体的word。</p>
+<p>现在回到图像领域。</p>
+<p>如果是在图像领域，我们可以把每个class用attribute来表示，如下图的<span style="color: red"> Database</span>所示，比如dog有毛，是四条腿，有尾巴的，……。这个attribute的数量要足够多，每个class都有其特别的attribute组合，如果出现两个类别的class有相同的attribute组合，这个方法就失效了。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720193359055.png" alt="image-20200720193359055" style="zoom:67%;"></p>
+<p>那么现在的任务就变成了，辨识每张image里面的attribute，比如看到dog的图像，就要说这是有毛、有四条腿、有尾巴的动物；</p>
+<p>在testing的时候，即使出现一个从来没看过的动物，network只需要辨识这个动物的attribute就可以了，再去查看属性表，看哪一个class和这些attribute最接近。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720194107595.png" alt="image-20200720194107595" style="zoom:67%;"></p>
+<p>这个attribute的数量可能会非常多，这时我们就需要做attribute embedding（降维成一个vector，表示成space上的一个点）；首先我们需要把图像的attribute先投影到embedding space上，把表格里面的属性也投影到这个space，分别写作$f(x^i),g(y^i)$，f和g可以看作是一个network；</p>
+<p>在training的时候，我们希望$f(x^i),g(y^i)$越接近越好；在testing的时候，即使我们从来没见过这个草泥马，我们也可以把这个草泥马的attribute投影到embedding space上，看哪个class的attribute和这个点最接近</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720194343007.png" alt="image-20200720194343007" style="zoom:67%;"></p>
+<p>如果没有这个database（class和attribute的关系），我们可以借助word vector来完成这个任务。即用word vector来表示这个动物，这个vector的某个dimension就表示动物的某个attribute，再把attribute也用对应的word vector表示，再来做embedding</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720195143255.png" alt="image-20200720195143255" style="zoom:67%;"></p>
+<p>$x^1,y^1$投影到embedding space之后，他们之间的距离要越接近越好，对应着一个最小化问题；但这样做会造成一个问题，只要把所有的word都投影到一个点上，距离就是0；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720200937712.png" alt="image-20200720200937712" style="zoom: 67%;"></p>
+<p>因此要对loss function进行一些变化，我们要使同一个pair之间的距离越小越好，还要使不同pair之间的距离越大越好，即</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720201144961.png" alt="image-20200720201144961" style="zoom:67%;"></p>
+<p>如果后面一项小于0，这个loss function的值就是0，把这一项进行化简，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720201233705.png" alt="image-20200720201233705" style="zoom:67%;"></p>
+<p>还有一个<strong>更简单</strong>的方法来做zero-shot learning，即<strong>Convex Combination of Semantic Embedding</strong>；<span style="color: red">只需要off-the-shelf NN for ImageNet和一个word vector就可以完成；</span></p>
+<ul>
+<li>首先把图像输入neural network，但NN可能没办法分辨出到底是哪一个class，lion和tiger的几率都是0.5；</li>
+<li>再找出Lion和tiger的word vector，把这两者的vector用1:1的比例进行混合，即0.5V(tiger)+0.5V(lion)，得到混合之后的vector；</li>
+<li>观察哪个vector和这个混合之后的vector最为接近，这里是V(liger)。</li>
+</ul>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720201614381.png" alt="image-20200720201614381" style="zoom:67%;"></p>
+<p>这里是这个方法的实验结果，ConSE即是Convex Combination of Semantic Embedding，第一只海狮取得了不错的效果，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720202952205.png" alt="image-20200720202952205" style="zoom:50%;"></p>
+<p>还有关于翻译的例子，训练数据只有English到Japanese、Korean等，但没有Japanese到Korean的数据，通过transfer learning的思想，也可以对这两种语言进行翻译。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720203150995.png" alt="image-20200720203150995" style="zoom:67%;"></p>
+<h4 id="Self-taught-learning"><a href="#Self-taught-learning" class="headerlink" title="Self-taught learning"></a>Self-taught learning</h4><p>刚才讲了很多source data都有label的情况，现在我们来叙述source data是unlabeled，target data是label的情况，即self-taught learning。</p>
+<p>现在我们有足够多的source data，即使是unlabeled，可以学习一个feature extractor，再去target data上抽取feature。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720203754918.png" alt="image-20200720203754918" style="zoom:67%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Transfer Learning</tag>
       </tags>
   </entry>
   <entry>
@@ -3283,46 +3387,6 @@ S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（M
       </tags>
   </entry>
   <entry>
-    <title>流水线</title>
-    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
-    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
-<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
-<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
-<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
-<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
-<li>需要有<u>通过时间与排空时间</u></li>
-</ul>
-<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
-<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
-<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
-<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
-<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
-<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
-<ul>
-<li><p>从前调度</p>
-</li>
-<li><p>从目标处调度</p>
-</li>
-<li><p>从失败出调度</p>
-</li>
-</ul>
-<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
-<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
-<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
-<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>软件工程</category>
-      </categories>
-      <tags>
-        <tag>流水线</tag>
-        <tag>吞吐率</tag>
-        <tag>加速比</tag>
-        <tag>效率</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Gradient Descent</title>
     <url>/2020/06/04/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/</url>
     <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>梯度下降的目标是使损失函数L最小化，$\theta^* = arg\ min\ L(\theta)$</p>
@@ -3426,6 +3490,46 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
       </tags>
   </entry>
   <entry>
+    <title>流水线</title>
+    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
+    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
+<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
+<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
+<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
+<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
+<li>需要有<u>通过时间与排空时间</u></li>
+</ul>
+<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
+<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
+<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
+<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
+<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
+<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
+<ul>
+<li><p>从前调度</p>
+</li>
+<li><p>从目标处调度</p>
+</li>
+<li><p>从失败出调度</p>
+</li>
+</ul>
+<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
+<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
+<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
+<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>软件工程</category>
+      </categories>
+      <tags>
+        <tag>流水线</tag>
+        <tag>吞吐率</tag>
+        <tag>加速比</tag>
+        <tag>效率</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>测试</title>
     <url>/2020/03/12/%E6%B5%8B%E8%AF%95/</url>
     <content><![CDATA[<h5 id="测试步骤"><a href="#测试步骤" class="headerlink" title="测试步骤"></a>测试步骤</h5><ul>
@@ -3463,66 +3567,6 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
         <tag>集成测试</tag>
         <tag>白盒测试</tag>
         <tag>黑盒测试</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>计算机体系结构重要考点</title>
-    <url>/2020/03/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%87%8D%E8%A6%81%E8%80%83%E7%82%B9/</url>
-    <content><![CDATA[<h4 id="同时多线程"><a href="#同时多线程" class="headerlink" title="同时多线程"></a>同时多线程</h4><p>线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。</p>
-<p>线程级并行：指并行执行两个或两个以上的线程。</p>
-<p>同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种改进。通过寄存器命名和动态调度机制，来自各个独立线程的多条指令可以同时流出，而不用考虑它们之间的相互依赖关系。</p>
-<h5 id="实现多线程的主要方法"><a href="#实现多线程的主要方法" class="headerlink" title="实现多线程的主要方法"></a>实现多线程的主要方法</h5><p><u>细粒度多线程</u>：在每条指令之间都可以进行线程的切换，从而使得多个线程可以交替执行。</p>
-<ul>
-<li>优点：能够隐藏由长时间停顿带来的吞吐率的损失，也能够隐藏由段时间停顿带来的损失。</li>
-<li>缺点：减慢了单个线程的执行。即使没有任何停顿的线程也不能连续执行，而且会因为其他线程的指令的插入执行而被延迟。</li>
-</ul>
-<p><u>粗粒度多线程</u>：线程之间的切换只发生在时间较长的停顿出现的时候。</p>
-<ul>
-<li>优点：减少了切换次数，很大程度上也不会降低单个线程的执行速度。</li>
-<li>缺点：减少吞吐率损失的能力有限。由于实现粗粒度多线程的CPU只能执行单个线程的指令，不能交叉执行多个线程，因此当发生停顿时，流水线必须排空或暂停。</li>
-</ul>
-<h4 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h4><h5 id="写策略"><a href="#写策略" class="headerlink" title="写策略"></a>写策略</h5><p>写直达法：在执行写操作时，不仅把数据写入Cathe中相应的块，而且也写入下一级存储器。减少CPU写停顿的常用方法是，采用写缓冲器。</p>
-<p>写回法：只把数据写入Cathe中相应的块，不写入下一级存储器。这些最新数据只有在相应的块被替换出时，才被写回下一级存储器。速度快，要设置“修改位”。</p>
-<p>写不命中时，</p>
-<p>按写分配法：写不命中时，把所写单元的块从主存中调入Cathe，然后再进行写入。与<u>写回法</u>配合。</p>
-<p>不按写分配法：写不命中时，直接写入下一级存储器而不将相应的块调入Cathe。</p>
-<h5 id="三种类型的Cathe不命中"><a href="#三种类型的Cathe不命中" class="headerlink" title="三种类型的Cathe不命中"></a>三种类型的Cathe不命中</h5><p><u>强制性不命中</u>：当第一次访问一个快时，该块不在Cathe中，需从下一级存储器中调入Cathe。（冷启动访问不命中，首次访问不命中）</p>
-<p><u>容量不命中</u>：如果<u>程序执行时所需的块</u>不能全部调入Cathe中，当某些块被调出后，若又重新被访问，就会发生不命中。</p>
-<p><u>冲突不命中</u>：在组相联或者直接映像Cathe中，若太多的块映像到同一组（块）中，则会出现该组中某个块被别的块替换掉，然后又重新被访问的情况。（碰撞不命中，冲突不命中）</p>
-<p>关系：</p>
-<ul>
-<li><strong>相联度</strong>越高，冲突不命中就越少；</li>
-<li>强制性不命中和容量不命中不受相联度的影响；</li>
-<li>强制性不命中不受<strong>Cathe容量</strong>的影响，但容量不命中却随着容量的增加而减少。</li>
-</ul>
-<h4 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h4><h5 id="I-O系统的可靠性、可用性和可信性"><a href="#I-O系统的可靠性、可用性和可信性" class="headerlink" title="I/O系统的可靠性、可用性和可信性"></a>I/O系统的可靠性、可用性和可信性</h5><p>可靠性：系统从某个初始参考点开始<u>一直连续提供服务的能力</u>，用平均无故障时间（<strong>MTTF</strong>）来衡量。MTTF的导数是失效率。系统总体的失效率是各部件的失效率之和。系统<u>中断服务的时间</u>用平均修复时间（<strong>MTTR</strong>）来衡量。</p>
-<p>可用性：系统正常工作的时间在连续两次服务间隔时间中所占的比例。</p>
-<script type="math/tex; mode=display">
-可用性=\frac{MTTF}{MTTF+MTTR}</script><p>   平均失效间隔时间，MTBF</p>
-<script type="math/tex; mode=display">
-MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u>的。</p>
-<h5 id="廉价磁盘冗余阵列-RAID"><a href="#廉价磁盘冗余阵列-RAID" class="headerlink" title="廉价磁盘冗余阵列 (RAID)"></a>廉价磁盘冗余阵列 (RAID)</h5><p>RAID0：<u>无冗余和无校验</u>的磁盘阵列，成本最低。</p>
-<p>RAID1：<u>镜像</u>磁盘阵列。</p>
-<p>RAID2：采用纠错的<u>海明码</u>的磁盘阵列，冗余盘数量为$log_2m$，m为数据盘的个数。</p>
-<p>RAID3：<u>位</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
-<p>RAID4：<u>块</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
-<p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
-<p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
-<p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
-<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。<br>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
-]]></content>
-      <categories>
-        <category>计算机体系结构</category>
-      </categories>
-      <tags>
-        <tag>计算机体系结构</tag>
-        <tag>机群</tag>
-        <tag>MPP</tag>
-        <tag>SMP</tag>
-        <tag>消息传递</tag>
-        <tag>共享存储器</tag>
-        <tag>同时多线程</tag>
-        <tag>RAID</tag>
       </tags>
   </entry>
   <entry>
@@ -3625,6 +3669,66 @@ MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u
         <tag>系列机</tag>
         <tag>分段开采</tag>
         <tag>链接</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>计算机体系结构重要考点</title>
+    <url>/2020/03/10/%E8%AE%A1%E7%AE%97%E6%9C%BA%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84%E9%87%8D%E8%A6%81%E8%80%83%E7%82%B9/</url>
+    <content><![CDATA[<h4 id="同时多线程"><a href="#同时多线程" class="headerlink" title="同时多线程"></a>同时多线程</h4><p>线程：进程内的一个相对独立、可独立调度和指派的执行单元，它比进程要“轻巧”得多。线程中包含有调度所需的信息，但它自己基本上不拥有系统资源，只拥有在运行过程中必不可少的一点资源。线程切换时，只需保存和设置少量寄存器的内容，开销很小。</p>
+<p>线程级并行：指并行执行两个或两个以上的线程。</p>
+<p>同时多线程（SMT）：是一种在多流出、动态调度的处理器上结合了线程级并行和指令级并行的技术，它是多线程技术的一种改进。通过寄存器命名和动态调度机制，来自各个独立线程的多条指令可以同时流出，而不用考虑它们之间的相互依赖关系。</p>
+<h5 id="实现多线程的主要方法"><a href="#实现多线程的主要方法" class="headerlink" title="实现多线程的主要方法"></a>实现多线程的主要方法</h5><p><u>细粒度多线程</u>：在每条指令之间都可以进行线程的切换，从而使得多个线程可以交替执行。</p>
+<ul>
+<li>优点：能够隐藏由长时间停顿带来的吞吐率的损失，也能够隐藏由段时间停顿带来的损失。</li>
+<li>缺点：减慢了单个线程的执行。即使没有任何停顿的线程也不能连续执行，而且会因为其他线程的指令的插入执行而被延迟。</li>
+</ul>
+<p><u>粗粒度多线程</u>：线程之间的切换只发生在时间较长的停顿出现的时候。</p>
+<ul>
+<li>优点：减少了切换次数，很大程度上也不会降低单个线程的执行速度。</li>
+<li>缺点：减少吞吐率损失的能力有限。由于实现粗粒度多线程的CPU只能执行单个线程的指令，不能交叉执行多个线程，因此当发生停顿时，流水线必须排空或暂停。</li>
+</ul>
+<h4 id="存储系统"><a href="#存储系统" class="headerlink" title="存储系统"></a>存储系统</h4><h5 id="写策略"><a href="#写策略" class="headerlink" title="写策略"></a>写策略</h5><p>写直达法：在执行写操作时，不仅把数据写入Cathe中相应的块，而且也写入下一级存储器。减少CPU写停顿的常用方法是，采用写缓冲器。</p>
+<p>写回法：只把数据写入Cathe中相应的块，不写入下一级存储器。这些最新数据只有在相应的块被替换出时，才被写回下一级存储器。速度快，要设置“修改位”。</p>
+<p>写不命中时，</p>
+<p>按写分配法：写不命中时，把所写单元的块从主存中调入Cathe，然后再进行写入。与<u>写回法</u>配合。</p>
+<p>不按写分配法：写不命中时，直接写入下一级存储器而不将相应的块调入Cathe。</p>
+<h5 id="三种类型的Cathe不命中"><a href="#三种类型的Cathe不命中" class="headerlink" title="三种类型的Cathe不命中"></a>三种类型的Cathe不命中</h5><p><u>强制性不命中</u>：当第一次访问一个快时，该块不在Cathe中，需从下一级存储器中调入Cathe。（冷启动访问不命中，首次访问不命中）</p>
+<p><u>容量不命中</u>：如果<u>程序执行时所需的块</u>不能全部调入Cathe中，当某些块被调出后，若又重新被访问，就会发生不命中。</p>
+<p><u>冲突不命中</u>：在组相联或者直接映像Cathe中，若太多的块映像到同一组（块）中，则会出现该组中某个块被别的块替换掉，然后又重新被访问的情况。（碰撞不命中，冲突不命中）</p>
+<p>关系：</p>
+<ul>
+<li><strong>相联度</strong>越高，冲突不命中就越少；</li>
+<li>强制性不命中和容量不命中不受相联度的影响；</li>
+<li>强制性不命中不受<strong>Cathe容量</strong>的影响，但容量不命中却随着容量的增加而减少。</li>
+</ul>
+<h4 id="IO系统"><a href="#IO系统" class="headerlink" title="IO系统"></a>IO系统</h4><h5 id="I-O系统的可靠性、可用性和可信性"><a href="#I-O系统的可靠性、可用性和可信性" class="headerlink" title="I/O系统的可靠性、可用性和可信性"></a>I/O系统的可靠性、可用性和可信性</h5><p>可靠性：系统从某个初始参考点开始<u>一直连续提供服务的能力</u>，用平均无故障时间（<strong>MTTF</strong>）来衡量。MTTF的导数是失效率。系统总体的失效率是各部件的失效率之和。系统<u>中断服务的时间</u>用平均修复时间（<strong>MTTR</strong>）来衡量。</p>
+<p>可用性：系统正常工作的时间在连续两次服务间隔时间中所占的比例。</p>
+<script type="math/tex; mode=display">
+可用性=\frac{MTTF}{MTTF+MTTR}</script><p>   平均失效间隔时间，MTBF</p>
+<script type="math/tex; mode=display">
+MTBF=MTTF+MTTR</script><p>可信性：是服务的质量，是<u>不可度量</u>的。</p>
+<h5 id="廉价磁盘冗余阵列-RAID"><a href="#廉价磁盘冗余阵列-RAID" class="headerlink" title="廉价磁盘冗余阵列 (RAID)"></a>廉价磁盘冗余阵列 (RAID)</h5><p>RAID0：<u>无冗余和无校验</u>的磁盘阵列，成本最低。</p>
+<p>RAID1：<u>镜像</u>磁盘阵列。</p>
+<p>RAID2：采用纠错的<u>海明码</u>的磁盘阵列，冗余盘数量为$log_2m$，m为数据盘的个数。</p>
+<p>RAID3：<u>位</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID4：<u>块</u>交叉<u>奇偶校验</u>，只需要一个校验盘。</p>
+<p>RAID5：<u>无独立校验</u>的<u>奇偶校验</u>磁盘阵列，将校验信息分布到磁盘阵列中的各个磁盘。</p>
+<p>以上奇偶校验磁盘阵列只是在<u>一个盘</u>出现故障的情况下，仍能继续工作和恢复数据。</p>
+<p>RAID6：<u>P+Q双校验</u>磁盘阵列，可以容忍<u>两个磁盘</u>出错。</p>
+<p>RAID10：RAID1+0，先进行镜像（RAID1），再进行条带存放（RAID0）。<br>RAID01：RAID0+1，先进行条带存放（RAID0），再进行镜像（RAID1）。</p>
+]]></content>
+      <categories>
+        <category>计算机体系结构</category>
+      </categories>
+      <tags>
+        <tag>计算机体系结构</tag>
+        <tag>机群</tag>
+        <tag>MPP</tag>
+        <tag>SMP</tag>
+        <tag>消息传递</tag>
+        <tag>共享存储器</tag>
+        <tag>同时多线程</tag>
+        <tag>RAID</tag>
       </tags>
   </entry>
   <entry>
