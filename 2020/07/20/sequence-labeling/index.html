@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next mist" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+
+
+
+
+  <meta name="keywords" content="Deep Learning,Sequence Labeling,HMM,CRF,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="本文主要介绍了几种传统的序列标注方法，包括HMM（隐马尔可夫模型），CRF（条件随机场），Structed perception/SVM。 IntroductionSequence Labeling首先叙述sequence labeling的基本概念，machine的任务就是学习出一个函数f，可以实现sequence X到Y的转换。 现在我们假设X和Y的长度是一样的，输入$x_1,…,x_L$，输">
+<meta name="keywords" content="Deep Learning,Sequence Labeling,HMM,CRF">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sequence Labeling Problem">
+<meta property="og:url" content="http://yoursite.com/2020/07/20/sequence-labeling/index.html">
+<meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="本文主要介绍了几种传统的序列标注方法，包括HMM（隐马尔可夫模型），CRF（条件随机场），Structed perception/SVM。 IntroductionSequence Labeling首先叙述sequence labeling的基本概念，machine的任务就是学习出一个函数f，可以实现sequence X到Y的转换。 现在我们假设X和Y的长度是一样的，输入$x_1,…,x_L$，输">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200718154925173.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200718162236242.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200718162011348.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200718164901203.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719100147183.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719102547829.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719102935252.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719104130678.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719104448417.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719110735707.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719112157732.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719113206100.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719114302286.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719115754096.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719120903970.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719155658613.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719160753910.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719161039381.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719163106979.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719165805703.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719170157895.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719170732186.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719171416399.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719171541932.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719172033172.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719203144844.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719203811164.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719205358911.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719221245972.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719221342908.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719221517202.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719222851553.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719223144083.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719223315109.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719224753879.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719225001941.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719225047285.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719225440619.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719225619209.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719230003644.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200719225927570.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200720092212672.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200720092346614.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200720092639541.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200720103225145.png">
+<meta property="og:updated_time" content="2020-07-20T02:51:32.117Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sequence Labeling Problem">
+<meta name="twitter:description" content="本文主要介绍了几种传统的序列标注方法，包括HMM（隐马尔可夫模型），CRF（条件随机场），Structed perception/SVM。 IntroductionSequence Labeling首先叙述sequence labeling的基本概念，machine的任务就是学习出一个函数f，可以实现sequence X到Y的转换。 现在我们假设X和Y的长度是一样的，输入$x_1,…,x_L$，输">
+<meta name="twitter:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200718154925173.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/07/20/sequence-labeling/">
+
+
+
+
+
+  <title>Sequence Labeling Problem | Scarleatt</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Scarleatt</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/20/sequence-labeling/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Sequence Labeling Problem</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-20T10:49:00+08:00">
+                2020-07-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ML-notes/" itemprop="url" rel="index">
+                    <span itemprop="name">ML-notes</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.1k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  12
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文主要介绍了几种传统的序列标注方法，包括HMM（隐马尔可夫模型），CRF（条件随机场），Structed perception/SVM。</p>
+<h4 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h4><h5 id="Sequence-Labeling"><a href="#Sequence-Labeling" class="headerlink" title="Sequence Labeling"></a>Sequence Labeling</h5><p>首先叙述sequence labeling的基本概念，machine的任务就是学习出一个函数f，可以实现sequence X到Y的转换。</p>
+<p>现在我们假设X和Y的长度是一样的，输入$x_1,…,x_L$，输出为$y_1,..,y_L$，这个任务其使用RNN就可以完成，本文将叙述另外一种方法来进行sequence labeling。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200718154925173.png" alt="image-20200718154925173" style="zoom: 50%;"></p>
+<h5 id="Example-Task"><a href="#Example-Task" class="headerlink" title="Example Task"></a>Example Task</h5><p>本文会使用POS tagging来当作讲解的例子，我们要对一个句子中的每个word进行标注，词性的类别有很多，有名词、动词、副词等</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200718162236242.png" alt="image-20200718162236242" style="zoom:50%;"></p>
+<p>如果现在有一段话“John saw the saw.”，需要进行词性标注，那么“John”的词性就是是proper none，第一个“saw”是verb，第二个“saw”就是Noun；</p>
+<p>pos tagging是sequence labeling中比较basic、也比较重要的一个task，是很多文字处理程序的基石，比如必须先进行pos tagging，才可以再进一步做文本分析。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200718162011348.png" alt="image-20200718162011348" style="zoom:67%;"></p>
+<p>那么pos tagging任务是不是用一本词典就可以完成了呢？</p>
+<p>答案是不能，pos tagging任务还需要考虑word在句子中的顺序，才可以得出正确的词性，比如“John saw the saw.”这句话中，第一个“saw”是verb，第二个“saw”就是Noun；因此我们只考查词典是不能完成任务的，还需要完全理解整个句子的语义才可以得出正确的结果。</p>
+<h4 id="Hidden-Markov-Model-HMM"><a href="#Hidden-Markov-Model-HMM" class="headerlink" title="Hidden Markov Model (HMM)"></a>Hidden Markov Model (HMM)</h4><h5 id="Introduction-1"><a href="#Introduction-1" class="headerlink" title="Introduction"></a>Introduction</h5><p>如果使用HMM的思想来生成一个sequence，首先会生成一个POS sequence，再根据这个pos sequence来生成对应的词汇，从而生成最后需要的那个句子。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200718164901203.png" alt="image-20200718164901203" style="zoom:67%;"></p>
+<p>Step1: 在pos sequence中的第一个词汇，有0.5的几率是det，0.4的几率是propnoun，0.1的几率是verb；现在我们就可以进行random的sample，假设sample到了propnoun；下一个词有0.8的几率是verb，假设就sample到了verb；下一个词很可能就结束了</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719100147183.png" alt="image-20200719100147183" style="zoom:67%;"></p>
+<p>Step 2: 现在我们知道了pos sequence，就可以来进行填词，把每个词性对应的词汇找出来，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719102547829.png" alt="image-20200719102547829" style="zoom:67%;"></p>
+<p>HMM就是在描述，使用这个pos sequence来生成这个句子的几率，怎么说出这句话来。我们用$P(x,y)$表示这个word sequence x和pos sequence y一起出现的几率，$P(y)$表示这个pos sequence出现的几率，$P(x|y)$表示在y这个条件下，生成这个word sequence的概率。</p>
+<p>对于下图中的例子，$P(y)$表示PN放在句首的位置，PN后面接V的几率，V接D的几率，D接N的几率；$P(x|y)$就表示PN产生John的几率，V产生saw的几率，D产生the的几率，N产生saw的几率。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719102935252.png" alt="image-20200719102935252" style="zoom:67%;"></p>
+<p>这里是HMM的进一步叙述，step 1和2分别计算transition 和emission probability</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719104130678.png" alt="image-20200719104130678" style="zoom:67%;"></p>
+<h5 id="Estimating-the-probabilities"><a href="#Estimating-the-probabilities" class="headerlink" title="Estimating the probabilities"></a>Estimating the probabilities</h5><p>那么我们要怎么来计算这些概率呢，即PN后面接V，V产生saw的几率？</p>
+<p>这些概率都是通过training data得到的。首先要收集一大堆的training data（sentence），这些sentence中的每个词我们都找专家标好了对应的词性，有了这些标记好的training data，我们就可以来计算这些概率了。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719104448417.png" alt="image-20200719104448417" style="zoom:67%;"></p>
+<p>现在如果要计算这个tag是s，s的下一个tag是$s’$的概率，我们可以先计算出training data中s后面是s’的次数，再计算s出现的次数，即</p>
+<script type="math/tex; mode=display">
+P(y_{l+1}=s'|y_l=s)=\frac{count(s\rightarrow s')}{count(x)}</script><p>对于给出的tag是s，我们从s的词袋中找出对应的word是t的概率，我们可以计算出training data中tag s后面是word t的次数，再计算s出现的次数，即</p>
+<script type="math/tex; mode=display">
+P(x_{l}=t|y_l=s)=\frac{count(s\rightarrow t)}{count(x)}</script><p>$P(y_1|start)$表示$y_1$在句首出现的次数，$P(end|y_L)$表示$y_L$在句末出现的次数，我们就可以根据下图中的公式计算pos sequence y和word sequence x一起出现的几率$P(x,y)$，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719110735707.png" alt="image-20200719110735707" style="zoom:67%;"></p>
+<h5 id="How-to-do-POS-Tagging"><a href="#How-to-do-POS-Tagging" class="headerlink" title="How to do POS Tagging?"></a>How to do POS Tagging?</h5><p>我们现在可以看到word sequence x，但并不知道pos sequence y，y是隐藏的，需要我们通过某种算法来求解。</p>
+<p>我们要找到的y，其实就是使在给定word x的条件下，pos tag是y的概率最大的那个y，即</p>
+<script type="math/tex; mode=display">
+y=arg\mathop{\rm max}_{y\in Y}P(y|x)=arg\mathop{\rm max}_{y\in Y}\frac{P(x,y)}{P(x)}</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719112157732.png" alt="image-20200719112157732" style="zoom:67%;"></p>
+<h5 id="Viterbi-Algorithm"><a href="#Viterbi-Algorithm" class="headerlink" title="Viterbi Algorithm"></a>Viterbi Algorithm</h5><p>由于x是给定的，我们可以只考虑分子部分，那么现在的问题就变成了</p>
+<script type="math/tex; mode=display">
+\tilde y=arg\mathop{\rm max}_{y\in Y}P(x,y)</script><p>那么现在我们可以对所有可能的y进行穷举，假设pos tag一共有$|S|$个，pos sequence y的长度是$L$，那么一共有$|S|^L$种可能，这个计算量是非常庞大的；</p>
+<p>但现在有Viterbi Algorithm，我们可以对这个过程进行简化，可以把复杂度降低到$O(L|S|^2)$。这个算法可以看成是一个function，输入word x，输入可能性最大的那个tag y。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719113206100.png" alt="image-20200719113206100" style="zoom:67%;"></p>
+<h5 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h5><p>HMM是一种structed learning的方法，需要回答三个问题，</p>
+<p>Problem 1: 找到evaluation function，这里我们找的就是x和y的联合概率分布 $P(x,y)$ ；</p>
+<p>Problem 2: 进行inference，找到对应的x，来使evaluation function $P(x,y)$的概率最大；</p>
+<p>Problem 3: training，$P(y),P(x|y)$都可以从training data中的统计数据算出。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719114302286.png" alt="image-20200719114302286" style="zoom:67%;"></p>
+<h5 id="Drawbacks"><a href="#Drawbacks" class="headerlink" title="Drawbacks"></a>Drawbacks</h5><p>对于HMM算法，要找出使得evaluation function值最大的$\tilde y$。现在假设$\hat y$是正确的tag sequence，我们就必须要要求$P(x,\hat y)&gt;P(x,y)$，才能保证$\hat y$是正确的sequence；但HMM并不能做到这件事，并不能保证错误的y带进去的概率$P(x,y)$，一定小于正确的$\hat y$带进去的概率。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719115754096.png" alt="image-20200719115754096" style="zoom:67%;"></p>
+<p>现在举一个例子来说明这件事，有transition probability：P(V|N)=9/10，P(D|N)=1/10，分别表示tag N后面是V、N后面是D的概率；还有emission probability： P(a|V)=1/2，P(a|D)=1 ……，分别表示tag V对应的word是a、D对应的word是a的概率；</p>
+<p>那么现在有一个需要解决的问题，现在我们知道在l这个时间点对应的word是a，$y_l$这时最有可能对应的tag是什么呢？</p>
+<p>现在我们已经知道了$P(x_l|y_l),P(y_l|y_{l-1})$，把$y_l=V$带进去，我们可以得到tag N之后是V的概率为0.9，V对应的word是a的概率是0.5，$0.9\times 0.5=0.45$；如果我们把$y_l=D$带进去，概率就是$0.1\times 1=0.1$；明显是V对应的概率是最大的，因此我们可以认为这里的$y_l=V$</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719120903970.png" alt="image-20200719120903970" style="zoom:80%;"></p>
+<p>如果现在有这样的training data，N后面接V，有9个这样的数据，P后面接V，也有9个这样的数据，而N到D只有1个；那么N可以到V，也可以到D，到V的概率就是0.9，到D的概率是0.1；V只能退出a或者c，概率都是0.5；</p>
+<p>按照HMM算法，计算概率的大小，$N\rightarrow V\rightarrow a$概率是0.45，而$N\rightarrow D\rightarrow a$概率是0.1，明显中间节点是V的概率更大；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719155658613.png" alt="image-20200719155658613" style="zoom:80%;"></p>
+<p>但按照我们自己的分析，training data中明明就直接有一项$N\rightarrow D\rightarrow a$，但HMM却没有选择D，明显不符合常理。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719160753910.png" alt="image-20200719160753910" style="zoom:80%;"></p>
+<p>这里我们对HMM进行总结：</p>
+<ul>
+<li><span style="color: red">缺点：如果有一个pair (x,y)从来没有在training data中出现过，hmm还是很可能给这个pair一个很高的几率；</span></li>
+<li>优点：hmm在training data很少时比其他的方法performance要好。</li>
+</ul>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719161039381.png" alt="image-20200719161039381" style="zoom:67%;"></p>
+<p>之所以HMM会出现这个问题，是因为hmm的transition和emission probability是<strong>分开计算</strong>的；我们可以用一个更复杂的模型，CRF来解决这个问题。</p>
+<h4 id="Conditional-Random-Field-CRF"><a href="#Conditional-Random-Field-CRF" class="headerlink" title="Conditional Random Field (CRF)"></a>Conditional Random Field (CRF)</h4><p>我们可以把$P(x,y)$是正比于$exp(w\cdot \phi (x,y))$的，设一个比例系数R，可以看作是，</p>
+<script type="math/tex; mode=display">
+P(x,y)=\frac{exp(w\cdot \phi (x,y))}{R}</script><p>在CRF中，我们选择$P(y|x)$作为evaluation function</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719163106979.png" alt="image-20200719163106979" style="zoom:67%;"></p>
+<h5 id="P-x-y-for-CRF"><a href="#P-x-y-for-CRF" class="headerlink" title="P(x,y) for CRF"></a>P(x,y) for CRF</h5><p>把hmm的evaluation function进行log，可得到多个式子相加的形式</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719165805703.png" alt="image-20200719165805703" style="zoom:67%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719170157895.png" alt="image-20200719170157895" style="zoom:67%;"></p>
+<p>其中$N_{s,t}(x,y)$表示在$(x,y)$这个pair中，tag s和word t出现的次数。$(x,y)$表示专家标记之后的一个sentence。</p>
+<p>下面讲一个具体的例子。</p>
+<p>$logP(the|D)$出现了两次，即$N_{D,the}(x,y)=2$,</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719170732186.png" alt="image-20200719170732186" style="zoom:67%;"></p>
+<p>$logP(x,y)$中的其他项也进行类似的处理,</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719171416399.png" alt="image-20200719171416399" style="zoom:67%;"></p>
+<p>把这些展开的式子再代入原式子，就可以看作是两个vector进行dot product</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719171541932.png" alt="image-20200719171541932" style="zoom:67%;"></p>
+<p>对于w这个矩阵，其中每个维度的元素和原来的hmm都有着某种联系。比如$w_{s,t}=logP(x_i=t|y_i=s)$，表示在tag为s的条件下，取word为t的概率大小；如果对这个式子再取exp，那么就可以得到$P(x_i=t|y_i=s)=e^{w_{s,t}}$；</p>
+<p>但直接写$P(x,y)=exp(w\cdot \phi (x,y))$会有一些小问题，w矩阵里面的元素是可正可负的，如果是负的，exp之后就小于1，可以解释为概率值；如果是正的，exp之后就大于1，由于概率值都是小于1的，就不能解释为概率值；因此，这里$P(x,y),exp(w\cdot \phi (x,y))$是一个成正比的关系。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719172033172.png" alt="image-20200719172033172" style="zoom:67%;"></p>
+<h5 id="Feature-Vector"><a href="#Feature-Vector" class="headerlink" title="Feature Vector"></a>Feature Vector</h5><p> $\phi (x,y)$就是feature vector，由两部分组成，</p>
+<p><strong>Part 1</strong>: tag和word之间的关系，比如在(x,y)这个pair中，“the”被标记为D两次，因此value对应2；“dog”被标记为N一次，value的值就对应为1；没出现过的value就是0；</p>
+<p>如果有$|S|$个可能的tags，$|L|$个可能的words，Part 1就有$|S|\times |L|$个dimensions。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719203144844.png" alt="image-20200719203144844" style="zoom:67%;"></p>
+<p><strong>Part 2</strong>: tag之间的关系，比如在(x,y)这个pair中，tag D后面接N的次数为2，即$N_{D,N}(x,y)=2$，但tag D后面接D的次数是0，因此$N_{D,D}(x,y)=0$。</p>
+<p>如果有$|S|$个可能的tags，$|L|$个可能的words，Part 2就有$|S|\times |S|+2|S|$个dimensions，S个tag和其他的S个tag都有关系，start和end和S个tag也有关系</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719203811164.png" alt="image-20200719203811164" style="zoom:67%;"></p>
+<h5 id="Training-Criterion"><a href="#Training-Criterion" class="headerlink" title="Training Criterion"></a>Training Criterion</h5><p>$P(y|x)$表示在已知的word x上，生成pos sequence y的概率。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719205358911.png" alt="image-20200719205358911" style="zoom:67%;"></p>
+<h5 id="Gradient-Ascent"><a href="#Gradient-Ascent" class="headerlink" title="Gradient Ascent"></a>Gradient Ascent</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719221245972.png" style="zoom:67%;"></p>
+<h5 id="Training"><a href="#Training" class="headerlink" title="Training"></a>Training</h5><p>首先求对应的梯度</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719221342908.png" style="zoom:67%;"></p>
+<p>在求出来的梯度中，$N_{s,t}(x^n,\hat y^n)$表示word t和tag s在$(x^n,\hat y^n)$中出现的次数；后面一项表示对于任意的y‘，都需要计算给出的word $x^n$的tag是y’的概率 $P(y’|x^n)$，还需要计算word t和tag s在$(x^n,y’)$中出现的次数 $N_{s,t}(x^n,y’)$ ；</p>
+<p>我们再来叙述下梯度中两个式子所表示的物理含义，</p>
+<ul>
+<li>第一项，如果s，t在$(x^n,\hat y^n)$出现的次数越多，就增加w；</li>
+<li><p>第二项，如果s，t在$(x^n,y’)$出现的次数越多，并不是在正确答案中出现的次数多，那么就减小w。</p>
+</li>
+<li><p>如果s，t在正确答案中出现次数多，就减小w，任意一个y’出现的次数也多的话，就增加w，这两项可以实现一个<strong>tradeoff</strong>。</p>
+</li>
+</ul>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719221517202.png" alt="image-20200719221517202" style="zoom:67%;"></p>
+<p>但这里要计算所有可能的y‘，硬算的话计算量会很大，可以用Viterbi algorithm算法来减小计算量。</p>
+<p>下图为vector的表示，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719222851553.png" alt="image-20200719222851553" style="zoom:67%;"></p>
+<h5 id="Inference"><a href="#Inference" class="headerlink" title="Inference"></a>Inference</h5><p>求出w后，就可以开始进行inference，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719223144083.png" alt="image-20200719223144083" style="zoom:67%;"></p>
+<h5 id="CRF-v-s-HMM"><a href="#CRF-v-s-HMM" class="headerlink" title="CRF v.s. HMM"></a>CRF v.s. HMM</h5><p>CRF不仅增加$P(x,\hat y)$，还会减小$P(x,y’)$，但HMM并没有减小这个操作；</p>
+<p>我们想要得到的结果是$P(x,\hat y)&gt;P(x,y)$，HMM并不能实现，而CRF却能够实现；这是由于CRF会在学习过程不断调整参数，比如把原来的$P(a|V)=1/2$调整为0.1，使出现正确答案的概率最大。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719223315109.png" alt="image-20200719223315109" style="zoom:67%;"></p>
+<h5 id="Summary-1"><a href="#Summary-1" class="headerlink" title="Summary"></a>Summary</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719224753879.png" style="zoom:67%;"></p>
+<h4 id="Structured-Perceptron-SVM"><a href="#Structured-Perceptron-SVM" class="headerlink" title="Structured Perceptron/SVM"></a>Structured Perceptron/SVM</h4><h5 id="Structured-Perceptron"><a href="#Structured-Perceptron" class="headerlink" title="Structured Perceptron"></a>Structured Perceptron</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719225001941.png" alt="image-20200719225001941" style="zoom:67%;"></p>
+<h5 id="Structured-Perceptron-v-s-CRF"><a href="#Structured-Perceptron-v-s-CRF" class="headerlink" title="Structured Perceptron v.s. CRF"></a>Structured Perceptron v.s. CRF</h5><p>Structured Perceptron只减掉某一个y（几率最大的那个），CRF则是减去所有的y‘</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719225047285.png" alt="image-20200719225047285" style="zoom:67%;"></p>
+<h5 id="Structured-SVM"><a href="#Structured-SVM" class="headerlink" title="Structured SVM"></a>Structured SVM</h5><p>还额外考虑error</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719225440619.png" alt="image-20200719225440619" style="zoom:67%;"></p>
+<h5 id="Error-Function"><a href="#Error-Function" class="headerlink" title="Error Function"></a>Error Function</h5><p>error function表示$\hat y^n$和y之间的差距，problem 2.1除了考虑dot product的值最大，还需要考虑error function的值，也需要越大越好</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719225619209.png" alt="image-20200719225619209" style="zoom:67%;"></p>
+<p>上图中还有一个计算error function的example，在$\hat y,y$之间有三个tag不一样，sequence的长度为10，因此error function的值为3/10</p>
+<h4 id="Concluding-Remarks"><a href="#Concluding-Remarks" class="headerlink" title="Concluding Remarks"></a><strong>Concluding Remarks</strong></h4><p>这里是几种算法performance的比较，最好的是structed svm</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719230003644.png" alt="image-20200719230003644" style="zoom:67%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200719225927570.png" alt="image-20200719225927570" style="zoom:67%;"></p>
+<h5 id="How-about-RNN？"><a href="#How-about-RNN？" class="headerlink" title="How about RNN？"></a>How about RNN？</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720092212672.png" alt="image-20200720092212672" style="zoom:67%;"></p>
+<h5 id="Integrated-together"><a href="#Integrated-together" class="headerlink" title="Integrated together"></a>Integrated together</h5><p>我们可以把RNN、LSTM和HMM、crf的思想结合起来，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720092346614.png" style="zoom:67%;"></p>
+<p> 比如语音识别领域，我们可以用RNN的结果来表示$P(x_l|y_l)$ </p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720092639541.png" alt="image-20200720092639541" style="zoom:67%;"></p>
+<p>在semantic tagging，把input vector输入这个双向的RNN，得到新的feature，再抽取出新的$(x,y)$，</p>
+<p> <img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200720103225145.png" alt="image-20200720103225145" style="zoom:67%;"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/Sequence-Labeling/" rel="tag"># Sequence Labeling</a>
+          
+            <a href="/tags/HMM/" rel="tag"># HMM</a>
+          
+            <a href="/tags/CRF/" rel="tag"># CRF</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/17/GAN-evalution/" rel="next" title="Evaluation of Generative Models">
+                <i class="fa fa-chevron-left"></i> Evaluation of Generative Models
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Scarleatt">
+            
+              <p class="site-author-name" itemprop="name">Scarleatt</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">42</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">119</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/scarleatt" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:fawnliu2333@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Sequence-Labeling"><span class="nav-number">1.1.</span> <span class="nav-text">Sequence Labeling</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Example-Task"><span class="nav-number">1.2.</span> <span class="nav-text">Example Task</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Hidden-Markov-Model-HMM"><span class="nav-number">2.</span> <span class="nav-text">Hidden Markov Model (HMM)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Introduction-1"><span class="nav-number">2.1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Estimating-the-probabilities"><span class="nav-number">2.2.</span> <span class="nav-text">Estimating the probabilities</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#How-to-do-POS-Tagging"><span class="nav-number">2.3.</span> <span class="nav-text">How to do POS Tagging?</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Viterbi-Algorithm"><span class="nav-number">2.4.</span> <span class="nav-text">Viterbi Algorithm</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Summary"><span class="nav-number">2.5.</span> <span class="nav-text">Summary</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Drawbacks"><span class="nav-number">2.6.</span> <span class="nav-text">Drawbacks</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Conditional-Random-Field-CRF"><span class="nav-number">3.</span> <span class="nav-text">Conditional Random Field (CRF)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#P-x-y-for-CRF"><span class="nav-number">3.1.</span> <span class="nav-text">P(x,y) for CRF</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Feature-Vector"><span class="nav-number">3.2.</span> <span class="nav-text">Feature Vector</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Training-Criterion"><span class="nav-number">3.3.</span> <span class="nav-text">Training Criterion</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Gradient-Ascent"><span class="nav-number">3.4.</span> <span class="nav-text">Gradient Ascent</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Training"><span class="nav-number">3.5.</span> <span class="nav-text">Training</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Inference"><span class="nav-number">3.6.</span> <span class="nav-text">Inference</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CRF-v-s-HMM"><span class="nav-number">3.7.</span> <span class="nav-text">CRF v.s. HMM</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Summary-1"><span class="nav-number">3.8.</span> <span class="nav-text">Summary</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Structured-Perceptron-SVM"><span class="nav-number">4.</span> <span class="nav-text">Structured Perceptron/SVM</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Structured-Perceptron"><span class="nav-number">4.1.</span> <span class="nav-text">Structured Perceptron</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Structured-Perceptron-v-s-CRF"><span class="nav-number">4.2.</span> <span class="nav-text">Structured Perceptron v.s. CRF</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Structured-SVM"><span class="nav-number">4.3.</span> <span class="nav-text">Structured SVM</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Error-Function"><span class="nav-number">4.4.</span> <span class="nav-text">Error Function</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Concluding-Remarks"><span class="nav-number">5.</span> <span class="nav-text">Concluding Remarks</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#How-about-RNN？"><span class="nav-number">5.1.</span> <span class="nav-text">How about RNN？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Integrated-together"><span class="nav-number">5.2.</span> <span class="nav-text">Integrated together</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017-<span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Scarleatt</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">80.3k</span>
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
