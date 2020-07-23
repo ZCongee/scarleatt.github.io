@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+
+
+
+
+<html class="theme-next mist" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.ico?v=5.1.4">
+
+
+
+
+
+
+  <meta name="keywords" content="Deep Learning,Life Long Learning,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Life long learning又可以叫做终身学习；对于人类自身而言，我们每次都是用同一个脑来学习机器学习的每一堂课，每次的作业也都需要训练不同的神经网络，那么我们可不可以每次作业都使用同一个神经网络呢？ life long learning可简称为LLL，也可被称作Continuous Learning, Never Ending Learning, Incremental Learning">
+<meta name="keywords" content="Deep Learning,Life Long Learning">
+<meta property="og:type" content="article">
+<meta property="og:title" content="life_long_learning">
+<meta property="og:url" content="http://yoursite.com/2020/07/23/life-long-learning/index.html">
+<meta property="og:site_name" content="Scarleatt">
+<meta property="og:description" content="Life long learning又可以叫做终身学习；对于人类自身而言，我们每次都是用同一个脑来学习机器学习的每一堂课，每次的作业也都需要训练不同的神经网络，那么我们可不可以每次作业都使用同一个神经网络呢？ life long learning可简称为LLL，也可被称作Continuous Learning, Never Ending Learning, Incremental Learning">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723145825710.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723150701827.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723152403209.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723152851995.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723153450380.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723154043805.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723154422819.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723155444021.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723160629095.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723161429363.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723163027322.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723181638276.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723181923345.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723182233611.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723182325608.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723183254274.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723183818913.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723185524830.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723190928029.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723193437276.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723200038272.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723200623400.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723201318638.png">
+<meta property="og:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723201801447.png">
+<meta property="og:updated_time" content="2020-07-23T12:33:50.623Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="life_long_learning">
+<meta name="twitter:description" content="Life long learning又可以叫做终身学习；对于人类自身而言，我们每次都是用同一个脑来学习机器学习的每一堂课，每次的作业也都需要训练不同的神经网络，那么我们可不可以每次作业都使用同一个神经网络呢？ life long learning可简称为LLL，也可被称作Continuous Learning, Never Ending Learning, Incremental Learning">
+<meta name="twitter:image" content="https://gitee.com/scarleatt/image/raw/master/img/image-20200723145825710.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2020/07/23/life-long-learning/">
+
+
+
+
+
+  <title>life_long_learning | Scarleatt</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Scarleatt</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/07/23/life-long-learning/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Scarleatt">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Scarleatt">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">life_long_learning</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-07-23T20:32:39+08:00">
+                2020-07-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Knowledge-Graph/" itemprop="url" rel="index">
+                    <span itemprop="name">Knowledge Graph</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.2k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  11
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Life long learning又可以叫做终身学习；对于人类自身而言，我们每次都是用同一个脑来学习机器学习的每一堂课，每次的作业也都需要训练不同的神经网络，那么我们可不可以每次作业都使用同一个神经网络呢？</p>
+<p>life long learning可简称为LLL，也可被称作Continuous Learning, Never Ending Learning, Incremental Learning；</p>
+<p>我们可以让机器先学会task 1，再学第二个任务task 2，这时机器就学会了2项技能，……</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723145825710.png" alt="image-20200723145825710" style="zoom:67%;"></p>
+<p>那么要让机器学会这么多的技能，到底要学会什么样的技能呢？</p>
+<p>主要有以下三点：</p>
+<ul>
+<li>Knowledge retention，即怎么样让机器把学过的东西记下来，</li>
+<li>knowledge transfer，</li>
+<li>model expansion，</li>
+</ul>
+<h4 id="Knowledge-Retention"><a href="#Knowledge-Retention" class="headerlink" title="Knowledge Retention"></a>Knowledge Retention</h4><h5 id="Example-–-Image"><a href="#Example-–-Image" class="headerlink" title="Example – Image"></a>Example – Image</h5><p>现在有一个2层的network，每层都50个neural，我们希望这个network可以学习这两个task，task 1和2都是关于手写数字识别的，但task 1的数据加上了一些杂讯；</p>
+<p>先用task 1的训练数据来对network进行训练，训练完成后，再分别对两个task的测试数据进行测试，task 1的测试数据得到了90%的准确率，而task 2的测试数据得到了96%的准确率；虽然network并没有看到过task 2的训练数据，但由于task 1和2是很接近的，因此学习到的东西可以transfer到task 2上，network在task 2的数据上也表现得很好；</p>
+<p>如果现在把task 1训练好的参数作为task 2的network的初始值，再用task 2的训练数据继续训练下去，训练完成后，分别在task 1和2的测试集上进行测试；task 2的准确率上升到97%，但却忘记了task 1要怎么做，task 1的准确率下降到80%；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723150701827.png" alt="image-20200723150701827" style="zoom:67%;"></p>
+<p>现在我们可以让task 1和2同时进行学习，即把这两者的训练资料都混合到一起，可以发现学习的效果还不错，在task 1上的准确率是89%，在task 2上的准确率是98%；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723152403209.png" alt="image-20200723152403209" style="zoom:67%;"></p>
+<p>两个任务同时学习的效果还不错，但这两个任务分开学习，就会忘记之前学习过的内容。</p>
+<h5 id="Example-–-Question-Answering"><a href="#Example-–-Question-Answering" class="headerlink" title="Example – Question Answering"></a>Example – Question Answering</h5><p>再举一个知识问答的例子；给出一个document，根据这个document来回答提出的问题；这里用到的数据集是bAbi，一共包括20个不同类型的问题；</p>
+<p>现在就有两个选择，这20个task分开进行训练，也可以把这20个task同时训练</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723152851995.png" alt="image-20200723152851995" style="zoom:67%;"></p>
+<p>如果我们选择分开训练，先训练task 1，在训练task 2，……；每个task训练完，我们都来观察题型5（who）正确率的变化，在题型1，2，3，4上正确率都很低，在题型5上正确率就突然到了100%，但做完题型6后，又不会做题型5了，忘记了之前学习的结果。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723153450380.png" alt="image-20200723153450380" style="zoom:67%;"></p>
+<p>如果我们选择把所有题型的数据进行混合，只用一个network，来一起训练，可以发现结果正确率还不错。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723154043805.png" alt="image-20200723154043805" style="zoom:67%;"></p>
+<h5 id="Multi-task-training"><a href="#Multi-task-training" class="headerlink" title="Multi-task training"></a>Multi-task training</h5><p>我们可以把所有任务的训练数据都进行混合，再输入数据network进行训练；这种训练方式就不会忘记之前学过的东西；</p>
+<p>但这种学习方式会出现一个新问题，我们之前已经把999个task的数据进行混合，也把这个模型训练好了；但现在来了一个新的task 1000，如果还使用这种训练方式，我们就必须把前面999个task的训练资料一直保存，再将1000个task的数据重新混合，重新进行训练；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723154422819.png" alt="image-20200723154422819" style="zoom:67%;"></p>
+<p>那么我们可不可以通过一种方式，使机器不要重新读取之前的任务数据，就可以保存机器过去学过的东西，这也就是life long learning要探讨的问题；</p>
+<h5 id="Elastic-Weight-Consolidation-EWC"><a href="#Elastic-Weight-Consolidation-EWC" class="headerlink" title="Elastic Weight Consolidation (EWC)"></a>Elastic Weight Consolidation (EWC)</h5><p>我们可以通过一种经典的解法，EWC来解决这个问题；有一些weight对上一个task是非常重要的，如果这些weight发生了变化，机器就会忘记过去的任务要怎么做了；我们可以把这些重要的参数保护起来，只改变那些不重要的参数。</p>
+<p>$\theta^b$表示前面任务学习完的模型参数，其中的每一个参数$\theta_i^b$都有一个guard $b_i$，来说明这个参数的重要性；</p>
+<p>现在我们就有了一个新的loss function $L’(\theta)$，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723155444021.png" alt="image-20200723155444021" style="zoom:67%;"></p>
+<p>如果$b_i=0$，那么参数$\theta_i$就可以不受任何的限制，可以任意调整$\theta_i$的值；</p>
+<p>如果$b_i=\infty$，就表示$\theta_i$已经被强烈地保护起来了，不可以对$\theta_i$的值进行变化。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723160629095.png" alt="image-20200723160629095" style="zoom:67%;"></p>
+<p>loss function中的$\sum b_i(\theta_i-\theta_i^b)^2$表示一种正则化，由于$b_i$的存在，我们希望$\theta_i,\theta_i^b$之间的距离有时候越近越好，有时候什么距离都可以。</p>
+<p>我们再举一个具体的例子来叙述EWC。</p>
+<p>下图表示有两个task，参数分别也只有两个$\theta_1,\theta_2$，颜色表示error surface的变化，颜色越深，表示loss越小；</p>
+<p>假设task 1之前没有其他的训练任务，在训练task 1时，首先进行随机初始化，初始参数$\theta^0$在途中所示位置，沿着梯度下降的方向走，到了$\theta^b$；</p>
+<p>现在进行task 2的训练，把$\theta^b$的值复制到task 2上，沿着梯度下降的方向走，走到loss最小的地方，到了图中$\theta^*$的位置；</p>
+<p>这时我们会发现task 2的学习结果完全忘记了task 1，现在的$\theta^*$会得到很高的loss。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723161429363.png" alt="image-20200723161429363" style="zoom:67%;"></p>
+<p>在使用EWC之后，我们会为每个参数设置一个$b_i$，不同文章有不同的做法；一个比较简单的做法是，算每个参数的二次微分，得到下图中右边的曲线图；</p>
+<p>在task 1上，对于其中的一个参数$\theta_1$，其值对loss的结果影响不大，我们可以把$b_1$设置为一个很小的值；但$\theta_2$的变化对loss的影响就很大，就必须要给$\theta_2$一个很大的$b_2$，在下一个task时，就尽量不要对这个参数进行变化。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723163027322.png" alt="image-20200723163027322" style="zoom:67%;"></p>
+<p>我们再来看task 2，现在参数移动的方向就发生了变化，为了保证不对$\theta_2$进行变化，task 2的参数更新方向只能是水平的，只改变$\theta_1$的值，不改变$\theta_2$的值。如果在这个方向进行变化，就算我们训练好了task 2，也不会对task 1的精确度造成太大影响。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723181638276.png" alt="image-20200723181638276" style="zoom:67%;"></p>
+<p>这是原论文中的训练结果，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723181923345.png" alt="image-20200723181923345" style="zoom:67%;"></p>
+<p>还有一些最新的研究，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723182233611.png" alt="image-20200723182233611" style="zoom:67%;"></p>
+<h5 id="Generating-Data"><a href="#Generating-Data" class="headerlink" title="Generating Data"></a><strong>Generating Data</strong></h5><p>在进行multi-task learning时，既然memory是有限的，那么我们可不可以训练一个模型，来产生以前的训练资料呢？</p>
+<p>实际上是可以的，首先需要训练一个generator，来生成task 1的训练数据，那么现在就可以丢掉task 1的数据；接下来就可以把task 1和2的训练数据进行混合，一起学习出新的模型</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723182325608.png" alt="image-20200723182325608" style="zoom:67%;"></p>
+<p>但generator生成一些很高清的图像，是有很大难度的。</p>
+<h5 id="Adding-New-Classes"><a href="#Adding-New-Classes" class="headerlink" title="Adding New Classes"></a>Adding New Classes</h5><p>对于之前我们叙述的任务，都是网络结构不需要调整的；如果现在有一个任务是进行10个类别的分类，另一个任务是进行20个类别的分类，就需要修改网络的结构，下图展示了一些修改网络结构的方法；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723183254274.png" alt="image-20200723183254274" style="zoom:67%;"></p>
+<h4 id="Knowledge-Transfer"><a href="#Knowledge-Transfer" class="headerlink" title="Knowledge Transfer"></a>Knowledge Transfer</h4><p>我们希望机器不仅能记住knowledge， 还可以把不同任务之间的knowledge进行transfer；</p>
+<p>如果对于每个task，我们都单独学习一个模型，就不会遗忘过去训练的模型了；但这种做法没有考虑不同模型之间的knowledge的转换，而且我们并不能把所有的模型都存储下来。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723183818913.png" alt="image-20200723183818913" style="zoom:67%;"></p>
+<h5 id="Life-Long-v-s-Transfer"><a href="#Life-Long-v-s-Transfer" class="headerlink" title="Life-Long v.s. Transfer"></a>Life-Long v.s. Transfer</h5><p>transfer learning是先训练好一个模型task 1，在进行fine-tune得到另外一个模型task 2，并不会再重新回去学习task 1；</p>
+<p>life long learning比transfer learning多考虑了一步，希望不忘记过去学到的东西。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723185524830.png" alt="image-20200723185524830" style="zoom:67%;"></p>
+<h5 id="Evaluation"><a href="#Evaluation" class="headerlink" title="Evaluation"></a><strong>Evaluation</strong></h5><p>下面我们介绍如何来对life long learning进行评价，评价的方式有很多种，这里只说一个大概的方向。</p>
+<p>一般都会画一个矩阵出来，纵轴表示在task上的performance，第一行表示学完task 1之后，在每个task上的performance；其中$R_{i,j}$表示在训练完task i之后，在task j上的performance；</p>
+<p>如果$i&gt;j$，表示在训练任务i之前，已经学完了第j个任务，$R_{i,j}$则表示学任务i之后，之前的任务j到底忘记了多少；</p>
+<p>如果$i&lt;j$，表示机器学习了第i个任务，但还没学到第j个任务，$R_{i,j}$则表示前i个任务能不能transfer到第j个任务上；</p>
+<p>在这个矩阵的基础上，我们就可以定义各式各样的标准，比如我们可以算Accuracy，表示在第T个任务学习完后，在第1到T个任务上的performance的平均值，即把矩阵最后一行的performance都平均起来，</p>
+<script type="math/tex; mode=display">
+{\rm Accuracy}=\frac{1}{T}\sum_{i=1}^TR_{T,i}</script><p>如果想知道机器有多会做knowledge retention，我们就可以定义一个Backward Transfer， 先看机器在学完第一个task的performance $R_{1,1}$，再看一直学习到T个task之后，在task 1上的performance $R_{T,1}$，再计算这两者之间的差距；</p>
+<script type="math/tex; mode=display">
+{\rm Backward\ Transfer}=\frac{1}{T-1}\sum_{i=1}^{T-1}R_{T,i}-R_{i,i}</script><p>这个值一般是负值，在刚开始时准确率最高，学习到后面的task之后，就慢慢忘记了前面task 1，在task 1上的performance就变小了，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723190928029.png" alt="image-20200723190928029" style="zoom:67%;"></p>
+<h5 id="Gradient-Episodic-Memory-GEM"><a href="#Gradient-Episodic-Memory-GEM" class="headerlink" title="Gradient Episodic Memory (GEM)"></a>Gradient Episodic Memory (GEM)</h5><p>对于现在在训练的task 2，如果我们修改其梯度的方向，就可以提高之前学习完的task 1的performance；</p>
+<p>在下图中，现在要训练的模型是$\theta$，再计算出参数更新的方向g；同时，我们还需要一些前面task的训练资料，再根据这些资料计算出前面task的梯度反方向，也就是前面task参数更新的方向$g^1,g^2$，</p>
+<p>如果$g^1,g^2$和g的内积分别都是正的（左），那么我们参数更新的方向就是现在的g；</p>
+<p>但也有可能这个内积的负的（右），现在$g^1,g$之间的内积就是负的，如果继续往g的方向更新参数，很可能会对$g^1$这个方向的task造成伤害；我们可以把g的方向稍微变换一下，变成$g’$的方向，使$g’\cdot g^1\geq0,g’\cdot g^2\geq0$，这样进行参数的更新，就不会对之前的task 1和2造成伤害，很可能还会提高其performance；</p>
+<p>但g的方向不能变化太大，不能伤害到现在的task。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723193437276.png" alt="image-20200723193437276" style="zoom:67%;"></p>
+<p>下面是实验结果展示，GEM算法的正确率都还不错。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723200038272.png" alt="image-20200723200038272" style="zoom:67%;"></p>
+<h4 id="Model-Expansion"><a href="#Model-Expansion" class="headerlink" title="Model Expansion"></a>Model Expansion</h4><p>network也可以学习自动扩张，比如扩充一些神经元，但这个扩张并不是毫无限制的，我们希望这个扩张是有效率的，模型扩张的速度最好不要和task加进来的速度成正比。</p>
+<h5 id="Progressive-Neural-Networks"><a href="#Progressive-Neural-Networks" class="headerlink" title="Progressive Neural Networks"></a>Progressive Neural Networks</h5><p>首先需要训练task 1，再用新的model来训练task 2，由于要进行knowledge transfer，前一个task的hidden layer的输出，会作为task 2的后面几层的输入；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723200623400.png" alt="image-20200723200623400" style="zoom:67%;"></p>
+<h5 id="Expert-Gate"><a href="#Expert-Gate" class="headerlink" title="Expert Gate"></a>Expert Gate</h5><p>每个task还是需要训练自己的模型，如果进来一个新的任务，会去和旧的任务进行比较，看哪一个旧任务和这个任务最接近；选择最接近的任务来作为新任务的初始化参数；</p>
+<p>每次新加入一个任务，都会新加入一个模型，模型的数量和任务的数量是成正比的。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723201318638.png" alt="image-20200723201318638" style="zoom:67%;"></p>
+<h5 id="Net2Net"><a href="#Net2Net" class="headerlink" title="Net2Net"></a>Net2Net</h5><p>如果要把network进行扩张，就需要新加入一些neural，这些新加入的neural很可能会对之前的任务造成影响，很可能会忘记过去学习到的技能。那么怎么加入新的neural，而不忘记过去的技能呢？</p>
+<p>如下图所示，要扩张的新神经元是$h[3]$，可以发现扩张之后的网络要做的事和扩张之前是一样的；</p>
+<p>但这样做可能有一个问题，这两个网络是完全一样的，我们可以在扩张之后的network加一些noise，使这两个network有区别，但又不会影响原来network已经学习到的技能</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723201801447.png" alt="image-20200723201801447" style="zoom:67%;"></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Deep-Learning/" rel="tag"># Deep Learning</a>
+          
+            <a href="/tags/Life-Long-Learning/" rel="tag"># Life Long Learning</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/07/22/meta-learning/" rel="next" title="Meta Learning">
+                <i class="fa fa-chevron-left"></i> Meta Learning
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.gif" alt="Scarleatt">
+            
+              <p class="site-author-name" itemprop="name">Scarleatt</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">125</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/scarleatt" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i>GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:fawnliu2333@gmail.com" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Knowledge-Retention"><span class="nav-number">1.</span> <span class="nav-text">Knowledge Retention</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Example-–-Image"><span class="nav-number">1.1.</span> <span class="nav-text">Example – Image</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Example-–-Question-Answering"><span class="nav-number">1.2.</span> <span class="nav-text">Example – Question Answering</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Multi-task-training"><span class="nav-number">1.3.</span> <span class="nav-text">Multi-task training</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Elastic-Weight-Consolidation-EWC"><span class="nav-number">1.4.</span> <span class="nav-text">Elastic Weight Consolidation (EWC)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Generating-Data"><span class="nav-number">1.5.</span> <span class="nav-text">Generating Data</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Adding-New-Classes"><span class="nav-number">1.6.</span> <span class="nav-text">Adding New Classes</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Knowledge-Transfer"><span class="nav-number">2.</span> <span class="nav-text">Knowledge Transfer</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Life-Long-v-s-Transfer"><span class="nav-number">2.1.</span> <span class="nav-text">Life-Long v.s. Transfer</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Evaluation"><span class="nav-number">2.2.</span> <span class="nav-text">Evaluation</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Gradient-Episodic-Memory-GEM"><span class="nav-number">2.3.</span> <span class="nav-text">Gradient Episodic Memory (GEM)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Model-Expansion"><span class="nav-number">3.</span> <span class="nav-text">Model Expansion</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Progressive-Neural-Networks"><span class="nav-number">3.1.</span> <span class="nav-text">Progressive Neural Networks</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Expert-Gate"><span class="nav-number">3.2.</span> <span class="nav-text">Expert Gate</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Net2Net"><span class="nav-number">3.3.</span> <span class="nav-text">Net2Net</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2017-<span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Scarleatt</span>
+
+  
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    
+      <span class="post-meta-item-text">Site words total count&#58;</span>
+    
+    <span title="Site words total count">92k</span>
+  
+</div>
+
+<!--
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.4</div>
+
+-->
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.7.1/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
