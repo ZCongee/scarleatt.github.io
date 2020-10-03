@@ -104,6 +104,108 @@ L(\mu,\sum)=f_{\mu,\sum} (x^1)f_{\mu,\sum} (x^2)\cdot\cdot\cdot f_{\mu,\sum} (x^
       </tags>
   </entry>
   <entry>
+    <title>Bert模型精讲</title>
+    <url>/2020/07/13/Bert/</url>
+    <content><![CDATA[<h4 id="Autoregressive-LM-与-Autoencoder-LM"><a href="#Autoregressive-LM-与-Autoencoder-LM" class="headerlink" title="Autoregressive LM 与 Autoencoder LM"></a>Autoregressive LM 与 Autoencoder LM</h4><p>Autoregressive语言模型：根据上文内容预测下一个可能跟随的单词，或者根据下文来预测前文的单词，但并不能同时根据上下文来预测单词。GPT是典型的自回归语言模型。ELMO虽然有两个方向，一个是自左向右的自回归语言模型，另一个是自右向左的自回归语言模型，由两个自回归语言模型组成，本质上还是自回归语言模型。</p>
+<ul>
+<li>缺点：只能根据上文或下文来预测单词，并不能同时依据上下文；</li>
+<li>优点：对生成类NLP任务有很大优势，比如机器翻译，就是从左向右的，并不需要同时根据上下文的内容进行判断。</li>
+</ul>
+<p>Autoencoder语言模型：在输入中随机Mask一些单词，使模型可以同时根据上下文的内容来预测这些被mask的单词。</p>
+<ul>
+<li>缺点：由于引入了Mask标记，而fine-tuning阶段并不能看到Mask标记，因此会造成预训练和fine-tune阶段不一致的问题；</li>
+<li>优点：可以很好地融入双向语言模型。</li>
+</ul>
+<h4 id="DAE与Masked-Language-Model"><a href="#DAE与Masked-Language-Model" class="headerlink" title="DAE与Masked Language Model"></a>DAE与Masked Language Model</h4><h5 id="AutoEncoder"><a href="#AutoEncoder" class="headerlink" title="AutoEncoder"></a>AutoEncoder</h5><p>对于输入大小为28×28的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简的特征；但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；那么我们现在就先来做一个decoder，把code恢复成一张image；</p>
+<p>decoder和encoder单独是没办法训练的，因为是无监督学习，因此现在我们将这两者一起学习，学习的目标是使input和output之间的差距越小越好。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712121526873.png" alt="image-20200712121526873" style="zoom:80%;"></p>
+<h5 id="Denoising-AutoEncoder（DAE）"><a href="#Denoising-AutoEncoder（DAE）" class="headerlink" title="Denoising AutoEncoder（DAE）"></a>Denoising AutoEncoder（DAE）</h5><p>为了缓解原来的autoencoder很容易<font color="red">过拟合</font>的问题，我们可以在输入中加入一些<font color="red">随机噪声</font>。对于原来的input x，我们先加入一些noise得到$x’$(破损数据)，进行encode之后再进行decode，使之和最早的input之间的差值最小；encoder现在不仅学习到了encode这件事，还学习到了把noise过滤掉这件事。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712121915387.png" alt="image-20200712121915387"></p>
+<p><strong>DAE模型的优势：</strong></p>
+<ul>
+<li><p>可以减小训练数据和测试数据之间的gap；</p>
+</li>
+<li><p>和非破损数据的训练相比，由于DAR在训练的时候不小心把输入的噪声也擦除了，因此破损数据训练出来的weight噪声比较小。</p>
+</li>
+</ul>
+<p>在下图中，左图为没有使用任何噪声的resulted filters，右图为使用了30%噪声的resulted filter，可以发现使用了噪声的autoencoder，其训练好的weight噪声要低很多。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/271419017086934.png" alt="271419017086934" style="zoom:50%;"></p>
+<h5 id="DAE-与-Masked-Language-Model"><a href="#DAE-与-Masked-Language-Model" class="headerlink" title="DAE 与 Masked Language Model"></a>DAE 与 Masked Language Model</h5><ul>
+<li>BERT是基于<strong>Transformer Encoder</strong>来构建的一种模型；</li>
+<li>BERT是基于<strong>DAE</strong>（Denoising Autoencoder，去噪自动编码器）的，这部分在BERT中被称为<strong>Masked Language Model</strong>；</li>
+<li>Masked Language Model并不是严格意义上的语言模型，这仅仅是训练语言模型的一种方式。BERT在输入中随机Mask一些单词，使模型可以同时根据上下文的内容来预测这些被mask的单词，这个过程其实就是DAE的过程（Mask标签就相当于加入的噪声，DAE要去掉这些噪声，并还原出原来的图像）。</li>
+</ul>
+<p>DAE的代码实现为：<a href="http://deeplearning.net/tutorial/dA.html" target="_blank" rel="noopener">http://deeplearning.net/tutorial/dA.html</a></p>
+<h4 id="Transformer模型回顾"><a href="#Transformer模型回顾" class="headerlink" title="Transformer模型回顾"></a>Transformer模型回顾</h4><p>详见<a href="https://scarleatt.github.io/2020/07/13/Transformer/" target="_blank" rel="noopener">https://scarleatt.github.io/2020/07/13/Transformer/</a></p>
+<h5 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h5><p>transform模型由多个encoder和decoder构成，如下图所示</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712185243525.png" alt="image-20200712185243525" style="zoom: 80%;"></p>
+<p><strong>Encoder</strong>由N=6个相同的layer组成，layer就是上图中左边的方框部分，左边的英文字母“Nx”表示layer的数量，这里N=6。每个layer都有两个sub-layer，即multi-head attention和position-wise feed-forward network。每个sub-layer还加入了residual connection和layer normalization，因此每个sub-layer的输出为</p>
+<script type="math/tex; mode=display">
+\rm sub\_layer_{output}=LayerNorm(x+Sublayer(x))</script><p><strong>Decoder</strong>也由6个相同的layer组成，layer就是上图的右边的方框部分，此时N=6。layer由3个sub-layer组成，除了encoder提到的两个sub-layer，还有Masked Multi-Head Attention。</p>
+<p>新加入的masked multi-head attention，在进行softmax之前对未来的position进行mask（设为-inf），可以保证对位置i的预测只依赖位置小于i的已知输出，不会接触到未来位置的信息</p>
+<ul>
+<li>输出：对应i位置的输出词的概率分布，如果词库中有一万个单词，输出的vector就是一万维；</li>
+<li>输入：encoder的输出 &amp; 对应i-1位置decoder的输出。中间的attention（masked）并不是self-attention，K，V来自encoder，Q来自上一位置decoder的输出；</li>
+<li>解码：编码可以并行计算，一次性全部encoding出来。但解码不是一次把所有的序列解出来，由于要用到上一个位置encoder的出书作为这次的query，因此解码是像rnn一样一个一个解出来的。</li>
+</ul>
+<h4 id="BERT模型"><a href="#BERT模型" class="headerlink" title="BERT模型"></a>BERT模型</h4><h5 id="模型结构-1"><a href="#模型结构-1" class="headerlink" title="模型结构"></a>模型结构</h5><p>Bert模型全称是BidirectionalEncoder Representations from Transformer，是基于Transformer中的encoder的双向结构。模型的主要创新点在pre-training上，包括Mask Language Model、Next Sentence Prediction，来分别捕捉词语和句子级别的representation。</p>
+<p>Bert的模型结构示意图如下图左1所示，是双向的，而GPT则是单向的；</p>
+<p>ELMo虽然也是双向的，但这两者的目标函数是不同的，ELMo的目标函数是两个$P(w_i|w_1,..,w_{i-1}),P(w_i|w_{i+1},…,w_n)$，是独立训练出两个不同的representation然后拼接；但Bert的目标函数是$P(w_i|w_1,..,w_n)$，包括两个方向的单词。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713224006961.png" alt></p>
+<h5 id="Pre-training"><a href="#Pre-training" class="headerlink" title="Pre-training"></a>Pre-training</h5><p><strong>Task #1: Mask LM</strong>   对于输入的一段文字，随机mask这句话中的几个词，要求根据剩余词汇来确定被mask的词。我们把要mask的长度定为15%，在被mask的文字中，80%采用[Mask]标记替换，10%采用任意词替换，剩余10%保持原词汇不变。</p>
+<p><strong>Task #2: Next Sentence Prediction</strong>   由于很多重要的下游任务，比如Question Answering (QA) 和 Natural Language Inference (NLI)，都需要理解两个句子之间的关系，因此增加了NSP这个预训练任务，使得模型可以理解两个句子之间的关系。在一篇文章里，我们选择了A和B两个句子，B有50%的几率是A的下一句（isNext），输入这两个句子，BERT模型来判断B是不是A的下一句。</p>
+<p>由于attention的计算开销是输入序列长度的平方，如果输入序列太长会影响整个模型的训练速度，因此90%的序列都选用seq_len=128来进行训练，剩下的10%都选用512的序列长度。</p>
+<h5 id="Fine-tuning"><a href="#Fine-tuning" class="headerlink" title="Fine-tuning"></a>Fine-tuning</h5><p>从头开始训练Bert模型的任务是非常艰巨的，google公布了在多种语言上预训练好的模型，我们可以在此基础上进行fine-tuning，比从头开始训练所需的计算量要小得多。对于特定的任务，Bert模型只需要添加一个输出层来进行微调即可。这些任务可以是问题解答、语言推理等。</p>
+<p>官网最开始提出的模型是文本分类，如果要用于其他任务，则需要进行一些改进，如图所示，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713221407425.png" alt="image-20200713221407425"></p>
+<p>可以调整的参数和取值范围有：</p>
+<ul>
+<li>Batch size: 16, 32</li>
+<li>Learning rate (Adam): 5e-5, 3e-5, 2e-5</li>
+<li>Number of epochs: 3, 4</li>
+</ul>
+<p>Q：为什么说Bert是双向的 ？</p>
+<p>A：由于输入的序列有部分是被mask了，由于Transformer的特性，模型会注意上下文所有的单词，即两个方向的单词，这就实现了双向表示，说明Bert是一个双向语言模型。</p>
+<h4 id="BERT在实际场景中的应用"><a href="#BERT在实际场景中的应用" class="headerlink" title="BERT在实际场景中的应用"></a>BERT在实际场景中的应用</h4><p>可以应用到：</p>
+<ul>
+<li>情感分类：质量问题分析；</li>
+<li>意图识别；</li>
+<li>问答匹配；</li>
+<li>命名实体识别。</li>
+</ul>
+<p>bert在实际场景中的使用：</p>
+<ul>
+<li>筛选训练数据，提出过短或过长的数据；</li>
+<li>尝试bert+conv，bert+conv+avg_max_pooling，bert_last_layer_concat等方式；</li>
+<li>针对本场景数据，进行少步数的进一步预训练。</li>
+</ul>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><ul>
+<li>引入了Masked LM，使用双向LM做模型预训练。</li>
+<li>为预训练引入了新目标NSP，它可以学习两个句子之间的关系。</li>
+<li>为下游任务引入了很通用的求解框架，不再为任务做模型定制。</li>
+<li>刷新了多项NLP任务的记录，引爆了NLP无监督预训练技术。</li>
+</ul>
+<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><ol>
+<li>帮助理解Transform模型中的attention机制，<a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-transformer/</a></li>
+<li><p>Bert模型的理解，<a href="https://zhuanlan.zhihu.com/p/46652512" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/46652512</a></p>
+</li>
+<li><p><a href="https://www.cnblogs.com/Milburn/p/12031501.html" target="_blank" rel="noopener">BERT模型图解</a></p>
+</li>
+<li><p><a href="https://www.bilibili.com/video/BV1M5411x7FZ?from=search&amp;seid=15336884376384843690" target="_blank" rel="noopener">Bert模型精讲</a></p>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>Knowledge Graph</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>AutoEncoder</tag>
+        <tag>Denoising AutoEncoder</tag>
+        <tag>Transformer</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Attack and Defense</title>
     <url>/2020/06/26/Attack/</url>
     <content><![CDATA[<h4 id="Motivation"><a href="#Motivation" class="headerlink" title="Motivation"></a>Motivation</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200626095005396.png" alt="image-20200626095005396" style="zoom:50%;"></p>
@@ -267,105 +369,16 @@ w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="https://gitee.com/scarle
       </tags>
   </entry>
   <entry>
-    <title>Bert模型精讲</title>
-    <url>/2020/07/13/Bert/</url>
-    <content><![CDATA[<h4 id="Autoregressive-LM-与-Autoencoder-LM"><a href="#Autoregressive-LM-与-Autoencoder-LM" class="headerlink" title="Autoregressive LM 与 Autoencoder LM"></a>Autoregressive LM 与 Autoencoder LM</h4><p>Autoregressive语言模型：根据上文内容预测下一个可能跟随的单词，或者根据下文来预测前文的单词，但并不能同时根据上下文来预测单词。GPT是典型的自回归语言模型。ELMO虽然有两个方向，一个是自左向右的自回归语言模型，另一个是自右向左的自回归语言模型，由两个自回归语言模型组成，本质上还是自回归语言模型。</p>
-<ul>
-<li>缺点：只能根据上文或下文来预测单词，并不能同时依据上下文；</li>
-<li>优点：对生成类NLP任务有很大优势，比如机器翻译，就是从左向右的，并不需要同时根据上下文的内容进行判断。</li>
-</ul>
-<p>Autoencoder语言模型：在输入中随机Mask一些单词，使模型可以同时根据上下文的内容来预测这些被mask的单词。</p>
-<ul>
-<li>缺点：由于引入了Mask标记，而fine-tuning阶段并不能看到Mask标记，因此会造成预训练和fine-tune阶段不一致的问题；</li>
-<li>优点：可以很好地融入双向语言模型。</li>
-</ul>
-<h4 id="DAE与Masked-Language-Model"><a href="#DAE与Masked-Language-Model" class="headerlink" title="DAE与Masked Language Model"></a>DAE与Masked Language Model</h4><h5 id="AutoEncoder"><a href="#AutoEncoder" class="headerlink" title="AutoEncoder"></a>AutoEncoder</h5><p>对于输入大小为28×28的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简的特征；但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；那么我们现在就先来做一个decoder，把code恢复成一张image；</p>
-<p>decoder和encoder单独是没办法训练的，因为是无监督学习，因此现在我们将这两者一起学习，学习的目标是使input和output之间的差距越小越好。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712121526873.png" alt="image-20200712121526873" style="zoom:80%;"></p>
-<h5 id="Denoising-AutoEncoder（DAE）"><a href="#Denoising-AutoEncoder（DAE）" class="headerlink" title="Denoising AutoEncoder（DAE）"></a>Denoising AutoEncoder（DAE）</h5><p>为了缓解原来的autoencoder很容易<font color="red">过拟合</font>的问题，我们可以在输入中加入一些<font color="red">随机噪声</font>。对于原来的input x，我们先加入一些noise得到$x’$(破损数据)，进行encode之后再进行decode，使之和最早的input之间的差值最小；encoder现在不仅学习到了encode这件事，还学习到了把noise过滤掉这件事。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712121915387.png" alt="image-20200712121915387"></p>
-<p><strong>DAE模型的优势：</strong></p>
-<ul>
-<li><p>可以减小训练数据和测试数据之间的gap；</p>
-</li>
-<li><p>和非破损数据的训练相比，由于DAR在训练的时候不小心把输入的噪声也擦除了，因此破损数据训练出来的weight噪声比较小。</p>
-</li>
-</ul>
-<p>在下图中，左图为没有使用任何噪声的resulted filters，右图为使用了30%噪声的resulted filter，可以发现使用了噪声的autoencoder，其训练好的weight噪声要低很多。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/271419017086934.png" alt="271419017086934" style="zoom:50%;"></p>
-<h5 id="DAE-与-Masked-Language-Model"><a href="#DAE-与-Masked-Language-Model" class="headerlink" title="DAE 与 Masked Language Model"></a>DAE 与 Masked Language Model</h5><ul>
-<li>BERT是基于<strong>Transformer Encoder</strong>来构建的一种模型；</li>
-<li>BERT是基于<strong>DAE</strong>（Denoising Autoencoder，去噪自动编码器）的，这部分在BERT中被称为<strong>Masked Language Model</strong>；</li>
-<li>Masked Language Model并不是严格意义上的语言模型，这仅仅是训练语言模型的一种方式。BERT在输入中随机Mask一些单词，使模型可以同时根据上下文的内容来预测这些被mask的单词，这个过程其实就是DAE的过程（Mask标签就相当于加入的噪声，DAE要去掉这些噪声，并还原出原来的图像）。</li>
-</ul>
-<p>DAE的代码实现为：<a href="http://deeplearning.net/tutorial/dA.html" target="_blank" rel="noopener">http://deeplearning.net/tutorial/dA.html</a></p>
-<h4 id="Transformer模型回顾"><a href="#Transformer模型回顾" class="headerlink" title="Transformer模型回顾"></a>Transformer模型回顾</h4><p>详见<a href="https://scarleatt.github.io/2020/07/13/Transformer/" target="_blank" rel="noopener">https://scarleatt.github.io/2020/07/13/Transformer/</a></p>
-<h5 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h5><p>transform模型由多个encoder和decoder构成，如下图所示</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712185243525.png" alt="image-20200712185243525" style="zoom: 80%;"></p>
-<p><strong>Encoder</strong>由N=6个相同的layer组成，layer就是上图中左边的方框部分，左边的英文字母“Nx”表示layer的数量，这里N=6。每个layer都有两个sub-layer，即multi-head attention和position-wise feed-forward network。每个sub-layer还加入了residual connection和layer normalization，因此每个sub-layer的输出为</p>
-<script type="math/tex; mode=display">
-\rm sub\_layer_{output}=LayerNorm(x+Sublayer(x))</script><p><strong>Decoder</strong>也由6个相同的layer组成，layer就是上图的右边的方框部分，此时N=6。layer由3个sub-layer组成，除了encoder提到的两个sub-layer，还有Masked Multi-Head Attention。</p>
-<p>新加入的masked multi-head attention，在进行softmax之前对未来的position进行mask（设为-inf），可以保证对位置i的预测只依赖位置小于i的已知输出，不会接触到未来位置的信息</p>
-<ul>
-<li>输出：对应i位置的输出词的概率分布，如果词库中有一万个单词，输出的vector就是一万维；</li>
-<li>输入：encoder的输出 &amp; 对应i-1位置decoder的输出。中间的attention（masked）并不是self-attention，K，V来自encoder，Q来自上一位置decoder的输出；</li>
-<li>解码：编码可以并行计算，一次性全部encoding出来。但解码不是一次把所有的序列解出来，由于要用到上一个位置encoder的出书作为这次的query，因此解码是像rnn一样一个一个解出来的。</li>
-</ul>
-<h4 id="BERT模型"><a href="#BERT模型" class="headerlink" title="BERT模型"></a>BERT模型</h4><h5 id="模型结构-1"><a href="#模型结构-1" class="headerlink" title="模型结构"></a>模型结构</h5><p>Bert模型全称是BidirectionalEncoder Representations from Transformer，是基于Transformer中的encoder的双向结构。模型的主要创新点在pre-training上，包括Mask Language Model、Next Sentence Prediction，来分别捕捉词语和句子级别的representation。</p>
-<p>Bert的模型结构示意图如下图左1所示，是双向的，而GPT则是单向的；</p>
-<p>ELMo虽然也是双向的，但这两者的目标函数是不同的，ELMo的目标函数是两个$P(w_i|w_1,..,w_{i-1}),P(w_i|w_{i+1},…,w_n)$，是独立训练出两个不同的representation然后拼接；但Bert的目标函数是$P(w_i|w_1,..,w_n)$，包括两个方向的单词。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713224006961.png" alt></p>
-<h5 id="Pre-training"><a href="#Pre-training" class="headerlink" title="Pre-training"></a>Pre-training</h5><p><strong>Task #1: Mask LM</strong>   对于输入的一段文字，随机mask这句话中的几个词，要求根据剩余词汇来确定被mask的词。我们把要mask的长度定为15%，在被mask的文字中，80%采用[Mask]标记替换，10%采用任意词替换，剩余10%保持原词汇不变。</p>
-<p><strong>Task #2: Next Sentence Prediction</strong>   由于很多重要的下游任务，比如Question Answering (QA) 和 Natural Language Inference (NLI)，都需要理解两个句子之间的关系，因此增加了NSP这个预训练任务，使得模型可以理解两个句子之间的关系。在一篇文章里，我们选择了A和B两个句子，B有50%的几率是A的下一句（isNext），输入这两个句子，BERT模型来判断B是不是A的下一句。</p>
-<p>由于attention的计算开销是输入序列长度的平方，如果输入序列太长会影响整个模型的训练速度，因此90%的序列都选用seq_len=128来进行训练，剩下的10%都选用512的序列长度。</p>
-<h5 id="Fine-tuning"><a href="#Fine-tuning" class="headerlink" title="Fine-tuning"></a>Fine-tuning</h5><p>从头开始训练Bert模型的任务是非常艰巨的，google公布了在多种语言上预训练好的模型，我们可以在此基础上进行fine-tuning，比从头开始训练所需的计算量要小得多。对于特定的任务，Bert模型只需要添加一个输出层来进行微调即可。这些任务可以是问题解答、语言推理等。</p>
-<p>官网最开始提出的模型是文本分类，如果要用于其他任务，则需要进行一些改进，如图所示，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713221407425.png" alt="image-20200713221407425"></p>
-<p>可以调整的参数和取值范围有：</p>
-<ul>
-<li>Batch size: 16, 32</li>
-<li>Learning rate (Adam): 5e-5, 3e-5, 2e-5</li>
-<li>Number of epochs: 3, 4</li>
-</ul>
-<p>Q：为什么说Bert是双向的 ？</p>
-<p>A：由于输入的序列有部分是被mask了，由于Transformer的特性，模型会注意上下文所有的单词，即两个方向的单词，这就实现了双向表示，说明Bert是一个双向语言模型。</p>
-<h4 id="BERT在实际场景中的应用"><a href="#BERT在实际场景中的应用" class="headerlink" title="BERT在实际场景中的应用"></a>BERT在实际场景中的应用</h4><p>可以应用到：</p>
-<ul>
-<li>情感分类：质量问题分析；</li>
-<li>意图识别；</li>
-<li>问答匹配；</li>
-<li>命名实体识别。</li>
-</ul>
-<p>bert在实际场景中的使用：</p>
-<ul>
-<li>筛选训练数据，提出过短或过长的数据；</li>
-<li>尝试bert+conv，bert+conv+avg_max_pooling，bert_last_layer_concat等方式；</li>
-<li>针对本场景数据，进行少步数的进一步预训练。</li>
-</ul>
-<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><ul>
-<li>引入了Masked LM，使用双向LM做模型预训练。</li>
-<li>为预训练引入了新目标NSP，它可以学习两个句子之间的关系。</li>
-<li>为下游任务引入了很通用的求解框架，不再为任务做模型定制。</li>
-<li>刷新了多项NLP任务的记录，引爆了NLP无监督预训练技术。</li>
-</ul>
-<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><ol>
-<li>帮助理解Transform模型中的attention机制，<a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-transformer/</a></li>
-<li><p>Bert模型的理解，<a href="https://zhuanlan.zhihu.com/p/46652512" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/46652512</a></p>
-</li>
-<li><p><a href="https://www.cnblogs.com/Milburn/p/12031501.html" target="_blank" rel="noopener">BERT模型图解</a></p>
-</li>
-<li><p><a href="https://www.bilibili.com/video/BV1M5411x7FZ?from=search&amp;seid=15336884376384843690" target="_blank" rel="noopener">Bert模型精讲</a></p>
-</li>
-</ol>
-]]></content>
+    <title>CCF-JSON查询</title>
+    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
+    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
+<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</span><br><span class="line">    <span class="keyword">int</span> n, m;</span><br><span class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</span><br><span class="line">    getchar();</span><br><span class="line">    <span class="keyword">while</span> (n--) &#123;</span><br><span class="line">        <span class="built_in">string</span> temp;</span><br><span class="line">        getline(<span class="built_in">cin</span>, temp);</span><br><span class="line">        json += temp;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</span><br><span class="line">    <span class="built_in">string</span> preHost;</span><br><span class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</span><br><span class="line">    <span class="built_in">string</span> key, value;</span><br><span class="line">    <span class="built_in">string</span> now_key;</span><br><span class="line">    <span class="built_in">string</span> temp_key;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</span><br><span class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</span><br><span class="line">            isvalue = <span class="literal">true</span>;</span><br><span class="line">            iskey = <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</span><br><span class="line">            isstring = <span class="literal">false</span>;</span><br><span class="line">            pre.push_back(key);</span><br><span class="line">            temp_key = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</span><br><span class="line">                    temp_key += pre[j];</span><br><span class="line">                    temp_key += <span class="string">"."</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</span><br><span class="line">            &#125;</span><br><span class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</span><br><span class="line">            preHost += key;</span><br><span class="line">            preHost += <span class="string">"."</span>;</span><br><span class="line">            key = <span class="string">""</span>;</span><br><span class="line">            iskey = <span class="literal">true</span>;</span><br><span class="line">            isvalue = <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</span><br><span class="line">            isvalue = <span class="literal">false</span>;</span><br><span class="line">            iskey = <span class="literal">true</span>;</span><br><span class="line">            i++;</span><br><span class="line">            temp_key = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</span><br><span class="line">                    temp_key += pre[j];</span><br><span class="line">                    temp_key += <span class="string">"."</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            temp_key+=key;</span><br><span class="line">            all[temp_key] = value;</span><br><span class="line"></span><br><span class="line">            preHost = <span class="string">""</span>;</span><br><span class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</span><br><span class="line">                pre.pop_back();</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</span><br><span class="line">            isvalue = <span class="literal">false</span>;</span><br><span class="line">            iskey = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">            temp_key = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</span><br><span class="line">                    temp_key += pre[j];</span><br><span class="line">                    temp_key += <span class="string">"."</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            temp_key+=key;</span><br><span class="line">            all[temp_key] = value;</span><br><span class="line"></span><br><span class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</span><br><span class="line">            isstring = <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</span><br><span class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</span><br><span class="line">        <span class="built_in">string</span> temp;</span><br><span class="line">        getline(<span class="built_in">cin</span>, temp);</span><br><span class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
       <categories>
-        <category>Knowledge Graph</category>
+        <category>CCF Answer</category>
       </categories>
       <tags>
-        <tag>Deep Learning</tag>
-        <tag>AutoEncoder</tag>
-        <tag>Denoising AutoEncoder</tag>
-        <tag>Transformer</tag>
+        <tag>CCF</tag>
       </tags>
   </entry>
   <entry>
@@ -428,19 +441,6 @@ w ^i=w^{i-1}-\eta\Delta L(w^{i-1})</script><p><img src="https://gitee.com/scarle
         <tag>Speech Enhancement</tag>
         <tag>Video Generation</tag>
         <tag>Patch GAN</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>CCF-JSON查询</title>
-    <url>/2017/12/02/CCF-JSON%E6%9F%A5%E8%AF%A2/</url>
-    <content><![CDATA[<p>试题编号：   201709-3<br>试题名称：   JSON查询<br>时间限制：   1.0s<br>内存限制：   256.0MB<br>问题描述：<br>　　JSON (JavaScript Object Notation) 是一种轻量级的数据交换格式，可以用来描述半结构化的数据。JSON 格式中的基本单元是值 (value)，出于简化的目的本题只涉及 2 种类型的值：<br>　　&#42; 字符串 (string)：字符串是由双引号 “ 括起来的一组字符（可以为空）。如果字符串的内容中出现双引号 “，在双引号前面加反斜杠，也就是用 \” 表示；如果出现反斜杠 \，则用两个反斜杠 \\ 表示。反斜杠后面不能出现 “ 和 \ 以外的字符。例如：””、”hello”、”\”\\”。<br>　　&#42; 对象 (object)：对象是一组键值对的无序集合（可以为空）。键值对表示对象的属性，键是属性名，值是属性的内容。对象以左花括号 { 开始，右花括号 } 结束，键值对之间以逗号 , 分隔。一个键值对的键和值之间以冒号 : 分隔。键必须是字符串，同一个对象所有键值对的键必须两两都不相同；值可以是字符串，也可以是另一个对象。例如：{}、{“foo”: “bar”}、{“Mon”: “weekday”, “Tue”: “weekday”, “Sun”: “weekend”}。<br>　　除了字符串内部的位置，其他位置都可以插入一个或多个空格使得 JSON 的呈现更加美观，也可以在一些地方换行，不会影响所表示的数据内容。例如，上面举例的最后一个 JSON 数据也可以写成如下形式。<br>　　{<br>　　“Mon”: “weekday”,<br>　　“Tue”: “weekday”,<br>　　“Sun”: “weekend”<br>　　}<br>　　给出一个 JSON 格式描述的数据，以及若干查询，编程返回这些查询的结果。<br>输入格式<br>　　第一行是两个正整数 n 和 m，分别表示 JSON 数据的行数和查询的个数。<br>　　接下来 n 行，描述一个 JSON 数据，保证输入是一个合法的 JSON 对象。<br>　　接下来 m 行，每行描述一个查询。给出要查询的属性名，要求返回对应属性的内容。需要支持多层查询，各层的属性名之间用小数点 . 连接。保证查询的格式都是合法的。<br>输出格式<br>　　对于输入的每一个查询，按顺序输出查询结果，每个结果占一行。<br>　　如果查询结果是一个字符串，则输出 STRING <string>，其中 <string> 是字符串的值，中间用一个空格分隔。<br>　　如果查询结果是一个对象，则输出 OBJECT，不需要输出对象的内容。<br>　　如果查询结果不存在，则输出 NOTEXIST。</string></string></p>
-<p>样例输入<br>10 5<br>{<br>“firstName”: “John”,<br>“lastName”: “Smith”,<br>“address”: {<br>“streetAddress”: “2ndStreet”,<br>“city”: “NewYork”,<br>“state”: “NY”<br>},<br>“esc\\aped”: “\”hello\””<br>}<br>firstName<br>address<br>address.city<br>address.postal<br>esc\aped<br>样例输出<br>STRING John<br>OBJECT<br>STRING NewYork<br>NOTEXIST<br>STRING “hello”<br>评测用例规模与约定<br>　　n ≤ 100，每行不超过 80 个字符。<br>　　m ≤ 100，每个查询的长度不超过 80 个字符。<br>　　字符串中的字符均为 ASCII 码 33-126 的可打印字符，不会出现空格。所有字符串都不是空串。<br>　　所有作为键的字符串不会包含小数点 .。查询时键的大小写敏感。<br>　　50%的评测用例输入的对象只有 1 层结构，80%的评测用例输入的对象结构层数不超过 2 层。举例来说，{“a”: “b”} 是一层结构的对象，{“a”: {“b”: “c”}} 是二层结构的对象，以此类推。<br>  <strong>思路</strong>：加一些标识位，用vector数据类型来存储键值</p>
-<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;map&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">string</span> json = <span class="string">""</span>;</span><br><span class="line">    <span class="keyword">int</span> n, m;</span><br><span class="line">    <span class="built_in">cin</span>&gt;&gt;n&gt;&gt;m;</span><br><span class="line">    getchar();</span><br><span class="line">    <span class="keyword">while</span> (n--) &#123;</span><br><span class="line">        <span class="built_in">string</span> temp;</span><br><span class="line">        getline(<span class="built_in">cin</span>, temp);</span><br><span class="line">        json += temp;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">map</span>&lt;<span class="built_in">string</span>,<span class="built_in">string</span>&gt; all;</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; pre;</span><br><span class="line">    <span class="built_in">string</span> preHost;</span><br><span class="line">    <span class="keyword">int</span> iskey = <span class="literal">true</span>, isvalue = <span class="literal">false</span>, isstring = <span class="literal">false</span>, blank = <span class="literal">false</span>;</span><br><span class="line">    <span class="built_in">string</span> key, value;</span><br><span class="line">    <span class="built_in">string</span> now_key;</span><br><span class="line">    <span class="built_in">string</span> temp_key;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; json.length(); i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (json[i] == <span class="string">' '</span>) blank = <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">else</span> blank = <span class="literal">false</span>;</span><br><span class="line">        <span class="keyword">if</span> (json[i]==<span class="string">':'</span>) &#123;</span><br><span class="line">            isvalue = <span class="literal">true</span>;</span><br><span class="line">            iskey = <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'&#123;'</span>) &#123;</span><br><span class="line">            isstring = <span class="literal">false</span>;</span><br><span class="line">            pre.push_back(key);</span><br><span class="line">            temp_key = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size()<span class="number">-1</span>; j++) &#123;</span><br><span class="line">                    temp_key += pre[j];</span><br><span class="line">                    temp_key += <span class="string">"."</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                temp_key += pre[pre.size()<span class="number">-1</span>];</span><br><span class="line">            &#125;</span><br><span class="line">            all[temp_key] = <span class="string">"&#123;"</span>;</span><br><span class="line">            preHost += key;</span><br><span class="line">            preHost += <span class="string">"."</span>;</span><br><span class="line">            key = <span class="string">""</span>;</span><br><span class="line">            iskey = <span class="literal">true</span>;</span><br><span class="line">            isvalue = <span class="literal">false</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (json[i]==<span class="string">'&#125;'</span>) &#123;</span><br><span class="line">            isvalue = <span class="literal">false</span>;</span><br><span class="line">            iskey = <span class="literal">true</span>;</span><br><span class="line">            i++;</span><br><span class="line">            temp_key = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</span><br><span class="line">                    temp_key += pre[j];</span><br><span class="line">                    temp_key += <span class="string">"."</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            temp_key+=key;</span><br><span class="line">            all[temp_key] = value;</span><br><span class="line"></span><br><span class="line">            preHost = <span class="string">""</span>;</span><br><span class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>)</span><br><span class="line">                pre.pop_back();</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">','</span>) &#123;</span><br><span class="line">            isvalue = <span class="literal">false</span>;</span><br><span class="line">            iskey = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">            temp_key = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">if</span> (pre.size()&gt;<span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">for</span> (<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; pre.size(); j++) &#123;</span><br><span class="line">                    temp_key += pre[j];</span><br><span class="line">                    temp_key += <span class="string">"."</span>;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            temp_key+=key;</span><br><span class="line">            all[temp_key] = value;</span><br><span class="line"></span><br><span class="line">            key = <span class="string">""</span>; value = <span class="string">""</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; json[i]==<span class="string">'"'</span>) &#123;</span><br><span class="line">            isstring = <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">continue</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (iskey &amp;&amp; json[i]==<span class="string">'"'</span>) <span class="keyword">continue</span>;</span><br><span class="line">        <span class="keyword">if</span> ((json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'"'</span>) || (json[i]==<span class="string">'\\'</span>&amp;&amp;json[i+<span class="number">1</span>]==<span class="string">'\\'</span>)) i++;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (iskey &amp;&amp; !blank) key+=json[i];</span><br><span class="line">        <span class="keyword">if</span> (isvalue &amp;&amp; isstring &amp;&amp; !blank) value+=json[i];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; m; i++) &#123;</span><br><span class="line">        <span class="built_in">string</span> temp;</span><br><span class="line">        getline(<span class="built_in">cin</span>, temp);</span><br><span class="line">        <span class="keyword">if</span> (all[temp]==<span class="string">""</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"NOTEXIST"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (all[temp]==<span class="string">"&#123;"</span>) <span class="built_in">cout</span>&lt;&lt;<span class="string">"OBJECT"</span>&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">        <span class="keyword">else</span> <span class="built_in">cout</span>&lt;&lt;<span class="string">"STRING "</span>&lt;&lt;all[temp]&lt;&lt;<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
-      <categories>
-        <category>CCF Answer</category>
-      </categories>
-      <tags>
-        <tag>CCF</tag>
       </tags>
   </entry>
   <entry>
@@ -627,68 +627,6 @@ u^*=\frac{1}{79}\sum_{n=1}^{79}x^n,\quad\sum^*=\frac{1}{79}\sum_{n=1}^{79}(x^n-\
       </tags>
   </entry>
   <entry>
-    <title>Deep Autoencoder</title>
-    <url>/2020/06/29/Deep-autoencoder/</url>
-    <content><![CDATA[<h4 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h4><p>对于输入大小为$28\times28$的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简（compact）的特征；</p>
-<p>但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；</p>
-<p>那么我们现在就先来做一个decoder，把code恢复成一张image；</p>
-<p>decoder和encoder单独是没办法训练的，因为是无监督学习，因此现在我们将这两者一起学习</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629094326636.png" alt="image-20200629094326636" style="zoom:50%;"></p>
-<h4 id="Recap-PCA"><a href="#Recap-PCA" class="headerlink" title="Recap: PCA"></a>Recap: PCA</h4><p>这里先回顾一下<a href="https://scarleatt.github.io/2020/06/28/dimension-reduction/" target="_blank" rel="noopener">PCA</a>，对于输入的图像$x$为$784$维，经过PCA降维，可以降低到324维的图像$\hat x$，在encoder和decoder的学习过程中，应达到的目标是最小化$(x-\hat x)^2$，这个结构可以看成是具有一个hidden layer的network</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629100232021.png" alt="image-20200629100232021" style="zoom:50%;"></p>
-<h4 id="Deep-Auto-encoder"><a href="#Deep-Auto-encoder" class="headerlink" title="Deep Auto-encoder"></a>Deep Auto-encoder</h4><h5 id="Structure"><a href="#Structure" class="headerlink" title="Structure"></a>Structure</h5><p>中间的hidden layer也可以不止一个，也可以是多个的hidden layer，这种结构就称作deep auto-encoder</p>
-<p><span style="color: red">注：encoder和decoder的结构不一定非得是对称的。</span></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629101531636.png" alt="image-20200629101531636" style="zoom:50%;"></p>
-<h5 id="PCA-vs-Deep-Auto-encoder"><a href="#PCA-vs-Deep-Auto-encoder" class="headerlink" title="PCA. vs Deep Auto-encoder"></a>PCA. vs Deep Auto-encoder</h5><p>对于下图中的图像(0,1,2,3,4)，如果我们使用PCA，只有中间一个hidden layer，先从784维降到30维，再从30维恢复到784维，可以发现图像变得比较模糊；</p>
-<p>如果使用deep auto-encoder，先从784到1000，1000到500，500到250，250到300，再使用类似的encoder恢复图像，可以发现结果图像非常清晰</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629101748853.png" alt="image-20200629101748853" style="zoom:50%;"></p>
-<p>如果我们先使用PCA进行降维，把原图从784降到2维，对二维的数据进行可视化，可以发现不同的digit（不同的颜色代表不同的数字）都叠在一起了；</p>
-<p>如果使用deep autoencoder，可以发现这个数字都是分开的</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629102817764.png" alt="image-20200629102817764" style="zoom:50%;"></p>
-<h4 id="Text-Retrieval"><a href="#Text-Retrieval" class="headerlink" title="Text Retrieval"></a>Text Retrieval</h4><p>下图中蓝色的圆点都表示一个document，我们将输入的query也加入这个document，再计算查询的词汇query和每个document之间的inner product或similarity等，距离最近的document，similarity的值是最大的，因此会retrieval距离红色箭头最近的其他两个蓝色箭头</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629103259176.png" alt="image-20200629103259176" style="zoom:50%;"></p>
-<p>还有另外一种方法，使用一个vector来表示所有的词汇，vector对应的值就是每个character出现的次数；但这种方式没有考虑原来的语义顺序，每个character都是independent的</p>
-<p>在下图中，假设bag里面有2000个词汇，把输入的document或query变成对应的vector，再输入相应的encoder，降维成2维，对这二维的数据进行可视化，如右图所示，不同的颜色代表不同的document；</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629104843900.png" alt="image-20200629104843900" style="zoom:50%;"></p>
-<p>如果我们现在输入一个query，再降维到二维，可以发现和图中对应的document是有关的，我们就可以看到query所属的类别是Energy market</p>
-<p>但用LSA就得不到对应的结果</p>
-<h4 id="Similar-Image-Search"><a href="#Similar-Image-Search" class="headerlink" title="Similar Image Search"></a>Similar Image Search</h4><p>以图找图，如果我们只是做pixel上的相似程度，那么我们可以得到以下的结果，迈克杰克逊和马蹄铁也很像，这显然不符合常理</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110009994.png" alt="image-20200629110009994" style="zoom:50%;"></p>
-<p>我们可以把输入的image经过deep auto-encoder，变成一个code，再去做搜寻；由于auto-encoder是unsupervised learning，收集多少数据都行，不缺数据</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110134069.png" alt="image-20200629110134069" style="zoom:50%;"></p>
-<p>用deep auto-encoder来找类似迈克杰克逊，也可以得到更好的结果（至少全是人脸 ）</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110527622.png" alt="image-20200629110527622" style="zoom:50%;"></p>
-<h4 id="Pre-training-DNN"><a href="#Pre-training-DNN" class="headerlink" title="Pre-training DNN"></a>Pre-training DNN</h4><p>autoencoder也可以用到network的pre-training过程，来初始化所需要的weight；在下图中，如果我们要对第一个hidden layer的weight进行初始化，那么我们可以使用autoencoder，先将784维到1000维，再进行reconstruct，使1000维降到784维，来使$x,\hat x$之间的差值最小</p>
-<p>但这样可能会出现一个问题，由于1000维比784维更高维，autoencoder很可能将input直接embed到1000维里，再进行恢复，这样很可能network什么都没有学到；</p>
-<p>对于这个问题，我们可以把1000维再加上一个regularization，比如L1，这1000维的数据中有某些维必须是为0的，这样就可以避免autoencoder直接将input进行embed</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110742780.png" alt="image-20200629110742780" style="zoom:50%;"></p>
-<p>我们可以学习这样的一个autoencoder，先将input转化成一个1000维的vector，再把这个vector转化为<span style="color: green">1000维的code</span>，再把这个code转化为1000维的vector；使input和output越接近越好，<strong>把$W^2$的值保存下来</strong>，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629111953318.png" alt="image-20200629111953318" style="zoom:50%;"></p>
-<p>再继续下一个layer，使用第三个autoencoder</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629112400780.png" alt="image-20200629112400780" style="zoom:50%;"></p>
-<p>学习到$W^1,W^2,W^3$之后，就把这个weight作为初始值，$W^4$则进行random init，再使用<span style="color: red">back propagation</span>进行fine-tune</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629112513885.png" alt="image-20200629112513885" style="zoom:50%;"></p>
-<p><span style="color: red">如果我们有大量的unlabeled data，labeled data只有很小一部分，那么我们就可以通过这种无监督学习的方式来初始化weight，再使用剩下的label data来对network进行fine-tune即可</span></p>
-<h4 id="De-noising-auto-encoder"><a href="#De-noising-auto-encoder" class="headerlink" title="De-noising auto-encoder"></a>De-noising auto-encoder</h4><p>对于原来的input x，我们先加入一些noise得到$x’$，进行encode之后再进行decode，使之和最早的input之间的差值最小；encoder现在不仅学习到了encode这件事，还学习到了把noise过滤掉这件事</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629113151447.png" alt="image-20200629113151447" style="zoom:50%;"></p>
-<h4 id="Auto-encoder-for-CNN"><a href="#Auto-encoder-for-CNN" class="headerlink" title="Auto-encoder for CNN"></a>Auto-encoder for CNN</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629114519998.png" alt="image-20200629114519998" style="zoom:50%;"></p>
-<h5 id="CNN-Unpooling"><a href="#CNN-Unpooling" class="headerlink" title="CNN -Unpooling"></a>CNN -Unpooling</h5><p>在pooling时，会选择四个方框中的最大值，并记住最大值的location；</p>
-<p>在upooling时，就会用到上面的location</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629114730398.png" alt="image-20200629114730398" style="zoom:50%;"></p>
-<h5 id="Deconvolution"><a href="#Deconvolution" class="headerlink" title="Deconvolution"></a>Deconvolution</h5><p>Deconvolution其实就是在做convolution，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629114919151.png" alt="image-20200629114919151" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Deep Autoencoder</tag>
-        <tag>Autoencoder</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Tips for Training DNN</title>
     <url>/2020/06/07/DNN-tip/</url>
     <content><![CDATA[<blockquote>
@@ -861,50 +799,65 @@ L2:\ w^{t+1}=(1-\eta\lambda)w^t-\eta \frac{\partial L}{\partial w}</script><ul>
       </tags>
   </entry>
   <entry>
-    <title>Intelligent Photo Editing</title>
-    <url>/2020/07/15/GAN-Intelligent-Photo-Editing/</url>
-    <content><![CDATA[<p>本文主要介绍了使用GAN来进行智能图像编辑，包括编辑原图像，Image super resolution和Image Completion等。</p>
-<h4 id="Modifying-Input-Code"><a href="#Modifying-Input-Code" class="headerlink" title="Modifying Input Code"></a>Modifying Input Code</h4><p>generator的输入是一个vector，输出一张人脸。input的vector的每个维度都表示某种特征，我们现在要做的就是根据生成的图像，来反推出输入vector的每个dimension表示什么特征。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715094805474.png" alt="image-20200715094805474" style="zoom:67%;"></p>
-<h4 id="GAN-Autoencoder"><a href="#GAN-Autoencoder" class="headerlink" title="GAN+Autoencoder"></a>GAN+Autoencoder</h4><p>我们可以收集一堆有label的数据，这个label可以表示这个图像具有的特征是金发、年轻、男性、女性等。</p>
-<p>但现在有一个问题，根据给出的image，我们并不知道其输入的随机vector是什么。我们可以学习另外一个encoder，这个encoder和generator就组成了一个autoencoder。</p>
-<p>为了学习出输入的vector，我们需要固定generator的参数，可以用discriminator的参数来初始化encoder的参数，再来学习encoder。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715095135708.png" alt="image-20200715095135708" style="zoom:67%;"></p>
-<h4 id="Attribute-Representation"><a href="#Attribute-Representation" class="headerlink" title="Attribute Representation"></a>Attribute Representation</h4><p>encoder训练完成后，我们就可以知道图像x对应的vector z是什么，什么样的vector可以生成这张图像。</p>
-<p>在下图中，我们算出每个短发图像的vector之后，再做一个平均，就可以知道短发图像的vector；把长发图像的vector做一个平均，就可以得到长发图像的vector。把这两个vector相减得到$z_{long}$，就可以知道要做什么样的变化，使短发的脸变成长发的脸。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715100537911.png" alt="image-20200715100537911" style="zoom:67%;"></p>
-<p>现在我们有一张短发的图像x，把它输入encoder得到code，把这个code和$z_{long}$相加，就可以得到长发脸的vector $z’$，把这个vector再输入generator，就可以得到长发脸的图像$Gen(z’)$。</p>
-<p>那么现在对于随机输入的一张图像，我们把其code再加上我们想要的特征向量(比如$z_{long}$)，就可以得到我们想要的特征图的输出。</p>
-<p>智能的ps演示，<a href="https://www.youtube.com/watch?v=9c4z6YsBGQ0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=9c4z6YsBGQ0</a></p>
-<p>那么这种智能的ps是怎么作用的呢？</p>
-<h4 id="Photo-Editing"><a href="#Photo-Editing" class="headerlink" title="Photo Editing"></a><strong>Photo Editing</strong></h4><h5 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h5><p>首先需要训练一个generator，在不同的latent space上sample出不同的点，generator就可以生成对应的商品。</p>
-<p>那么刚才那个智能的ps中，对原图进行小小的修改就可以变成一件新的商品，这个是怎么完成的呢？</p>
-<p>首先需要对输入的商品图像进行反推，反推出在这个code space上的位置，在这个基础上，再进行变化。在满足使用者给出的constrain后，就可以产生一张新的图。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715102116230.png" alt="image-20200715102116230" style="zoom:67%;"></p>
-<h5 id="Back-to-z"><a href="#Back-to-z" class="headerlink" title="Back to z"></a>Back to z</h5><p>我们首先需要完成的事，根据输入的图像反推出对应的code。有以下三种方式。</p>
-<p><strong>Method 1</strong>  当成一个optimization problem，找到对应的$z^*$，使其对应的generator的输出和原图之间的差值最小化，loss function可以有很多种，可以是计算像素级的差值，也可以使用其他的classifier网络，让这两者的embedding越接近越好。</p>
-<script type="math/tex; mode=display">
-z^*=arg\mathop{\rm min}_zL(G(z),x^T)</script><p><strong>Method 2</strong> 使用一个autoencoder ，使input和output越接近越好。</p>
-<p><strong>Method 3</strong> 结合了前两个方法，第一个方法要用到gradient descent，可能会遇到local minimal这个问题，给z不同的初始化值，最后得到的结果很可能是不一样的。因此我们可以用autoencoder得到的z来作为方法1的初始值，再来进行优化调整。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715103603424.png" alt="image-20200715103603424" style="zoom:67%;"></p>
-<h5 id="Editing-Photos"><a href="#Editing-Photos" class="headerlink" title="Editing Photos"></a>Editing Photos</h5><p>从图像反推出z之后，我们还需要求解另外一个optimization problem。</p>
-<p>把z输入generator之后，产生image的还需要满足一个额外的constrain $U(G(z))$；新的图像和原来的图像应该越接近越好，原来是黑色的鞋子，现在我们希望新图像还是鞋子，不能差太多；discriminator还需要检测生成的新图像是不是realistic；</p>
-<script type="math/tex; mode=display">
-z^*=arg\mathop{\rm min}_z U(G(z))+\lambda_1||z-z_0||^2-\lambda_2D(G(z))</script><p>求解这个optimization problem，找到满足这些constrain的$z^*$。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715104644372.png" alt="image-20200715104644372" style="zoom:67%;"></p>
-<h4 id="Image-super-resolution"><a href="#Image-super-resolution" class="headerlink" title="Image super resolution"></a>Image super resolution</h4><p>GAN也可以进行Image super resolution，输入一张模糊的图，输出一张清晰的图。可以发现使用GAN的结果，更加清晰了。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715102031232.png" alt="image-20200715102031232" style="zoom:67%;"></p>
-<h4 id="Image-Completion"><a href="#Image-Completion" class="headerlink" title="Image Completion"></a>Image Completion</h4><p>我们可以把图像的某部分挖空，机器要来恢复这部分被挖空的图像。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715105653264.png" alt="image-20200715105653264" style="zoom:67%;"></p>
+    <title>Deep Autoencoder</title>
+    <url>/2020/06/29/Deep-autoencoder/</url>
+    <content><![CDATA[<h4 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h4><p>对于输入大小为$28\times28$的图像，先经过encoder进行编码，得到的结果通常比784维要小，code表示比原来的image更加精简（compact）的特征；</p>
+<p>但现在我们进行的是unsupervised learning，这个code到底长什么样子也不知道；</p>
+<p>那么我们现在就先来做一个decoder，把code恢复成一张image；</p>
+<p>decoder和encoder单独是没办法训练的，因为是无监督学习，因此现在我们将这两者一起学习</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629094326636.png" alt="image-20200629094326636" style="zoom:50%;"></p>
+<h4 id="Recap-PCA"><a href="#Recap-PCA" class="headerlink" title="Recap: PCA"></a>Recap: PCA</h4><p>这里先回顾一下<a href="https://scarleatt.github.io/2020/06/28/dimension-reduction/" target="_blank" rel="noopener">PCA</a>，对于输入的图像$x$为$784$维，经过PCA降维，可以降低到324维的图像$\hat x$，在encoder和decoder的学习过程中，应达到的目标是最小化$(x-\hat x)^2$，这个结构可以看成是具有一个hidden layer的network</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629100232021.png" alt="image-20200629100232021" style="zoom:50%;"></p>
+<h4 id="Deep-Auto-encoder"><a href="#Deep-Auto-encoder" class="headerlink" title="Deep Auto-encoder"></a>Deep Auto-encoder</h4><h5 id="Structure"><a href="#Structure" class="headerlink" title="Structure"></a>Structure</h5><p>中间的hidden layer也可以不止一个，也可以是多个的hidden layer，这种结构就称作deep auto-encoder</p>
+<p><span style="color: red">注：encoder和decoder的结构不一定非得是对称的。</span></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629101531636.png" alt="image-20200629101531636" style="zoom:50%;"></p>
+<h5 id="PCA-vs-Deep-Auto-encoder"><a href="#PCA-vs-Deep-Auto-encoder" class="headerlink" title="PCA. vs Deep Auto-encoder"></a>PCA. vs Deep Auto-encoder</h5><p>对于下图中的图像(0,1,2,3,4)，如果我们使用PCA，只有中间一个hidden layer，先从784维降到30维，再从30维恢复到784维，可以发现图像变得比较模糊；</p>
+<p>如果使用deep auto-encoder，先从784到1000，1000到500，500到250，250到300，再使用类似的encoder恢复图像，可以发现结果图像非常清晰</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629101748853.png" alt="image-20200629101748853" style="zoom:50%;"></p>
+<p>如果我们先使用PCA进行降维，把原图从784降到2维，对二维的数据进行可视化，可以发现不同的digit（不同的颜色代表不同的数字）都叠在一起了；</p>
+<p>如果使用deep autoencoder，可以发现这个数字都是分开的</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629102817764.png" alt="image-20200629102817764" style="zoom:50%;"></p>
+<h4 id="Text-Retrieval"><a href="#Text-Retrieval" class="headerlink" title="Text Retrieval"></a>Text Retrieval</h4><p>下图中蓝色的圆点都表示一个document，我们将输入的query也加入这个document，再计算查询的词汇query和每个document之间的inner product或similarity等，距离最近的document，similarity的值是最大的，因此会retrieval距离红色箭头最近的其他两个蓝色箭头</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629103259176.png" alt="image-20200629103259176" style="zoom:50%;"></p>
+<p>还有另外一种方法，使用一个vector来表示所有的词汇，vector对应的值就是每个character出现的次数；但这种方式没有考虑原来的语义顺序，每个character都是independent的</p>
+<p>在下图中，假设bag里面有2000个词汇，把输入的document或query变成对应的vector，再输入相应的encoder，降维成2维，对这二维的数据进行可视化，如右图所示，不同的颜色代表不同的document；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629104843900.png" alt="image-20200629104843900" style="zoom:50%;"></p>
+<p>如果我们现在输入一个query，再降维到二维，可以发现和图中对应的document是有关的，我们就可以看到query所属的类别是Energy market</p>
+<p>但用LSA就得不到对应的结果</p>
+<h4 id="Similar-Image-Search"><a href="#Similar-Image-Search" class="headerlink" title="Similar Image Search"></a>Similar Image Search</h4><p>以图找图，如果我们只是做pixel上的相似程度，那么我们可以得到以下的结果，迈克杰克逊和马蹄铁也很像，这显然不符合常理</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110009994.png" alt="image-20200629110009994" style="zoom:50%;"></p>
+<p>我们可以把输入的image经过deep auto-encoder，变成一个code，再去做搜寻；由于auto-encoder是unsupervised learning，收集多少数据都行，不缺数据</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110134069.png" alt="image-20200629110134069" style="zoom:50%;"></p>
+<p>用deep auto-encoder来找类似迈克杰克逊，也可以得到更好的结果（至少全是人脸 ）</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110527622.png" alt="image-20200629110527622" style="zoom:50%;"></p>
+<h4 id="Pre-training-DNN"><a href="#Pre-training-DNN" class="headerlink" title="Pre-training DNN"></a>Pre-training DNN</h4><p>autoencoder也可以用到network的pre-training过程，来初始化所需要的weight；在下图中，如果我们要对第一个hidden layer的weight进行初始化，那么我们可以使用autoencoder，先将784维到1000维，再进行reconstruct，使1000维降到784维，来使$x,\hat x$之间的差值最小</p>
+<p>但这样可能会出现一个问题，由于1000维比784维更高维，autoencoder很可能将input直接embed到1000维里，再进行恢复，这样很可能network什么都没有学到；</p>
+<p>对于这个问题，我们可以把1000维再加上一个regularization，比如L1，这1000维的数据中有某些维必须是为0的，这样就可以避免autoencoder直接将input进行embed</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629110742780.png" alt="image-20200629110742780" style="zoom:50%;"></p>
+<p>我们可以学习这样的一个autoencoder，先将input转化成一个1000维的vector，再把这个vector转化为<span style="color: green">1000维的code</span>，再把这个code转化为1000维的vector；使input和output越接近越好，<strong>把$W^2$的值保存下来</strong>，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629111953318.png" alt="image-20200629111953318" style="zoom:50%;"></p>
+<p>再继续下一个layer，使用第三个autoencoder</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629112400780.png" alt="image-20200629112400780" style="zoom:50%;"></p>
+<p>学习到$W^1,W^2,W^3$之后，就把这个weight作为初始值，$W^4$则进行random init，再使用<span style="color: red">back propagation</span>进行fine-tune</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629112513885.png" alt="image-20200629112513885" style="zoom:50%;"></p>
+<p><span style="color: red">如果我们有大量的unlabeled data，labeled data只有很小一部分，那么我们就可以通过这种无监督学习的方式来初始化weight，再使用剩下的label data来对network进行fine-tune即可</span></p>
+<h4 id="De-noising-auto-encoder"><a href="#De-noising-auto-encoder" class="headerlink" title="De-noising auto-encoder"></a>De-noising auto-encoder</h4><p>对于原来的input x，我们先加入一些noise得到$x’$，进行encode之后再进行decode，使之和最早的input之间的差值最小；encoder现在不仅学习到了encode这件事，还学习到了把noise过滤掉这件事</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629113151447.png" alt="image-20200629113151447" style="zoom:50%;"></p>
+<h4 id="Auto-encoder-for-CNN"><a href="#Auto-encoder-for-CNN" class="headerlink" title="Auto-encoder for CNN"></a>Auto-encoder for CNN</h4><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629114519998.png" alt="image-20200629114519998" style="zoom:50%;"></p>
+<h5 id="CNN-Unpooling"><a href="#CNN-Unpooling" class="headerlink" title="CNN -Unpooling"></a>CNN -Unpooling</h5><p>在pooling时，会选择四个方框中的最大值，并记住最大值的location；</p>
+<p>在upooling时，就会用到上面的location</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629114730398.png" alt="image-20200629114730398" style="zoom:50%;"></p>
+<h5 id="Deconvolution"><a href="#Deconvolution" class="headerlink" title="Deconvolution"></a>Deconvolution</h5><p>Deconvolution其实就是在做convolution，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629114919151.png" alt="image-20200629114919151" style="zoom:50%;"></p>
 ]]></content>
       <categories>
         <category>ML-notes</category>
       </categories>
       <tags>
         <tag>Deep Learning</tag>
-        <tag>GAN</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Deep Autoencoder</tag>
         <tag>Autoencoder</tag>
-        <tag>Intelligent Photo Editing</tag>
       </tags>
   </entry>
   <entry>
@@ -1003,6 +956,128 @@ y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情�
       </tags>
   </entry>
   <entry>
+    <title>Intelligent Photo Editing</title>
+    <url>/2020/07/15/GAN-Intelligent-Photo-Editing/</url>
+    <content><![CDATA[<p>本文主要介绍了使用GAN来进行智能图像编辑，包括编辑原图像，Image super resolution和Image Completion等。</p>
+<h4 id="Modifying-Input-Code"><a href="#Modifying-Input-Code" class="headerlink" title="Modifying Input Code"></a>Modifying Input Code</h4><p>generator的输入是一个vector，输出一张人脸。input的vector的每个维度都表示某种特征，我们现在要做的就是根据生成的图像，来反推出输入vector的每个dimension表示什么特征。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715094805474.png" alt="image-20200715094805474" style="zoom:67%;"></p>
+<h4 id="GAN-Autoencoder"><a href="#GAN-Autoencoder" class="headerlink" title="GAN+Autoencoder"></a>GAN+Autoencoder</h4><p>我们可以收集一堆有label的数据，这个label可以表示这个图像具有的特征是金发、年轻、男性、女性等。</p>
+<p>但现在有一个问题，根据给出的image，我们并不知道其输入的随机vector是什么。我们可以学习另外一个encoder，这个encoder和generator就组成了一个autoencoder。</p>
+<p>为了学习出输入的vector，我们需要固定generator的参数，可以用discriminator的参数来初始化encoder的参数，再来学习encoder。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715095135708.png" alt="image-20200715095135708" style="zoom:67%;"></p>
+<h4 id="Attribute-Representation"><a href="#Attribute-Representation" class="headerlink" title="Attribute Representation"></a>Attribute Representation</h4><p>encoder训练完成后，我们就可以知道图像x对应的vector z是什么，什么样的vector可以生成这张图像。</p>
+<p>在下图中，我们算出每个短发图像的vector之后，再做一个平均，就可以知道短发图像的vector；把长发图像的vector做一个平均，就可以得到长发图像的vector。把这两个vector相减得到$z_{long}$，就可以知道要做什么样的变化，使短发的脸变成长发的脸。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715100537911.png" alt="image-20200715100537911" style="zoom:67%;"></p>
+<p>现在我们有一张短发的图像x，把它输入encoder得到code，把这个code和$z_{long}$相加，就可以得到长发脸的vector $z’$，把这个vector再输入generator，就可以得到长发脸的图像$Gen(z’)$。</p>
+<p>那么现在对于随机输入的一张图像，我们把其code再加上我们想要的特征向量(比如$z_{long}$)，就可以得到我们想要的特征图的输出。</p>
+<p>智能的ps演示，<a href="https://www.youtube.com/watch?v=9c4z6YsBGQ0" target="_blank" rel="noopener">https://www.youtube.com/watch?v=9c4z6YsBGQ0</a></p>
+<p>那么这种智能的ps是怎么作用的呢？</p>
+<h4 id="Photo-Editing"><a href="#Photo-Editing" class="headerlink" title="Photo Editing"></a><strong>Photo Editing</strong></h4><h5 id="Basic-Idea"><a href="#Basic-Idea" class="headerlink" title="Basic Idea"></a>Basic Idea</h5><p>首先需要训练一个generator，在不同的latent space上sample出不同的点，generator就可以生成对应的商品。</p>
+<p>那么刚才那个智能的ps中，对原图进行小小的修改就可以变成一件新的商品，这个是怎么完成的呢？</p>
+<p>首先需要对输入的商品图像进行反推，反推出在这个code space上的位置，在这个基础上，再进行变化。在满足使用者给出的constrain后，就可以产生一张新的图。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715102116230.png" alt="image-20200715102116230" style="zoom:67%;"></p>
+<h5 id="Back-to-z"><a href="#Back-to-z" class="headerlink" title="Back to z"></a>Back to z</h5><p>我们首先需要完成的事，根据输入的图像反推出对应的code。有以下三种方式。</p>
+<p><strong>Method 1</strong>  当成一个optimization problem，找到对应的$z^*$，使其对应的generator的输出和原图之间的差值最小化，loss function可以有很多种，可以是计算像素级的差值，也可以使用其他的classifier网络，让这两者的embedding越接近越好。</p>
+<script type="math/tex; mode=display">
+z^*=arg\mathop{\rm min}_zL(G(z),x^T)</script><p><strong>Method 2</strong> 使用一个autoencoder ，使input和output越接近越好。</p>
+<p><strong>Method 3</strong> 结合了前两个方法，第一个方法要用到gradient descent，可能会遇到local minimal这个问题，给z不同的初始化值，最后得到的结果很可能是不一样的。因此我们可以用autoencoder得到的z来作为方法1的初始值，再来进行优化调整。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715103603424.png" alt="image-20200715103603424" style="zoom:67%;"></p>
+<h5 id="Editing-Photos"><a href="#Editing-Photos" class="headerlink" title="Editing Photos"></a>Editing Photos</h5><p>从图像反推出z之后，我们还需要求解另外一个optimization problem。</p>
+<p>把z输入generator之后，产生image的还需要满足一个额外的constrain $U(G(z))$；新的图像和原来的图像应该越接近越好，原来是黑色的鞋子，现在我们希望新图像还是鞋子，不能差太多；discriminator还需要检测生成的新图像是不是realistic；</p>
+<script type="math/tex; mode=display">
+z^*=arg\mathop{\rm min}_z U(G(z))+\lambda_1||z-z_0||^2-\lambda_2D(G(z))</script><p>求解这个optimization problem，找到满足这些constrain的$z^*$。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715104644372.png" alt="image-20200715104644372" style="zoom:67%;"></p>
+<h4 id="Image-super-resolution"><a href="#Image-super-resolution" class="headerlink" title="Image super resolution"></a>Image super resolution</h4><p>GAN也可以进行Image super resolution，输入一张模糊的图，输出一张清晰的图。可以发现使用GAN的结果，更加清晰了。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715102031232.png" alt="image-20200715102031232" style="zoom:67%;"></p>
+<h4 id="Image-Completion"><a href="#Image-Completion" class="headerlink" title="Image Completion"></a>Image Completion</h4><p>我们可以把图像的某部分挖空，机器要来恢复这部分被挖空的图像。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200715105653264.png" alt="image-20200715105653264" style="zoom:67%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>GAN</tag>
+        <tag>Autoencoder</tag>
+        <tag>Intelligent Photo Editing</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Evaluation of Generative Models</title>
+    <url>/2020/07/17/GAN-evalution/</url>
+    <content><![CDATA[<p>本文主要叙述了几种评价GAN生成结果好坏的方法。首先叙述了使用传统的likelihood，由于传统的likelihood方法有一些局限性，本文接着使用了Inception Score的思想，来对GAN进行评价。</p>
+<h4 id="Likelihood"><a href="#Likelihood" class="headerlink" title="Likelihood"></a>Likelihood</h4><p>对于传统的评价generator生成结果的方法，是计算每个结果产生的likelihood。</p>
+<ul>
+<li>先从真实数据的distribution中sample出$\{x^1,x^2,…x^m\}$；</li>
+<li>把$x^i$代入现在的已知的distribution $P_G(x^i;\theta)$，表示$x^i$是从现在这个distribution中sample出来的概率；</li>
+<li>把这些概率相乘，得到似然函数L；最后找到对应的参数$\theta$，使似然函数取得最大值。</li>
+</ul>
+<script type="math/tex; mode=display">
+L=\frac{1}{N}\sum_{i}logP_G(x^i;\theta)</script><p>这个likelihood就可以用来评价generator的好坏，如果likelihood很高，表示这个generator有很高的几率可以产生真实数据，就是一个好的generator。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717141511915.png" alt="image-20200717141511915" style="zoom:67%;"></p>
+<p>现在会遇到一个新问题。我们没有办法计算$P_G(x^i)$，训练好的generator就可以看作是一个network，这个network可以实现输入一个vector，然后输出一张图像，但没有办法算出generator产生某个特定图像的几率。generator虽然可以产生图像，但没有办法产生特定的图像。</p>
+<p>如果generator是一个gaussian mixture model，我们就可以算出这个likelihood；但现在是复杂的模型，并不能计算likelihood；</p>
+<h5 id="Likelihood-Kernel-Density-Estimation"><a href="#Likelihood-Kernel-Density-Estimation" class="headerlink" title="Likelihood - Kernel Density Estimation"></a>Likelihood - Kernel Density Estimation</h5><p>我们可以尝试 Kernel Density Estimation来计算likelihood。</p>
+<p>首先让generator产生很多data，然后我们再使用多个gaussian distribution来逼近这些data。如果现在是图像问题，先让generator生成很多图像（高维的vector），把这些vector当作gaussian model的mean，每个mean都有一个固定的variance；把这些gaussian model都融合起来，就得到了一个gaussian mixture model;</p>
+<p><a href="https://scarleatt.github.io/2020/06/29/generative-models/" target="_blank" rel="noopener"><strong>Gaussian Mixture Model</strong>：</a>如果现在有m个gaussian model，其中$P(m)$表示选择该对应model的可能性，$P(x|m)$表示在选定了第k个model后，该mode产生x的概率，即</p>
+<script type="math/tex; mode=display">
+P(x)=\sum_mP(m)P(x|m)</script><p>那么现在我们就有了分布$P_G$的近似分布$P(x)$，那么我们就可以计算$P_G$产生真实数据$x^i$的概率$P_G(x^i)$了，我们也可以继续计算likelihood。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717152812318.png" alt="image-20200717152812318" style="zoom:67%;"></p>
+<h5 id="Likelihood-v-s-Quality"><a href="#Likelihood-v-s-Quality" class="headerlink" title="Likelihood v.s. Quality"></a>Likelihood v.s. Quality</h5><p>就算我们真的算出了这个likelihood，这个likelihood也并不一定就代表了generator的quality，很可能会出现以下两种情况：</p>
+<ul>
+<li><p>low likelihood，很可能产生high quality的图像。在下图中，很可能generator生成了很接近真实图像的动漫头像，但这时我们要来计算likelihood，生成图像和真实图像很可能差别很大，那么generator生成数据库中的真实图像的可能性就很小，即$P_G(x^i)=0$；</p>
+</li>
+<li><p>high likelihood，很可能产生low quality的图像。下图中有两个generator，算出来的likelihood值分别为$L_1,L_2$。generator 1生成的图像质量很高，且和数据库中真实的图像也很接近，我们可以先算出这个likelihood，</p>
+</li>
+</ul>
+<script type="math/tex; mode=display">
+L_1=\frac{1}{N}\sum_{i}logP_G(x^i)</script><p>对于generator 2生成的图像，有0.99的概率生成模糊的图像，有0.01的概率生成真实的清晰图像。相对于generator 1而言，$P_G(x^i)$减小了100倍，</p>
+<script type="math/tex; mode=display">
+L_2=\frac{1}{N}\sum_{i}log\frac{P_G(x^i)}{100}=-log100+\frac{1}{N}\sum_{i}logP_G(x^i)</script><p>其中$log100$的值接近4.6，但likelihood的值算出来的值一般都是几百的，generator 1和2的likelihood算出来其实差别不大。但其实这两个generator的差别很大，generator 1比2要好一百倍，只是likelihood的值算出来差别不大而已。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717152908621.png" alt="image-20200717152908621" style="zoom:67%;"></p>
+<p>因此，likelihood的值与generator的好坏其实是没有必然联系的。</p>
+<h4 id="Objective-Evaluation"><a href="#Objective-Evaluation" class="headerlink" title="Objective Evaluation"></a>Objective Evaluation</h4><p>我们可以用一个训练好的classifier来判断生成结果的好坏，加入我们现在在做人脸生成问题，我们就可以用人脸识别程序来判断，如果能进行识别，就说明生成的结果还不错。这个classifier是训练好的，比如VGG。</p>
+<p>在下图中，generator生成了一张图像x，我们把x输入这个classifier，会输出对应类别的distribution，即x属于class 1，2，3的概率。如果这个分布产生的概率越集中（某个类别概率很大，其他类别概率很小），就表示generator产生的图像品质很高，classifier可以很自信地进行分类；</p>
+<p>很可能generator就只能产生那个类别的清晰图像而已，产生的其他类别图像质量都很差，这并不是我们想要的结果。因此，我们不仅仅衡量输出概率的distribution，还需要从diverse的方向来衡量；</p>
+<p>那么什么叫从diverse的方向来衡量呢？</p>
+<p>现在让generator生成一堆图像，这里用三张不同的图像作为例子，把这些图像输入CNN，得到三个不同的distribution，再分别求三个distribution中属于同一类别概率的平均值。如果平均值的分布比较uniform，就表示每一种class都有可能被产生，就表示是diverse的；如果平均完之后的值有的很大，是某一个class的概率特别高，model就比较倾向于产生这个类别的事物，就说明output不够diverse。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717155627711.png" alt="image-20200717155627711" style="zoom:67%;"></p>
+<p>现在对于我们的模型就有两个要求，</p>
+<ul>
+<li><strong>图片质量</strong>：classifier得出的distribution要足够sharp、集中，classifier可以很自信地确定x是属于哪个类别；这可以用条件概率$P(y|x)$来表示，越大越好；</li>
+<li><strong>图片多样性</strong>：生成的图像还要足够diverse，标签的分布要均匀，因为我们不希望生成的图像都是属于某一个类别的；这可以用$p(y)$来表示。</li>
+</ul>
+<p>有了这些限制之后，就可以定义对应的score，我们这里使用的是inception network来进行evaluation，对应的分数是inception score，</p>
+<script type="math/tex; mode=display">
+{\rm Inception\ score}=\sum_x\sum_yP(y|x)logP(y|x)-\sum_yP(y)logP(y)</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717182906616.png" alt="image-20200717182906616" style="zoom:67%;"></p>
+<h4 id="We-don’t-want-memory-GAN"><a href="#We-don’t-want-memory-GAN" class="headerlink" title="We don’t want memory GAN."></a>We don’t want memory GAN.</h4><p>在训练GAN的时候，还有另外一个问题，有时候计算generator生成的图像特别清晰，这个结果也不见得是好的。因为很可能generator只是记住了training data中的某几张图像而已，而我们希望生成的图像不是database里面的，而是有创造性的图像。</p>
+<p>那么我们怎么知道生成的图像是不是database里面的呢？要一张一张去对比吗？</p>
+<p>我们可以在generator每生成一张图像的时候，都自动和database里面的每张图像进行对比，可以进行pixel-level的相似度对比；</p>
+<p>但只进行pixel-level的相似度对比是远远不够的。在下图中，有一只羊的图像，每一条曲线都代表一张图像，纵坐标表示database中的图和羊的近似程度，横坐标表示把羊图像向左移动的pixel数目。如果往左边移动一个pixel，发现这张图像还是和原来的图像最接近；如果移动两个pixel，最像的图片就变成了下图中红色方框内的图像，对应图中的红色曲线</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717195325432.png" alt="image-20200717195325432" style="zoom:67%;"></p>
+<h4 id="Mode-Dropping"><a href="#Mode-Dropping" class="headerlink" title="Mode Dropping"></a>Mode Dropping</h4><p>在训练GAN的时候，很可能会出现mode dropping，生成的图像出现多样性不够的问题。</p>
+<p>对于DCGAN（Deep Convolutional GAN），我们怎么检测其生成的人脸是多样性的呢？</p>
+<p>首先DCGAN产生很多张image，看这些生成的image中有没有非常像的，是人都可以辨识出来的。对于判断是不是同一张人脸，可以使用下列论文中提到的方法，先把DCGAN生成的图像丢到一个classifier里面，如果机器认为这是同一张图像，人再来进行观察，看是不是同一张图像。</p>
+<p>那么DCGAN到底可以产生多少张不一样的image呢？</p>
+<p>现在我们sample出400张image出来，如果有50%的概率，可以从400张image里面找出2张相同的人脸；我们就可以根据这个数据来反推到底产生了多少不同的人脸</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717200642896.png" alt="image-20200717200642896" style="zoom:50%;"></p>
+<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><ol>
+<li><p>Lucas Theis, Aäron van den Oord, Matthias Bethge, “A note on the evaluation of generative models”, arXiv preprint, 2015</p>
+</li>
+<li><p><a href="https://blog.csdn.net/qq_27261889/article/details/86483505" target="_blank" rel="noopener">【深度理解】如何评价GAN网络的好坏？IS（inception score）和FID（Fréchet Inception Distance）</a></p>
+</li>
+</ol>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>GAN</tag>
+        <tag>Inception Score</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Feature Extraction of GAN</title>
     <url>/2020/07/14/GAN-feature-extraction/</url>
     <content><![CDATA[<p>本文主要叙述GAN进行feature extraction的应用，包括InfoGAN，BiGAN，VAE-GAN，Triple GAN，Domain-adversarial training。</p>
@@ -1089,81 +1164,6 @@ y=w_1x_1+..+w_mx_m+...+w_Mx_M</script><p>对于$w_m$的值，有以下三种情�
         <tag>VAE-GAN</tag>
         <tag>Triple GAN</tag>
         <tag>Domain-adversarial training</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Evaluation of Generative Models</title>
-    <url>/2020/07/17/GAN-evalution/</url>
-    <content><![CDATA[<p>本文主要叙述了几种评价GAN生成结果好坏的方法。首先叙述了使用传统的likelihood，由于传统的likelihood方法有一些局限性，本文接着使用了Inception Score的思想，来对GAN进行评价。</p>
-<h4 id="Likelihood"><a href="#Likelihood" class="headerlink" title="Likelihood"></a>Likelihood</h4><p>对于传统的评价generator生成结果的方法，是计算每个结果产生的likelihood。</p>
-<ul>
-<li>先从真实数据的distribution中sample出$\{x^1,x^2,…x^m\}$；</li>
-<li>把$x^i$代入现在的已知的distribution $P_G(x^i;\theta)$，表示$x^i$是从现在这个distribution中sample出来的概率；</li>
-<li>把这些概率相乘，得到似然函数L；最后找到对应的参数$\theta$，使似然函数取得最大值。</li>
-</ul>
-<script type="math/tex; mode=display">
-L=\frac{1}{N}\sum_{i}logP_G(x^i;\theta)</script><p>这个likelihood就可以用来评价generator的好坏，如果likelihood很高，表示这个generator有很高的几率可以产生真实数据，就是一个好的generator。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717141511915.png" alt="image-20200717141511915" style="zoom:67%;"></p>
-<p>现在会遇到一个新问题。我们没有办法计算$P_G(x^i)$，训练好的generator就可以看作是一个network，这个network可以实现输入一个vector，然后输出一张图像，但没有办法算出generator产生某个特定图像的几率。generator虽然可以产生图像，但没有办法产生特定的图像。</p>
-<p>如果generator是一个gaussian mixture model，我们就可以算出这个likelihood；但现在是复杂的模型，并不能计算likelihood；</p>
-<h5 id="Likelihood-Kernel-Density-Estimation"><a href="#Likelihood-Kernel-Density-Estimation" class="headerlink" title="Likelihood - Kernel Density Estimation"></a>Likelihood - Kernel Density Estimation</h5><p>我们可以尝试 Kernel Density Estimation来计算likelihood。</p>
-<p>首先让generator产生很多data，然后我们再使用多个gaussian distribution来逼近这些data。如果现在是图像问题，先让generator生成很多图像（高维的vector），把这些vector当作gaussian model的mean，每个mean都有一个固定的variance；把这些gaussian model都融合起来，就得到了一个gaussian mixture model;</p>
-<p><a href="https://scarleatt.github.io/2020/06/29/generative-models/" target="_blank" rel="noopener"><strong>Gaussian Mixture Model</strong>：</a>如果现在有m个gaussian model，其中$P(m)$表示选择该对应model的可能性，$P(x|m)$表示在选定了第k个model后，该mode产生x的概率，即</p>
-<script type="math/tex; mode=display">
-P(x)=\sum_mP(m)P(x|m)</script><p>那么现在我们就有了分布$P_G$的近似分布$P(x)$，那么我们就可以计算$P_G$产生真实数据$x^i$的概率$P_G(x^i)$了，我们也可以继续计算likelihood。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717152812318.png" alt="image-20200717152812318" style="zoom:67%;"></p>
-<h5 id="Likelihood-v-s-Quality"><a href="#Likelihood-v-s-Quality" class="headerlink" title="Likelihood v.s. Quality"></a>Likelihood v.s. Quality</h5><p>就算我们真的算出了这个likelihood，这个likelihood也并不一定就代表了generator的quality，很可能会出现以下两种情况：</p>
-<ul>
-<li><p>low likelihood，很可能产生high quality的图像。在下图中，很可能generator生成了很接近真实图像的动漫头像，但这时我们要来计算likelihood，生成图像和真实图像很可能差别很大，那么generator生成数据库中的真实图像的可能性就很小，即$P_G(x^i)=0$；</p>
-</li>
-<li><p>high likelihood，很可能产生low quality的图像。下图中有两个generator，算出来的likelihood值分别为$L_1,L_2$。generator 1生成的图像质量很高，且和数据库中真实的图像也很接近，我们可以先算出这个likelihood，</p>
-</li>
-</ul>
-<script type="math/tex; mode=display">
-L_1=\frac{1}{N}\sum_{i}logP_G(x^i)</script><p>对于generator 2生成的图像，有0.99的概率生成模糊的图像，有0.01的概率生成真实的清晰图像。相对于generator 1而言，$P_G(x^i)$减小了100倍，</p>
-<script type="math/tex; mode=display">
-L_2=\frac{1}{N}\sum_{i}log\frac{P_G(x^i)}{100}=-log100+\frac{1}{N}\sum_{i}logP_G(x^i)</script><p>其中$log100$的值接近4.6，但likelihood的值算出来的值一般都是几百的，generator 1和2的likelihood算出来其实差别不大。但其实这两个generator的差别很大，generator 1比2要好一百倍，只是likelihood的值算出来差别不大而已。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717152908621.png" alt="image-20200717152908621" style="zoom:67%;"></p>
-<p>因此，likelihood的值与generator的好坏其实是没有必然联系的。</p>
-<h4 id="Objective-Evaluation"><a href="#Objective-Evaluation" class="headerlink" title="Objective Evaluation"></a>Objective Evaluation</h4><p>我们可以用一个训练好的classifier来判断生成结果的好坏，加入我们现在在做人脸生成问题，我们就可以用人脸识别程序来判断，如果能进行识别，就说明生成的结果还不错。这个classifier是训练好的，比如VGG。</p>
-<p>在下图中，generator生成了一张图像x，我们把x输入这个classifier，会输出对应类别的distribution，即x属于class 1，2，3的概率。如果这个分布产生的概率越集中（某个类别概率很大，其他类别概率很小），就表示generator产生的图像品质很高，classifier可以很自信地进行分类；</p>
-<p>很可能generator就只能产生那个类别的清晰图像而已，产生的其他类别图像质量都很差，这并不是我们想要的结果。因此，我们不仅仅衡量输出概率的distribution，还需要从diverse的方向来衡量；</p>
-<p>那么什么叫从diverse的方向来衡量呢？</p>
-<p>现在让generator生成一堆图像，这里用三张不同的图像作为例子，把这些图像输入CNN，得到三个不同的distribution，再分别求三个distribution中属于同一类别概率的平均值。如果平均值的分布比较uniform，就表示每一种class都有可能被产生，就表示是diverse的；如果平均完之后的值有的很大，是某一个class的概率特别高，model就比较倾向于产生这个类别的事物，就说明output不够diverse。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717155627711.png" alt="image-20200717155627711" style="zoom:67%;"></p>
-<p>现在对于我们的模型就有两个要求，</p>
-<ul>
-<li><strong>图片质量</strong>：classifier得出的distribution要足够sharp、集中，classifier可以很自信地确定x是属于哪个类别；这可以用条件概率$P(y|x)$来表示，越大越好；</li>
-<li><strong>图片多样性</strong>：生成的图像还要足够diverse，标签的分布要均匀，因为我们不希望生成的图像都是属于某一个类别的；这可以用$p(y)$来表示。</li>
-</ul>
-<p>有了这些限制之后，就可以定义对应的score，我们这里使用的是inception network来进行evaluation，对应的分数是inception score，</p>
-<script type="math/tex; mode=display">
-{\rm Inception\ score}=\sum_x\sum_yP(y|x)logP(y|x)-\sum_yP(y)logP(y)</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717182906616.png" alt="image-20200717182906616" style="zoom:67%;"></p>
-<h4 id="We-don’t-want-memory-GAN"><a href="#We-don’t-want-memory-GAN" class="headerlink" title="We don’t want memory GAN."></a>We don’t want memory GAN.</h4><p>在训练GAN的时候，还有另外一个问题，有时候计算generator生成的图像特别清晰，这个结果也不见得是好的。因为很可能generator只是记住了training data中的某几张图像而已，而我们希望生成的图像不是database里面的，而是有创造性的图像。</p>
-<p>那么我们怎么知道生成的图像是不是database里面的呢？要一张一张去对比吗？</p>
-<p>我们可以在generator每生成一张图像的时候，都自动和database里面的每张图像进行对比，可以进行pixel-level的相似度对比；</p>
-<p>但只进行pixel-level的相似度对比是远远不够的。在下图中，有一只羊的图像，每一条曲线都代表一张图像，纵坐标表示database中的图和羊的近似程度，横坐标表示把羊图像向左移动的pixel数目。如果往左边移动一个pixel，发现这张图像还是和原来的图像最接近；如果移动两个pixel，最像的图片就变成了下图中红色方框内的图像，对应图中的红色曲线</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717195325432.png" alt="image-20200717195325432" style="zoom:67%;"></p>
-<h4 id="Mode-Dropping"><a href="#Mode-Dropping" class="headerlink" title="Mode Dropping"></a>Mode Dropping</h4><p>在训练GAN的时候，很可能会出现mode dropping，生成的图像出现多样性不够的问题。</p>
-<p>对于DCGAN（Deep Convolutional GAN），我们怎么检测其生成的人脸是多样性的呢？</p>
-<p>首先DCGAN产生很多张image，看这些生成的image中有没有非常像的，是人都可以辨识出来的。对于判断是不是同一张人脸，可以使用下列论文中提到的方法，先把DCGAN生成的图像丢到一个classifier里面，如果机器认为这是同一张图像，人再来进行观察，看是不是同一张图像。</p>
-<p>那么DCGAN到底可以产生多少张不一样的image呢？</p>
-<p>现在我们sample出400张image出来，如果有50%的概率，可以从400张image里面找出2张相同的人脸；我们就可以根据这个数据来反推到底产生了多少不同的人脸</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200717200642896.png" alt="image-20200717200642896" style="zoom:50%;"></p>
-<h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h4><ol>
-<li><p>Lucas Theis, Aäron van den Oord, Matthias Bethge, “A note on the evaluation of generative models”, arXiv preprint, 2015</p>
-</li>
-<li><p><a href="https://blog.csdn.net/qq_27261889/article/details/86483505" target="_blank" rel="noopener">【深度理解】如何评价GAN网络的好坏？IS（inception score）和FID（Fréchet Inception Distance）</a></p>
-</li>
-</ol>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>GAN</tag>
-        <tag>Inception Score</tag>
       </tags>
   </entry>
   <entry>
@@ -1773,166 +1773,6 @@ P(x|C2)=P(x_1=1|C_2)\times P(x_2=1|C_2)=\frac{1}{3}\times\frac{1}{3}</script><p>
       </tags>
   </entry>
   <entry>
-    <title>Self-Attention与Transformer模型</title>
-    <url>/2020/07/13/Transformer/</url>
-    <content><![CDATA[<p>本文是对论文《Attention is all you need》的理解。首先介绍了标准的attention机制，再介绍了transformer的encoder和decoder，以及self-attention。</p>
-<h3 id="标准attention机制"><a href="#标准attention机制" class="headerlink" title="标准attention机制"></a>标准attention机制</h3><p>下图中就表示了标准的attention机制。也可见<a href="https://scarleatt.github.io/2020/06/28/seq2seq/" target="_blank" rel="noopener">sequence to sequence</a>中有关attention机制的相关叙述。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713163711310.png" alt="image-20200713163711310"></p>
-<p>根据下面这个公式，先计算Query和每个Key之间的相似度，再乘对应的value，就可以来计算出attention的值。</p>
-<script type="math/tex; mode=display">
-\rm Attention(Query,Source)=\sum_{i=1}^{L_x}Similarity(Query,Key_i)*Value_i</script><p>其中$L_x$表示source的长度，Query和每个Key之间的相似度也有不同的计算方法，</p>
-<p>点积：</p>
-<script type="math/tex; mode=display">
-\rm Similarity(Query,Key_i)=Query*Key_i</script><p>Cosine相似性:</p>
-<script type="math/tex; mode=display">
-\rm Similarity(Query,Key_i)=\frac{Query*Key_i}{||Query||\cdot ||Key_i||}</script><p>MLP网络：</p>
-<script type="math/tex; mode=display">
-\rm Similarity(Query,Key_i)=MLP(Query,Key_i)</script><p>下面我们将从三个阶段来详细介绍attention机制。</p>
-<p><strong>阶段1</strong>：根据Query和Key计算相似度Similarity，可以用上文介绍的三种方法，即求两者的点乘、计算两者的cosin相似度、根据神经网络来计算；我们把这一阶段算出来的$Key_i$与Query之间的相似度记为$\alpha_i$；</p>
-<p><strong>阶段2</strong>：把$\alpha_i$输入softmax函数，进行归一化，得到$\hat \alpha_i$；</p>
-<p><strong>阶段3</strong>：根据$\hat \alpha_i$和Value计算attention的值，即</p>
-<script type="math/tex; mode=display">
-\rm Attention(Query,Key,Value)=\sum_{i=1}^{L_x}\alpha_i\cdot Value_i</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713164825271.png" alt="image-20200713164825271"></p>
-<h3 id="Transformer"><a href="#Transformer" class="headerlink" title="Transformer"></a>Transformer</h3><h4 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h4><p>transform模型由多个encoder和decoder构成，如下图所示</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712185243525.png" alt="image-20200712185243525" style="zoom:80%;"></p>
-<h4 id="Encoder"><a href="#Encoder" class="headerlink" title="Encoder"></a>Encoder</h4><p>Encoder由N=6个相同的layer组成，layer就是上图中左边的方框部分，左边的英文字母“Nx”表示layer的数量，这里N=6。每个layer都有两个sub-layer，即multi-head attention和position-wise feed-forward network。每个sub-layer还加入了residual connection和layer normalization，因此每个sub-layer的输出为</p>
-<script type="math/tex; mode=display">
-\rm sub\_layer_{output}=LayerNorm(x+Sublayer(x))</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712214746642.png" alt="image-20200712214746642" style="zoom:67%;"></p>
-<h4 id="Decoder"><a href="#Decoder" class="headerlink" title="Decoder"></a>Decoder</h4><p>Decoder也由6个相同的layer组成，layer就是上图的右边的方框部分，此时N=6。layer由3个sub-layer组成，除了encoder提到的两个sub-layer，还有Masked Multi-Head Attention。</p>
-<p>新加入的masked multi-head attention，在进行softmax之前对未来的position进行mask（设为-inf），可以保证对位置i的预测只依赖位置小于i的已知输出，不会接触到未来位置的信息。</p>
-<ul>
-<li>输出：对应i位置的输出词的概率分布，如果词库中有一万个单词，输出的vector就是一万维；</li>
-<li>输入：encoder的输出 &amp; 对应i-1位置decoder的输出。中间的attention（masked）并不是self-attention，K，V来自encoder，Q来自上一位置decoder的输出；</li>
-<li>解码：编码可以并行计算，一次性全部encoding出来。但解码不是一次把所有的序列解出来，由于要用到上一个位置encoder的出书作为这次的query，因此解码是像rnn一样一个一个解出来的。</li>
-</ul>
-<p>动图演示，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/transformer_decoding_2.gif" alt="transformer_decoding_2"></p>
-<h4 id="Self-Attention"><a href="#Self-Attention" class="headerlink" title="Self-Attention"></a>Self-Attention</h4><p>attention有三个输入$Q,K,V$。<span style="color: red">对于self-attention来讲，Q，K，V三者都来自同一个输入向量X，只是将X进行了不同的线性变换（乘上不同的权重矩阵）。</span></p>
-<p>attention可以通过以下式子计算，先计算Q和K的点乘，再进行scale（除以$\sqrt{d_k}$），输入softmax函数，再与V进行点乘，即可得到输出。</p>
-<script type="math/tex; mode=display">
-{\rm Attention}(Q,K,V)={\rm softmax}(\frac{QK^T}{\sqrt{d_k}})V</script><p>我们把输入的embedding全都放到一个矩阵$X$内，矩阵的每一行表示输入序列的一个word，$W^Q,W^K,W^V$表示Q，K，V对应的权重矩阵，可以通过网络进行学习。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712215525200.png" alt="image-20200712215525200" style="zoom: 50%;"></p>
-<p>得到Q，K，V之后，就可以进行self-attention的计算，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712220405217.png" alt="image-20200712220405217" style="zoom: 50%;"></p>
-<p>Q1：为什么选择dot-product attention，而不是additive attention？</p>
-<p>A：dot-product attention可以使用高度优化过后的矩阵运算代码。</p>
-<p>Q2：为什么要除以$\sqrt{d_k}$这一项？</p>
-<p>A：（1）在$d_k$很小的时候，如果不进行scaling，dot-product attention和additive attention的performance相差不大；如果$d_k$值很大，那么点乘的值就会很大，不做scaling的话，效果就没有additive attention好。（2）如果$d_k$的值很大，点乘的结果也很大，输入softmax函数之后的梯度就会变得很小，不利于back propagation。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712192858975-20200713101139647.png" alt="image-20200712192858975"></p>
-<h4 id="Multi-Head-Attention"><a href="#Multi-Head-Attention" class="headerlink" title="Multi-Head Attention"></a>Multi-Head Attention</h4><p>multi-head attention则是将Q，K，V分别进行h次不同的<strong>线性变换</strong>，再把这些不同的attention结果连接起来，即</p>
-<script type="math/tex; mode=display">
-\rm MultiHead(Q,K,V)=Concat(head_1,..,head_h)W^O\\
-\quad head_i=Attention(QW_i^Q,KW_i^K,VW_i^V)</script><p>multi-head attention的流程图如下，1) input sequence为<span style="color: green">Thinking Machines</span>；2) embedding每个word，转化成vector；3) 分别计算8个attention head的Q，K，V；4) ；使用上一步的结果Q，K，V来计算attention的值；5) 将$Z^0,…,Z^7$的结果连接去来，形成一个大矩阵，再用这个大矩阵来乘矩阵$W^O$，得到最后的结果Z。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713120312773.png" alt="image-20200713120312773"></p>
-<h4 id="Positional-Encoding"><a href="#Positional-Encoding" class="headerlink" title="Positional Encoding"></a>Positional Encoding</h4><p>由于这个模型并没有包含RNN和CNN，并没有考虑输入序列的order，我们必须在embedding之后把序列的order也考虑进去，把位置信息positional encoding加上embedding，就得到了带位置信息的embedding。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713100210115.png" alt="image-20200713100210115"></p>
-<p>作者使用了不同频率的正弦和余弦函数来完成这项工作，</p>
-<script type="math/tex; mode=display">
-PE_{(pos,2i)}=sin(pos/10000^{2i/d_{model}})\\
-PE_{(pos,2i+1)}=cos(pos/10000^{2i/d_{model}})</script><p>其中pos就表示position，i表示dimension。positional encoding的每个维度都对应着一个正弦曲线。</p>
-<p>NLP任务还需要考虑到单词的相对位置，根据下列正余弦的变化公式，</p>
-<script type="math/tex; mode=display">
-\rm sin(\alpha+\beta)=sin\alpha cos\beta+cos\alpha sin\beta\\
-cos(\alpha+\beta)=cos\alpha cos\beta-sin\alpha sin\beta</script><p>可得出：现在对于固定的offset k，$PE_{pos+k}$可以表示成$PE_{pos}$的线性变换，</p>
-<h4 id="Residual-Connection"><a href="#Residual-Connection" class="headerlink" title="Residual Connection"></a>Residual Connection</h4><p>在每个encoder的sub-layer中，都对应一个residual connection和layer normalization。</p>
-<p>下图中Add表示residual connection，是为了解决多层神经网络训练困难的问题，通过将前一层的信息无差地传递到下一层，可以有效地仅关注差异部分。</p>
-<p>Norm则表示Layer Normalization，通过对层的激活值的归一化，可以加速模型的训练过程，使其更快地收敛。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713172314745.png" alt="image-20200713172314745" style="zoom:67%;"></p>
-<h4 id="Layer-Normalization"><a href="#Layer-Normalization" class="headerlink" title="Layer Normalization"></a>Layer Normalization</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>输入x有m个batch，即$B=\{x_1,x_2,..,x_m\}$，每个$x_i$都有K个element，对每个batch进行layer Normalization，得到$B’=\{y_1,y_2,..,y_m\}$。</p>
-<p>对于其中的某个batch $x_i=\{x_{i,1},x_{i,2},…,x_{i,K}\}$，我们先求出其对应的均值和方差，即</p>
-<script type="math/tex; mode=display">
-\mu_i=\frac{1}{K}\sum_{k=1}^Kx_{i,k}\\
-\sigma_i^2=\frac{1}{K}\sum_{k=1}^K(x_{i,k}-\mu)^2</script><p>再进行归一化，参数$\epsilon$是为了解决分母突然为0的情况。</p>
-<script type="math/tex; mode=display">
-\hat x_{i,k}=\frac{x_{i,k}-\mu_i}{\sqrt{\sigma_i^2+\epsilon}}</script><p>经过缩放和转移的步骤，可得到最后的结果</p>
-<script type="math/tex; mode=display">
-y_i=\gamma \hat x_i+\beta=LN_{\gamma,\beta}(x_i)</script><p>对于输入的tensor的形状为$[m,H,W,C]$，m表示batch的数量，H和W表示输入数据的高度和宽度，C表示channel的数量。Layer Normalization是对每个channel进行归一化。</p>
-<h5 id="BN-vs-LN"><a href="#BN-vs-LN" class="headerlink" title="BN vs LN"></a>BN vs LN</h5><p>Batch Norm和Layer Norm的主要区别在于归一化的维度不一样，</p>
-<ul>
-<li>batchNorm是在batch上，对mHW做归一化；</li>
-<li>layerNorm是在channel方向上，对CHW做归一化。</li>
-</ul>
-<p>BN的具体做法就是对每一小批数据，在batch这个方向上做归一化。如下图所示：</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713220311349.png" alt="image-20200713220311349" style="zoom:100%;"></p>
-<p>而对于Layer Norm，则是在channel上</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713220419384.png" alt="image-20200713220419384"></p>
-<h3 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h3><p><strong>标准的attention和self-attention的主要区别</strong>在于：self-attention的Q，K，V都是由输入序列X经过线性变换所提取到的。</p>
-<p><strong>Transformer模型：</strong></p>
-<p>优点：transformer模型不仅可以应用到NLP的机器翻译领域，还可以应用到其他非NLP领域，是非常有科研潜力的一个方向。</p>
-<p>缺点：（1）没有使用RNN和CNN，使模型并不能捕捉一些局部特征，使用Transform+RNN+CNN效果可能会更好；（2）Transform丢失的位置信息在NLP其实是非常重要的，加入position encoding其实只是一个权宜之计，并不能从根本上改变transform的结构缺陷。</p>
-<h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h3><p>[1] <a href="https://zhuanlan.zhihu.com/p/48508221" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/48508221</a></p>
-<p>[2] <a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-transformer/</a></p>
-<p>[3] Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need [C]//Advances in Neural Information Processing Systems. 2017: 5998-6008.</p>
-<p>[4] <a href="https://mp.weixin.qq.com/s?__biz=MzI5NDMzMjY1MA==&amp;mid=2247485591&amp;idx=1&amp;sn=ab8b2204f81e0a8de6d1882df9a9c2c0&amp;scene=21#wechat_redirect" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzI5NDMzMjY1MA==&amp;mid=2247485591&amp;idx=1&amp;sn=ab8b2204f81e0a8de6d1882df9a9c2c0&amp;scene=21#wechat_redirect</a></p>
-<p>[5] <a href="https://leimao.github.io/blog/Layer-Normalization/" target="_blank" rel="noopener">Layer Normalization</a></p>
-]]></content>
-      <categories>
-        <category>Knowledge Graph</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Transformer</tag>
-        <tag>Self-Attention</tag>
-        <tag>Sequence to Sequence</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Word Embedding</title>
-    <url>/2020/06/11/Word-Embedding/</url>
-    <content><![CDATA[<h4 id="Word-Embedding"><a href="#Word-Embedding" class="headerlink" title="Word Embedding"></a>Word Embedding</h4><p>如果使用1-of-N encoding，每个单词用一个vector表示，那么5个单词就需要5个vector；如果我们把同一个类别的单词都放到那个类里，即属于class1的单词有dog、cat、bird，属于动物类的单词，同理可以得出class2，class3；</p>
-<p>但只做classify是不够的，这些class之间也有一些其他的联系；比如class1属于动物，class3属于植物，他们都是生物，只做classify并不能体现这种联系；</p>
-<p>现在我们把每个word都project到一个两个dimension上， 水平的dimension可以是表示生物（class1，class3）和其他类别class2之间的差距，竖直的dimension可以是会动（class2，class3）的和不会动class1之间的差距；</p>
-<p>如果现在有10w个单词，1-of-N encoding就需要10w个vector，但word embedding可能只需要50维左右，就可以表示这些所有的word。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611094055907.png" alt="image-20200611094055907" style="zoom:50%;"></p>
-<p>word2vec是一个无监督学习问题，如果network的input为“Apple”，要输出其对应的vector </p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611095916810.png" alt="image-20200611095916810" style="zoom:50%;"></p>
-<p>下面我们将叙述生成词向量的两种主要手段。</p>
-<h4 id="Count-based"><a href="#Count-based" class="headerlink" title="Count based"></a>Count based</h4><p>基于计数的方法，记录文本中词的出现次数。如果两个单词$w_i,w_j$常常一起出现，那么我们就认为其对应的vector $V(w_i),V(w_j)$之间就是非常接近的。</p>
-<p>用$N_{i,j}$表示$w_i,w_j$在同一个document中出现的次数，那么我们希望找到对应的$V(w_i),V(w_j)$，其做inner product的值和这个次数越接近越好。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611102225747.png" alt="image-20200611102225747" style="zoom:50%;"></p>
-<h4 id="Prediction-based"><a href="#Prediction-based" class="headerlink" title="Prediction-based"></a>Prediction-based</h4><p>基于预测的方法，即可以通过上下文预测中心词，也可以通过中心词预测上下文。中心词即我们要预测的词。在下文中，$w_i$是我们要预测的值，$…,w_{i-2},w_{i-1}$就是其对应的上下文；</p>
-<p>现在我们把$w_{i-1}$的one-hot encoding作为网络的输入，网络的输出为每个词作为下一个词$w_i$输出的概率，如果词袋中有10w个词，那么输出的维度就对应为10w维。</p>
-<p>把网络中第一个hidden layer的input拿出来，即$z=(z_1,z_2,…)^T$；如果输入为不同1-of-N encoding，那么对应的z也是不一样的。我们就可以用z来代表一个word，即z就是我们要寻找的word vector $V(w)$。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611102755128.png" alt="image-20200611102755128" style="zoom: 40%;"></p>
-<p>如果现在有两个training text，“蔡英文 宣誓就职”、“马英九 宣誓就职”，如果输入的1-of-N encoding是“蔡英文”或“马英九”，那么我们希望在网络的输出概率中，“宣誓就职”的概率是最大的。同理我们也可以把网络的第一个hidden layer的输入作为z，就是我们要寻找的word vector $V(w)$。</p>
-<p>这时我们就需要中间的hidden layer来做这样一件事，如果输入为不同的词汇（“蔡英文”，“马英九”），那么我们希望中间的hidden layer可以把不同的词汇project到相同的空间，这样网络的输出才可能都是“宣誓就职”对应的概率最大。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705122246038.png" alt="image-20200705122246038" style="zoom:50%;"></p>
-<h5 id="Sharing-weight"><a href="#Sharing-weight" class="headerlink" title="Sharing weight"></a><strong>Sharing weight</strong></h5><p>只考虑前面的一个词汇，来预测下一个词汇会很难，我们可以考虑前面的几个词汇。现在我们来叙述考虑前两个词汇的结果。</p>
-<p>现在我们并不能像之间的neural network那样，所有的输入都连成一个vector作为输入。但实际上，我们希望不同的one-hot vector的同一维度之间是tie在一起的。即$w_{i-1},w_{i-2}$的第一维对应$z_1$，其对应的weight是一样的；同理$w_{i-1},w_{i-2}$的第二维对应$z_1$，其对应的weight是一样的，……</p>
-<p>Q：为什么不同的one-hot vector的同一维度之间是tie在一起的呢？</p>
-<p>A：我们现在把同一个word放到$w_{i-1},w_{i-2}$的位置， 如果每一维对应的weight都不一样，那么实际上就输入了两个vector。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611103812991.png" alt="image-20200611103812991" style="zoom:50%;"></p>
-<p>如果我们设置$x_{i-1},x_{i-2}$的长度都是$|V|$，$z$的长度是$|Z|$，那么</p>
-<script type="math/tex; mode=display">
-z=W_1x_{i-2}+W_2x_{i-1}</script><p>其中$W_1=W_2=W$，那么$z=W(x_{i-2}+x_{i-1})$，也就得到了word vector $V(w)$，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611104833054.png" alt="image-20200611104833054" style="zoom:50%;"></p>
-<p>那么在实际的网络训练中，我们如何保证$W_1=W_2$呢？</p>
-<p>首先需要将$w_1,w_2$初始化为相同的值，那么</p>
-<script type="math/tex; mode=display">
-w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}\\
-w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}</script><p>由于gradient的值不同，$w_1,w_2$在更新一次参数之后就不相等了，必须保证每次更新之后的值还是一样的，因此</p>
-<script type="math/tex; mode=display">
-w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}-\eta \frac{\partial C}{\partial w_j}\\
-w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}-\eta \frac{\partial C}{\partial w_i}</script><p>这样每次更新的值都一样的，也就保证了$w_1=w_2$</p>
-<h5 id="Training"><a href="#Training" class="headerlink" title="Training"></a><strong>Training</strong></h5><p>对于输入“潮水、退了”，我们希望network的输出和“就”越接近越好，即最小化cross entropy</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611103701528.png" alt="image-20200611103701528" style="zoom:50%;"></p>
-<h5 id="Various-Architectures"><a href="#Various-Architectures" class="headerlink" title="Various Architectures"></a>Various Architectures</h5><p>CBOW：根据上下文的词汇$w_{i-1},w_{i+1}$来预测中心词$w_i$;</p>
-<p>Skip-gram：根据中心词$w_i$来预测上下文$w_{i-1},w_{i+1}$。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611110004840.png" alt="image-20200611110004840" style="zoom:50%;"></p>
-<h5 id="Result"><a href="#Result" class="headerlink" title="Result"></a>Result</h5><p>vec(Rome) - vec(Italy) $\approx$ vec(Berlin) - vec(Germany)，Italy和Rome之间有is-capital-of的关系，这种关系也恰好在Madrid和Spain之间出现。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611110430525.png" alt="image-20200611110430525" style="zoom:50%;"></p>
-<p>如果现在有人问机器一个问题，Rome和Italy之间的关系就像是Berlin和什么的关系？我们就可以通过计算vec(Berlin) $\approx$ vec(Rome) - vec(Italy)  + vec(Germany)得出结果。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705125922175.png" alt="image-20200705125922175" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>word embedding</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Recurrent Neural Network</title>
     <url>/2020/06/10/RNN/</url>
     <content><![CDATA[<h4 id="Example-Application"><a href="#Example-Application" class="headerlink" title="Example Application"></a>Example Application</h4><p>将Taipei作为向量的输入，由于RNN网络是有记忆的，因此可以根据输入来预测目的地dest，以及离开的时间</p>
@@ -2114,6 +1954,110 @@ a=h(c')f(z_0)</script><h4 id="Learning"><a href="#Learning" class="headerlink" t
       </tags>
   </entry>
   <entry>
+    <title>Self-Attention与Transformer模型</title>
+    <url>/2020/07/13/Transformer/</url>
+    <content><![CDATA[<p>本文是对论文《Attention is all you need》的理解。首先介绍了标准的attention机制，再介绍了transformer的encoder和decoder，以及self-attention。</p>
+<h3 id="标准attention机制"><a href="#标准attention机制" class="headerlink" title="标准attention机制"></a>标准attention机制</h3><p>下图中就表示了标准的attention机制。也可见<a href="https://scarleatt.github.io/2020/06/28/seq2seq/" target="_blank" rel="noopener">sequence to sequence</a>中有关attention机制的相关叙述。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713163711310.png" alt="image-20200713163711310"></p>
+<p>根据下面这个公式，先计算Query和每个Key之间的相似度，再乘对应的value，就可以来计算出attention的值。</p>
+<script type="math/tex; mode=display">
+\rm Attention(Query,Source)=\sum_{i=1}^{L_x}Similarity(Query,Key_i)*Value_i</script><p>其中$L_x$表示source的长度，Query和每个Key之间的相似度也有不同的计算方法，</p>
+<p>点积：</p>
+<script type="math/tex; mode=display">
+\rm Similarity(Query,Key_i)=Query*Key_i</script><p>Cosine相似性:</p>
+<script type="math/tex; mode=display">
+\rm Similarity(Query,Key_i)=\frac{Query*Key_i}{||Query||\cdot ||Key_i||}</script><p>MLP网络：</p>
+<script type="math/tex; mode=display">
+\rm Similarity(Query,Key_i)=MLP(Query,Key_i)</script><p>下面我们将从三个阶段来详细介绍attention机制。</p>
+<p><strong>阶段1</strong>：根据Query和Key计算相似度Similarity，可以用上文介绍的三种方法，即求两者的点乘、计算两者的cosin相似度、根据神经网络来计算；我们把这一阶段算出来的$Key_i$与Query之间的相似度记为$\alpha_i$；</p>
+<p><strong>阶段2</strong>：把$\alpha_i$输入softmax函数，进行归一化，得到$\hat \alpha_i$；</p>
+<p><strong>阶段3</strong>：根据$\hat \alpha_i$和Value计算attention的值，即</p>
+<script type="math/tex; mode=display">
+\rm Attention(Query,Key,Value)=\sum_{i=1}^{L_x}\alpha_i\cdot Value_i</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713164825271.png" alt="image-20200713164825271"></p>
+<h3 id="Transformer"><a href="#Transformer" class="headerlink" title="Transformer"></a>Transformer</h3><h4 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h4><p>transform模型由多个encoder和decoder构成，如下图所示</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712185243525.png" alt="image-20200712185243525" style="zoom:80%;"></p>
+<h4 id="Encoder"><a href="#Encoder" class="headerlink" title="Encoder"></a>Encoder</h4><p>Encoder由N=6个相同的layer组成，layer就是上图中左边的方框部分，左边的英文字母“Nx”表示layer的数量，这里N=6。每个layer都有两个sub-layer，即multi-head attention和position-wise feed-forward network。每个sub-layer还加入了residual connection和layer normalization，因此每个sub-layer的输出为</p>
+<script type="math/tex; mode=display">
+\rm sub\_layer_{output}=LayerNorm(x+Sublayer(x))</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712214746642.png" alt="image-20200712214746642" style="zoom:67%;"></p>
+<h4 id="Decoder"><a href="#Decoder" class="headerlink" title="Decoder"></a>Decoder</h4><p>Decoder也由6个相同的layer组成，layer就是上图的右边的方框部分，此时N=6。layer由3个sub-layer组成，除了encoder提到的两个sub-layer，还有Masked Multi-Head Attention。</p>
+<p>新加入的masked multi-head attention，在进行softmax之前对未来的position进行mask（设为-inf），可以保证对位置i的预测只依赖位置小于i的已知输出，不会接触到未来位置的信息。</p>
+<ul>
+<li>输出：对应i位置的输出词的概率分布，如果词库中有一万个单词，输出的vector就是一万维；</li>
+<li>输入：encoder的输出 &amp; 对应i-1位置decoder的输出。中间的attention（masked）并不是self-attention，K，V来自encoder，Q来自上一位置decoder的输出；</li>
+<li>解码：编码可以并行计算，一次性全部encoding出来。但解码不是一次把所有的序列解出来，由于要用到上一个位置encoder的出书作为这次的query，因此解码是像rnn一样一个一个解出来的。</li>
+</ul>
+<p>动图演示，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/transformer_decoding_2.gif" alt="transformer_decoding_2"></p>
+<h4 id="Self-Attention"><a href="#Self-Attention" class="headerlink" title="Self-Attention"></a>Self-Attention</h4><p>attention有三个输入$Q,K,V$。<span style="color: red">对于self-attention来讲，Q，K，V三者都来自同一个输入向量X，只是将X进行了不同的线性变换（乘上不同的权重矩阵）。</span></p>
+<p>attention可以通过以下式子计算，先计算Q和K的点乘，再进行scale（除以$\sqrt{d_k}$），输入softmax函数，再与V进行点乘，即可得到输出。</p>
+<script type="math/tex; mode=display">
+{\rm Attention}(Q,K,V)={\rm softmax}(\frac{QK^T}{\sqrt{d_k}})V</script><p>我们把输入的embedding全都放到一个矩阵$X$内，矩阵的每一行表示输入序列的一个word，$W^Q,W^K,W^V$表示Q，K，V对应的权重矩阵，可以通过网络进行学习。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712215525200.png" alt="image-20200712215525200" style="zoom: 50%;"></p>
+<p>得到Q，K，V之后，就可以进行self-attention的计算，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712220405217.png" alt="image-20200712220405217" style="zoom: 50%;"></p>
+<p>Q1：为什么选择dot-product attention，而不是additive attention？</p>
+<p>A：dot-product attention可以使用高度优化过后的矩阵运算代码。</p>
+<p>Q2：为什么要除以$\sqrt{d_k}$这一项？</p>
+<p>A：（1）在$d_k$很小的时候，如果不进行scaling，dot-product attention和additive attention的performance相差不大；如果$d_k$值很大，那么点乘的值就会很大，不做scaling的话，效果就没有additive attention好。（2）如果$d_k$的值很大，点乘的结果也很大，输入softmax函数之后的梯度就会变得很小，不利于back propagation。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200712192858975-20200713101139647.png" alt="image-20200712192858975"></p>
+<h4 id="Multi-Head-Attention"><a href="#Multi-Head-Attention" class="headerlink" title="Multi-Head Attention"></a>Multi-Head Attention</h4><p>multi-head attention则是将Q，K，V分别进行h次不同的<strong>线性变换</strong>，再把这些不同的attention结果连接起来，即</p>
+<script type="math/tex; mode=display">
+\rm MultiHead(Q,K,V)=Concat(head_1,..,head_h)W^O\\
+\quad head_i=Attention(QW_i^Q,KW_i^K,VW_i^V)</script><p>multi-head attention的流程图如下，1) input sequence为<span style="color: green">Thinking Machines</span>；2) embedding每个word，转化成vector；3) 分别计算8个attention head的Q，K，V；4) ；使用上一步的结果Q，K，V来计算attention的值；5) 将$Z^0,…,Z^7$的结果连接去来，形成一个大矩阵，再用这个大矩阵来乘矩阵$W^O$，得到最后的结果Z。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713120312773.png" alt="image-20200713120312773"></p>
+<h4 id="Positional-Encoding"><a href="#Positional-Encoding" class="headerlink" title="Positional Encoding"></a>Positional Encoding</h4><p>由于这个模型并没有包含RNN和CNN，并没有考虑输入序列的order，我们必须在embedding之后把序列的order也考虑进去，把位置信息positional encoding加上embedding，就得到了带位置信息的embedding。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713100210115.png" alt="image-20200713100210115"></p>
+<p>作者使用了不同频率的正弦和余弦函数来完成这项工作，</p>
+<script type="math/tex; mode=display">
+PE_{(pos,2i)}=sin(pos/10000^{2i/d_{model}})\\
+PE_{(pos,2i+1)}=cos(pos/10000^{2i/d_{model}})</script><p>其中pos就表示position，i表示dimension。positional encoding的每个维度都对应着一个正弦曲线。</p>
+<p>NLP任务还需要考虑到单词的相对位置，根据下列正余弦的变化公式，</p>
+<script type="math/tex; mode=display">
+\rm sin(\alpha+\beta)=sin\alpha cos\beta+cos\alpha sin\beta\\
+cos(\alpha+\beta)=cos\alpha cos\beta-sin\alpha sin\beta</script><p>可得出：现在对于固定的offset k，$PE_{pos+k}$可以表示成$PE_{pos}$的线性变换，</p>
+<h4 id="Residual-Connection"><a href="#Residual-Connection" class="headerlink" title="Residual Connection"></a>Residual Connection</h4><p>在每个encoder的sub-layer中，都对应一个residual connection和layer normalization。</p>
+<p>下图中Add表示residual connection，是为了解决多层神经网络训练困难的问题，通过将前一层的信息无差地传递到下一层，可以有效地仅关注差异部分。</p>
+<p>Norm则表示Layer Normalization，通过对层的激活值的归一化，可以加速模型的训练过程，使其更快地收敛。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713172314745.png" alt="image-20200713172314745" style="zoom:67%;"></p>
+<h4 id="Layer-Normalization"><a href="#Layer-Normalization" class="headerlink" title="Layer Normalization"></a>Layer Normalization</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>输入x有m个batch，即$B=\{x_1,x_2,..,x_m\}$，每个$x_i$都有K个element，对每个batch进行layer Normalization，得到$B’=\{y_1,y_2,..,y_m\}$。</p>
+<p>对于其中的某个batch $x_i=\{x_{i,1},x_{i,2},…,x_{i,K}\}$，我们先求出其对应的均值和方差，即</p>
+<script type="math/tex; mode=display">
+\mu_i=\frac{1}{K}\sum_{k=1}^Kx_{i,k}\\
+\sigma_i^2=\frac{1}{K}\sum_{k=1}^K(x_{i,k}-\mu)^2</script><p>再进行归一化，参数$\epsilon$是为了解决分母突然为0的情况。</p>
+<script type="math/tex; mode=display">
+\hat x_{i,k}=\frac{x_{i,k}-\mu_i}{\sqrt{\sigma_i^2+\epsilon}}</script><p>经过缩放和转移的步骤，可得到最后的结果</p>
+<script type="math/tex; mode=display">
+y_i=\gamma \hat x_i+\beta=LN_{\gamma,\beta}(x_i)</script><p>对于输入的tensor的形状为$[m,H,W,C]$，m表示batch的数量，H和W表示输入数据的高度和宽度，C表示channel的数量。Layer Normalization是对每个channel进行归一化。</p>
+<h5 id="BN-vs-LN"><a href="#BN-vs-LN" class="headerlink" title="BN vs LN"></a>BN vs LN</h5><p>Batch Norm和Layer Norm的主要区别在于归一化的维度不一样，</p>
+<ul>
+<li>batchNorm是在batch上，对mHW做归一化；</li>
+<li>layerNorm是在channel方向上，对CHW做归一化。</li>
+</ul>
+<p>BN的具体做法就是对每一小批数据，在batch这个方向上做归一化。如下图所示：</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713220311349.png" alt="image-20200713220311349" style="zoom:100%;"></p>
+<p>而对于Layer Norm，则是在channel上</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200713220419384.png" alt="image-20200713220419384"></p>
+<h3 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h3><p><strong>标准的attention和self-attention的主要区别</strong>在于：self-attention的Q，K，V都是由输入序列X经过线性变换所提取到的。</p>
+<p><strong>Transformer模型：</strong></p>
+<p>优点：transformer模型不仅可以应用到NLP的机器翻译领域，还可以应用到其他非NLP领域，是非常有科研潜力的一个方向。</p>
+<p>缺点：（1）没有使用RNN和CNN，使模型并不能捕捉一些局部特征，使用Transform+RNN+CNN效果可能会更好；（2）Transform丢失的位置信息在NLP其实是非常重要的，加入position encoding其实只是一个权宜之计，并不能从根本上改变transform的结构缺陷。</p>
+<h3 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h3><p>[1] <a href="https://zhuanlan.zhihu.com/p/48508221" target="_blank" rel="noopener">https://zhuanlan.zhihu.com/p/48508221</a></p>
+<p>[2] <a href="https://jalammar.github.io/illustrated-transformer/" target="_blank" rel="noopener">https://jalammar.github.io/illustrated-transformer/</a></p>
+<p>[3] Vaswani A, Shazeer N, Parmar N, et al. Attention is all you need [C]//Advances in Neural Information Processing Systems. 2017: 5998-6008.</p>
+<p>[4] <a href="https://mp.weixin.qq.com/s?__biz=MzI5NDMzMjY1MA==&amp;mid=2247485591&amp;idx=1&amp;sn=ab8b2204f81e0a8de6d1882df9a9c2c0&amp;scene=21#wechat_redirect" target="_blank" rel="noopener">https://mp.weixin.qq.com/s?__biz=MzI5NDMzMjY1MA==&amp;mid=2247485591&amp;idx=1&amp;sn=ab8b2204f81e0a8de6d1882df9a9c2c0&amp;scene=21#wechat_redirect</a></p>
+<p>[5] <a href="https://leimao.github.io/blog/Layer-Normalization/" target="_blank" rel="noopener">Layer Normalization</a></p>
+]]></content>
+      <categories>
+        <category>Knowledge Graph</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Transformer</tag>
+        <tag>Self-Attention</tag>
+        <tag>Sequence to Sequence</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Wasserstein GAN (WGAN)</title>
     <url>/2020/07/14/WGAN/</url>
     <content><![CDATA[<p>本文主要介绍了WGAN的核心思想。由于JS divergence自身的限制，我们先改进了classifier的输出分数的分布，从sigmoid改成了linear，即LSGAN；还有另外一种改进方式，使用Wasserstein distance来衡量两个分布之间的差异，即WGAN。</p>
@@ -2214,6 +2158,62 @@ V(G,D)\approx\mathop{\rm max}_{D}\{E_{x\sim P_{data}}[D(x)]-E_{x\sim P_{G}}[D(x)
         <tag>Earth Mover’s Distance</tag>
         <tag>Lipschitz Function</tag>
         <tag>EBGAN</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Word Embedding</title>
+    <url>/2020/06/11/Word-Embedding/</url>
+    <content><![CDATA[<h4 id="Word-Embedding"><a href="#Word-Embedding" class="headerlink" title="Word Embedding"></a>Word Embedding</h4><p>如果使用1-of-N encoding，每个单词用一个vector表示，那么5个单词就需要5个vector；如果我们把同一个类别的单词都放到那个类里，即属于class1的单词有dog、cat、bird，属于动物类的单词，同理可以得出class2，class3；</p>
+<p>但只做classify是不够的，这些class之间也有一些其他的联系；比如class1属于动物，class3属于植物，他们都是生物，只做classify并不能体现这种联系；</p>
+<p>现在我们把每个word都project到一个两个dimension上， 水平的dimension可以是表示生物（class1，class3）和其他类别class2之间的差距，竖直的dimension可以是会动（class2，class3）的和不会动class1之间的差距；</p>
+<p>如果现在有10w个单词，1-of-N encoding就需要10w个vector，但word embedding可能只需要50维左右，就可以表示这些所有的word。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611094055907.png" alt="image-20200611094055907" style="zoom:50%;"></p>
+<p>word2vec是一个无监督学习问题，如果network的input为“Apple”，要输出其对应的vector </p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611095916810.png" alt="image-20200611095916810" style="zoom:50%;"></p>
+<p>下面我们将叙述生成词向量的两种主要手段。</p>
+<h4 id="Count-based"><a href="#Count-based" class="headerlink" title="Count based"></a>Count based</h4><p>基于计数的方法，记录文本中词的出现次数。如果两个单词$w_i,w_j$常常一起出现，那么我们就认为其对应的vector $V(w_i),V(w_j)$之间就是非常接近的。</p>
+<p>用$N_{i,j}$表示$w_i,w_j$在同一个document中出现的次数，那么我们希望找到对应的$V(w_i),V(w_j)$，其做inner product的值和这个次数越接近越好。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611102225747.png" alt="image-20200611102225747" style="zoom:50%;"></p>
+<h4 id="Prediction-based"><a href="#Prediction-based" class="headerlink" title="Prediction-based"></a>Prediction-based</h4><p>基于预测的方法，即可以通过上下文预测中心词，也可以通过中心词预测上下文。中心词即我们要预测的词。在下文中，$w_i$是我们要预测的值，$…,w_{i-2},w_{i-1}$就是其对应的上下文；</p>
+<p>现在我们把$w_{i-1}$的one-hot encoding作为网络的输入，网络的输出为每个词作为下一个词$w_i$输出的概率，如果词袋中有10w个词，那么输出的维度就对应为10w维。</p>
+<p>把网络中第一个hidden layer的input拿出来，即$z=(z_1,z_2,…)^T$；如果输入为不同1-of-N encoding，那么对应的z也是不一样的。我们就可以用z来代表一个word，即z就是我们要寻找的word vector $V(w)$。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611102755128.png" alt="image-20200611102755128" style="zoom: 40%;"></p>
+<p>如果现在有两个training text，“蔡英文 宣誓就职”、“马英九 宣誓就职”，如果输入的1-of-N encoding是“蔡英文”或“马英九”，那么我们希望在网络的输出概率中，“宣誓就职”的概率是最大的。同理我们也可以把网络的第一个hidden layer的输入作为z，就是我们要寻找的word vector $V(w)$。</p>
+<p>这时我们就需要中间的hidden layer来做这样一件事，如果输入为不同的词汇（“蔡英文”，“马英九”），那么我们希望中间的hidden layer可以把不同的词汇project到相同的空间，这样网络的输出才可能都是“宣誓就职”对应的概率最大。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705122246038.png" alt="image-20200705122246038" style="zoom:50%;"></p>
+<h5 id="Sharing-weight"><a href="#Sharing-weight" class="headerlink" title="Sharing weight"></a><strong>Sharing weight</strong></h5><p>只考虑前面的一个词汇，来预测下一个词汇会很难，我们可以考虑前面的几个词汇。现在我们来叙述考虑前两个词汇的结果。</p>
+<p>现在我们并不能像之间的neural network那样，所有的输入都连成一个vector作为输入。但实际上，我们希望不同的one-hot vector的同一维度之间是tie在一起的。即$w_{i-1},w_{i-2}$的第一维对应$z_1$，其对应的weight是一样的；同理$w_{i-1},w_{i-2}$的第二维对应$z_1$，其对应的weight是一样的，……</p>
+<p>Q：为什么不同的one-hot vector的同一维度之间是tie在一起的呢？</p>
+<p>A：我们现在把同一个word放到$w_{i-1},w_{i-2}$的位置， 如果每一维对应的weight都不一样，那么实际上就输入了两个vector。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611103812991.png" alt="image-20200611103812991" style="zoom:50%;"></p>
+<p>如果我们设置$x_{i-1},x_{i-2}$的长度都是$|V|$，$z$的长度是$|Z|$，那么</p>
+<script type="math/tex; mode=display">
+z=W_1x_{i-2}+W_2x_{i-1}</script><p>其中$W_1=W_2=W$，那么$z=W(x_{i-2}+x_{i-1})$，也就得到了word vector $V(w)$，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611104833054.png" alt="image-20200611104833054" style="zoom:50%;"></p>
+<p>那么在实际的网络训练中，我们如何保证$W_1=W_2$呢？</p>
+<p>首先需要将$w_1,w_2$初始化为相同的值，那么</p>
+<script type="math/tex; mode=display">
+w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}\\
+w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}</script><p>由于gradient的值不同，$w_1,w_2$在更新一次参数之后就不相等了，必须保证每次更新之后的值还是一样的，因此</p>
+<script type="math/tex; mode=display">
+w_i\leftarrow w_i-\eta \frac{\partial C}{\partial w_i}-\eta \frac{\partial C}{\partial w_j}\\
+w_j\leftarrow w_j-\eta \frac{\partial C}{\partial w_j}-\eta \frac{\partial C}{\partial w_i}</script><p>这样每次更新的值都一样的，也就保证了$w_1=w_2$</p>
+<h5 id="Training"><a href="#Training" class="headerlink" title="Training"></a><strong>Training</strong></h5><p>对于输入“潮水、退了”，我们希望network的输出和“就”越接近越好，即最小化cross entropy</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611103701528.png" alt="image-20200611103701528" style="zoom:50%;"></p>
+<h5 id="Various-Architectures"><a href="#Various-Architectures" class="headerlink" title="Various Architectures"></a>Various Architectures</h5><p>CBOW：根据上下文的词汇$w_{i-1},w_{i+1}$来预测中心词$w_i$;</p>
+<p>Skip-gram：根据中心词$w_i$来预测上下文$w_{i-1},w_{i+1}$。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611110004840.png" alt="image-20200611110004840" style="zoom:50%;"></p>
+<h5 id="Result"><a href="#Result" class="headerlink" title="Result"></a>Result</h5><p>vec(Rome) - vec(Italy) $\approx$ vec(Berlin) - vec(Germany)，Italy和Rome之间有is-capital-of的关系，这种关系也恰好在Madrid和Spain之间出现。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200611110430525.png" alt="image-20200611110430525" style="zoom:50%;"></p>
+<p>如果现在有人问机器一个问题，Rome和Italy之间的关系就像是Berlin和什么的关系？我们就可以通过计算vec(Berlin) $\approx$ vec(Rome) - vec(Italy)  + vec(Germany)得出结果。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200705125922175.png" alt="image-20200705125922175" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>word embedding</tag>
       </tags>
   </entry>
   <entry>
@@ -2487,7 +2487,9 @@ L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="https://gitee.com/scarleatt
 <p>（c）对于第二层的训练结果，就把其中的三个点推荐给用户了，但最左端的点也在decision boundary之上，也会被推荐给用户，模型在训练过程中会存在一定的误差，</p>
 <p>（d）这里就开始对第二个用户的模型进行训练；</p>
 <p>（e）这是加入了标签顺滑（label smoothing）的结果，推荐会更加精准，在图中，我们可以看到用户不感兴趣的点进行下移，用户感兴趣的点（a图中的黄色方框部分）则上移，尽量移到decision boundary之上</p>
-<h5 id="Label-Smoothing-Regularization"><a href="#Label-Smoothing-Regularization" class="headerlink" title="Label Smoothing Regularization"></a>Label Smoothing Regularization</h5><p>（1）在下图的能量方程中，$l_u(e_i)$表示用户u是否对实体$e_i$感兴趣（值为0或1），能量方程可以把相同的label保存下来，把不同的label就去掉了；（2）再找到使得能量方程取得最小值的$l_u^<em>$；（3）再通过KL距离函数求得$y_{uv}$和$\hat l_u^</em>(v)$之间的相似度，也是求最小值，可得$R(A)$，再代入损失函数</p>
+<h5 id="Label-Smoothing-Regularization"><a href="#Label-Smoothing-Regularization" class="headerlink" title="Label Smoothing Regularization"></a>Label Smoothing Regularization</h5><p>（1）在下图的能量方程中，$l_u(e_i)$表示用户u是否对实体$e_i$感兴趣（值为0或1），能量方程可以把相同的label保存下来，把不同的label就去掉了；</p>
+<p>（2）再找到使得能量方程取得最小值的$l_u^{*}$；</p>
+<p>（3）再通过KL距离函数求得$y_{uv}$和$\hat l_u^*(v)$之间的相似度，也是求最小值，可得$R(A)$，再代入损失函数</p>
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200702155919603.png" alt="image-20200702155919603"></p>
 <p>$\lambda$可以不断做调整，来找到损失函数的最小值</p>
 <h5 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h5><p>输入为知识图谱G，新建一个邻接矩阵M后；（2）再把用户对感兴趣的实体新建一个权重矩阵（输入mapping函数S），再进行图卷积更新特征矩阵，即$e_u^{(i)}\leftarrow \sigma (\cdot)$；（3）标签顺滑，更新$l_u^{(i)}(e)$，再代入损失函数中的 J；不断地进行这个过程，只到损失函数收敛为止</p>
@@ -2633,123 +2635,11 @@ L=J(\hat y_{uv})+\lambda R(A_u)</script><p><img src="https://gitee.com/scarleatt
 <p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200723201801447.png" alt="image-20200723201801447" style="zoom:67%;"></p>
 ]]></content>
       <categories>
-        <category>Knowledge Graph</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Life Long Learning</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Generative Models</title>
-    <url>/2020/06/29/generative-models/</url>
-    <content><![CDATA[<blockquote>
-<p>本文主要叙述了集中generative models，包括PixelRNN、VAE，GAN（生成对抗网络）；还叙述了auto-encoder和VAE的区别，以及VAE进行改进的地方，通过高斯混合模型来对VAE的原理进行了详细介绍。</p>
-</blockquote>
-<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>Generative Models可以分为三大类：pixelRNN、autoencoder、GAN；</p>
-<p>现在machine可以对猫狗进行分类，在将来machine就可以通过自己的学习画出一只猫来。</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629141407487.png" alt="image-20200629141407487" style="zoom: 67%;"></p>
-<h4 id="PixelRNN"><a href="#PixelRNN" class="headerlink" title="PixelRNN"></a>PixelRNN</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>如果要生成一张图像，我们可以先生成这张图像的第一个红色pixel，再根据这个pixel生成下一个蓝色pixel，每个pixel可以用一个三维的vector来进行表示</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629141521860.png" alt="image-20200629141521860" style="zoom: 67%;"></p>
-<p>这是一个无监督学习的过程，并不需要对data进行标注</p>
-<p>如果我们现在把下图中的狗下半身遮住，可以让machine学习出下半身的图片</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629141945697.png" alt="image-20200629141945697" style="zoom: 67%;"></p>
-<p>也可以用到声讯号</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629142331286.png" alt="image-20200629142331286" style="zoom:50%;"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629142353897.png" alt="image-20200629142353897" style="zoom:50%;"></p>
-<h5 id="Practicing-Generation-Models-Pokemon-Creation"><a href="#Practicing-Generation-Models-Pokemon-Creation" class="headerlink" title="Practicing Generation Models: Pokémon Creation"></a>Practicing Generation Models: Pokémon Creation</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629142516414.png" alt="image-20200629142516414" style="zoom: 67%;"></p>
-<p>做这个实验时，有一些tips；</p>
-<p>由于每个pixel都使用三维的vector来表示（RGB），只有三个channel的值相差特别大时，才会有颜色特别鲜明的图片，但学习结果并不能保证这一点，因此图片会会比较灰蒙蒙的，最后得出来的结果会不太好；</p>
-<p>因此，每个pixel最好使用1-of-N encoding来表示，输入一个绿色的方块，vector中只有绿色方块对应的dimensions为1，其他都是0；但有$256\times256$种颜色，颜色种类非常繁多，可以先对类似的颜色做一个<strong>clustering</strong>，类似的颜色都用同一种颜色来表示，可以把颜色数量缩小到167种</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629142535096.png" alt="image-20200629142535096" style="zoom: 67%;"></p>
-<p>下面开始正式做实验</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629143804656.png" alt="image-20200629143804656" style="zoom: 67%;"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629143843226.png" alt="image-20200629143843226" style="zoom: 33%;"></p>
-<h4 id="VAE"><a href="#VAE" class="headerlink" title="VAE"></a>VAE</h4><h5 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629144022672.png" alt="image-20200629144022672" style="zoom: 67%;"></p>
-<h5 id="VAE-1"><a href="#VAE-1" class="headerlink" title="VAE"></a>VAE</h5><p>VAE不像autoencoder那样，直接得出code，经过了一些变换，即$c_i=exp(\sigma_i)\times e_i+m_i$，也是来最小化reconstruction error</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629144250780.png" alt="image-20200629144250780" style="zoom: 67%;"></p>
-<p>minimize的目标还有</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><h5 id="Pokemon-Creation"><a href="#Pokemon-Creation" class="headerlink" title="Pokémon Creation"></a>Pokémon Creation</h5><p>input一个宝可梦图像，进行encoder、decoder，得到reconstruct之后的图像，其中code是10-dim的；</p>
-<p>现在我们只选择其中的2个纬度出来，其他纬度的值都固定不变，对这个二维的坐标轴，放入不同的点，再输入对应的Decoder，观察其合成出来的image；如果使用不同维度的点，就可以观察到不同维度生成的image；根据不同的维度，我们就可以根据自己的需要，调整这些维度的值，从而得出我们想要的结果</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629150656140.png" alt="image-20200629150656140" style="zoom: 50%;"></p>
-<p>部分结果展示</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629151406932.png" alt="image-20200629151406932" style="zoom:50%;"></p>
-<h5 id="Why-VAE"><a href="#Why-VAE" class="headerlink" title="Why VAE?"></a>Why VAE?</h5><p>对于一张满月的图像，先进行encode，再进行decode，使得input和output之间的差值最小化；对半月的图像输入也如此</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629152107223.png" alt="image-20200629152107223" style="zoom: 67%;"></p>
-<p>对于encoder的其中一个输出$\sigma_i$，表示noise的variance，需要再输入exp函数进行计算，保证其值是大于0的，是machine自己学习的</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629153400892.png" alt="image-20200629153400892" style="zoom: 67%;"></p>
-<p>但只有noise是不够的，还需要加一些限制</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>在下图中，蓝色的线表示$exp(\sigma_i)$，红色的线表示$(1+\sigma_i)$，绿色的线表示两者的差值，可以发现在原点处差值是最小的，$\sigma _i$的值接近1，variance的值接近1</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629153918937.png" alt="image-20200629153918937" style="zoom:50%;"></p>
-<p>$(m_i)^2$为正则项regularization term，让结果不那么overfiting</p>
-<p>在下图中，为一个高维的坐标（用一维进行了展示），曲线表示image是宝可梦的概率，可以在图中看到，对于一些很像宝可梦的image，$P(x)$值很高，但对于一些比较模棱两可的image，$P(x)$值就很低</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629154606838.png" alt="image-20200629154606838" style="zoom: 33%;"></p>
-<p>那么我们到底要怎么来评估这个probability distribution呢？答案是高斯混合模型</p>
-<h5 id="Gaussian-Mixture-Model"><a href="#Gaussian-Mixture-Model" class="headerlink" title="Gaussian Mixture Model"></a>Gaussian Mixture Model</h5><p>对于下图中的曲线图，蓝色表示多个高斯模型，黑色曲线表示这些模型通过一定的weight进行叠加之后的结果</p>
-<p>现在有很多个gaussian model（1，2，3，4，5…），且都对应了自己的weight $P(m)$（蓝色方块），<span style="color: red">要先根据weight选对应的gaussian，再决定到底要从gaussian中sample哪些data</span> ;我们使用$P(m)$表示每个gaussian的weight，$P(x|m)$表示从对应的gaussian中选出data x的概率</p>
-<p>x并不是代表着某个类别，而是用一个vector来进行表示，每个维度表示不同的特征，即 <u>Distributed representation is better than cluster</u></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629155005437.png" alt="image-20200629155005437" style="zoom: 67%;"></p>
-<p>我们现在从正态分布中sample一个data z，z的每个dimension就表示某种attribute；</p>
-<p>根据z我们就可以得出高斯分布mean和variance，即$\mu (z),\sigma(z)$，z有无穷多个可能，mean和variance也有无穷多个可能</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629160314318.png" alt="image-20200629160314318" style="zoom: 67%;"></p>
-<p>在最下方的图中，我们可以认为最中间的圆点被sample到的几率最大，其他圆点被sample到的几率就相对较小；<span style="color: red">每个z被sample到之后，根据某个function，计算出对应的mean和variance，都对应着不同的gaussian model</span></p>
-<p>这个function可以是一个neural network，input为z，output为$\mu(z),\sigma(z)$</p>
-<p>由于现在是连续的z，$P(z)$的形式也发生了变化，</p>
-<script type="math/tex; mode=display">
-P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><h5 id="Maximizing-Likelihood"><a href="#Maximizing-Likelihood" class="headerlink" title="Maximizing Likelihood"></a><strong>Maximizing Likelihood</strong></h5><p>现在我们需要找到z和$\mu(z),\sigma(z)$之间的关系，用network来进行计算的时候也需要一个评估手段，这里我们采用的是最大化$L=\sum_xlogP(x)$，即最大化我们已经看到的image x的likelihood；</p>
-<p>那么我们现在就有一个NN的参数需要调整，来最大化likelihood L；</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629162138964.png" alt="image-20200629162138964" style="zoom: 67%;"></p>
-<p>现在我们还有另外一个distribution $q(z|x)$，和前一个是相反的，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，其mean和variance，即$\mu’(x),\sigma’(x)$</p>
-<p>$P(x|z)$表示z决定了x的distribution，$q(z|x)$表示x决定了z的distribution</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629163947560.png" alt="image-20200629163947560" style="zoom:45%;"></p>
-<p>其中$P(z,x)=P(x)P(z|x)$</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629165559403.png" alt="image-20200629165559403" style="zoom:50%;"></p>
-<p>我们本来需要调整的参数是$P(x|z)$，使得$P(x)$取得最大值，从而使likelihood取得最大值；但现在的lower bound为$L_b$，是$log(P(x))$的最小值，其中$P(z)$是已知的，不知道的参数是$P(x|z),q(z|x)$，两项都需要调整</p>
-<p>Q：这里为什么突然多了一项需要调整的参数？</p>
-<p>A：这里并不知道lower bound和likelihood之间的关系到底是怎样的，有可能升高了lower bound，但likelihood反而下降了；引入q就可以解决这个问题</p>
-<p>根据原式子，即$P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z$，只和$P(x|z)$有关，与$q(z|x)$是无关的，即下图中<span style="color: purple">方框</span>部分是不变的，</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629170614939.png" alt="image-20200629170614939" style="zoom: 67%;"></p>
-<p><strong>如果我们现在固定$P(x|z)$，想通过$q(z|x)$来使$L_b$ 最大化，那么对应的KL divergence就会最小化，到一种很极端的情况，KL divergence会变为0；如果$L_b$继续上升，那么肯定会超出该区域，因此对应的$logP(x)$也会继续上升；KL divergence不断变小的过程，$q(z|x),P(z|x)$之间的差距也会不断缩小</strong></p>
-<p>因此，这个过程不仅让likelihood变得越来越大，也会找到和$P(x|z)$接近的$q(z|x)$</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629171631388.png" alt="image-20200629171631388" style="zoom:50%;"></p>
-<p>对于$q(z|x)$，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，就可以知道z是从什么样的gaussian distribution得出来的</p>
-<h5 id="Connection-with-Network"><a href="#Connection-with-Network" class="headerlink" title="Connection with Network"></a><strong>Connection with Network</strong></h5><p>现在我们的目标就是最小化$q(z|x),P(z)$之间的KL divergence，即使$q(z|x)$和normal distribution $P(z)$越接近越好，即minimize</p>
-<script type="math/tex; mode=display">
-\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>还需要maximizing</p>
-<script type="math/tex; mode=display">
-P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629172034668.png" alt="image-20200629172034668" style="zoom:50%;"></p>
-<p>对于input的x，我们先输入网络$NN’$，得到获取z的gaussian distribution；sample得到z之后，再输入网络$NN$，得到获取x的gaussian distribution，使得新分布的mean和x越接近越好</p>
-<h5 id="KL散度"><a href="#KL散度" class="headerlink" title="KL散度"></a>KL散度</h5><blockquote>
-<p>所谓KL散度，是指当某分布q(x)被用于近似p(x)时的信息损失。</p>
-</blockquote>
-<p>计算公式为</p>
-<script type="math/tex; mode=display">
-KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href="#Problems-of-VAE" class="headerlink" title="Problems of VAE"></a>Problems of VAE</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629174600157.png" alt="image-20200629174600157" style="zoom:50%;"></p>
-<h4 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h4><h5 id="The-evolution-of-generation"><a href="#The-evolution-of-generation" class="headerlink" title="The evolution of generation"></a>The evolution of generation</h5><p>v1：会generate一些奇怪的图片，然后会有一个第一代的discriminator，来辨别到底哪一个是real image；</p>
-<p>V2： generater会根据上一次discriminater的结果进行调整，第二代生成的image就和真实的image更像了，再把image输入第二代discriminator，再进行比较；</p>
-<p>…….</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629175524852.png" alt="image-20200629175524852" style="zoom:50%;"></p>
-<h5 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h5><p>对于generator，可以看作是VAE里面的decoder，我们通常选择从某个distributionsample出来的vector，输入到第一代的generator，再生成相对应的image，有多少个vector，就生成多少个image；</p>
-<p>把真实的image输入discriminator，与generator生成的image进行比较；并对这些data进行标注，real image标注为1，其余标注为0</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629201306815.png" alt="image-20200629201306815" style="zoom:50%;"></p>
-<h5 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h5><p>首先随机sample一个vector，作为Generator的输入，generator会生成对应的image，再把这个image输入discriminator，输出是real image的概率，对于第一代（v1），generator还不成熟，因此概率只有0.87；generator接下来会调整自己的参数，使discriminator认为其生成的image是real image；</p>
-<p>这generator+discriminator就相当于一个network，整体目标是使discriminator认为generator生成的image是real image，就可以根据这个指标来使用梯度下降算法，进行back propagation，来不断调整generator的参数；</p>
-<p><span style="color: red">注：在训练过程中应该固定discriminator的参数，来调整generator的参数</span></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629201707553.png" alt="image-20200629201707553" style="zoom:50%;"></p>
-<h5 id="Why-GAN-is-hard-to-train"><a href="#Why-GAN-is-hard-to-train" class="headerlink" title="Why GAN is hard to train?"></a>Why GAN is hard to train?</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629202903543.png" alt="image-20200629202903543" style="zoom:50%;"></p>
-]]></content>
-      <categories>
         <category>ML-notes</category>
       </categories>
       <tags>
         <tag>Deep Learning</tag>
-        <tag>GAN</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Autoencoder</tag>
-        <tag>VAE</tag>
-        <tag>PixelRNN</tag>
+        <tag>Life Long Learning</tag>
       </tags>
   </entry>
   <entry>
@@ -2931,6 +2821,118 @@ L(\phi)=\sum_{n=1}^Nl^n(\phi)</script><p><span style="color: red"> Model pre-tra
       </tags>
   </entry>
   <entry>
+    <title>Generative Models</title>
+    <url>/2020/06/29/generative-models/</url>
+    <content><![CDATA[<blockquote>
+<p>本文主要叙述了集中generative models，包括PixelRNN、VAE，GAN（生成对抗网络）；还叙述了auto-encoder和VAE的区别，以及VAE进行改进的地方，通过高斯混合模型来对VAE的原理进行了详细介绍。</p>
+</blockquote>
+<h4 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h4><p>Generative Models可以分为三大类：pixelRNN、autoencoder、GAN；</p>
+<p>现在machine可以对猫狗进行分类，在将来machine就可以通过自己的学习画出一只猫来。</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629141407487.png" alt="image-20200629141407487" style="zoom: 67%;"></p>
+<h4 id="PixelRNN"><a href="#PixelRNN" class="headerlink" title="PixelRNN"></a>PixelRNN</h4><h5 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h5><p>如果要生成一张图像，我们可以先生成这张图像的第一个红色pixel，再根据这个pixel生成下一个蓝色pixel，每个pixel可以用一个三维的vector来进行表示</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629141521860.png" alt="image-20200629141521860" style="zoom: 67%;"></p>
+<p>这是一个无监督学习的过程，并不需要对data进行标注</p>
+<p>如果我们现在把下图中的狗下半身遮住，可以让machine学习出下半身的图片</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629141945697.png" alt="image-20200629141945697" style="zoom: 67%;"></p>
+<p>也可以用到声讯号</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629142331286.png" alt="image-20200629142331286" style="zoom:50%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629142353897.png" alt="image-20200629142353897" style="zoom:50%;"></p>
+<h5 id="Practicing-Generation-Models-Pokemon-Creation"><a href="#Practicing-Generation-Models-Pokemon-Creation" class="headerlink" title="Practicing Generation Models: Pokémon Creation"></a>Practicing Generation Models: Pokémon Creation</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629142516414.png" alt="image-20200629142516414" style="zoom: 67%;"></p>
+<p>做这个实验时，有一些tips；</p>
+<p>由于每个pixel都使用三维的vector来表示（RGB），只有三个channel的值相差特别大时，才会有颜色特别鲜明的图片，但学习结果并不能保证这一点，因此图片会会比较灰蒙蒙的，最后得出来的结果会不太好；</p>
+<p>因此，每个pixel最好使用1-of-N encoding来表示，输入一个绿色的方块，vector中只有绿色方块对应的dimensions为1，其他都是0；但有$256\times256$种颜色，颜色种类非常繁多，可以先对类似的颜色做一个<strong>clustering</strong>，类似的颜色都用同一种颜色来表示，可以把颜色数量缩小到167种</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629142535096.png" alt="image-20200629142535096" style="zoom: 67%;"></p>
+<p>下面开始正式做实验</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629143804656.png" alt="image-20200629143804656" style="zoom: 67%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629143843226.png" alt="image-20200629143843226" style="zoom: 33%;"></p>
+<h4 id="VAE"><a href="#VAE" class="headerlink" title="VAE"></a>VAE</h4><h5 id="Auto-encoder"><a href="#Auto-encoder" class="headerlink" title="Auto-encoder"></a>Auto-encoder</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629144022672.png" alt="image-20200629144022672" style="zoom: 67%;"></p>
+<h5 id="VAE-1"><a href="#VAE-1" class="headerlink" title="VAE"></a>VAE</h5><p>VAE不像autoencoder那样，直接得出code，经过了一些变换，即$c_i=exp(\sigma_i)\times e_i+m_i$，也是来最小化reconstruction error</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629144250780.png" alt="image-20200629144250780" style="zoom: 67%;"></p>
+<p>minimize的目标还有</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><h5 id="Pokemon-Creation"><a href="#Pokemon-Creation" class="headerlink" title="Pokémon Creation"></a>Pokémon Creation</h5><p>input一个宝可梦图像，进行encoder、decoder，得到reconstruct之后的图像，其中code是10-dim的；</p>
+<p>现在我们只选择其中的2个纬度出来，其他纬度的值都固定不变，对这个二维的坐标轴，放入不同的点，再输入对应的Decoder，观察其合成出来的image；如果使用不同维度的点，就可以观察到不同维度生成的image；根据不同的维度，我们就可以根据自己的需要，调整这些维度的值，从而得出我们想要的结果</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629150656140.png" alt="image-20200629150656140" style="zoom: 50%;"></p>
+<p>部分结果展示</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629151406932.png" alt="image-20200629151406932" style="zoom:50%;"></p>
+<h5 id="Why-VAE"><a href="#Why-VAE" class="headerlink" title="Why VAE?"></a>Why VAE?</h5><p>对于一张满月的图像，先进行encode，再进行decode，使得input和output之间的差值最小化；对半月的图像输入也如此</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629152107223.png" alt="image-20200629152107223" style="zoom: 67%;"></p>
+<p>对于encoder的其中一个输出$\sigma_i$，表示noise的variance，需要再输入exp函数进行计算，保证其值是大于0的，是machine自己学习的</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629153400892.png" alt="image-20200629153400892" style="zoom: 67%;"></p>
+<p>但只有noise是不够的，还需要加一些限制</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>在下图中，蓝色的线表示$exp(\sigma_i)$，红色的线表示$(1+\sigma_i)$，绿色的线表示两者的差值，可以发现在原点处差值是最小的，$\sigma _i$的值接近1，variance的值接近1</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629153918937.png" alt="image-20200629153918937" style="zoom:50%;"></p>
+<p>$(m_i)^2$为正则项regularization term，让结果不那么overfiting</p>
+<p>在下图中，为一个高维的坐标（用一维进行了展示），曲线表示image是宝可梦的概率，可以在图中看到，对于一些很像宝可梦的image，$P(x)$值很高，但对于一些比较模棱两可的image，$P(x)$值就很低</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629154606838.png" alt="image-20200629154606838" style="zoom: 33%;"></p>
+<p>那么我们到底要怎么来评估这个probability distribution呢？答案是高斯混合模型</p>
+<h5 id="Gaussian-Mixture-Model"><a href="#Gaussian-Mixture-Model" class="headerlink" title="Gaussian Mixture Model"></a>Gaussian Mixture Model</h5><p>对于下图中的曲线图，蓝色表示多个高斯模型，黑色曲线表示这些模型通过一定的weight进行叠加之后的结果</p>
+<p>现在有很多个gaussian model（1，2，3，4，5…），且都对应了自己的weight $P(m)$（蓝色方块），<span style="color: red">要先根据weight选对应的gaussian，再决定到底要从gaussian中sample哪些data</span> ;我们使用$P(m)$表示每个gaussian的weight，$P(x|m)$表示从对应的gaussian中选出data x的概率</p>
+<p>x并不是代表着某个类别，而是用一个vector来进行表示，每个维度表示不同的特征，即 <u>Distributed representation is better than cluster</u></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629155005437.png" alt="image-20200629155005437" style="zoom: 67%;"></p>
+<p>我们现在从正态分布中sample一个data z，z的每个dimension就表示某种attribute；</p>
+<p>根据z我们就可以得出高斯分布mean和variance，即$\mu (z),\sigma(z)$，z有无穷多个可能，mean和variance也有无穷多个可能</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629160314318.png" alt="image-20200629160314318" style="zoom: 67%;"></p>
+<p>在最下方的图中，我们可以认为最中间的圆点被sample到的几率最大，其他圆点被sample到的几率就相对较小；<span style="color: red">每个z被sample到之后，根据某个function，计算出对应的mean和variance，都对应着不同的gaussian model</span></p>
+<p>这个function可以是一个neural network，input为z，output为$\mu(z),\sigma(z)$</p>
+<p>由于现在是连续的z，$P(z)$的形式也发生了变化，</p>
+<script type="math/tex; mode=display">
+P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><h5 id="Maximizing-Likelihood"><a href="#Maximizing-Likelihood" class="headerlink" title="Maximizing Likelihood"></a><strong>Maximizing Likelihood</strong></h5><p>现在我们需要找到z和$\mu(z),\sigma(z)$之间的关系，用network来进行计算的时候也需要一个评估手段，这里我们采用的是最大化$L=\sum_xlogP(x)$，即最大化我们已经看到的image x的likelihood；</p>
+<p>那么我们现在就有一个NN的参数需要调整，来最大化likelihood L；</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629162138964.png" alt="image-20200629162138964" style="zoom: 67%;"></p>
+<p>现在我们还有另外一个distribution $q(z|x)$，和前一个是相反的，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，其mean和variance，即$\mu’(x),\sigma’(x)$</p>
+<p>$P(x|z)$表示z决定了x的distribution，$q(z|x)$表示x决定了z的distribution</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629163947560.png" alt="image-20200629163947560" style="zoom:45%;"></p>
+<p>其中$P(z,x)=P(x)P(z|x)$</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629165559403.png" alt="image-20200629165559403" style="zoom:50%;"></p>
+<p>我们本来需要调整的参数是$P(x|z)$，使得$P(x)$取得最大值，从而使likelihood取得最大值；但现在的lower bound为$L_b$，是$log(P(x))$的最小值，其中$P(z)$是已知的，不知道的参数是$P(x|z),q(z|x)$，两项都需要调整</p>
+<p>Q：这里为什么突然多了一项需要调整的参数？</p>
+<p>A：这里并不知道lower bound和likelihood之间的关系到底是怎样的，有可能升高了lower bound，但likelihood反而下降了；引入q就可以解决这个问题</p>
+<p>根据原式子，即$P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z$，只和$P(x|z)$有关，与$q(z|x)$是无关的，即下图中<span style="color: purple">方框</span>部分是不变的，</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629170614939.png" alt="image-20200629170614939" style="zoom: 67%;"></p>
+<p><strong>如果我们现在固定$P(x|z)$，想通过$q(z|x)$来使$L_b$ 最大化，那么对应的KL divergence就会最小化，到一种很极端的情况，KL divergence会变为0；如果$L_b$继续上升，那么肯定会超出该区域，因此对应的$logP(x)$也会继续上升；KL divergence不断变小的过程，$q(z|x),P(z|x)$之间的差距也会不断缩小</strong></p>
+<p>因此，这个过程不仅让likelihood变得越来越大，也会找到和$P(x|z)$接近的$q(z|x)$</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629171631388.png" alt="image-20200629171631388" style="zoom:50%;"></p>
+<p>对于$q(z|x)$，其中$z|x$表示给出x，再把x输入网络$NN’$，得到属于z的gaussian distribution，就可以知道z是从什么样的gaussian distribution得出来的</p>
+<h5 id="Connection-with-Network"><a href="#Connection-with-Network" class="headerlink" title="Connection with Network"></a><strong>Connection with Network</strong></h5><p>现在我们的目标就是最小化$q(z|x),P(z)$之间的KL divergence，即使$q(z|x)$和normal distribution $P(z)$越接近越好，即minimize</p>
+<script type="math/tex; mode=display">
+\sum_{i=1}^3(exp(\sigma_i)-(1+\sigma_i)+(m_i)^2)</script><p>还需要maximizing</p>
+<script type="math/tex; mode=display">
+P(x)=\mathop{\int }_zP(z)P(x|z){\rm d}z</script><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629172034668.png" alt="image-20200629172034668" style="zoom:50%;"></p>
+<p>对于input的x，我们先输入网络$NN’$，得到获取z的gaussian distribution；sample得到z之后，再输入网络$NN$，得到获取x的gaussian distribution，使得新分布的mean和x越接近越好</p>
+<h5 id="KL散度"><a href="#KL散度" class="headerlink" title="KL散度"></a>KL散度</h5><blockquote>
+<p>所谓KL散度，是指当某分布q(x)被用于近似p(x)时的信息损失。</p>
+</blockquote>
+<p>计算公式为</p>
+<script type="math/tex; mode=display">
+KL(p||q)=\sum p(x)log\frac{p(x)}{q(x)}</script><h5 id="Problems-of-VAE"><a href="#Problems-of-VAE" class="headerlink" title="Problems of VAE"></a>Problems of VAE</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629174600157.png" alt="image-20200629174600157" style="zoom:50%;"></p>
+<h4 id="GAN"><a href="#GAN" class="headerlink" title="GAN"></a>GAN</h4><h5 id="The-evolution-of-generation"><a href="#The-evolution-of-generation" class="headerlink" title="The evolution of generation"></a>The evolution of generation</h5><p>v1：会generate一些奇怪的图片，然后会有一个第一代的discriminator，来辨别到底哪一个是real image；</p>
+<p>V2： generater会根据上一次discriminater的结果进行调整，第二代生成的image就和真实的image更像了，再把image输入第二代discriminator，再进行比较；</p>
+<p>…….</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629175524852.png" alt="image-20200629175524852" style="zoom:50%;"></p>
+<h5 id="Discriminator"><a href="#Discriminator" class="headerlink" title="Discriminator"></a>Discriminator</h5><p>对于generator，可以看作是VAE里面的decoder，我们通常选择从某个distributionsample出来的vector，输入到第一代的generator，再生成相对应的image，有多少个vector，就生成多少个image；</p>
+<p>把真实的image输入discriminator，与generator生成的image进行比较；并对这些data进行标注，real image标注为1，其余标注为0</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629201306815.png" alt="image-20200629201306815" style="zoom:50%;"></p>
+<h5 id="Generator"><a href="#Generator" class="headerlink" title="Generator"></a>Generator</h5><p>首先随机sample一个vector，作为Generator的输入，generator会生成对应的image，再把这个image输入discriminator，输出是real image的概率，对于第一代（v1），generator还不成熟，因此概率只有0.87；generator接下来会调整自己的参数，使discriminator认为其生成的image是real image；</p>
+<p>这generator+discriminator就相当于一个network，整体目标是使discriminator认为generator生成的image是real image，就可以根据这个指标来使用梯度下降算法，进行back propagation，来不断调整generator的参数；</p>
+<p><span style="color: red">注：在训练过程中应该固定discriminator的参数，来调整generator的参数</span></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629201707553.png" alt="image-20200629201707553" style="zoom:50%;"></p>
+<h5 id="Why-GAN-is-hard-to-train"><a href="#Why-GAN-is-hard-to-train" class="headerlink" title="Why GAN is hard to train?"></a>Why GAN is hard to train?</h5><p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200629202903543.png" alt="image-20200629202903543" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>GAN</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Autoencoder</tag>
+        <tag>VAE</tag>
+        <tag>PixelRNN</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Network Compression</title>
     <url>/2020/06/27/network-conpression/</url>
     <content><![CDATA[<h4 id="Why-？"><a href="#Why-？" class="headerlink" title="Why ？"></a>Why ？</h4><p>在未来我们可能需要model放到model device上面，但这些device上面的资源是有限的，包括存储控价有限和computing power有限</p>
@@ -3083,55 +3085,6 @@ S=\frac{1}{2}\sum_{i,j}w_{i,j}(y^i-y^j)^2</script><p>根据公式我们可以算
         <tag>Deep Learning</tag>
         <tag>semi-supervised</tag>
         <tag>smoothness</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
-    <url>/2020/06/28/t-SNE/</url>
-    <content><![CDATA[<blockquote>
-<p>本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；</p>
-</blockquote>
-<h4 id="Manifold-Learning"><a href="#Manifold-Learning" class="headerlink" title="Manifold Learning"></a>Manifold Learning</h4><p>在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learning 任务</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628202133893.png" alt="image-20200628202133893" style="zoom:50%;"></p>
-<h4 id="Locally-Linear-Embedding-LLE"><a href="#Locally-Linear-Embedding-LLE" class="headerlink" title="Locally Linear Embedding (LLE)"></a>Locally Linear Embedding (LLE)</h4><p>用$w_{ij}$表示$x_i,x_j$之间的联系，先找到使得$\sum_i ||x^i-\sum_jw_{ij}x^j||_2$最小化的$w_{ij}$，再根据这个$w_{ij}$来找到降维的结果$z_i,z_j$</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628202738023.png" alt="image-20200628202738023" style="zoom:50%;"></p>
-<p>如果并不知道之前的$x_i,x_j$，那么就可以用LLE这种方法，也可以得出$z_i,z_j$</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628203501209.png" alt="image-20200628203501209" style="zoom:50%;"></p>
-<h4 id="Laplacian-Eigenmaps"><a href="#Laplacian-Eigenmaps" class="headerlink" title="Laplacian Eigenmaps"></a>Laplacian Eigenmaps</h4><p>Review: 在之前的semi-supervised learning中，如果$x^1,x^2$在一个high density region内是相近的，那么我们就可以认为$\hat y^1,\hat y^2$也有类似的表现</p>
-<p>如果$y^i,y^j$是connected的，那么其$w_{ij}$就是对应的相似度；如果没有connect，其$w_{ij}$就是0</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628204015777.png" alt="image-20200628204015777" style="zoom:50%;"></p>
-<p>我们也可以得出类似smoothness的式子，计算$z^i,z^j$之间的smoothness</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628205136836.png" alt="image-20200628205136836" style="zoom:50%;"></p>
-<p>那么我们现在的目标就是找到$z^i,z^j$，来使S达到最小值，还需要有一些额外的constrains</p>
-<p>现在我们对z加入一些constrains，如果降维后z的维数是M，那么我们就不希望取出来的这些点还生活在比M还低维的空间里面；我们现在希望把塞进高维空间的低维空间展开，我们就不希望展开之后的点在一个更低维的空间里面</p>
-<h4 id="T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><a href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE" class="headerlink" title="T-distributed Stochastic Neighbor Embedding (t-SNE)"></a>T-distributed Stochastic Neighbor Embedding (t-SNE)</h4><p>对于之前的LLE方法，类似的data之间是很close的，<u>但不同类别之间的data却没有分开，是叠成一团的</u></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628210651621.png" alt="image-20200628210651621" style="zoom:50%;"></p>
-<p><strong>为了找到对应的$z^i,z^j$</strong>，先计算$x^i,x^j$之间的相似度$S(x^i,x^j)$，再得出一个分布 $P(x^j|x^i)$；还要计算$z^i,z^j$之间的相似度$S’(z^i,z^j)$，得出分布$Q(z^j|z^i)$；</p>
-<p>这两个分布应该越接近越好，使用L来表示</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628211215304.png" alt="image-20200628211215304" style="zoom:50%;"></p>
-<p>可以使用gradient descent，有了L函数，再分别对$z^i,z^j$求偏微分即可</p>
-<p>但t-SNE要对所有的point之间都求similarity，因此计算量比较大，在数据量很大的情况下电脑的计算速度会非常慢</p>
-<p>因此，对于很高的dimensions，通常先做降维（PCA），比如可以降维到50维，再使用t-SNE降到2维</p>
-<p><span style="color: red">通常我们使用t-SNE来对高维的数据进行可视化</span></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628211326492.png" alt="image-20200628211326492" style="zoom:50%;"></p>
-<p>在上图中，红色曲线表示SNE，蓝色曲线表示t-SNE，纵轴表示distribution；如果我们想要维持相同的distribution，即在同一个水平线上，就达到了如图所示的效果；相同的几率，t-SNE的$||z^i-z^j||_2$之间的距离越大</p>
-<p>如果本来就离得很近，那么经过t-SNE之间的距离还是很小；如果本来就离得很远，那么从原来的distribution拉到t-SNE之后，距离会更远；</p>
-<p>到实际的例子中，<span style="color: red">如果本来是同一个类别的data，由于这些data之间的距离很近，不会收到t-SNE很大的影响；但如果是属于不同类别的data，距离是比较远的，t-SNE会放大这种距离</span></p>
-<p>对于下图中的MNIST，先使用PCA进行降维，再进行可视化，就可以得到下图中的good visualization</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628213646582.png" alt="image-20200628213646582" style="zoom:50%;"></p>
-<p>下图中有一个更加直观的例子，使用t-SNE算法，运用gradient descent的思想，不同类别的data之间的距离会越来越大</p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628214657615.png" alt="image-20200628214657615" style="zoom:50%;"></p>
-<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628214721028.png" alt="image-20200628214721028" style="zoom:50%;"></p>
-]]></content>
-      <categories>
-        <category>ML-notes</category>
-      </categories>
-      <tags>
-        <tag>Deep Learning</tag>
-        <tag>Unsupervised Learning</tag>
-        <tag>Dimension Reduction</tag>
-        <tag>LLE</tag>
-        <tag>t-SNE</tag>
       </tags>
   </entry>
   <entry>
@@ -3408,6 +3361,215 @@ P(x,y)=\frac{exp(w\cdot \phi (x,y))}{R}</script><p>在CRF中，我们选择$P(y|
       </tags>
   </entry>
   <entry>
+    <title>T-distributed Stochastic Neighbor Embedding (t-SNE)</title>
+    <url>/2020/06/28/t-SNE/</url>
+    <content><![CDATA[<blockquote>
+<p>本文主要叙述了t-SNE，即T-distributed Stochastic Neighbor Embedding ；先介绍了LLE的主要思想，再总结了它的缺点，从而引出t-SNE；</p>
+</blockquote>
+<h4 id="Manifold-Learning"><a href="#Manifold-Learning" class="headerlink" title="Manifold Learning"></a>Manifold Learning</h4><p>在高维空间里，距离该点很远的点很可能与这个点也是有关联的，因此我们可以把3-D的空间进行降维，那么我们就可以更方便地进行clustering或unsupervised learning 任务</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628202133893.png" alt="image-20200628202133893" style="zoom:50%;"></p>
+<h4 id="Locally-Linear-Embedding-LLE"><a href="#Locally-Linear-Embedding-LLE" class="headerlink" title="Locally Linear Embedding (LLE)"></a>Locally Linear Embedding (LLE)</h4><p>用$w_{ij}$表示$x_i,x_j$之间的联系，先找到使得$\sum_i ||x^i-\sum_jw_{ij}x^j||_2$最小化的$w_{ij}$，再根据这个$w_{ij}$来找到降维的结果$z_i,z_j$</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628202738023.png" alt="image-20200628202738023" style="zoom:50%;"></p>
+<p>如果并不知道之前的$x_i,x_j$，那么就可以用LLE这种方法，也可以得出$z_i,z_j$</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628203501209.png" alt="image-20200628203501209" style="zoom:50%;"></p>
+<h4 id="Laplacian-Eigenmaps"><a href="#Laplacian-Eigenmaps" class="headerlink" title="Laplacian Eigenmaps"></a>Laplacian Eigenmaps</h4><p>Review: 在之前的semi-supervised learning中，如果$x^1,x^2$在一个high density region内是相近的，那么我们就可以认为$\hat y^1,\hat y^2$也有类似的表现</p>
+<p>如果$y^i,y^j$是connected的，那么其$w_{ij}$就是对应的相似度；如果没有connect，其$w_{ij}$就是0</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628204015777.png" alt="image-20200628204015777" style="zoom:50%;"></p>
+<p>我们也可以得出类似smoothness的式子，计算$z^i,z^j$之间的smoothness</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628205136836.png" alt="image-20200628205136836" style="zoom:50%;"></p>
+<p>那么我们现在的目标就是找到$z^i,z^j$，来使S达到最小值，还需要有一些额外的constrains</p>
+<p>现在我们对z加入一些constrains，如果降维后z的维数是M，那么我们就不希望取出来的这些点还生活在比M还低维的空间里面；我们现在希望把塞进高维空间的低维空间展开，我们就不希望展开之后的点在一个更低维的空间里面</p>
+<h4 id="T-distributed-Stochastic-Neighbor-Embedding-t-SNE"><a href="#T-distributed-Stochastic-Neighbor-Embedding-t-SNE" class="headerlink" title="T-distributed Stochastic Neighbor Embedding (t-SNE)"></a>T-distributed Stochastic Neighbor Embedding (t-SNE)</h4><p>对于之前的LLE方法，类似的data之间是很close的，<u>但不同类别之间的data却没有分开，是叠成一团的</u></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628210651621.png" alt="image-20200628210651621" style="zoom:50%;"></p>
+<p><strong>为了找到对应的$z^i,z^j$</strong>，先计算$x^i,x^j$之间的相似度$S(x^i,x^j)$，再得出一个分布 $P(x^j|x^i)$；还要计算$z^i,z^j$之间的相似度$S’(z^i,z^j)$，得出分布$Q(z^j|z^i)$；</p>
+<p>这两个分布应该越接近越好，使用L来表示</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628211215304.png" alt="image-20200628211215304" style="zoom:50%;"></p>
+<p>可以使用gradient descent，有了L函数，再分别对$z^i,z^j$求偏微分即可</p>
+<p>但t-SNE要对所有的point之间都求similarity，因此计算量比较大，在数据量很大的情况下电脑的计算速度会非常慢</p>
+<p>因此，对于很高的dimensions，通常先做降维（PCA），比如可以降维到50维，再使用t-SNE降到2维</p>
+<p><span style="color: red">通常我们使用t-SNE来对高维的数据进行可视化</span></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628211326492.png" alt="image-20200628211326492" style="zoom:50%;"></p>
+<p>在上图中，红色曲线表示SNE，蓝色曲线表示t-SNE，纵轴表示distribution；如果我们想要维持相同的distribution，即在同一个水平线上，就达到了如图所示的效果；相同的几率，t-SNE的$||z^i-z^j||_2$之间的距离越大</p>
+<p>如果本来就离得很近，那么经过t-SNE之间的距离还是很小；如果本来就离得很远，那么从原来的distribution拉到t-SNE之后，距离会更远；</p>
+<p>到实际的例子中，<span style="color: red">如果本来是同一个类别的data，由于这些data之间的距离很近，不会收到t-SNE很大的影响；但如果是属于不同类别的data，距离是比较远的，t-SNE会放大这种距离</span></p>
+<p>对于下图中的MNIST，先使用PCA进行降维，再进行可视化，就可以得到下图中的good visualization</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628213646582.png" alt="image-20200628213646582" style="zoom:50%;"></p>
+<p>下图中有一个更加直观的例子，使用t-SNE算法，运用gradient descent的思想，不同类别的data之间的距离会越来越大</p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628214657615.png" alt="image-20200628214657615" style="zoom:50%;"></p>
+<p><img src="https://gitee.com/scarleatt/image/raw/master/img/image-20200628214721028.png" alt="image-20200628214721028" style="zoom:50%;"></p>
+]]></content>
+      <categories>
+        <category>ML-notes</category>
+      </categories>
+      <tags>
+        <tag>Deep Learning</tag>
+        <tag>Unsupervised Learning</tag>
+        <tag>Dimension Reduction</tag>
+        <tag>LLE</tag>
+        <tag>t-SNE</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>指令级并行</title>
+    <url>/2020/03/11/%E6%8C%87%E4%BB%A4%E7%BA%A7%E5%B9%B6%E8%A1%8C/</url>
+    <content><![CDATA[<h5 id="指令级并行"><a href="#指令级并行" class="headerlink" title="指令级并行"></a>指令级并行</h5><p>指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：</p>
+<ul>
+<li>资源重复，重复设置多个处理部件；</li>
+<li>采用流水线技术，使指令重叠并行执行。</li>
+</ul>
+<p>指令的<strong>静态调度</strong>：依靠编译器进行静态调度，以减少相关和冲突。它不是在程序执行的过程中，而是在编译期间进行调度和优化。</p>
+<p>指令的<strong>动态调度</strong>：能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。是由硬件在程序执行时进行优化的。</p>
+<p>基本程序块：一串连续的代码除了入口和出口以外，没有其他的分支指令和转入点。</p>
+<p>不精确异常：当执行指令i导致发生异常时，处理机的现场与严格按照程序顺序执行时指令i的现场不同。</p>
+<p>精确异常：发生异常时，处理机的现场与严格按照程序顺序执行指令i的现场相同。</p>
+<h5 id="相关与冲突"><a href="#相关与冲突" class="headerlink" title="相关与冲突"></a>相关与冲突</h5><ul>
+<li>数据相关</li>
+<li>名相关，名指指令所访问的寄存器或存储器单元的名称。<ul>
+<li>反相关</li>
+<li>输出相关</li>
+</ul>
+</li>
+<li>控制相关</li>
+</ul>
+<p>流水线冲突 指由于相关的存在，使得指令流中的下一条指令不能在指定的时钟周期执行。<u>结构冲突</u>是硬件资源冲突引起的，<u>数据冲突</u>是数据相关和名相关引起的，<u>控制冲突</u>是控制相关引起的。</p>
+<p>为了保证程序执行的正确性，必须保证的最关键的两个特性是：</p>
+<ul>
+<li><u>数据流</u></li>
+<li>保持<u>异常行为</u>：无论怎么改变指令的执行顺序，都不能改变程序中异常的发生情况。</li>
+</ul>
+<h4 id="指令的动态调度"><a href="#指令的动态调度" class="headerlink" title="指令的动态调度"></a>指令的动态调度</h4><p>能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。优点：</p>
+<ul>
+<li>能够处理一些<u>编译时情况不明的相关</u>（比如涉及存储器访问的相关），并简化了编译器；</li>
+<li>能够使本来是面向某一流水线优化编译的代码在<u>其他动态调度的流水线上</u>也能执行。</li>
+</ul>
+<h5 id="记分牌"><a href="#记分牌" class="headerlink" title="记分牌"></a>记分牌</h5><p>把流水线中的译码段ID分解成了两个段：流出和读操作数。记录的信息由三部分组成：</p>
+<ul>
+<li>指令状态表</li>
+<li>功能部件状态表</li>
+<li>结果寄存器状态表</li>
+</ul>
+<h5 id="Tomasulo"><a href="#Tomasulo" class="headerlink" title="Tomasulo"></a>Tomasulo</h5><p>核心思想：（1）记录和检测指令相关，操作数一旦就绪就立即执行，把发生RAW冲突的可能性较小到最低；（2）通过寄存器换名来消除WAR冲突和WAW冲突。寄存器换名是通过保留站来实现，它保存正在流出和等待流出指令所需要的操作数。</p>
+<p>基本思想：只要操作数有效，就取其放到保留站中，避免指令流出时才到寄存器取数据，这就使得即将执行的指令从相应的保留站中读取数据，而不用到寄存器中。指令的执行结果也是直接放到等待数据的其它保留站中去。一条指令流出时，存放操作数的寄存器被换名为该寄存器对应的保留站的名称。</p>
+<h4 id="动态分支预测"><a href="#动态分支预测" class="headerlink" title="动态分支预测"></a>动态分支预测</h4><p>用硬件动态地进行分支处理的方法。在程序运行的过程中，根据分支指令过去的表现预测将来的行为。如果分支行为发生了变化，预测结果也跟着变化。</p>
+<h5 id="分支历史表（BHT）"><a href="#分支历史表（BHT）" class="headerlink" title="分支历史表（BHT）"></a>分支历史表（BHT）</h5><p>用来记录相关指令最近一次或几次的执行情况是成功还是失败，并根据此进行预测。</p>
+<h5 id="分支目标缓冲器（BTB）"><a href="#分支目标缓冲器（BTB）" class="headerlink" title="分支目标缓冲器（BTB）"></a>分支目标缓冲器（BTB）</h5><p>是一种动态分支预测技术。将（1）<u>执行过的成功分支指令的目标地址</u>（2）<u>预测的分支目标地址</u> 记录在一张硬件表格中。在每次取指令时，用该指令的地址与BTB表中所有项目的第一个字段进行比较，以便尽早知道指令是否分支成功，尽早知道目标地址，达到减少分支开销的目的。</p>
+<p>BHT方法是在<u>译码ID</u>段，就能获得分支目标地址、顺序下一条指令以及预测的结果。BTB方法在<u>取址IF</u>段就能知道这些信息。</p>
+<h5 id="基于硬件的前瞻执行"><a href="#基于硬件的前瞻执行" class="headerlink" title="基于硬件的前瞻执行"></a>基于硬件的前瞻执行</h5><p>是解决控制相关的方法，它对分支指令的结果进行猜测，然后按照这个猜测继续取址、流出和执行后续的指令。但指令执行的结果不写回寄存器或存储器，而是放到一个称为ROB（再定序列缓冲器）中。等到相应的指令得到“确认”（即确实是应该执行）后，才将结果写入寄存器或存储器中。</p>
+<p>把三种思想结合在了一起：</p>
+<ul>
+<li><u>动态分支预测</u>。用来选择后续执行的指令。</li>
+<li>在控制相关的结果尚未出来之前，<u>前瞻</u>地执行后续指令。</li>
+<li>用<u>动态调度</u>对基本块的各种组合进行<u>跨基本块的组合</u>。</li>
+</ul>
+<h4 id="超标量流水线"><a href="#超标量流水线" class="headerlink" title="超标量流水线"></a>超标量流水线</h4><p>是一种多指令流出技术。它在每个时钟周期流出的指令条数不固定，依代码的具体情况而定，但有个上限。</p>
+<h4 id="超长指令字"><a href="#超长指令字" class="headerlink" title="超长指令字"></a>超长指令字</h4><p>是一种多指令流出技术。在每个时钟周期内流出的指令数都是固定的，这些指令构成一条长指令或者一个指令包，在这个指令包中，指令之间的并行性是通过指令显式地表现出来的。这种处理机的指令调度由编译器静态完成。</p>
+]]></content>
+      <categories>
+        <category>计算机体系结构</category>
+      </categories>
+      <tags>
+        <tag>计算机体系结构</tag>
+        <tag>指令级并行</tag>
+        <tag>指令相关</tag>
+        <tag>指令冲突</tag>
+        <tag>动态调度</tag>
+        <tag>记分牌</tag>
+        <tag>Tomasulo</tag>
+        <tag>BHT</tag>
+        <tag>BTB</tag>
+        <tag>ROB</tag>
+        <tag>前瞻执行</tag>
+        <tag>超标量</tag>
+        <tag>VLIW</tag>
+        <tag>超长指令字</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>多处理机</title>
+    <url>/2020/03/11/%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA/</url>
+    <content><![CDATA[<h5 id="计算机分类"><a href="#计算机分类" class="headerlink" title="计算机分类"></a>计算机分类</h5><ul>
+<li>按照<u>Flynn分类</u>法，可将计算机分为<u>SISD、SIMD、MISD、MIMD</u>四类。</li>
+<li><u>冯氏分类</u>法，<u>字串位串、字串位并、字并位串、字并位并</u>。</li>
+<li><u>Handler分类法</u>。</li>
+</ul>
+<h5 id="存储器系统结构"><a href="#存储器系统结构" class="headerlink" title="存储器系统结构"></a>存储器系统结构</h5><ul>
+<li>集中式存储器：各处理器可共享一个集中式的物理存储器；</li>
+<li>分布式存储器：存储器分布到各个处理器中。<ul>
+<li>如果大多数的访存都是针对本地节点进行的，就可以<u>降低</u>对存储器和互联网络的<u>带宽要求</u>；</li>
+<li>对本地存储器的<u>访问延迟小</u>。</li>
+<li>缺点：处理器之间的<u>通信</u>较为<u>复杂</u>。</li>
+</ul>
+</li>
+</ul>
+<p>存储器在物理上分布到各节点中，但<u>逻辑地址空间</u>的组织方式以及处理器之间<u>通信方式</u>不同：</p>
+<ul>
+<li>把在物理上分离的存储器作为一个<u>统一的共享逻辑空间</u>进行编址，不同处理器上的同一个物理地址指向同一个存储单元。<u>分布式共享存储器系统（DSM）</u>。采用<u>共享存储器</u>通信机制。</li>
+<li>把每个节点中的存储器编址为一个<u>独立的地址空间</u>，不同节点的地址空间之间是相互独立的，不同处理器上的同一个物理地址指向不同的存储单元。<u>机群</u>。采用<u>消息传递</u>机制。</li>
+</ul>
+<h5 id="通信机制"><a href="#通信机制" class="headerlink" title="通信机制"></a>通信机制</h5><p><strong>共享存储器</strong></p>
+<p>处理器之间的通信是通过load和store指令对相同存储器地址进行读/写来实现的。</p>
+<ul>
+<li>与常用的对称式多处理机的通信机制兼容；</li>
+<li>处理机之间的通信方式比较复杂时，编程相对容易；</li>
+<li>在开发程序时，可以将重点放到对性能影响较大的数据访问上；</li>
+<li>通信数据量小时，通信开销小，贷款利用好；</li>
+<li>可以通过Cathe缓冲技术来减少远程通信的频度。</li>
+</ul>
+<p><strong>消息传递</strong></p>
+<p>处理器之间是通过显示地发送消息来进行通信的，把消息看成是一个远程进程调用（RPC）。</p>
+<ul>
+<li>硬件更简单；</li>
+<li>通信是显示的，可以更容易搞清楚何时发生通信以及通信开销是多少；</li>
+<li>显示通信可以使编程者重点注意并行计算的主要通信开销，使之有可能开发出结构更好、性能更高的并行程序；</li>
+<li>可以减少不当同步带来错误的可能性。</li>
+</ul>
+<h5 id="并行处理面临的挑战"><a href="#并行处理面临的挑战" class="headerlink" title="并行处理面临的挑战"></a>并行处理面临的挑战</h5><ul>
+<li>程序中的并行性有限；</li>
+<li>相对较大通信开销。</li>
+<li>计算：Amdahl</li>
+</ul>
+<script type="math/tex; mode=display">
+加速比=\frac{1}{\frac{可加速部分比例}{部件加速比}+(1-可加速部分比例)}</script><script type="math/tex; mode=display">
+S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（MIMD）"><a href="#并行计算机系统结构（MIMD）" class="headerlink" title="并行计算机系统结构（MIMD）"></a>并行计算机系统结构（MIMD）</h5><ul>
+<li>PVP</li>
+<li><strong>SMP</strong>，对称式共享存储器多处理机</li>
+<li>DSM</li>
+<li><strong>MPP</strong>，大规模并行处理机</li>
+<li><strong>机群</strong></li>
+</ul>
+<h5 id="对称式共享存储器多处理机（SMP）"><a href="#对称式共享存储器多处理机（SMP）" class="headerlink" title="对称式共享存储器多处理机（SMP）"></a>对称式共享存储器多处理机（SMP）</h5><p>也称为集中式共享多处理机，一般由十几个处理器构成，各处理器共享一个集中式的物理存储器，这个主存相对于各处理器的关系是对称的。</p>
+<ul>
+<li>商用处理器</li>
+<li>共享存储器</li>
+<li>集中共享</li>
+</ul>
+<h5 id="大规模并行处理机（MPP）"><a href="#大规模并行处理机（MPP）" class="headerlink" title="大规模并行处理机（MPP）"></a>大规模并行处理机（MPP）</h5><p>按照当前的标准，具有几百台~几千台处理机的任何机器都是大规模并行处理系统。</p>
+<ul>
+<li>处理节点使用商用微处理器，每个节点可以有多个微处理器；</li>
+<li>具有较好的可扩展性；</li>
+<li>采用分布式非共享的存储器，各节点有自己的地址空间；</li>
+<li>采用消息传递的通信机制。</li>
+</ul>
+<h5 id="机群"><a href="#机群" class="headerlink" title="机群"></a>机群</h5><p>是一种价格低廉、易于构建、扩放性极强的并行计算机系统。它由多台同构或者异构的独立计算机通过高性能网络和局域网连在一起，协同完成特定的并行计算任务。从用户的角度看，它就是一个单一的、集中的计算资源。</p>
+<ul>
+<li>商用处理器</li>
+<li>分布非共享式</li>
+<li>消息传递</li>
+</ul>
+]]></content>
+      <categories>
+        <category>计算机体系结构</category>
+      </categories>
+      <tags>
+        <tag>计算机体系结构</tag>
+        <tag>机群</tag>
+        <tag>MPP</tag>
+        <tag>SMP</tag>
+        <tag>消息传递</tag>
+        <tag>共享存储器</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Transfer Learning</title>
     <url>/2020/07/20/transfer-learning/</url>
     <content><![CDATA[<blockquote>
@@ -3512,206 +3674,6 @@ P(x,y)=\frac{exp(w\cdot \phi (x,y))}{R}</script><p>在CRF中，我们选择$P(y|
       </tags>
   </entry>
   <entry>
-    <title>多处理机</title>
-    <url>/2020/03/11/%E5%A4%9A%E5%A4%84%E7%90%86%E6%9C%BA/</url>
-    <content><![CDATA[<h5 id="计算机分类"><a href="#计算机分类" class="headerlink" title="计算机分类"></a>计算机分类</h5><ul>
-<li>按照<u>Flynn分类</u>法，可将计算机分为<u>SISD、SIMD、MISD、MIMD</u>四类。</li>
-<li><u>冯氏分类</u>法，<u>字串位串、字串位并、字并位串、字并位并</u>。</li>
-<li><u>Handler分类法</u>。</li>
-</ul>
-<h5 id="存储器系统结构"><a href="#存储器系统结构" class="headerlink" title="存储器系统结构"></a>存储器系统结构</h5><ul>
-<li>集中式存储器：各处理器可共享一个集中式的物理存储器；</li>
-<li>分布式存储器：存储器分布到各个处理器中。<ul>
-<li>如果大多数的访存都是针对本地节点进行的，就可以<u>降低</u>对存储器和互联网络的<u>带宽要求</u>；</li>
-<li>对本地存储器的<u>访问延迟小</u>。</li>
-<li>缺点：处理器之间的<u>通信</u>较为<u>复杂</u>。</li>
-</ul>
-</li>
-</ul>
-<p>存储器在物理上分布到各节点中，但<u>逻辑地址空间</u>的组织方式以及处理器之间<u>通信方式</u>不同：</p>
-<ul>
-<li>把在物理上分离的存储器作为一个<u>统一的共享逻辑空间</u>进行编址，不同处理器上的同一个物理地址指向同一个存储单元。<u>分布式共享存储器系统（DSM）</u>。采用<u>共享存储器</u>通信机制。</li>
-<li>把每个节点中的存储器编址为一个<u>独立的地址空间</u>，不同节点的地址空间之间是相互独立的，不同处理器上的同一个物理地址指向不同的存储单元。<u>机群</u>。采用<u>消息传递</u>机制。</li>
-</ul>
-<h5 id="通信机制"><a href="#通信机制" class="headerlink" title="通信机制"></a>通信机制</h5><p><strong>共享存储器</strong></p>
-<p>处理器之间的通信是通过load和store指令对相同存储器地址进行读/写来实现的。</p>
-<ul>
-<li>与常用的对称式多处理机的通信机制兼容；</li>
-<li>处理机之间的通信方式比较复杂时，编程相对容易；</li>
-<li>在开发程序时，可以将重点放到对性能影响较大的数据访问上；</li>
-<li>通信数据量小时，通信开销小，贷款利用好；</li>
-<li>可以通过Cathe缓冲技术来减少远程通信的频度。</li>
-</ul>
-<p><strong>消息传递</strong></p>
-<p>处理器之间是通过显示地发送消息来进行通信的，把消息看成是一个远程进程调用（RPC）。</p>
-<ul>
-<li>硬件更简单；</li>
-<li>通信是显示的，可以更容易搞清楚何时发生通信以及通信开销是多少；</li>
-<li>显示通信可以使编程者重点注意并行计算的主要通信开销，使之有可能开发出结构更好、性能更高的并行程序；</li>
-<li>可以减少不当同步带来错误的可能性。</li>
-</ul>
-<h5 id="并行处理面临的挑战"><a href="#并行处理面临的挑战" class="headerlink" title="并行处理面临的挑战"></a>并行处理面临的挑战</h5><ul>
-<li>程序中的并行性有限；</li>
-<li>相对较大通信开销。</li>
-<li>计算：Amdahl</li>
-</ul>
-<script type="math/tex; mode=display">
-加速比=\frac{1}{\frac{可加速部分比例}{部件加速比}+(1-可加速部分比例)}</script><script type="math/tex; mode=display">
-S=\frac{1}{\frac{Fe}{Se}+(1-Fe)}</script><h5 id="并行计算机系统结构（MIMD）"><a href="#并行计算机系统结构（MIMD）" class="headerlink" title="并行计算机系统结构（MIMD）"></a>并行计算机系统结构（MIMD）</h5><ul>
-<li>PVP</li>
-<li><strong>SMP</strong>，对称式共享存储器多处理机</li>
-<li>DSM</li>
-<li><strong>MPP</strong>，大规模并行处理机</li>
-<li><strong>机群</strong></li>
-</ul>
-<h5 id="对称式共享存储器多处理机（SMP）"><a href="#对称式共享存储器多处理机（SMP）" class="headerlink" title="对称式共享存储器多处理机（SMP）"></a>对称式共享存储器多处理机（SMP）</h5><p>也称为集中式共享多处理机，一般由十几个处理器构成，各处理器共享一个集中式的物理存储器，这个主存相对于各处理器的关系是对称的。</p>
-<ul>
-<li>商用处理器</li>
-<li>共享存储器</li>
-<li>集中共享</li>
-</ul>
-<h5 id="大规模并行处理机（MPP）"><a href="#大规模并行处理机（MPP）" class="headerlink" title="大规模并行处理机（MPP）"></a>大规模并行处理机（MPP）</h5><p>按照当前的标准，具有几百台~几千台处理机的任何机器都是大规模并行处理系统。</p>
-<ul>
-<li>处理节点使用商用微处理器，每个节点可以有多个微处理器；</li>
-<li>具有较好的可扩展性；</li>
-<li>采用分布式非共享的存储器，各节点有自己的地址空间；</li>
-<li>采用消息传递的通信机制。</li>
-</ul>
-<h5 id="机群"><a href="#机群" class="headerlink" title="机群"></a>机群</h5><p>是一种价格低廉、易于构建、扩放性极强的并行计算机系统。它由多台同构或者异构的独立计算机通过高性能网络和局域网连在一起，协同完成特定的并行计算任务。从用户的角度看，它就是一个单一的、集中的计算资源。</p>
-<ul>
-<li>商用处理器</li>
-<li>分布非共享式</li>
-<li>消息传递</li>
-</ul>
-]]></content>
-      <categories>
-        <category>计算机体系结构</category>
-      </categories>
-      <tags>
-        <tag>计算机体系结构</tag>
-        <tag>机群</tag>
-        <tag>MPP</tag>
-        <tag>SMP</tag>
-        <tag>消息传递</tag>
-        <tag>共享存储器</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>指令级并行</title>
-    <url>/2020/03/11/%E6%8C%87%E4%BB%A4%E7%BA%A7%E5%B9%B6%E8%A1%8C/</url>
-    <content><![CDATA[<h5 id="指令级并行"><a href="#指令级并行" class="headerlink" title="指令级并行"></a>指令级并行</h5><p>指令之间存在的并行性，利用它，计算机可以并行执行两条或两条以上的指令。开发ILP的途径有两种：</p>
-<ul>
-<li>资源重复，重复设置多个处理部件；</li>
-<li>采用流水线技术，使指令重叠并行执行。</li>
-</ul>
-<p>指令的<strong>静态调度</strong>：依靠编译器进行静态调度，以减少相关和冲突。它不是在程序执行的过程中，而是在编译期间进行调度和优化。</p>
-<p>指令的<strong>动态调度</strong>：能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。是由硬件在程序执行时进行优化的。</p>
-<p>基本程序块：一串连续的代码除了入口和出口以外，没有其他的分支指令和转入点。</p>
-<p>不精确异常：当执行指令i导致发生异常时，处理机的现场与严格按照程序顺序执行时指令i的现场不同。</p>
-<p>精确异常：发生异常时，处理机的现场与严格按照程序顺序执行指令i的现场相同。</p>
-<h5 id="相关与冲突"><a href="#相关与冲突" class="headerlink" title="相关与冲突"></a>相关与冲突</h5><ul>
-<li>数据相关</li>
-<li>名相关，名指指令所访问的寄存器或存储器单元的名称。<ul>
-<li>反相关</li>
-<li>输出相关</li>
-</ul>
-</li>
-<li>控制相关</li>
-</ul>
-<p>流水线冲突 指由于相关的存在，使得指令流中的下一条指令不能在指定的时钟周期执行。<u>结构冲突</u>是硬件资源冲突引起的，<u>数据冲突</u>是数据相关和名相关引起的，<u>控制冲突</u>是控制相关引起的。</p>
-<p>为了保证程序执行的正确性，必须保证的最关键的两个特性是：</p>
-<ul>
-<li><u>数据流</u></li>
-<li>保持<u>异常行为</u>：无论怎么改变指令的执行顺序，都不能改变程序中异常的发生情况。</li>
-</ul>
-<h4 id="指令的动态调度"><a href="#指令的动态调度" class="headerlink" title="指令的动态调度"></a>指令的动态调度</h4><p>能够在保持程序数据流和异常行为的情况下，通过硬件对指令执行顺序进行重新安排，以提高流水线的利用率且减少停顿现象。优点：</p>
-<ul>
-<li>能够处理一些<u>编译时情况不明的相关</u>（比如涉及存储器访问的相关），并简化了编译器；</li>
-<li>能够使本来是面向某一流水线优化编译的代码在<u>其他动态调度的流水线上</u>也能执行。</li>
-</ul>
-<h5 id="记分牌"><a href="#记分牌" class="headerlink" title="记分牌"></a>记分牌</h5><p>把流水线中的译码段ID分解成了两个段：流出和读操作数。记录的信息由三部分组成：</p>
-<ul>
-<li>指令状态表</li>
-<li>功能部件状态表</li>
-<li>结果寄存器状态表</li>
-</ul>
-<h5 id="Tomasulo"><a href="#Tomasulo" class="headerlink" title="Tomasulo"></a>Tomasulo</h5><p>核心思想：（1）记录和检测指令相关，操作数一旦就绪就立即执行，把发生RAW冲突的可能性较小到最低；（2）通过寄存器换名来消除WAR冲突和WAW冲突。寄存器换名是通过保留站来实现，它保存正在流出和等待流出指令所需要的操作数。</p>
-<p>基本思想：只要操作数有效，就取其放到保留站中，避免指令流出时才到寄存器取数据，这就使得即将执行的指令从相应的保留站中读取数据，而不用到寄存器中。指令的执行结果也是直接放到等待数据的其它保留站中去。一条指令流出时，存放操作数的寄存器被换名为该寄存器对应的保留站的名称。</p>
-<h4 id="动态分支预测"><a href="#动态分支预测" class="headerlink" title="动态分支预测"></a>动态分支预测</h4><p>用硬件动态地进行分支处理的方法。在程序运行的过程中，根据分支指令过去的表现预测将来的行为。如果分支行为发生了变化，预测结果也跟着变化。</p>
-<h5 id="分支历史表（BHT）"><a href="#分支历史表（BHT）" class="headerlink" title="分支历史表（BHT）"></a>分支历史表（BHT）</h5><p>用来记录相关指令最近一次或几次的执行情况是成功还是失败，并根据此进行预测。</p>
-<h5 id="分支目标缓冲器（BTB）"><a href="#分支目标缓冲器（BTB）" class="headerlink" title="分支目标缓冲器（BTB）"></a>分支目标缓冲器（BTB）</h5><p>是一种动态分支预测技术。将（1）<u>执行过的成功分支指令的目标地址</u>（2）<u>预测的分支目标地址</u> 记录在一张硬件表格中。在每次取指令时，用该指令的地址与BTB表中所有项目的第一个字段进行比较，以便尽早知道指令是否分支成功，尽早知道目标地址，达到减少分支开销的目的。</p>
-<p>BHT方法是在<u>译码ID</u>段，就能获得分支目标地址、顺序下一条指令以及预测的结果。BTB方法在<u>取址IF</u>段就能知道这些信息。</p>
-<h5 id="基于硬件的前瞻执行"><a href="#基于硬件的前瞻执行" class="headerlink" title="基于硬件的前瞻执行"></a>基于硬件的前瞻执行</h5><p>是解决控制相关的方法，它对分支指令的结果进行猜测，然后按照这个猜测继续取址、流出和执行后续的指令。但指令执行的结果不写回寄存器或存储器，而是放到一个称为ROB（再定序列缓冲器）中。等到相应的指令得到“确认”（即确实是应该执行）后，才将结果写入寄存器或存储器中。</p>
-<p>把三种思想结合在了一起：</p>
-<ul>
-<li><u>动态分支预测</u>。用来选择后续执行的指令。</li>
-<li>在控制相关的结果尚未出来之前，<u>前瞻</u>地执行后续指令。</li>
-<li>用<u>动态调度</u>对基本块的各种组合进行<u>跨基本块的组合</u>。</li>
-</ul>
-<h4 id="超标量流水线"><a href="#超标量流水线" class="headerlink" title="超标量流水线"></a>超标量流水线</h4><p>是一种多指令流出技术。它在每个时钟周期流出的指令条数不固定，依代码的具体情况而定，但有个上限。</p>
-<h4 id="超长指令字"><a href="#超长指令字" class="headerlink" title="超长指令字"></a>超长指令字</h4><p>是一种多指令流出技术。在每个时钟周期内流出的指令数都是固定的，这些指令构成一条长指令或者一个指令包，在这个指令包中，指令之间的并行性是通过指令显式地表现出来的。这种处理机的指令调度由编译器静态完成。</p>
-]]></content>
-      <categories>
-        <category>计算机体系结构</category>
-      </categories>
-      <tags>
-        <tag>计算机体系结构</tag>
-        <tag>指令级并行</tag>
-        <tag>指令相关</tag>
-        <tag>指令冲突</tag>
-        <tag>动态调度</tag>
-        <tag>记分牌</tag>
-        <tag>Tomasulo</tag>
-        <tag>BHT</tag>
-        <tag>BTB</tag>
-        <tag>ROB</tag>
-        <tag>前瞻执行</tag>
-        <tag>超标量</tag>
-        <tag>VLIW</tag>
-        <tag>超长指令字</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>流水线</title>
-    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
-    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
-<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
-<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
-<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
-<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
-<li>需要有<u>通过时间与排空时间</u></li>
-</ul>
-<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
-<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
-<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
-<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
-<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
-<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
-<ul>
-<li><p>从前调度</p>
-</li>
-<li><p>从目标处调度</p>
-</li>
-<li><p>从失败出调度</p>
-</li>
-</ul>
-<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
-<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
-<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
-<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
-</ul>
-]]></content>
-      <categories>
-        <category>软件工程</category>
-      </categories>
-      <tags>
-        <tag>流水线</tag>
-        <tag>吞吐率</tag>
-        <tag>加速比</tag>
-        <tag>效率</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Gradient Descent</title>
     <url>/2020/06/04/%E6%A2%AF%E5%BA%A6%E4%B8%8B%E9%99%8D/</url>
     <content><![CDATA[<h4 id="Gradient-Descent"><a href="#Gradient-Descent" class="headerlink" title="Gradient Descent"></a>Gradient Descent</h4><p>梯度下降的目标是使损失函数L最小化，$\theta^* = arg\ min\ L(\theta)$</p>
@@ -3812,6 +3774,46 @@ L(\theta)_{min} & \approx   u(\theta_1-a)+v(\theta_2-b) \\
         <tag>gradient descent</tag>
         <tag>adagrad</tag>
         <tag>SGD</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>流水线</title>
+    <url>/2020/03/25/%E6%B5%81%E6%B0%B4%E7%BA%BF/</url>
+    <content><![CDATA[<h4 id="流水线的特点"><a href="#流水线的特点" class="headerlink" title="流水线的特点"></a>流水线的特点</h4><ul>
+<li>把一个处理过程<u>分解</u>为若干个子过程，每个过程由一个专门的功能部件来实现</li>
+<li>各<u>功能段的时间</u>应尽可能相等，否则将引起流水线堵塞和断流</li>
+<li>每一个段的后面都要有一个<u>缓冲寄存器</u>，称为流水寄存器</li>
+<li>适合于大量<u>重复</u>的时序过程，只有在源源不断地输入任务，才能充分发挥流水线的效率</li>
+<li>需要有<u>通过时间与排空时间</u></li>
+</ul>
+<p>在指令流水线中，解决控制相关的方法主要有：<u>冻结或排空流水线</u>、<u>预测分支失败</u>、<u>预测分支成功</u>、<u>延迟分支</u>。</p>
+<h4 id="减少分支延迟"><a href="#减少分支延迟" class="headerlink" title="减少分支延迟"></a>减少分支延迟</h4><p>三种通过软件（编译器）来处理的方法（静态的方法）：预测分支失败/成功，延迟分支。</p>
+<p><strong>3种方法的共同特点</strong>是：它们对分支的处理方法在<u>程序执行过程中</u>是<u>始终不变</u>的，它们要么总是预测分支失败，要么总是预测分支成功。</p>
+<h5 id="预测分支失败"><a href="#预测分支失败" class="headerlink" title="预测分支失败"></a>预测分支失败</h5><p>沿着失败的指令继续处理指令，就好像什么都没发生过似的。当确定分支指令是失败时，说明预测正确，流水线正常流动；当确定分支指令是成功时，流水线就把分支指令之后取出的指令转化为空操作，并按分支目标地址重新取指令执行。</p>
+<h5 id="预测分支成功"><a href="#预测分支成功" class="headerlink" title="预测分支成功"></a>预测分支成功</h5><p>当流水线ID段检测到分支指令后，一旦算出了分支目标地址，就开始从该目标地址取指令执行。</p>
+<h5 id="延迟分支"><a href="#延迟分支" class="headerlink" title="延迟分支"></a>延迟分支</h5><p>主要思想是从逻辑上“延长”分支指令的执行时间。把延迟分支看成是由分支指令和若干个延迟槽构成，不管分支是否成功，都要执行延迟槽内的指令。</p>
+<ul>
+<li><p>从前调度</p>
+</li>
+<li><p>从目标处调度</p>
+</li>
+<li><p>从失败出调度</p>
+</li>
+</ul>
+<p>三种调度方法的优缺点分别是：<img src="/2020/03/25/流水线/image-20200314165639374.png" alt="三种调度方法的优缺点"></p>
+<h4 id="流水线的额外开销"><a href="#流水线的额外开销" class="headerlink" title="流水线的额外开销"></a>流水线的额外开销</h4><ul>
+<li>流水寄存器延迟，流水线段与段之间都要设置流水寄存器；</li>
+<li>时钟偏移开销，流水线中的时钟到达各流水寄存器的最大差值时间，时钟到达各流水寄存器的时间不是完全相同的。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>软件工程</category>
+      </categories>
+      <tags>
+        <tag>流水线</tag>
+        <tag>吞吐率</tag>
+        <tag>加速比</tag>
+        <tag>效率</tag>
       </tags>
   </entry>
   <entry>
